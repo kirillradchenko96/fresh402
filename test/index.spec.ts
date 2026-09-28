@@ -1,29 +1,31 @@
-import {
-	env,
-	createExecutionContext,
-	waitOnExecutionContext,
-	SELF,
-} from "cloudflare:test";
-import { describe, it, expect } from "vitest";
-import worker from "../src/index";
+import { SELF } from "cloudflare:test";
+import { describe, expect, it } from "vitest";
 
-// For now, you'll need to do something like this to get a correctly-typed
-// `Request` to pass to `worker.fetch()`.
-const IncomingRequest = Request<unknown, IncomingRequestCfProperties>;
+describe("Fresh402", () => {
+    it("returns the health endpoint", async () => {
+        const response = await SELF.fetch("http://example.com/");
 
-describe("Hello World worker", () => {
-	it("responds with Hello World! (unit style)", async () => {
-		const request = new IncomingRequest("http://example.com");
-		// Create an empty context to pass to `worker.fetch()`.
-		const ctx = createExecutionContext();
-		const response = await worker.fetch(request, env, ctx);
-		// Wait for all `Promise`s passed to `ctx.waitUntil()` to settle before running test assertions
-		await waitOnExecutionContext(ctx);
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
-	});
+        expect(response.status).toBe(200);
 
-	it("responds with Hello World! (integration style)", async () => {
-		const response = await SELF.fetch("https://example.com");
-		expect(await response.text()).toMatchInlineSnapshot(`"Hello World!"`);
-	});
+        const body = (await response.json()) as {
+            name: string;
+            status: string;
+            version: string;
+            normalizer_version: number;
+            endpoints: Record<string, string>;
+        };
+
+        expect(body.name).toBe("Fresh402");
+        expect(body.status).toBe("ok");
+        expect(body.version).toBe("0.5.0");
+        expect(body.normalizer_version).toBe(2);
+        expect(body.endpoints.check).toContain("/v1/check");
+        expect(body.endpoints.diff).toContain("/v1/diff");
+    });
+
+    it("returns 404 for an unknown route", async () => {
+        const response = await SELF.fetch("http://example.com/does-not-exist");
+
+        expect(response.status).toBe(404);
+    });
 });

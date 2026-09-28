@@ -7,6 +7,7 @@
 	"name": "fresh402",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-09-26",
+    "compatibility_flags": ["global_fetch_strictly_public"],
 	"observability": {
 		"enabled": true
 	},

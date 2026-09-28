@@ -206,25 +206,90 @@ function canonicalizeUrl(target: URL): string {
     return canonical.toString();
 }
 
-async function fetchTarget(target: URL): Promise<Response> {
-    const controller = new AbortController();
-
-    const timeout = setTimeout(() => {
-        controller.abort();
-    }, 10_000);
-
-    try {
-        return await fetch(target.toString(), {
-            redirect: "follow",
-            signal: controller.signal,
-            headers: {
-                "user-agent": "Fresh402/0.5",
-                accept: "text/html,text/plain;q=0.9,*/*;q=0.1",
-            },
-        });
-    } finally {
-        clearTimeout(timeout);
+class TargetNotAllowedError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "TargetNotAllowedError";
     }
+}
+
+const MAX_REDIRECTS = 5;
+
+async function fetchTarget(
+    target: URL,
+    allowPrivate: boolean,
+): Promise<Response> {
+    let current = new URL(target.toString());
+
+    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+        const validationError = validateTarget(current, allowPrivate);
+
+        if (validationError) {
+            throw new TargetNotAllowedError(validationError);
+        }
+
+        const controller = new AbortController();
+
+        const timeout = setTimeout(() => {
+            controller.abort();
+        }, 10_000);
+
+        let response: Response;
+
+        try {
+            response = await fetch(current.toString(), {
+                redirect: "manual",
+                signal: controller.signal,
+                headers: {
+                    "user-agent": "Fresh402/0.5.1",
+                    accept: "text/html,text/plain;q=0.9,*/*;q=0.1",
+                },
+            });
+        } finally {
+            clearTimeout(timeout);
+        }
+
+        const redirectStatuses = new Set([301, 302, 303, 307, 308]);
+
+        if (!redirectStatuses.has(response.status)) {
+            return response;
+        }
+
+        const location = response.headers.get("location");
+
+        if (!location) {
+            return response;
+        }
+
+        if (hop >= MAX_REDIRECTS) {
+            throw new TargetNotAllowedError(
+                `Too many redirects. Maximum allowed is ${MAX_REDIRECTS}.`,
+            );
+        }
+
+        const next = new URL(location, current);
+
+        if (
+            current.protocol === "https:" &&
+            next.protocol === "http:"
+        ) {
+            throw new TargetNotAllowedError(
+                "HTTPS to HTTP redirects are not allowed.",
+            );
+        }
+
+        const nextValidationError = validateTarget(next, allowPrivate);
+
+        if (nextValidationError) {
+            throw new TargetNotAllowedError(
+                `Redirect target rejected: ${nextValidationError}`,
+            );
+        }
+
+        current = next;
+    }
+
+    throw new TargetNotAllowedError("Redirect limit exceeded.");
 }
 
 export default {
@@ -236,7 +301,7 @@ export default {
             return json({
                 name: "Fresh402",
                 status: "ok",
-                version: "0.5.0",
+                version: "0.5.1",
                 normalizer_version: NORMALIZER_VERSION,
                 endpoints: {
                     check: "POST /v1/check",
@@ -436,7 +501,7 @@ export default {
 
             try {
                 const startedAt = Date.now();
-                const response = await fetchTarget(target);
+                const response = await fetchTarget(target, allowPrivate);
 
                 if (!response.ok) {
                     return json(
@@ -747,6 +812,16 @@ export default {
             } catch (error) {
                 console.error(error);
 
+                if (error instanceof TargetNotAllowedError) {
+                    return json(
+                        {
+                            error: "target_not_allowed",
+                            message: error.message,
+                        },
+                        400,
+                    );
+                }
+
                 return json(
                     {
                         error: "check_failed",
@@ -768,4 +843,3 @@ export default {
         );
     },
 } satisfies ExportedHandler<Env>;
-

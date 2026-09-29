@@ -1,3 +1,10 @@
+import { Hono } from "hono";
+import { paymentMiddleware } from "@x402/hono";
+import {
+    HTTPFacilitatorClient,
+    x402ResourceServer,
+} from "@x402/core/server";
+import { registerExactEvmScheme } from "@x402/evm/exact/server";
 const NORMALIZER_VERSION = 2;
 
 interface ResourceRow {
@@ -292,7 +299,7 @@ async function fetchTarget(
     throw new TargetNotAllowedError("Redirect limit exceeded.");
 }
 
-export default {
+const coreHandler = {
     async fetch(request, env): Promise<Response> {
         const requestUrl = new URL(request.url);
         const allowPrivate = isLocalDevelopmentRequest(requestUrl);
@@ -301,7 +308,7 @@ export default {
             return json({
                 name: "Fresh402",
                 status: "ok",
-                version: "0.5.1",
+                version: "0.6.0",
                 normalizer_version: NORMALIZER_VERSION,
                 endpoints: {
                     check: "POST /v1/check",
@@ -843,3 +850,54 @@ export default {
         );
     },
 } satisfies ExportedHandler<Env>;
+
+const PAY_TO = "0x58B4b483fBE31860335eCeB12CCCF4338b251085";
+
+const facilitatorClient = new HTTPFacilitatorClient({
+    url: "https://x402.org/facilitator",
+});
+
+const x402Server = new x402ResourceServer(facilitatorClient);
+registerExactEvmScheme(x402Server);
+
+type Fresh402AppEnv = {
+    Bindings: Env;
+    Variables: {
+        coreRequest: Request;
+    };
+};
+
+const app = new Hono<Fresh402AppEnv>();
+
+// Preserve an untouched copy of the request body for our existing handler.
+app.use("*", async (c, next) => {
+    c.set("coreRequest", c.req.raw.clone());
+    await next();
+});
+
+app.use(
+    paymentMiddleware(
+        {
+            "POST /v1/check": {
+                accepts: [
+                    {
+                        scheme: "exact",
+                        price: "$0.001",
+                        network: "eip155:84532",
+                        payTo: PAY_TO,
+                    },
+                ],
+                description:
+                    "Check whether a URL has materially changed and update its Fresh402 snapshot.",
+                mimeType: "application/json",
+            },
+        },
+        x402Server,
+    ),
+);
+
+app.all("*", (c) => {
+    return coreHandler.fetch(c.get("coreRequest"), c.env);
+});
+
+export default app;

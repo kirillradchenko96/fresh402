@@ -325,7 +325,7 @@ const coreHandler = {
             return json({
                 name: "Fresh402",
                 status: "ok",
-                version: "1.0.1",
+                version: "1.0.2",
                 normalizer_version: NORMALIZER_VERSION,
                 endpoints: {
                     check: "POST /v1/check",
@@ -1648,22 +1648,10 @@ async function getFresh402McpHandler(
             const server =
               new McpServer({
                 name: "Fresh402",
-                version: "1.0.1",
+                version: "1.0.2",
               });
 
-            server.registerTool(
-              "fresh402_check",
-              {
-                description:
-                  "Detect meaningful web page changes and page freshness while filtering common boilerplate/noise. Costs $0.001 USDC per call.",
-
-                inputSchema:
-                  z.object({
-                    url:
-                      z.string().url(),
-                  }),
-              },
-
+            const paidFresh402Check =
               paid(
                 async ({
                   url,
@@ -1693,7 +1681,49 @@ async function getFresh402McpHandler(
                       result,
                   };
                 },
-              ),
+              );
+
+            server.registerTool(
+              "fresh402_check",
+              {
+                description:
+                  "Detect meaningful web page changes and page freshness while filtering common boilerplate/noise. Costs $0.001 USDC per call.",
+
+                inputSchema:
+                  z.object({
+                    url:
+                      z.string().url(),
+                  }),
+              },
+
+              async (
+                args,
+                ctx,
+              ) => {
+                // @x402/mcp 2.27 currently targets MCP SDK v1,
+                // where request metadata lived at extra._meta.
+                // MCP SDK v2 moved it to ctx.mcpReq._meta.
+                //
+                // Bridge only the fields the payment wrapper
+                // needs while keeping Fresh402 on modern MCP v2.
+                const legacyExtra = {
+                  _meta:
+                    ctx.mcpReq._meta,
+
+                  signal:
+                    ctx.mcpReq.signal,
+
+                  requestId:
+                    ctx.mcpReq.id,
+                } as Parameters<
+                  typeof paidFresh402Check
+                >[1];
+
+                return paidFresh402Check(
+                  args,
+                  legacyExtra,
+                );
+              },
             );
 
             return server;

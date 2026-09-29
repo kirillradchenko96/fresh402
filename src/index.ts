@@ -308,7 +308,7 @@ const coreHandler = {
             return json({
                 name: "Fresh402",
                 status: "ok",
-                version: "0.6.0",
+                version: "0.6.1",
                 normalizer_version: NORMALIZER_VERSION,
                 endpoints: {
                     check: "POST /v1/check",
@@ -869,9 +869,25 @@ type Fresh402AppEnv = {
 
 const app = new Hono<Fresh402AppEnv>();
 
+
+
 // Preserve an untouched copy of the request body for our existing handler.
 app.use("*", async (c, next) => {
     c.set("coreRequest", c.req.raw.clone());
+    await next();
+});
+
+let x402InitPromise: Promise<void> | undefined;
+
+app.use("/v1/check", async (_c, next) => {
+    if (!x402InitPromise) {
+        x402InitPromise = x402Server.initialize().catch((error) => {
+            x402InitPromise = undefined;
+            throw error;
+        });
+    }
+
+    await x402InitPromise;
     await next();
 });
 
@@ -893,6 +909,9 @@ app.use(
             },
         },
         x402Server,
+        undefined,
+        undefined,
+        false,
     ),
 );
 

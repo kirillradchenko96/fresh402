@@ -1,3 +1,18 @@
+import {
+  McpServer,
+  createMcpHandler,
+} from "@modelcontextprotocol/server";
+
+import {
+  createPaymentWrapper,
+} from "@x402/mcp";
+
+import {
+  ExactEvmScheme,
+} from "@x402/evm/exact/server";
+
+import { z } from "zod";
+
 import { SignJWT, importJWK } from "jose";
 import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
 import { HTTPFacilitatorClient } from "@x402/core/server";
@@ -310,13 +325,14 @@ const coreHandler = {
             return json({
                 name: "Fresh402",
                 status: "ok",
-                version: "0.9.0",
+                version: "1.0.0",
                 normalizer_version: NORMALIZER_VERSION,
                 endpoints: {
                     check: "POST /v1/check",
                     history: "GET /v1/history?url=https://example.com",
                     diff: "GET /v1/diff?url=https://example.com",
                     stats: "GET /v1/stats",
+                    mcp: "POST /mcp",
                 },
             });
         }
@@ -1283,6 +1299,454 @@ throw error;
 
 return x402GatePromise;
 }
+
+
+type Fresh402McpPaymentPayload = {
+  accepted?: {
+    amount?: string;
+  };
+};
+
+type Fresh402McpRequest = {
+  method?: string;
+  params?: {
+    name?: string;
+    _meta?: Record<string, unknown>;
+  };
+};
+
+type Fresh402McpEnvelope = {
+  result?: {
+    _meta?: Record<string, unknown>;
+  };
+};
+
+let fresh402McpHandlerPromise:
+  | Promise<ReturnType<typeof createMcpHandler>>
+  | undefined;
+
+
+function extractMcpSettlement(
+  text: string,
+): SettlementForLogging | null {
+  const candidates: unknown[] = [];
+
+  try {
+    candidates.push(JSON.parse(text));
+  } catch {
+    for (const line of text.split(/\r?\n/)) {
+      if (!line.startsWith("data:")) {
+        continue;
+      }
+
+      const payload = line.slice(5).trim();
+
+      if (!payload || payload === "[DONE]") {
+        continue;
+      }
+
+      try {
+        candidates.push(JSON.parse(payload));
+      } catch {
+        // Ignore non-JSON SSE data.
+      }
+    }
+  }
+
+  for (const candidate of candidates) {
+    const envelope =
+      candidate as Fresh402McpEnvelope;
+
+    const settlement =
+      envelope?.result?._meta?.[
+        "x402/payment-response"
+      ] as SettlementForLogging | undefined;
+
+    if (
+      settlement?.success &&
+      settlement.transaction &&
+      settlement.network &&
+      settlement.payer
+    ) {
+      return settlement;
+    }
+  }
+
+  return null;
+}
+
+
+async function recordMcpPaymentEvent(
+  db: Fresh402Bindings["DB"],
+  request: Request,
+  response: Response,
+): Promise<void> {
+  if (request.method !== "POST") {
+    return;
+  }
+
+  let rpc:
+    | Fresh402McpRequest
+    | undefined;
+
+  try {
+    rpc =
+      (await request.json()) as
+        Fresh402McpRequest;
+  } catch {
+    return;
+  }
+
+  if (
+    rpc.method !== "tools/call" ||
+    rpc.params?.name !== "fresh402_check"
+  ) {
+    return;
+  }
+
+  const payment =
+    rpc.params?._meta?.[
+      "x402/payment"
+    ] as Fresh402McpPaymentPayload | undefined;
+
+  if (!payment) {
+    // Unpaid discovery/call attempt.
+    return;
+  }
+
+  const rawAmount =
+    payment.accepted?.amount;
+
+  const amountAtomic =
+    rawAmount && /^\d+$/.test(rawAmount)
+      ? Number(rawAmount)
+      : CHECK_PRICE_ATOMIC;
+
+  if (
+    !Number.isSafeInteger(amountAtomic) ||
+    amountAtomic <= 0
+  ) {
+    console.error(
+      "Fresh402 MCP payment log skipped: invalid amount",
+      rawAmount,
+    );
+
+    return;
+  }
+
+  const settlement =
+    extractMcpSettlement(
+      await response.text(),
+    );
+
+  if (!settlement) {
+    return;
+  }
+
+  const isTestBuyer =
+    settlement.payer!.toLowerCase() ===
+    TEST_BUYER_ADDRESS.toLowerCase()
+      ? 1
+      : 0;
+
+  await db
+    .prepare(
+      `INSERT OR IGNORE INTO payment_events
+       (
+         transaction_hash,
+         payer,
+         network,
+         route,
+         amount_atomic,
+         is_test_buyer,
+         created_at
+       )
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .bind(
+      settlement.transaction,
+      settlement.payer,
+      settlement.network,
+      "/mcp#fresh402_check",
+      amountAtomic,
+      isTestBuyer,
+      new Date().toISOString(),
+    )
+    .run();
+}
+
+
+async function runFresh402CheckForMcp(
+  url: string,
+  env: Fresh402Bindings,
+): Promise<Record<string, unknown>> {
+  const internalRequest =
+    new Request(
+      "https://fresh402.internal/v1/check",
+      {
+        method: "POST",
+        headers: {
+          "content-type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          url,
+        }),
+      },
+    );
+
+  // Call the existing Fresh402 core directly.
+  // Payment is handled by the MCP wrapper, so this
+  // intentionally bypasses the HTTP x402 middleware.
+  const response =
+    await coreHandler.fetch(
+      internalRequest,
+      env,
+    );
+
+  const text =
+    await response.text();
+
+  if (!response.ok) {
+    throw new Error(
+      `Fresh402 check failed with HTTP ${response.status}: ${text}`,
+    );
+  }
+
+  try {
+    return JSON.parse(text) as
+      Record<string, unknown>;
+  } catch {
+    throw new Error(
+      "Fresh402 core returned invalid JSON.",
+    );
+  }
+}
+
+
+async function getFresh402McpHandler(
+  env: Fresh402Bindings,
+) {
+  const apiKeyId =
+    env.CDP_API_KEY_ID;
+
+  const apiKeySecret =
+    env.CDP_API_KEY_SECRET;
+
+  if (!apiKeyId || !apiKeySecret) {
+    throw new Error(
+      "Fresh402 MCP payment service is missing CDP credentials.",
+    );
+  }
+
+  if (!fresh402McpHandlerPromise) {
+    fresh402McpHandlerPromise =
+      (async () => {
+        const facilitatorClient =
+          createFresh402CdpFacilitator(
+            apiKeyId,
+            apiKeySecret,
+          );
+
+        const resourceServer =
+          new x402ResourceServer(
+            facilitatorClient,
+          );
+
+        resourceServer.register(
+          "eip155:*",
+          new ExactEvmScheme(),
+        );
+
+        await resourceServer.initialize();
+
+        const accepts =
+          await resourceServer
+            .buildPaymentRequirements({
+              scheme: "exact",
+              network: "eip155:8453",
+              payTo: PAY_TO,
+              price: "$0.001",
+              extra: {
+                name: "USD Coin",
+                version: "2",
+              },
+            });
+
+        const paid =
+          createPaymentWrapper(
+            resourceServer,
+            {
+              accepts,
+
+              resource: {
+                url:
+                  "mcp://tool/fresh402_check",
+
+                description:
+                  "Detect meaningful content changes in a URL while filtering common page noise.",
+
+                mimeType:
+                  "application/json",
+
+                serviceName:
+                  "Fresh402 Web Change Monitor",
+
+                tags: [
+                  "website-monitoring",
+                  "page-change-detection",
+                  "url-freshness",
+                  "semantic-diff",
+                  "ai-agents",
+                ],
+              },
+
+              extensions:
+                declareDiscoveryExtension({
+                  toolName:
+                    "fresh402_check",
+
+                  description:
+                    "Detect meaningful content changes in any URL, monitor website and web page changes, check page freshness, filter common boilerplate/noise, and return a change signal for AI agents.",
+
+                  transport:
+                    "streamable-http",
+
+                  inputSchema: {
+                    type: "object",
+
+                    properties: {
+                      url: {
+                        type: "string",
+                        format: "uri",
+
+                        description:
+                          "Absolute HTTP or HTTPS URL to monitor. Send the same URL again to detect meaningful changes since the previous Fresh402 snapshot.",
+                      },
+                    },
+
+                    required: [
+                      "url",
+                    ],
+
+                    additionalProperties:
+                      false,
+                  },
+
+                  example: {
+                    url:
+                      "https://example.com",
+                  },
+                }),
+            },
+          );
+
+        return createMcpHandler(
+          () => {
+            const server =
+              new McpServer({
+                name: "Fresh402",
+                version: "1.0.0",
+              });
+
+            server.registerTool(
+              "fresh402_check",
+              {
+                description:
+                  "Detect meaningful web page changes and page freshness while filtering common boilerplate/noise. Costs $0.001 USDC per call.",
+
+                inputSchema:
+                  z.object({
+                    url:
+                      z.string().url(),
+                  }),
+              },
+
+              paid(
+                async ({
+                  url,
+                }: {
+                  url: string;
+                }) => {
+                  const result =
+                    await runFresh402CheckForMcp(
+                      url,
+                      env,
+                    );
+
+                  return {
+                    content: [
+                      {
+                        type:
+                          "text" as const,
+
+                        text:
+                          JSON.stringify(
+                            result,
+                          ),
+                      },
+                    ],
+
+                    structuredContent:
+                      result,
+                  };
+                },
+              ),
+            );
+
+            return server;
+          },
+        );
+      })().catch(
+        (error) => {
+          fresh402McpHandlerPromise =
+            undefined;
+
+          throw error;
+        },
+      );
+  }
+
+  return fresh402McpHandlerPromise;
+}
+
+
+app.all("/mcp", async (c) => {
+  const originalRequest =
+    c.req.raw;
+
+  const accountingRequest =
+    originalRequest.clone();
+
+  const mcpHandler =
+    await getFresh402McpHandler(
+      c.env,
+    );
+
+  const response =
+    await mcpHandler.fetch(
+      originalRequest,
+    );
+
+  try {
+    // Clone so accounting never consumes the
+    // actual MCP response body.
+    await recordMcpPaymentEvent(
+      c.env.DB,
+      accountingRequest,
+      response.clone(),
+    );
+  } catch (error) {
+    // Analytics must never break a valid MCP call.
+    console.error(
+      "Fresh402 MCP payment logging failed:",
+      error,
+    );
+  }
+
+  return response;
+});
+
 
 app.get("/v1/stats", async (c) => {
   const row = await c.env.DB

@@ -17,10 +17,11 @@ describe("Fresh402", () => {
 
         expect(body.name).toBe("Fresh402");
         expect(body.status).toBe("ok");
-        expect(body.version).toBe("0.9.0");
+        expect(body.version).toBe("1.0.0");
         expect(body.normalizer_version).toBe(2);
         expect(body.endpoints.check).toContain("/v1/check");
         expect(body.endpoints.diff).toContain("/v1/diff");
+        expect(body.endpoints.mcp).toContain("/mcp");
     });
 
     it("returns 404 for an unknown route", async () => {

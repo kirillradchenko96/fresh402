@@ -325,7 +325,7 @@ const coreHandler = {
             return json({
                 name: "Fresh402",
                 status: "ok",
-                version: "1.0.2",
+                version: "1.0.3",
                 normalizer_version: NORMALIZER_VERSION,
                 endpoints: {
                     check: "POST /v1/check",
@@ -1583,7 +1583,7 @@ async function getFresh402McpHandler(
 
               resource: {
                 url:
-                  "mcp://tool/fresh402_check",
+                  "https://fresh402.kirilllabs.workers.dev/mcp",
 
                 description:
                   "Detect meaningful content changes in a URL while filtering common page noise.",
@@ -1648,7 +1648,7 @@ async function getFresh402McpHandler(
             const server =
               new McpServer({
                 name: "Fresh402",
-                version: "1.0.2",
+                version: "1.0.3",
               });
 
             const paidFresh402Check =

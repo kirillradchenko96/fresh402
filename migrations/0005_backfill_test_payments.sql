@@ -1,0 +1,30 @@
+﻿INSERT OR IGNORE INTO payment_events
+(transaction_hash, payer, network, route, amount_atomic, is_test_buyer, created_at)
+VALUES
+(
+    '0x782a9b3114281e45c4d2c2f65ab4668475cf40b4e5e284a2d561e3dd84d2e69f',
+    '0x493c114566f166241cF75B04526c46083045bF89',
+    'eip155:8453',
+    '/v1/check',
+    1000,
+    1,
+    '2026-09-29T01:35:57.534Z'
+),
+(
+    '0xc7981c89a5baf67c4abd91c7a928b07fb17cadbb0c0ad36ddd156d0150537f0c',
+    '0x493c114566f166241cF75B04526c46083045bF89',
+    'eip155:8453',
+    '/v1/check',
+    1000,
+    1,
+    '2026-09-29T01:50:15.264Z'
+),
+(
+    '0xc1a7cd228dc5656bcfbe3689da9dc74cf7655bd5d83f0196fe3378bc42238cc8',
+    '0x493c114566f166241cF75B04526c46083045bF89',
+    'eip155:8453',
+    '/v1/check',
+    1000,
+    1,
+    '2026-09-29T03:03:44.693Z'
+);

@@ -310,12 +310,13 @@ const coreHandler = {
             return json({
                 name: "Fresh402",
                 status: "ok",
-                version: "0.8.1",
+                version: "0.9.0",
                 normalizer_version: NORMALIZER_VERSION,
                 endpoints: {
                     check: "POST /v1/check",
                     history: "GET /v1/history?url=https://example.com",
                     diff: "GET /v1/diff?url=https://example.com",
+                    stats: "GET /v1/stats",
                 },
             });
         }
@@ -1014,6 +1015,129 @@ let x402GatePromise:
 | Promise<ReturnType<typeof paymentMiddleware>>
 | undefined;
 
+
+const TEST_BUYER_ADDRESS =
+  "0x493c114566f166241cF75B04526c46083045bF89";
+
+const CHECK_PRICE_ATOMIC = 1000;
+const USDC_DECIMALS = 6;
+
+type SettlementForLogging = {
+  success?: boolean;
+  transaction?: string;
+  network?: string;
+  payer?: string;
+};
+
+type PaymentPayloadForLogging = {
+  accepted?: {
+    amount?: string;
+  };
+};
+
+type PaymentStatsRow = {
+  paid_calls: number | string | null;
+  revenue_atomic: number | string | null;
+  external_paid_calls: number | string | null;
+  external_revenue_atomic: number | string | null;
+  last_paid_at: string | null;
+  last_external_paid_at: string | null;
+};
+
+function decodeX402HeaderForLogging<T>(
+  value: string,
+): T | null {
+  try {
+    let normalized = value
+      .trim()
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
+    while (normalized.length % 4) {
+      normalized += "=";
+    }
+
+    return JSON.parse(atob(normalized)) as T;
+  } catch {
+    return null;
+  }
+}
+
+async function recordPaymentEvent(
+  db: Fresh402Bindings["DB"],
+  settlementHeader: string,
+  paymentSignature: string | undefined,
+): Promise<void> {
+  const settlement =
+    decodeX402HeaderForLogging<SettlementForLogging>(
+      settlementHeader,
+    );
+
+  if (
+    !settlement?.success ||
+    !settlement.transaction ||
+    !settlement.network ||
+    !settlement.payer
+  ) {
+    return;
+  }
+
+  const payment = paymentSignature
+    ? decodeX402HeaderForLogging<PaymentPayloadForLogging>(
+        paymentSignature,
+      )
+    : null;
+
+  const rawAmount = payment?.accepted?.amount;
+
+  const amountAtomic =
+    rawAmount && /^\d+$/.test(rawAmount)
+      ? Number(rawAmount)
+      : CHECK_PRICE_ATOMIC;
+
+  if (
+    !Number.isSafeInteger(amountAtomic) ||
+    amountAtomic <= 0
+  ) {
+    console.error(
+      "Fresh402 payment log skipped: invalid amount",
+      rawAmount,
+    );
+    return;
+  }
+
+  const isTestBuyer =
+    settlement.payer.toLowerCase() ===
+    TEST_BUYER_ADDRESS.toLowerCase()
+      ? 1
+      : 0;
+
+  await db
+    .prepare(
+      `INSERT OR IGNORE INTO payment_events
+       (
+         transaction_hash,
+         payer,
+         network,
+         route,
+         amount_atomic,
+         is_test_buyer,
+         created_at
+       )
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .bind(
+      settlement.transaction,
+      settlement.payer,
+      settlement.network,
+      "/v1/check",
+      amountAtomic,
+      isTestBuyer,
+      new Date().toISOString(),
+    )
+    .run();
+}
+
 async function getX402Gate(env: Fresh402Bindings) {
 const apiKeyId = env.CDP_API_KEY_ID;
 const apiKeySecret = env.CDP_API_KEY_SECRET;
@@ -1160,9 +1284,113 @@ throw error;
 return x402GatePromise;
 }
 
+app.get("/v1/stats", async (c) => {
+  const row = await c.env.DB
+    .prepare(
+      `SELECT
+         COUNT(*) AS paid_calls,
+         COALESCE(SUM(amount_atomic), 0) AS revenue_atomic,
+         COALESCE(
+           SUM(
+             CASE
+               WHEN is_test_buyer = 0 THEN 1
+               ELSE 0
+             END
+           ),
+           0
+         ) AS external_paid_calls,
+         COALESCE(
+           SUM(
+             CASE
+               WHEN is_test_buyer = 0
+               THEN amount_atomic
+               ELSE 0
+             END
+           ),
+           0
+         ) AS external_revenue_atomic,
+         MAX(created_at) AS last_paid_at,
+         MAX(
+           CASE
+             WHEN is_test_buyer = 0
+             THEN created_at
+             ELSE NULL
+           END
+         ) AS last_external_paid_at
+       FROM payment_events`,
+    )
+    .first<PaymentStatsRow>();
+
+  const paidCalls =
+    Number(row?.paid_calls ?? 0);
+
+  const revenueAtomic =
+    Number(row?.revenue_atomic ?? 0);
+
+  const externalPaidCalls =
+    Number(row?.external_paid_calls ?? 0);
+
+  const externalRevenueAtomic =
+    Number(row?.external_revenue_atomic ?? 0);
+
+  return c.json({
+    paid_calls: paidCalls,
+    test_paid_calls:
+      paidCalls - externalPaidCalls,
+    external_paid_calls:
+      externalPaidCalls,
+
+    revenue_usdc:
+      revenueAtomic / 10 ** USDC_DECIMALS,
+
+    external_revenue_usdc:
+      externalRevenueAtomic /
+      10 ** USDC_DECIMALS,
+
+    last_paid_at:
+      row?.last_paid_at ?? null,
+
+    last_external_paid_at:
+      row?.last_external_paid_at ?? null,
+  });
+});
+
 app.use("/v1/check", async (c, next) => {
-const paymentGate = await getX402Gate(c.env);
-return paymentGate(c, next);
+  const paymentGate =
+    await getX402Gate(c.env);
+
+  const result =
+    await paymentGate(c, next);
+
+  const response =
+    result instanceof Response
+      ? result
+      : c.res;
+
+  const settlementHeader =
+    response.headers.get("payment-response");
+
+  if (
+    response.ok &&
+    settlementHeader
+  ) {
+    try {
+      await recordPaymentEvent(
+        c.env.DB,
+        settlementHeader,
+        c.req.header("payment-signature"),
+      );
+    } catch (error) {
+      // Analytics must never break a successfully
+      // paid customer request.
+      console.error(
+        "Fresh402 payment logging failed:",
+        error,
+      );
+    }
+  }
+
+  return result;
 });
 app.all("*", (c) => {
     return coreHandler.fetch(c.get("coreRequest"), c.env);

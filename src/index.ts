@@ -325,7 +325,7 @@ const coreHandler = {
             return json({
                 name: "Fresh402",
                 status: "ok",
-                version: "1.0.0",
+                version: "1.0.1",
                 normalizer_version: NORMALIZER_VERSION,
                 endpoints: {
                     check: "POST /v1/check",
@@ -891,7 +891,7 @@ return btoa(binary)
 
 function createNonce(): string {
 const bytes = new Uint8Array(16);
-globalThis.crypto.getRandomValues(bytes);
+crypto.getRandomValues(bytes);
 
 return Array.from(bytes)
 .map((byte) => byte.toString(16).padStart(2, "0"))
@@ -1500,7 +1500,9 @@ async function runFresh402CheckForMcp(
   // intentionally bypasses the HTTP x402 middleware.
   const response =
     await coreHandler.fetch(
-      internalRequest,
+      internalRequest as Parameters<
+        typeof coreHandler.fetch
+      >[0],
       env,
     );
 
@@ -1646,7 +1648,7 @@ async function getFresh402McpHandler(
             const server =
               new McpServer({
                 name: "Fresh402",
-                version: "1.0.0",
+                version: "1.0.1",
               });
 
             server.registerTool(
@@ -1857,7 +1859,12 @@ app.use("/v1/check", async (c, next) => {
   return result;
 });
 app.all("*", (c) => {
-    return coreHandler.fetch(c.get("coreRequest"), c.env);
+    return coreHandler.fetch(
+        c.get("coreRequest") as Parameters<
+            typeof coreHandler.fetch
+        >[0],
+        c.env,
+    );
 });
 
 export default app;

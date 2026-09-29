@@ -165,3 +165,5 @@ dist
 .env*
 !.env.example
 .wrangler/
+check-cdp-bazaar.mjs
+test-fresh402-discovery.mjs

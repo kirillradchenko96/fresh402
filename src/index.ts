@@ -310,7 +310,7 @@ const coreHandler = {
             return json({
                 name: "Fresh402",
                 status: "ok",
-                version: "0.8.0",
+                version: "0.8.1",
                 normalizer_version: NORMALIZER_VERSION,
                 endpoints: {
                     check: "POST /v1/check",
@@ -1051,15 +1051,15 @@ payTo: PAY_TO,
 },
 ],
 description:
-"Check whether a web page has materially changed while filtering common page noise and updating its Fresh402 snapshot.",
+"Detect meaningful content changes in any URL, monitor website and web page changes, check page freshness, filter common boilerplate/noise, and return a change signal for AI agents.",
 mimeType: "application/json",
-serviceName: "Fresh402",
+serviceName: "Fresh402 Web Change Monitor",
 tags: [
-"freshness",
-"change-detection",
-"web-monitoring",
-"agents",
-"diff",
+"website-monitoring",
+"page-change-detection",
+"url-freshness",
+"semantic-diff",
+"ai-agents",
 ],
 extensions: {
 ...declareDiscoveryExtension({
@@ -1074,7 +1074,7 @@ url: {
 type: "string",
 format: "uri",
 description:
-"Absolute HTTP or HTTPS URL to check for meaningful content changes.",
+"Absolute HTTP or HTTPS URL to monitor. Send the same URL again to detect meaningful page changes since the previous Fresh402 snapshot.",
 },
 },
 required: ["url"],

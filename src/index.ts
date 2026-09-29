@@ -1,7 +1,8 @@
+import { SignJWT, importJWK } from "jose";
+import { HTTPFacilitatorClient } from "@x402/core/server";
 import { Hono } from "hono";
 import { paymentMiddleware } from "@x402/hono";
 import {
-    HTTPFacilitatorClient,
     x402ResourceServer,
 } from "@x402/core/server";
 import { registerExactEvmScheme } from "@x402/evm/exact/server";
@@ -308,7 +309,7 @@ const coreHandler = {
             return json({
                 name: "Fresh402",
                 status: "ok",
-                version: "0.6.1",
+                version: "0.7.1",
                 normalizer_version: NORMALIZER_VERSION,
                 endpoints: {
                     check: "POST /v1/check",
@@ -851,70 +852,226 @@ const coreHandler = {
     },
 } satisfies ExportedHandler<Env>;
 
-const PAY_TO = "0x58B4b483fBE31860335eCeB12CCCF4338b251085";
+const CDP_FACILITATOR_URL =
+"https://api.cdp.coinbase.com/platform/v2/x402";
 
-const facilitatorClient = new HTTPFacilitatorClient({
-    url: "https://x402.org/facilitator",
+const CDP_FACILITATOR_HOST =
+"api.cdp.coinbase.com";
+
+function bytesToBase64Url(bytes: Uint8Array): string {
+let binary = "";
+
+for (const byte of bytes) {
+binary += String.fromCharCode(byte);
+}
+
+return btoa(binary)
+.replace(/\+/g, "-")
+.replace(/\//g, "_")
+.replace(/=+$/g, "");
+}
+
+function createNonce(): string {
+const bytes = new Uint8Array(16);
+globalThis.crypto.getRandomValues(bytes);
+
+return Array.from(bytes)
+.map((byte) => byte.toString(16).padStart(2, "0"))
+.join("");
+}
+
+async function generateCdpJwt(
+apiKeyId: string,
+apiKeySecret: string,
+method: "GET" | "POST",
+path: string,
+): Promise<string> {
+const cleanSecret = apiKeySecret.replace(/\s+/g, "");
+
+let decoded: Uint8Array;
+
+try {
+const binary = atob(cleanSecret);
+decoded = Uint8Array.from(
+binary,
+(char) => char.charCodeAt(0),
+);
+} catch {
+throw new Error(
+"CDP API key secret is not valid base64.",
+);
+}
+
+// Fresh402 currently uses the Ed25519 CDP API key created in Portal.
+if (decoded.length !== 64) {
+throw new Error(
+`Expected a 64-byte Ed25519 CDP secret, received ${decoded.length} bytes.`,
+);
+}
+
+const seed = decoded.slice(0, 32);
+const publicKey = decoded.slice(32);
+
+const jwk = {
+kty: "OKP",
+crv: "Ed25519",
+d: bytesToBase64Url(seed),
+x: bytesToBase64Url(publicKey),
+};
+
+const signingKey = await importJWK(jwk, "EdDSA");
+
+const now = Math.floor(Date.now() / 1000);
+
+return new SignJWT({
+sub: apiKeyId,
+iss: "cdp",
+uris: [
+`${method} ${CDP_FACILITATOR_HOST}${path}`,
+],
+})
+.setProtectedHeader({
+alg: "EdDSA",
+kid: apiKeyId,
+typ: "JWT",
+nonce: createNonce(),
+})
+.setIssuedAt(now)
+.setNotBefore(now)
+.setExpirationTime(now + 120)
+.sign(signingKey);
+}
+
+function createFresh402CdpFacilitator(
+apiKeyId: string,
+apiKeySecret: string,
+): HTTPFacilitatorClient {
+const auth = async (
+method: "GET" | "POST",
+path: string,
+): Promise<Record<string, string>> => ({
+Authorization:
+`Bearer ${await generateCdpJwt(
+apiKeyId,
+apiKeySecret,
+method,
+path,
+)}`,
 });
 
-const x402Server = new x402ResourceServer(facilitatorClient);
-registerExactEvmScheme(x402Server);
+return new HTTPFacilitatorClient({
+url: CDP_FACILITATOR_URL,
+
+createAuthHeaders: async () => {
+const [verify, settle, supported] =
+await Promise.all([
+auth(
+"POST",
+"/platform/v2/x402/verify",
+),
+auth(
+"POST",
+"/platform/v2/x402/settle",
+),
+auth(
+"GET",
+"/platform/v2/x402/supported",
+),
+]);
+
+return {
+verify,
+settle,
+supported,
+};
+},
+});
+}
+const PAY_TO = "0x58B4b483fBE31860335eCeB12CCCF4338b251085";
+
+type Fresh402Bindings = Env & {
+CDP_API_KEY_ID?: string;
+CDP_API_KEY_SECRET?: string;
+};
 
 type Fresh402AppEnv = {
-    Bindings: Env;
-    Variables: {
-        coreRequest: Request;
-    };
+Bindings: Fresh402Bindings;
+Variables: {
+coreRequest: Request;
+};
 };
 
 const app = new Hono<Fresh402AppEnv>();
 
-
-
 // Preserve an untouched copy of the request body for our existing handler.
 app.use("*", async (c, next) => {
-    c.set("coreRequest", c.req.raw.clone());
-    await next();
+c.set("coreRequest", c.req.raw.clone());
+await next();
 });
 
-let x402InitPromise: Promise<void> | undefined;
+let x402GatePromise:
+| Promise<ReturnType<typeof paymentMiddleware>>
+| undefined;
 
-app.use("/v1/check", async (_c, next) => {
-    if (!x402InitPromise) {
-        x402InitPromise = x402Server.initialize().catch((error) => {
-            x402InitPromise = undefined;
-            throw error;
-        });
-    }
+async function getX402Gate(env: Fresh402Bindings) {
+const apiKeyId = env.CDP_API_KEY_ID;
+const apiKeySecret = env.CDP_API_KEY_SECRET;
 
-    await x402InitPromise;
-    await next();
-});
+if (!apiKeyId || !apiKeySecret) {
+throw new Error(
+"Fresh402 payment service is missing CDP credentials.",
+);
+}
 
-app.use(
-    paymentMiddleware(
-        {
-            "POST /v1/check": {
-                accepts: [
-                    {
-                        scheme: "exact",
-                        price: "$0.001",
-                        network: "eip155:84532",
-                        payTo: PAY_TO,
-                    },
-                ],
-                description:
-                    "Check whether a URL has materially changed and update its Fresh402 snapshot.",
-                mimeType: "application/json",
-            },
-        },
-        x402Server,
-        undefined,
-        undefined,
-        false,
-    ),
+if (!x402GatePromise) {
+x402GatePromise = (async () => {
+const facilitatorClient =
+createFresh402CdpFacilitator(
+apiKeyId,
+apiKeySecret,
 );
 
+const x402Server =
+new x402ResourceServer(facilitatorClient);
+
+registerExactEvmScheme(x402Server);
+
+await x402Server.initialize();
+
+return paymentMiddleware(
+{
+"POST /v1/check": {
+accepts: [
+{
+scheme: "exact",
+price: "$0.001",
+network: "eip155:8453",
+payTo: PAY_TO,
+},
+],
+description:
+"Check whether a URL has materially changed and update its Fresh402 snapshot.",
+mimeType: "application/json",
+},
+},
+x402Server,
+undefined,
+undefined,
+false,
+);
+})().catch((error) => {
+x402GatePromise = undefined;
+throw error;
+});
+}
+
+return x402GatePromise;
+}
+
+app.use("/v1/check", async (c, next) => {
+const paymentGate = await getX402Gate(c.env);
+return paymentGate(c, next);
+});
 app.all("*", (c) => {
     return coreHandler.fetch(c.get("coreRequest"), c.env);
 });

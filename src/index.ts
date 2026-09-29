@@ -1,4 +1,5 @@
 import { SignJWT, importJWK } from "jose";
+import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
 import { HTTPFacilitatorClient } from "@x402/core/server";
 import { Hono } from "hono";
 import { paymentMiddleware } from "@x402/hono";
@@ -309,7 +310,7 @@ const coreHandler = {
             return json({
                 name: "Fresh402",
                 status: "ok",
-                version: "0.7.1",
+                version: "0.8.0",
                 normalizer_version: NORMALIZER_VERSION,
                 endpoints: {
                     check: "POST /v1/check",
@@ -1050,8 +1051,99 @@ payTo: PAY_TO,
 },
 ],
 description:
-"Check whether a URL has materially changed and update its Fresh402 snapshot.",
+"Check whether a web page has materially changed while filtering common page noise and updating its Fresh402 snapshot.",
 mimeType: "application/json",
+serviceName: "Fresh402",
+tags: [
+"freshness",
+"change-detection",
+"web-monitoring",
+"agents",
+"diff",
+],
+extensions: {
+...declareDiscoveryExtension({
+bodyType: "json",
+input: {
+url: "https://example.com",
+},
+inputSchema: {
+type: "object",
+properties: {
+url: {
+type: "string",
+format: "uri",
+description:
+"Absolute HTTP or HTTPS URL to check for meaningful content changes.",
+},
+},
+required: ["url"],
+additionalProperties: false,
+},
+output: {
+example: {
+url: "https://example.com/",
+final_url: "https://example.com/",
+first_seen: false,
+rebaselined: false,
+raw_changed: false,
+changed: false,
+noise_detected: false,
+check_count: 3,
+snapshot_saved: false,
+normalizer_version: 2,
+content_length: 182,
+fetch_time_ms: 307,
+checked_at:
+"2026-09-29T01:35:57.534Z",
+},
+schema: {
+type: "object",
+properties: {
+url: {
+type: "string",
+},
+final_url: {
+type: "string",
+},
+first_seen: {
+type: "boolean",
+},
+rebaselined: {
+type: "boolean",
+},
+raw_changed: {
+type: "boolean",
+},
+changed: {
+type: "boolean",
+},
+noise_detected: {
+type: "boolean",
+},
+check_count: {
+type: "integer",
+},
+snapshot_saved: {
+type: "boolean",
+},
+normalizer_version: {
+type: "integer",
+},
+content_length: {
+type: "integer",
+},
+fetch_time_ms: {
+type: "integer",
+},
+checked_at: {
+type: "string",
+},
+},
+},
+},
+}),
+},
 },
 },
 x402Server,

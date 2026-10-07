@@ -1,0 +1,17 @@
+{
+    "$schema":  "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+    "name":  "io.github.kirillradchenko96/fresh402",
+    "title":  "Fresh402",
+    "description":  "Detect webpage and API changes. Free baseline; $0.005 USDC per check via x402 on Base.",
+    "version":  "1.1.1",
+    "repository":  {
+                       "url":  "https://github.com/kirillradchenko96/fresh402",
+                       "source":  "github"
+                   },
+    "remotes":  [
+                    {
+                        "type":  "streamable-http",
+                        "url":  "https://fresh402.kirilllabs.workers.dev/mcp"
+                    }
+                ]
+}

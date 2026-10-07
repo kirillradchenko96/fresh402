@@ -167,3 +167,9 @@ dist
 .wrangler/
 check-cdp-bazaar.mjs
 test-fresh402-discovery.mjs
+
+# Local Fresh402 development/release artifacts
+backups/
+X402_WORK_CONTEXT.txt
+*.price-backup
+*.pre-register-no-fetch

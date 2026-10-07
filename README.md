@@ -277,6 +277,28 @@ Fresh402 validates outbound targets and includes protections intended to reduce 
 
 Payment credentials and deployment secrets are supplied through runtime environment configuration and are not stored in this repository.
 
+### Resource limits
+
+- New free registrations (REST and MCP combined) are limited to 10 attempts per target hostname and 60 attempts overall per 60 seconds, in each Cloudflare location. Paths, queries, ports and selector/ignore-rule variants share the hostname limit. Failed upstream attempts also consume quota. Existing watches are returned without a fetch or quota charge; paid checks do not use these limits.
+- REST returns `429 registration_rate_limited` with `Retry-After: 60` when a limit is reached. Missing or unavailable rate limit bindings return `503 registration_unavailable` for new registrations. MCP reports these through the existing tool-error path.
+- Every incoming POST body is capped at 65,536 bytes before JSON parsing, payment handling, MCP dispatch or cloning (`413 request_too_large`). Reading an incoming body has a 10-second deadline (`408 request_timeout`).
+- Upstream response bodies are streamed with a 5,000,000-byte limit (`413 content_too_large`), including when `Content-Length` is absent or misleading. A single 10-second deadline covers redirects, headers and body reading (`504 upstream_timeout`). Unused and rejected streams are cancelled.
+- Concurrent creation of the same watch saves only one baseline and one initial snapshot. A losing free registration returns the stored baseline; overlapping initial requests can still perform separate upstream fetches, subject to the registration limits.
+
+The two rate limit bindings and their thresholds are declared in `wrangler.jsonc`; keep their namespace IDs unique within the Cloudflare account. These [Cloudflare limits](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/) are local to each location and eventually consistent. They mitigate bursts but are not a strict worldwide quota or a storage/billing cap. Legitimate users sharing a target hostname also share its allowance. The `global_fetch_strictly_public` compatibility flag remains enabled to protect against private addresses reached through DNS.
+
+### Local verification
+
+Use Node.js 24, then run:
+
+```sh
+npm ci
+npx tsc --noEmit
+npm test -- --run
+```
+
+Tests use a local Workers runtime, isolated D1 data and mocked upstream requests. They do not require payment credentials or access production. GitHub Actions runs these same checks on pull requests and pushes to `main`; the workflow has no deployment step.
+
 ## Current release
 
 **v1.1.0**

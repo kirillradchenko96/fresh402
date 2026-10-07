@@ -110,6 +110,25 @@ describe("Fresh402", () => {
         expect(diff.added_excerpt).toContain("9");
     });
 
+    it("serves Glama verification JSON", async () => {
+        const response = await SELF.fetch(
+            "http://example.com/.well-known/glama.json",
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.headers.get("content-type"))
+            .toContain("application/json");
+
+        const body = (await response.json()) as {
+            "$schema": string;
+            claim: string;
+        };
+
+        expect(body["$schema"]).toBe(
+            "https://glama.ai/mcp/schemas/connector.json",
+        );
+        expect(body.claim).toMatch(/^glama_claim_/);
+    });
     it("returns 404 for an unknown route", async () => {
         const response = await SELF.fetch(
             "http://example.com/does-not-exist",

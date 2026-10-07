@@ -1,4 +1,4 @@
-﻿import {
+import {
   McpServer,
   createMcpHandler,
 } from "@modelcontextprotocol/server";
@@ -1185,6 +1185,9 @@ app.all("/mcp", async (c) => {
 });
 
 
+app.get("/.well-known/glama.json", (c) => {
+  return c.json({"$schema":"https://glama.ai/mcp/schemas/connector.json","claim":"glama_claim_TphUzhTwuiiTc3VXeWc1uMARmUyUI2zV"});
+});
 app.get("/v1/stats", async (c) => {
   const row = await c.env.DB
     .prepare(

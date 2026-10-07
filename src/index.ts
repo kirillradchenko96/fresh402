@@ -1,4 +1,4 @@
-import {
+﻿import {
   McpServer,
   createMcpHandler,
 } from "@modelcontextprotocol/server";
@@ -22,852 +22,24 @@ import {
     x402ResourceServer,
 } from "@x402/core/server";
 import { registerExactEvmScheme } from "@x402/evm/exact/server";
-const NORMALIZER_VERSION = 2;
-
-interface ResourceRow {
-    url: string;
-    hash: string;
-    normalized_content: string;
-    created_at: string;
-    updated_at: string;
-    check_count: number;
-    raw_hash: string | null;
-    normalizer_version: number;
-}
-
-interface SnapshotRow {
-    id: number;
-    hash: string;
-    raw_hash: string | null;
-    normalized_content: string;
-    created_at: string;
-    normalizer_version: number;
-}
-
-function json(data: unknown, status = 200): Response {
-    return new Response(JSON.stringify(data, null, 2), {
-        status,
-        headers: {
-            "content-type": "application/json; charset=UTF-8",
-        },
-    });
-}
-
-async function sha256(text: string): Promise<string> {
-    const bytes = new TextEncoder().encode(text);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", bytes);
-
-    return Array.from(new Uint8Array(hashBuffer))
-        .map((byte) => byte.toString(16).padStart(2, "0"))
-        .join("");
-}
-
-function normalizeRawHtml(html: string): string {
-    return html
-        .replace(/\r\n/g, "\n")
-        .replace(/\s+/g, " ")
-        .trim();
-}
-
-function htmlToText(html: string): string {
-    return html
-        .replace(/<!--[\s\S]*?-->/g, " ")
-        .replace(/<[^>]+>/g, " ")
-        .replace(/&nbsp;/gi, " ")
-        .replace(/&amp;/gi, "&")
-        .replace(/&quot;/gi, '"')
-        .replace(/&#39;/gi, "'")
-        .replace(/&lt;/gi, "<")
-        .replace(/&gt;/gi, ">")
-        .replace(/\s+/g, " ")
-        .trim();
-}
-
-async function normalizeContent(html: string): Promise<string> {
-    const removeHandler = {
-        element(element: Element) {
-            element.remove();
-        },
-    };
-
-    const selectors = [
-        "script",
-        "style",
-        "noscript",
-        "template",
-        "svg",
-        "canvas",
-        "nav",
-        "footer",
-        "aside",
-        "[hidden]",
-        '[aria-hidden="true"]',
-        '[class*="cookie"]',
-        '[id*="cookie"]',
-        '[class*="consent"]',
-        '[id*="consent"]',
-        '[class*="advertisement"]',
-        '[id*="advertisement"]',
-    ];
-
-    let rewriter = new HTMLRewriter();
-
-    for (const selector of selectors) {
-        rewriter = rewriter.on(selector, removeHandler);
-    }
-
-    const cleanedHtml = await rewriter
-        .transform(
-            new Response(html, {
-                headers: {
-                    "content-type": "text/html; charset=UTF-8",
-                },
-            }),
-        )
-        .text();
-
-    return htmlToText(cleanedHtml);
-}
-
-function isLocalDevelopmentRequest(requestUrl: URL): boolean {
-    return (
-        requestUrl.hostname === "127.0.0.1" ||
-        requestUrl.hostname === "localhost" ||
-        requestUrl.hostname === "::1"
-    );
-}
-
-function isPrivateIpv4(hostname: string): boolean {
-    const parts = hostname.split(".").map(Number);
-
-    if (
-        parts.length !== 4 ||
-        parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)
-    ) {
-        return false;
-    }
-
-    const [a, b] = parts;
-
-    if (a === 0) return true;
-    if (a === 10) return true;
-    if (a === 127) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 100 && b >= 64 && b <= 127) return true;
-    if (a === 198 && (b === 18 || b === 19)) return true;
-    if (a >= 224) return true;
-
-    return false;
-}
-
-function isPrivateHostname(hostname: string): boolean {
-    const host = hostname
-        .toLowerCase()
-        .replace(/^\[/, "")
-        .replace(/\]$/, "");
-
-    if (
-        host === "localhost" ||
-        host.endsWith(".localhost") ||
-        host.endsWith(".local") ||
-        host.endsWith(".internal") ||
-        host.endsWith(".lan")
-    ) {
-        return true;
-    }
-
-    if (isPrivateIpv4(host)) {
-        return true;
-    }
-
-    if (
-        host === "::1" ||
-        host === "::" ||
-        host.startsWith("fc") ||
-        host.startsWith("fd") ||
-        host.startsWith("fe8") ||
-        host.startsWith("fe9") ||
-        host.startsWith("fea") ||
-        host.startsWith("feb")
-    ) {
-        return true;
-    }
-
-    if (host.startsWith("::ffff:")) {
-        return isPrivateIpv4(host.slice(7));
-    }
-
-    return false;
-}
-
-function validateTarget(target: URL, allowPrivate: boolean): string | null {
-    if (target.protocol !== "http:" && target.protocol !== "https:") {
-        return "Only HTTP and HTTPS URLs are supported.";
-    }
-
-    if (target.username || target.password) {
-        return "URLs containing usernames or passwords are not supported.";
-    }
-
-    const allowedPorts = new Set(["", "80", "443", "8080", "8443"]);
-
-    if (!allowPrivate && !allowedPorts.has(target.port)) {
-        return "This port is not allowed.";
-    }
-
-    if (!allowPrivate && isPrivateHostname(target.hostname)) {
-        return "Private, local, and internal network targets are not allowed.";
-    }
-
-    return null;
-}
-
-function canonicalizeUrl(target: URL): string {
-    const canonical = new URL(target.toString());
-    canonical.hash = "";
-    return canonical.toString();
-}
-
-class TargetNotAllowedError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "TargetNotAllowedError";
-    }
-}
-
-const MAX_REDIRECTS = 5;
-
-async function fetchTarget(
-    target: URL,
-    allowPrivate: boolean,
-): Promise<Response> {
-    let current = new URL(target.toString());
-
-    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-        const validationError = validateTarget(current, allowPrivate);
-
-        if (validationError) {
-            throw new TargetNotAllowedError(validationError);
-        }
-
-        const controller = new AbortController();
-
-        const timeout = setTimeout(() => {
-            controller.abort();
-        }, 10_000);
-
-        let response: Response;
-
-        try {
-            response = await fetch(current.toString(), {
-                redirect: "manual",
-                signal: controller.signal,
-                headers: {
-                    "user-agent": "Fresh402/0.5.1",
-                    accept: "text/html,text/plain;q=0.9,*/*;q=0.1",
-                },
-            });
-        } finally {
-            clearTimeout(timeout);
-        }
-
-        const redirectStatuses = new Set([301, 302, 303, 307, 308]);
-
-        if (!redirectStatuses.has(response.status)) {
-            return response;
-        }
-
-        const location = response.headers.get("location");
-
-        if (!location) {
-            return response;
-        }
-
-        if (hop >= MAX_REDIRECTS) {
-            throw new TargetNotAllowedError(
-                `Too many redirects. Maximum allowed is ${MAX_REDIRECTS}.`,
-            );
-        }
-
-        const next = new URL(location, current);
-
-        if (
-            current.protocol === "https:" &&
-            next.protocol === "http:"
-        ) {
-            throw new TargetNotAllowedError(
-                "HTTPS to HTTP redirects are not allowed.",
-            );
-        }
-
-        const nextValidationError = validateTarget(next, allowPrivate);
-
-        if (nextValidationError) {
-            throw new TargetNotAllowedError(
-                `Redirect target rejected: ${nextValidationError}`,
-            );
-        }
-
-        current = next;
-    }
-
-    throw new TargetNotAllowedError("Redirect limit exceeded.");
-}
+import {
+  FRESH402_VERSION,
+  NORMALIZER_VERSION,
+  handleCoreRequest,
+  type Fresh402CheckInput,
+  type Fresh402RegisterInput,
+} from "./freshness";
 
 const coreHandler = {
-    async fetch(request, env): Promise<Response> {
-        const requestUrl = new URL(request.url);
-        const allowPrivate = isLocalDevelopmentRequest(requestUrl);
-
-        if (request.method === "GET" && requestUrl.pathname === "/") {
-            return json({
-                name: "Fresh402",
-                status: "ok",
-                version: "1.0.3",
-                normalizer_version: NORMALIZER_VERSION,
-                endpoints: {
-                    check: "POST /v1/check",
-                    history: "GET /v1/history?url=https://example.com",
-                    diff: "GET /v1/diff?url=https://example.com",
-                    stats: "GET /v1/stats",
-                    mcp: "POST /mcp",
-                },
-            });
-        }
-
-        if (request.method === "GET" && requestUrl.pathname === "/v1/history") {
-            const targetUrl = requestUrl.searchParams.get("url");
-
-            if (!targetUrl) {
-                return json(
-                    {
-                        error: "missing_url",
-                        message: "Provide ?url=https://example.com",
-                    },
-                    400,
-                );
-            }
-
-            const snapshots = await env.DB.prepare(
-                `
-                SELECT
-                    id,
-                    url,
-                    hash,
-                    raw_hash,
-                    created_at,
-                    normalizer_version
-                FROM snapshots
-                WHERE url = ?
-                  AND normalizer_version = ?
-                ORDER BY id DESC
-                LIMIT 50
-                `,
-            )
-                .bind(targetUrl, NORMALIZER_VERSION)
-                .all();
-
-            return json({
-                url: targetUrl,
-                normalizer_version: NORMALIZER_VERSION,
-                count: snapshots.results.length,
-                snapshots: snapshots.results,
-            });
-        }
-
-        if (request.method === "GET" && requestUrl.pathname === "/v1/diff") {
-            const targetUrl = requestUrl.searchParams.get("url");
-
-            if (!targetUrl) {
-                return json(
-                    {
-                        error: "missing_url",
-                        message: "Provide ?url=https://example.com",
-                    },
-                    400,
-                );
-            }
-
-            const result = await env.DB.prepare(
-                `
-                SELECT
-                    id,
-                    hash,
-                    raw_hash,
-                    normalized_content,
-                    created_at,
-                    normalizer_version
-                FROM snapshots
-                WHERE url = ?
-                  AND normalizer_version = ?
-                ORDER BY id DESC
-                LIMIT 2
-                `,
-            )
-                .bind(targetUrl, NORMALIZER_VERSION)
-                .all<SnapshotRow>();
-
-            if (result.results.length < 2) {
-                return json({
-                    url: targetUrl,
-                    changed: false,
-                    message: "At least two comparable snapshots are required.",
-                    snapshots_available: result.results.length,
-                    normalizer_version: NORMALIZER_VERSION,
-                });
-            }
-
-            const after = result.results[0];
-            const before = result.results[1];
-
-            const oldText = before.normalized_content;
-            const newText = after.normalized_content;
-
-            let prefix = 0;
-
-            while (
-                prefix < oldText.length &&
-                prefix < newText.length &&
-                oldText[prefix] === newText[prefix]
-            ) {
-                prefix++;
-            }
-
-            let suffix = 0;
-
-            while (
-                suffix < oldText.length - prefix &&
-                suffix < newText.length - prefix &&
-                oldText[oldText.length - 1 - suffix] ===
-                    newText[newText.length - 1 - suffix]
-            ) {
-                suffix++;
-            }
-
-            return json({
-                url: targetUrl,
-                changed: before.hash !== after.hash,
-                normalizer_version: NORMALIZER_VERSION,
-
-                from: {
-                    snapshot_id: before.id,
-                    hash: before.hash,
-                    created_at: before.created_at,
-                },
-
-                to: {
-                    snapshot_id: after.id,
-                    hash: after.hash,
-                    created_at: after.created_at,
-                },
-
-                removed: oldText.slice(prefix, oldText.length - suffix),
-                added: newText.slice(prefix, newText.length - suffix),
-
-                before: oldText,
-                after: newText,
-            });
-        }
-
-        if (request.method === "POST" && requestUrl.pathname === "/v1/check") {
-            let body: { url?: string };
-
-            try {
-                body = (await request.json()) as { url?: string };
-            } catch {
-                return json(
-                    {
-                        error: "invalid_json",
-                        message: "Request body must be valid JSON.",
-                    },
-                    400,
-                );
-            }
-
-            if (!body.url) {
-                return json(
-                    {
-                        error: "missing_url",
-                        message: 'Provide a URL, for example: {"url":"https://example.com"}',
-                    },
-                    400,
-                );
-            }
-
-            let target: URL;
-
-            try {
-                target = new URL(body.url);
-            } catch {
-                return json(
-                    {
-                        error: "invalid_url",
-                        message: "The supplied URL is invalid.",
-                    },
-                    400,
-                );
-            }
-
-            const validationError = validateTarget(target, allowPrivate);
-
-            if (validationError) {
-                return json(
-                    {
-                        error: "target_not_allowed",
-                        message: validationError,
-                    },
-                    400,
-                );
-            }
-
-            const canonicalUrl = canonicalizeUrl(target);
-            target = new URL(canonicalUrl);
-
-            try {
-                const startedAt = Date.now();
-                const response = await fetchTarget(target, allowPrivate);
-
-                if (!response.ok) {
-                    return json(
-                        {
-                            error: "upstream_error",
-                            message: `Target returned HTTP ${response.status}.`,
-                            status: response.status,
-                        },
-                        502,
-                    );
-                }
-
-                const contentType = response.headers.get("content-type") ?? "";
-
-                if (
-                    !contentType.includes("text/html") &&
-                    !contentType.includes("text/plain")
-                ) {
-                    return json(
-                        {
-                            error: "unsupported_content_type",
-                            message: `Unsupported content type: ${contentType || "unknown"}`,
-                        },
-                        415,
-                    );
-                }
-
-                const contentLengthHeader = response.headers.get("content-length");
-
-                if (
-                    contentLengthHeader &&
-                    Number(contentLengthHeader) > 5_000_000
-                ) {
-                    return json(
-                        {
-                            error: "content_too_large",
-                            message: "Target content exceeds the 5 MB MVP limit.",
-                        },
-                        413,
-                    );
-                }
-
-                const html = await response.text();
-
-                if (html.length > 5_000_000) {
-                    return json(
-                        {
-                            error: "content_too_large",
-                            message: "Target content exceeds the 5 MB MVP limit.",
-                        },
-                        413,
-                    );
-                }
-
-                const rawNormalized = normalizeRawHtml(html);
-                const normalized = contentType.includes("text/html")
-                    ? await normalizeContent(html)
-                    : html.replace(/\s+/g, " ").trim();
-
-                const rawHash = await sha256(rawNormalized);
-                const contentHash = await sha256(normalized);
-                const now = new Date().toISOString();
-
-                const existing = await env.DB.prepare(
-                    `
-                    SELECT
-                        url,
-                        hash,
-                        normalized_content,
-                        created_at,
-                        updated_at,
-                        check_count,
-                        raw_hash,
-                        normalizer_version
-                    FROM resources
-                    WHERE url = ?
-                    `,
-                )
-                    .bind(canonicalUrl)
-                    .first<ResourceRow>();
-
-                if (!existing) {
-                    await env.DB.batch([
-                        env.DB.prepare(
-                            `
-                            INSERT INTO resources (
-                                url,
-                                hash,
-                                normalized_content,
-                                created_at,
-                                updated_at,
-                                check_count,
-                                raw_hash,
-                                normalizer_version
-                            )
-                            VALUES (?, ?, ?, ?, ?, 1, ?, ?)
-                            `,
-                        ).bind(
-                            canonicalUrl,
-                            contentHash,
-                            normalized,
-                            now,
-                            now,
-                            rawHash,
-                            NORMALIZER_VERSION,
-                        ),
-
-                        env.DB.prepare(
-                            `
-                            INSERT INTO snapshots (
-                                url,
-                                hash,
-                                normalized_content,
-                                created_at,
-                                raw_hash,
-                                normalizer_version
-                            )
-                            VALUES (?, ?, ?, ?, ?, ?)
-                            `,
-                        ).bind(
-                            canonicalUrl,
-                            contentHash,
-                            normalized,
-                            now,
-                            rawHash,
-                            NORMALIZER_VERSION,
-                        ),
-                    ]);
-
-                    return json({
-                        url: canonicalUrl,
-                        final_url: response.url,
-                        first_seen: true,
-                        rebaselined: false,
-                        raw_changed: false,
-                        changed: false,
-                        noise_detected: false,
-                        hash: contentHash,
-                        raw_hash: rawHash,
-                        check_count: 1,
-                        snapshot_saved: true,
-                        normalizer_version: NORMALIZER_VERSION,
-                        content_length: normalized.length,
-                        fetch_time_ms: Date.now() - startedAt,
-                        checked_at: now,
-                    });
-                }
-
-                const newCheckCount = existing.check_count + 1;
-
-                if (existing.normalizer_version !== NORMALIZER_VERSION) {
-                    await env.DB.batch([
-                        env.DB.prepare(
-                            `
-                            UPDATE resources
-                            SET
-                                hash = ?,
-                                normalized_content = ?,
-                                updated_at = ?,
-                                check_count = ?,
-                                raw_hash = ?,
-                                normalizer_version = ?
-                            WHERE url = ?
-                            `,
-                        ).bind(
-                            contentHash,
-                            normalized,
-                            now,
-                            newCheckCount,
-                            rawHash,
-                            NORMALIZER_VERSION,
-                            canonicalUrl,
-                        ),
-
-                        env.DB.prepare(
-                            `
-                            INSERT INTO snapshots (
-                                url,
-                                hash,
-                                normalized_content,
-                                created_at,
-                                raw_hash,
-                                normalizer_version
-                            )
-                            VALUES (?, ?, ?, ?, ?, ?)
-                            `,
-                        ).bind(
-                            canonicalUrl,
-                            contentHash,
-                            normalized,
-                            now,
-                            rawHash,
-                            NORMALIZER_VERSION,
-                        ),
-                    ]);
-
-                    return json({
-                        url: canonicalUrl,
-                        final_url: response.url,
-                        first_seen: false,
-                        rebaselined: true,
-                        raw_changed: false,
-                        changed: false,
-                        noise_detected: false,
-                        hash: contentHash,
-                        raw_hash: rawHash,
-                        check_count: newCheckCount,
-                        snapshot_saved: true,
-                        normalizer_version: NORMALIZER_VERSION,
-                        message: "Baseline refreshed because the normalizer changed.",
-                        content_length: normalized.length,
-                        fetch_time_ms: Date.now() - startedAt,
-                        checked_at: now,
-                    });
-                }
-
-                const changed = existing.hash !== contentHash;
-                const rawChanged =
-                    existing.raw_hash !== null
-                        ? existing.raw_hash !== rawHash
-                        : null;
-
-                const noiseDetected = rawChanged === true && !changed;
-
-                if (changed) {
-                    await env.DB.batch([
-                        env.DB.prepare(
-                            `
-                            UPDATE resources
-                            SET
-                                hash = ?,
-                                normalized_content = ?,
-                                updated_at = ?,
-                                check_count = ?,
-                                raw_hash = ?
-                            WHERE url = ?
-                            `,
-                        ).bind(
-                            contentHash,
-                            normalized,
-                            now,
-                            newCheckCount,
-                            rawHash,
-                            canonicalUrl,
-                        ),
-
-                        env.DB.prepare(
-                            `
-                            INSERT INTO snapshots (
-                                url,
-                                hash,
-                                normalized_content,
-                                created_at,
-                                raw_hash,
-                                normalizer_version
-                            )
-                            VALUES (?, ?, ?, ?, ?, ?)
-                            `,
-                        ).bind(
-                            canonicalUrl,
-                            contentHash,
-                            normalized,
-                            now,
-                            rawHash,
-                            NORMALIZER_VERSION,
-                        ),
-                    ]);
-                } else {
-                    await env.DB.prepare(
-                        `
-                        UPDATE resources
-                        SET
-                            updated_at = ?,
-                            check_count = ?,
-                            raw_hash = ?
-                        WHERE url = ?
-                        `,
-                    )
-                        .bind(
-                            now,
-                            newCheckCount,
-                            rawHash,
-                            canonicalUrl,
-                        )
-                        .run();
-                }
-
-                return json({
-                    url: canonicalUrl,
-                    final_url: response.url,
-                    first_seen: false,
-                    rebaselined: false,
-                    raw_changed: rawChanged,
-                    changed,
-                    noise_detected: noiseDetected,
-                    previous_hash: existing.hash,
-                    hash: contentHash,
-                    previous_raw_hash: existing.raw_hash,
-                    raw_hash: rawHash,
-                    check_count: newCheckCount,
-                    first_seen_at: existing.created_at,
-                    snapshot_saved: changed,
-                    normalizer_version: NORMALIZER_VERSION,
-                    content_length: normalized.length,
-                    fetch_time_ms: Date.now() - startedAt,
-                    checked_at: now,
-                });
-            } catch (error) {
-                console.error(error);
-
-                if (error instanceof TargetNotAllowedError) {
-                    return json(
-                        {
-                            error: "target_not_allowed",
-                            message: error.message,
-                        },
-                        400,
-                    );
-                }
-
-                return json(
-                    {
-                        error: "check_failed",
-                        message:
-                            error instanceof Error
-                                ? error.message
-                                : "Unable to check the target.",
-                    },
-                    500,
-                );
-            }
-        }
-
-        return json(
-            {
-                error: "not_found",
-            },
-            404,
-        );
-    },
+  async fetch(
+    request: Request,
+    env: Env,
+  ): Promise<Response> {
+    return handleCoreRequest(
+      request,
+      env,
+    );
+  },
 } satisfies ExportedHandler<Env>;
 
 const CDP_FACILITATOR_URL =
@@ -1035,7 +207,7 @@ let x402GatePromise:
 const TEST_BUYER_ADDRESS =
   "0x493c114566f166241cF75B04526c46083045bF89";
 
-const CHECK_PRICE_ATOMIC = 1000;
+const CHECK_PRICE_ATOMIC = 5000;
 const USDC_DECIMALS = 6;
 
 type SettlementForLogging = {
@@ -1045,11 +217,6 @@ type SettlementForLogging = {
   payer?: string;
 };
 
-type PaymentPayloadForLogging = {
-  accepted?: {
-    amount?: string;
-  };
-};
 
 type PaymentStatsRow = {
   paid_calls: number | string | null;
@@ -1082,7 +249,6 @@ function decodeX402HeaderForLogging<T>(
 async function recordPaymentEvent(
   db: Fresh402Bindings["DB"],
   settlementHeader: string,
-  paymentSignature: string | undefined,
 ): Promise<void> {
   const settlement =
     decodeX402HeaderForLogging<SettlementForLogging>(
@@ -1095,30 +261,6 @@ async function recordPaymentEvent(
     !settlement.network ||
     !settlement.payer
   ) {
-    return;
-  }
-
-  const payment = paymentSignature
-    ? decodeX402HeaderForLogging<PaymentPayloadForLogging>(
-        paymentSignature,
-      )
-    : null;
-
-  const rawAmount = payment?.accepted?.amount;
-
-  const amountAtomic =
-    rawAmount && /^\d+$/.test(rawAmount)
-      ? Number(rawAmount)
-      : CHECK_PRICE_ATOMIC;
-
-  if (
-    !Number.isSafeInteger(amountAtomic) ||
-    amountAtomic <= 0
-  ) {
-    console.error(
-      "Fresh402 payment log skipped: invalid amount",
-      rawAmount,
-    );
     return;
   }
 
@@ -1147,165 +289,273 @@ async function recordPaymentEvent(
       settlement.payer,
       settlement.network,
       "/v1/check",
-      amountAtomic,
+      CHECK_PRICE_ATOMIC,
       isTestBuyer,
       new Date().toISOString(),
     )
     .run();
 }
 
-async function getX402Gate(env: Fresh402Bindings) {
-const apiKeyId = env.CDP_API_KEY_ID;
-const apiKeySecret = env.CDP_API_KEY_SECRET;
+async function getX402Gate(
+  env: Fresh402Bindings,
+) {
+  const apiKeyId =
+    env.CDP_API_KEY_ID;
 
-if (!apiKeyId || !apiKeySecret) {
-throw new Error(
-"Fresh402 payment service is missing CDP credentials.",
-);
+  const apiKeySecret =
+    env.CDP_API_KEY_SECRET;
+
+  if (!apiKeyId || !apiKeySecret) {
+    throw new Error(
+      "Fresh402 payment service is missing CDP credentials.",
+    );
+  }
+
+  if (!x402GatePromise) {
+    x402GatePromise =
+      (async () => {
+        const facilitatorClient =
+          createFresh402CdpFacilitator(
+            apiKeyId,
+            apiKeySecret,
+          );
+
+        const x402Server =
+          new x402ResourceServer(
+            facilitatorClient,
+          );
+
+        registerExactEvmScheme(
+          x402Server,
+        );
+
+        await x402Server.initialize();
+
+        return paymentMiddleware(
+          {
+            "POST /v1/check": {
+              accepts: [
+                {
+                  scheme: "exact",
+                  price: "$0.005",
+                  network:
+                    "eip155:8453",
+                  payTo: PAY_TO,
+                },
+              ],
+
+              description:
+                "Cheap freshness oracle for AI agents. Register a baseline for free, then check whether scoped HTML, JSON, or text changed. Supports caller hashes, deterministic diffs, shared freshness cache, noise filtering, and HTTP revalidation.",
+
+              mimeType:
+                "application/json",
+
+              serviceName:
+                "Fresh402 Freshness Oracle",
+
+              tags: [
+                "url-freshness",
+                "page-change-detection",
+                "website-monitoring",
+                "json-monitoring",
+                "semantic-diff",
+                "ai-agents",
+              ],
+
+              extensions: {
+                ...declareDiscoveryExtension({
+                  bodyType:
+                    "json",
+
+                  input: {
+                    watch_id:
+                      "w_0123456789abcdef0123456789abcdef",
+                    max_age_seconds:
+                      300,
+                    include_diff:
+                      true,
+                  },
+
+                  inputSchema: {
+                    type: "object",
+
+                    properties: {
+                      watch_id: {
+                        type: "string",
+                        description:
+                          "Persistent watch ID returned by the free /v1/register endpoint or MCP fresh402_register tool.",
+                      },
+
+                      url: {
+                        type: "string",
+                        format: "uri",
+                        description:
+                          "Absolute HTTP or HTTPS URL. Use either url or watch_id.",
+                      },
+
+                      previous_hash: {
+                        type: "string",
+                        pattern:
+                          "^[a-fA-F0-9]{64}$",
+                        description:
+                          "Optional Fresh402 SHA-256 fingerprint to compare against.",
+                      },
+
+                      selector: {
+                        type: "string",
+                        description:
+                          "Optional CSS selector limiting HTML monitoring to a specific part of the page.",
+                      },
+
+                      ignore_selectors: {
+                        type: "array",
+                        items: {
+                          type: "string",
+                        },
+                        maxItems: 20,
+                        description:
+                          "Optional CSS selectors removed before HTML fingerprinting.",
+                      },
+
+                      ignore_json_paths: {
+                        type: "array",
+                        items: {
+                          type: "string",
+                        },
+                        maxItems: 20,
+                        description:
+                          "Optional JSON Pointer paths to ignore before canonical JSON fingerprinting. Wildcard * is supported.",
+                      },
+
+                      max_age_seconds: {
+                        type: "integer",
+                        minimum: 0,
+                        maximum: 86400,
+                        description:
+                          "Accept a shared Fresh402 result this many seconds old instead of refetching.",
+                      },
+
+                      include_diff: {
+                        type: "boolean",
+                        description:
+                          "Include a compact deterministic diff when comparable prior content is available.",
+                      },
+                    },
+
+                    oneOf: [
+                      {
+                        required: [
+                          "watch_id",
+                        ],
+                      },
+                      {
+                        required: [
+                          "url",
+                        ],
+                      },
+                    ],
+
+                    additionalProperties:
+                      false,
+                  },
+
+                  output: {
+                    example: {
+                      watch_id:
+                        "w_0123456789abcdef0123456789abcdef",
+                      url:
+                        "https://example.com/",
+                      changed: true,
+                      comparison_source:
+                        "stored_watch",
+                      hash:
+                        "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                      content_kind:
+                        "html",
+                      cached: false,
+                      cache_status:
+                        "miss",
+                      network_fetched:
+                        true,
+                      snapshot_saved:
+                        true,
+                      normalizer_version:
+                        NORMALIZER_VERSION,
+                      diff: {
+                        available:
+                          true,
+                        changed:
+                          true,
+                        change_ratio:
+                          0.12,
+                        removed_excerpt:
+                          "Pro $25/month",
+                        added_excerpt:
+                          "Pro $29/month",
+                      },
+                    },
+
+                    schema: {
+                      type: "object",
+                      properties: {
+                        watch_id: {
+                          type: "string",
+                        },
+                        url: {
+                          type: "string",
+                        },
+                        changed: {
+                          type: "boolean",
+                        },
+                        hash: {
+                          type: "string",
+                        },
+                        content_kind: {
+                          type: "string",
+                        },
+                        cached: {
+                          type: "boolean",
+                        },
+                        cache_status: {
+                          type: "string",
+                        },
+                        network_fetched: {
+                          type: "boolean",
+                        },
+                        snapshot_saved: {
+                          type: "boolean",
+                        },
+                        normalizer_version: {
+                          type: "integer",
+                        },
+                        diff: {
+                          type: "object",
+                        },
+                      },
+                    },
+                  },
+                }),
+              },
+            },
+          },
+
+          x402Server,
+          undefined,
+          undefined,
+          false,
+        );
+      })().catch(
+        (error) => {
+          x402GatePromise =
+            undefined;
+          throw error;
+        },
+      );
+  }
+
+  return x402GatePromise;
 }
 
-if (!x402GatePromise) {
-x402GatePromise = (async () => {
-const facilitatorClient =
-createFresh402CdpFacilitator(
-apiKeyId,
-apiKeySecret,
-);
-
-const x402Server =
-new x402ResourceServer(facilitatorClient);
-
-registerExactEvmScheme(x402Server);
-
-await x402Server.initialize();
-
-return paymentMiddleware(
-{
-"POST /v1/check": {
-accepts: [
-{
-scheme: "exact",
-price: "$0.001",
-network: "eip155:8453",
-payTo: PAY_TO,
-},
-],
-description:
-"Detect meaningful content changes in any URL, monitor website and web page changes, check page freshness, filter common boilerplate/noise, and return a change signal for AI agents.",
-mimeType: "application/json",
-serviceName: "Fresh402 Web Change Monitor",
-tags: [
-"website-monitoring",
-"page-change-detection",
-"url-freshness",
-"semantic-diff",
-"ai-agents",
-],
-extensions: {
-...declareDiscoveryExtension({
-bodyType: "json",
-input: {
-url: "https://example.com",
-},
-inputSchema: {
-type: "object",
-properties: {
-url: {
-type: "string",
-format: "uri",
-description:
-"Absolute HTTP or HTTPS URL to monitor. Send the same URL again to detect meaningful page changes since the previous Fresh402 snapshot.",
-},
-},
-required: ["url"],
-additionalProperties: false,
-},
-output: {
-example: {
-url: "https://example.com/",
-final_url: "https://example.com/",
-first_seen: false,
-rebaselined: false,
-raw_changed: false,
-changed: false,
-noise_detected: false,
-check_count: 3,
-snapshot_saved: false,
-normalizer_version: 2,
-content_length: 182,
-fetch_time_ms: 307,
-checked_at:
-"2026-09-29T01:35:57.534Z",
-},
-schema: {
-type: "object",
-properties: {
-url: {
-type: "string",
-},
-final_url: {
-type: "string",
-},
-first_seen: {
-type: "boolean",
-},
-rebaselined: {
-type: "boolean",
-},
-raw_changed: {
-type: "boolean",
-},
-changed: {
-type: "boolean",
-},
-noise_detected: {
-type: "boolean",
-},
-check_count: {
-type: "integer",
-},
-snapshot_saved: {
-type: "boolean",
-},
-normalizer_version: {
-type: "integer",
-},
-content_length: {
-type: "integer",
-},
-fetch_time_ms: {
-type: "integer",
-},
-checked_at: {
-type: "string",
-},
-},
-},
-},
-}),
-},
-},
-},
-x402Server,
-undefined,
-undefined,
-false,
-);
-})().catch((error) => {
-x402GatePromise = undefined;
-throw error;
-});
-}
-
-return x402GatePromise;
-}
-
-
-type Fresh402McpPaymentPayload = {
-  accepted?: {
-    amount?: string;
-  };
-};
 
 type Fresh402McpRequest = {
   method?: string;
@@ -1407,30 +657,10 @@ async function recordMcpPaymentEvent(
   const payment =
     rpc.params?._meta?.[
       "x402/payment"
-    ] as Fresh402McpPaymentPayload | undefined;
+    ];
 
   if (!payment) {
     // Unpaid discovery/call attempt.
-    return;
-  }
-
-  const rawAmount =
-    payment.accepted?.amount;
-
-  const amountAtomic =
-    rawAmount && /^\d+$/.test(rawAmount)
-      ? Number(rawAmount)
-      : CHECK_PRICE_ATOMIC;
-
-  if (
-    !Number.isSafeInteger(amountAtomic) ||
-    amountAtomic <= 0
-  ) {
-    console.error(
-      "Fresh402 MCP payment log skipped: invalid amount",
-      rawAmount,
-    );
-
     return;
   }
 
@@ -1468,7 +698,7 @@ async function recordMcpPaymentEvent(
       settlement.payer,
       settlement.network,
       "/mcp#fresh402_check",
-      amountAtomic,
+      CHECK_PRICE_ATOMIC,
       isTestBuyer,
       new Date().toISOString(),
     )
@@ -1476,28 +706,27 @@ async function recordMcpPaymentEvent(
 }
 
 
-async function runFresh402CheckForMcp(
-  url: string,
+async function runFresh402CoreForMcp(
+  path: "/v1/register" | "/v1/check",
+  input:
+    | Fresh402RegisterInput
+    | Fresh402CheckInput,
   env: Fresh402Bindings,
 ): Promise<Record<string, unknown>> {
   const internalRequest =
     new Request(
-      "https://fresh402.internal/v1/check",
+      `https://fresh402.internal${path}`,
       {
         method: "POST",
         headers: {
           "content-type":
             "application/json",
         },
-        body: JSON.stringify({
-          url,
-        }),
+        body:
+          JSON.stringify(input),
       },
     );
 
-  // Call the existing Fresh402 core directly.
-  // Payment is handled by the MCP wrapper, so this
-  // intentionally bypasses the HTTP x402 middleware.
   const response =
     await coreHandler.fetch(
       internalRequest as Parameters<
@@ -1511,7 +740,7 @@ async function runFresh402CheckForMcp(
 
   if (!response.ok) {
     throw new Error(
-      `Fresh402 check failed with HTTP ${response.status}: ${text}`,
+      `Fresh402 core returned HTTP ${response.status}: ${text}`,
     );
   }
 
@@ -1568,7 +797,7 @@ async function getFresh402McpHandler(
               scheme: "exact",
               network: "eip155:8453",
               payTo: PAY_TO,
-              price: "$0.001",
+              price: "$0.005",
               extra: {
                 name: "USD Coin",
                 version: "2",
@@ -1586,18 +815,19 @@ async function getFresh402McpHandler(
                   "https://fresh402.kirilllabs.workers.dev/mcp",
 
                 description:
-                  "Detect meaningful content changes in a URL while filtering common page noise.",
+                  "Cheap freshness oracle for AI agents. Register a baseline for free, then cheaply decide whether scoped HTML, JSON, or text changed before spending browser or LLM resources.",
 
                 mimeType:
                   "application/json",
 
                 serviceName:
-                  "Fresh402 Web Change Monitor",
+                  "Fresh402 Freshness Oracle",
 
                 tags: [
-                  "website-monitoring",
-                  "page-change-detection",
                   "url-freshness",
+                  "page-change-detection",
+                  "website-monitoring",
+                  "json-monitoring",
                   "semantic-diff",
                   "ai-agents",
                 ],
@@ -1609,7 +839,7 @@ async function getFresh402McpHandler(
                     "fresh402_check",
 
                   description:
-                    "Detect meaningful content changes in any URL, monitor website and web page changes, check page freshness, filter common boilerplate/noise, and return a change signal for AI agents.",
+                    "Check whether a registered URL or scoped web resource materially changed. Supports watch IDs, caller fingerprints, CSS scoping, JSON ignore paths, shared freshness caching, deterministic inline diffs, and conditional HTTP revalidation. Costs $0.005 USDC.",
 
                   transport:
                     "streamable-http",
@@ -1618,17 +848,75 @@ async function getFresh402McpHandler(
                     type: "object",
 
                     properties: {
+                      watch_id: {
+                        type: "string",
+                        description:
+                          "Watch ID returned by the free fresh402_register tool.",
+                      },
+
                       url: {
                         type: "string",
                         format: "uri",
-
                         description:
-                          "Absolute HTTP or HTTPS URL to monitor. Send the same URL again to detect meaningful changes since the previous Fresh402 snapshot.",
+                          "Absolute HTTP or HTTPS URL. Use either url or watch_id.",
+                      },
+
+                      previous_hash: {
+                        type: "string",
+                        pattern:
+                          "^[a-fA-F0-9]{64}$",
+                        description:
+                          "Optional Fresh402 fingerprint to compare against.",
+                      },
+
+                      selector: {
+                        type: "string",
+                        description:
+                          "Optional CSS selector limiting monitoring to part of an HTML page.",
+                      },
+
+                      ignore_selectors: {
+                        type: "array",
+                        items: {
+                          type: "string",
+                        },
+                        maxItems: 20,
+                      },
+
+                      ignore_json_paths: {
+                        type: "array",
+                        items: {
+                          type: "string",
+                        },
+                        maxItems: 20,
+                        description:
+                          "JSON Pointer paths to ignore before canonical JSON fingerprinting. Wildcard * is supported.",
+                      },
+
+                      max_age_seconds: {
+                        type: "integer",
+                        minimum: 0,
+                        maximum: 86400,
+                        description:
+                          "Accept shared Fresh402 state this many seconds old instead of refetching.",
+                      },
+
+                      include_diff: {
+                        type: "boolean",
                       },
                     },
 
-                    required: [
-                      "url",
+                    oneOf: [
+                      {
+                        required: [
+                          "watch_id",
+                        ],
+                      },
+                      {
+                        required: [
+                          "url",
+                        ],
+                      },
                     ],
 
                     additionalProperties:
@@ -1636,8 +924,12 @@ async function getFresh402McpHandler(
                   },
 
                   example: {
-                    url:
-                      "https://example.com",
+                    watch_id:
+                      "w_0123456789abcdef0123456789abcdef",
+                    max_age_seconds:
+                      300,
+                    include_diff:
+                      true,
                   },
                 }),
             },
@@ -1648,19 +940,83 @@ async function getFresh402McpHandler(
             const server =
               new McpServer({
                 name: "Fresh402",
-                version: "1.0.3",
+                version:
+                  FRESH402_VERSION,
               });
+
+            server.registerTool(
+              "fresh402_register",
+              {
+                description:
+                  "Create or retrieve a free Fresh402 baseline and persistent watch_id. Existing baselines are returned without refetching, so this tool cannot be used as a free repeated change check.",
+
+                inputSchema:
+                  z.object({
+                    url:
+                      z.string().url(),
+
+                    selector:
+                      z.string()
+                        .min(1)
+                        .max(256)
+                        .optional(),
+
+                    ignore_selectors:
+                      z.array(
+                        z.string()
+                          .min(1)
+                          .max(256),
+                      )
+                        .max(20)
+                        .optional(),
+
+                    ignore_json_paths:
+                      z.array(
+                        z.string()
+                          .min(1)
+                          .max(256),
+                      )
+                        .max(20)
+                        .optional(),
+                  }),
+              },
+
+              async (args) => {
+                const result =
+                  await runFresh402CoreForMcp(
+                    "/v1/register",
+                    args as Fresh402RegisterInput,
+                    env,
+                  );
+
+                return {
+                  content: [
+                    {
+                      type:
+                        "text" as const,
+                      text:
+                        JSON.stringify(
+                          result,
+                        ),
+                    },
+                  ],
+
+                  structuredContent:
+                    result,
+                };
+              },
+            );
 
             const paidFresh402Check =
               paid(
-                async ({
-                  url,
-                }: {
-                  url: string;
-                }) => {
+                async (
+                  args:
+                    Fresh402CheckInput,
+                ) => {
                   const result =
-                    await runFresh402CheckForMcp(
-                      url,
+                    await runFresh402CoreForMcp(
+                      "/v1/check",
+                      args,
                       env,
                     );
 
@@ -1669,7 +1025,6 @@ async function getFresh402McpHandler(
                       {
                         type:
                           "text" as const,
-
                         text:
                           JSON.stringify(
                             result,
@@ -1687,12 +1042,63 @@ async function getFresh402McpHandler(
               "fresh402_check",
               {
                 description:
-                  "Detect meaningful web page changes and page freshness while filtering common boilerplate/noise. Costs $0.001 USDC per call.",
+                  "Check whether a registered or caller-supplied web resource changed. Costs $0.005 USDC. Use fresh402_register first for a free baseline when starting a new watch.",
 
                 inputSchema:
                   z.object({
+                    watch_id:
+                      z.string()
+                        .regex(
+                          /^w_[a-f0-9]{32}$/,
+                        )
+                        .optional(),
+
                     url:
-                      z.string().url(),
+                      z.string()
+                        .url()
+                        .optional(),
+
+                    previous_hash:
+                      z.string()
+                        .regex(
+                          /^[a-fA-F0-9]{64}$/,
+                        )
+                        .optional(),
+
+                    selector:
+                      z.string()
+                        .min(1)
+                        .max(256)
+                        .optional(),
+
+                    ignore_selectors:
+                      z.array(
+                        z.string()
+                          .min(1)
+                          .max(256),
+                      )
+                        .max(20)
+                        .optional(),
+
+                    ignore_json_paths:
+                      z.array(
+                        z.string()
+                          .min(1)
+                          .max(256),
+                      )
+                        .max(20)
+                        .optional(),
+
+                    max_age_seconds:
+                      z.number()
+                        .int()
+                        .min(0)
+                        .max(86400)
+                        .optional(),
+
+                    include_diff:
+                      z.boolean()
+                        .optional(),
                   }),
               },
 
@@ -1700,12 +1106,6 @@ async function getFresh402McpHandler(
                 args,
                 ctx,
               ) => {
-                // @x402/mcp 2.27 currently targets MCP SDK v1,
-                // where request metadata lived at extra._meta.
-                // MCP SDK v2 moved it to ctx.mcpReq._meta.
-                //
-                // Bridge only the fields the payment wrapper
-                // needs while keeping Fresh402 on modern MCP v2.
                 const legacyExtra = {
                   _meta:
                     ctx.mcpReq._meta,
@@ -1719,8 +1119,12 @@ async function getFresh402McpHandler(
                   typeof paidFresh402Check
                 >[1];
 
+                const paidArgs: Record<string, unknown> = {
+                  ...args,
+                };
+
                 return paidFresh402Check(
-                  args,
+                  paidArgs,
                   legacyExtra,
                 );
               },
@@ -1874,7 +1278,6 @@ app.use("/v1/check", async (c, next) => {
       await recordPaymentEvent(
         c.env.DB,
         settlementHeader,
-        c.req.header("payment-signature"),
       );
     } catch (error) {
       // Analytics must never break a successfully
@@ -1898,3 +1301,4 @@ app.all("*", (c) => {
 });
 
 export default app;
+

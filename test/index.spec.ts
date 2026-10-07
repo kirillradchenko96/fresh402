@@ -1,4 +1,4 @@
-﻿import { SELF } from "cloudflare:test";
+import { SELF } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
 import {
     applyJsonIgnorePaths,
@@ -24,7 +24,7 @@ describe("Fresh402", () => {
 
         expect(body.name).toBe("Fresh402");
         expect(body.status).toBe("ok");
-        expect(body.version).toBe("1.1.0");
+        expect(body.version).toBe("1.1.1");
         expect(body.normalizer_version).toBe(2);
         expect(body.pricing.register).toBe("free");
         expect(body.pricing.check).toContain("0.005");

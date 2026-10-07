@@ -294,6 +294,7 @@ Use Node.js 24, then run:
 ```sh
 npm ci
 npx tsc --noEmit
+npx tsc --noEmit -p test/tsconfig.json
 npm test -- --run
 ```
 
@@ -301,7 +302,7 @@ Tests use a local Workers runtime, isolated D1 data and mocked upstream requests
 
 ## Current release
 
-**v1.1.0**
+**v1.1.1**
 
 Highlights:
 

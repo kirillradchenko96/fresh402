@@ -1,7 +1,7 @@
 ﻿import { BodyReadError, BODY_TIMEOUT_MS, cancelBody, readBoundedBody, readRequestBody } from "./body";
 
 export const NORMALIZER_VERSION = 2;
-export const FRESH402_VERSION = "1.1.0";
+export const FRESH402_VERSION = "1.1.1";
 
 const MAX_REDIRECTS = 5;
 const MAX_BODY_BYTES = 5_000_000;
@@ -1432,7 +1432,7 @@ async function fetchTarget(
             }
 
             const headers: Record<string, string> = {
-                "user-agent": "Fresh402/1.1.0",
+                "user-agent": "Fresh402/1.1.1",
                 accept:
                     "text/html,application/json,text/plain,application/*+json;q=0.9,text/*;q=0.8,*/*;q=0.1",
             };

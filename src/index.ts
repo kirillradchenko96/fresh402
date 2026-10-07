@@ -12,6 +12,7 @@ import {
 } from "@x402/evm/exact/server";
 
 import { z } from "zod";
+import { BodyReadError, readRequestBody } from "./body";
 
 import { SignJWT, importJWK } from "jose";
 import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
@@ -1300,5 +1301,19 @@ app.all("*", (c) => {
     );
 });
 
-export default app;
+export default {
+  async fetch(request, env, ctx) {
+    if (request.method === "POST") {
+      try {
+        // Bound the body before Hono, payment/MCP parsing or any request.clone().
+        const body = await readRequestBody(request);
+        request = new Request(request, { body });
+      } catch (error) {
+        if (!(error instanceof BodyReadError)) throw error;
+        return Response.json({ error: error.code, message: error.message }, { status: error.status });
+      }
+    }
+    return app.fetch(request, env, ctx);
+  },
+} satisfies ExportedHandler<Fresh402Bindings>;
 

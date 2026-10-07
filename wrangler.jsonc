@@ -12,6 +12,18 @@
 		"enabled": true
 	},
 	"upload_source_maps": true,
+	"ratelimits": [
+		{
+			"name": "REGISTER_TARGET_LIMITER",
+			"namespace_id": "4021001",
+			"simple": { "limit": 10, "period": 60 }
+		},
+		{
+			"name": "REGISTER_GLOBAL_LIMITER",
+			"namespace_id": "4021002",
+			"simple": { "limit": 60, "period": 60 }
+		}
+	],
 	"d1_databases": [
 		{
 			"binding": "DB",

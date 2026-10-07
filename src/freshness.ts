@@ -1,4 +1,6 @@
-﻿export const NORMALIZER_VERSION = 2;
+﻿import { BodyReadError, BODY_TIMEOUT_MS, cancelBody, readBoundedBody, readRequestBody } from "./body";
+
+export const NORMALIZER_VERSION = 2;
 export const FRESH402_VERSION = "1.1.0";
 
 const MAX_REDIRECTS = 5;
@@ -13,6 +15,8 @@ const DIFF_EXCERPT_LIMIT = 1_200;
 
 export interface FreshnessEnv {
     DB: D1Database;
+    REGISTER_TARGET_LIMITER: RateLimit;
+    REGISTER_GLOBAL_LIMITER: RateLimit;
 }
 
 type ContentKind = "html" | "json" | "text";
@@ -555,7 +559,8 @@ function isPrivateHostname(hostname: string): boolean {
     const host = hostname
         .toLowerCase()
         .replace(/^\[/, "")
-        .replace(/\]$/, "");
+        .replace(/\]$/, "")
+        .replace(/\.$/, "");
 
     if (
         host === "localhost" ||
@@ -572,19 +577,28 @@ function isPrivateHostname(hostname: string): boolean {
     }
 
     if (
-        host === "::1" ||
-        host === "::" ||
-        host.startsWith("fc") ||
-        host.startsWith("fd") ||
-        host.startsWith("fe8") ||
-        host.startsWith("fe9") ||
-        host.startsWith("fea") ||
-        host.startsWith("feb")
+        host.includes(":") && (
+            host === "::1" ||
+            host === "::" ||
+            host.startsWith("fc") ||
+            host.startsWith("fd") ||
+            host.startsWith("fe8") ||
+            host.startsWith("fe9") ||
+            host.startsWith("fea") ||
+            host.startsWith("feb")
+        )
     ) {
         return true;
     }
 
     if (host.startsWith("::ffff:")) {
+        // URL canonicalizes IPv4-mapped addresses to two hexadecimal words.
+        const words = host.slice(7).split(":");
+        if (words.length === 2) {
+            const high = parseInt(words[0], 16);
+            const low = parseInt(words[1], 16);
+            return isPrivateIpv4(`${high >> 8}.${high & 255}.${low >> 8}.${low & 255}`);
+        }
         return isPrivateIpv4(host.slice(7));
     }
 
@@ -930,10 +944,10 @@ async function saveNewWatch(
     config: WatchConfig,
     payload: NormalizedPayload,
     now: string,
-): Promise<void> {
+): Promise<boolean> {
     const stored = storedContent(payload.normalized);
 
-    await db.batch([
+    const results = await db.batch([
         db.prepare(
             `INSERT INTO watches (
                 watch_id,
@@ -955,7 +969,8 @@ async function saveNewWatch(
                 check_count,
                 normalizer_version
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+            ON CONFLICT(watch_id) DO NOTHING`,
         ).bind(
             watchId,
             config.url,
@@ -986,7 +1001,7 @@ async function saveNewWatch(
                 created_at,
                 normalizer_version
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            SELECT ?, ?, ?, ?, ?, ?, ?, ? WHERE changes() = 1`,
         ).bind(
             watchId,
             payload.hash,
@@ -998,6 +1013,9 @@ async function saveNewWatch(
             NORMALIZER_VERSION,
         ),
     ]);
+
+    // D1 batch is transactional: only the winning insert creates a snapshot.
+    return results[0].meta.changes === 1;
 }
 
 async function updateWatchAfterFetch(
@@ -1313,6 +1331,8 @@ function contentKindFromType(
 async function normalizeResponse(
     response: Response,
     config: WatchConfig,
+    body: string,
+    finalUrl: string,
 ): Promise<NormalizedPayload> {
     const contentType =
         response.headers.get("content-type") ?? "";
@@ -1329,30 +1349,6 @@ async function normalizeResponse(
     }
 
     validateContentConfiguration(kind, config);
-
-    const contentLengthHeader =
-        response.headers.get("content-length");
-
-    if (
-        contentLengthHeader &&
-        Number(contentLengthHeader) > MAX_BODY_BYTES
-    ) {
-        throw new Fresh402InputError(
-            "content_too_large",
-            `Target content exceeds the ${MAX_BODY_BYTES / 1_000_000} MB limit.`,
-            413,
-        );
-    }
-
-    const body = await response.text();
-
-    if (body.length > MAX_BODY_BYTES) {
-        throw new Fresh402InputError(
-            "content_too_large",
-            `Target content exceeds the ${MAX_BODY_BYTES / 1_000_000} MB limit.`,
-            413,
-        );
-    }
 
     let normalized: string;
 
@@ -1401,7 +1397,7 @@ async function normalizeResponse(
                 "last-modified",
             ),
         final_url:
-            response.url || config.url,
+            finalUrl,
     };
 }
 
@@ -1412,122 +1408,128 @@ async function fetchTarget(
         etag?: string | null;
         last_modified?: string | null;
     },
-): Promise<Response> {
+): Promise<{ response: Response; body: string; finalUrl: string }> {
     let current = new URL(target.toString());
+    const controller = new AbortController();
+    // One deadline includes every redirect, response headers and streamed body.
+    const timeout = setTimeout(() => controller.abort(new BodyReadError(
+        "upstream_timeout", "Target response timed out.", 504,
+    )), BODY_TIMEOUT_MS);
 
-    for (
-        let hop = 0;
-        hop <= MAX_REDIRECTS;
-        hop++
-    ) {
-        const validationError =
-            validateTarget(current, allowPrivate);
-
-        if (validationError) {
-            throw new TargetNotAllowedError(
-                validationError,
-            );
-        }
-
-        const controller =
-            new AbortController();
-
-        const timeout =
-            setTimeout(() => {
-                controller.abort();
-            }, 10_000);
-
-        const headers: Record<string, string> = {
-            "user-agent": "Fresh402/1.1.0",
-            accept:
-                "text/html,application/json,text/plain,application/*+json;q=0.9,text/*;q=0.8,*/*;q=0.1",
-        };
-
-        if (validators?.etag) {
-            headers["if-none-match"] =
-                validators.etag;
-        }
-
-        if (validators?.last_modified) {
-            headers["if-modified-since"] =
-                validators.last_modified;
-        }
-
-        let response: Response;
-
-        try {
-            response = await fetch(
-                current.toString(),
-                {
-                    redirect: "manual",
-                    signal: controller.signal,
-                    headers,
-                },
-            );
-        } finally {
-            clearTimeout(timeout);
-        }
-
-        const redirectStatuses =
-            new Set([
-                301,
-                302,
-                303,
-                307,
-                308,
-            ]);
-
-        if (
-            !redirectStatuses.has(
-                response.status,
-            )
+    try {
+        for (
+            let hop = 0;
+            hop <= MAX_REDIRECTS;
+            hop++
         ) {
-            return response;
+            const validationError =
+                validateTarget(current, allowPrivate);
+
+            if (validationError) {
+                throw new TargetNotAllowedError(
+                    validationError,
+                );
+            }
+
+            const headers: Record<string, string> = {
+                "user-agent": "Fresh402/1.1.0",
+                accept:
+                    "text/html,application/json,text/plain,application/*+json;q=0.9,text/*;q=0.8,*/*;q=0.1",
+            };
+
+            if (validators?.etag) {
+                headers["if-none-match"] =
+                    validators.etag;
+            }
+
+            if (validators?.last_modified) {
+                headers["if-modified-since"] =
+                    validators.last_modified;
+            }
+
+            const response = await fetch(current.toString(), {
+                redirect: "manual",
+                signal: controller.signal,
+                headers,
+            });
+
+            const redirectStatuses =
+                new Set([
+                    301,
+                    302,
+                    303,
+                    307,
+                    308,
+                ]);
+
+            if (
+                !redirectStatuses.has(
+                    response.status,
+                )
+            ) {
+                if (!response.ok) {
+                    cancelBody(response.body);
+                    return { response, body: "", finalUrl: current.toString() };
+                }
+                const bytes = await readBoundedBody(response, MAX_BODY_BYTES, new BodyReadError(
+                    "content_too_large",
+                    `Target content exceeds the ${MAX_BODY_BYTES / 1_000_000} MB limit.`,
+                    413,
+                ), controller.signal);
+                return { response, body: new TextDecoder().decode(bytes), finalUrl: current.toString() };
+            }
+
+            const location =
+                response.headers.get("location");
+
+            cancelBody(response.body);
+
+            if (!location) {
+                return { response, body: "", finalUrl: current.toString() };
+            }
+
+            if (hop >= MAX_REDIRECTS) {
+                throw new TargetNotAllowedError(
+                    `Too many redirects. Maximum allowed is ${MAX_REDIRECTS}.`,
+                );
+            }
+
+            const next =
+                new URL(location, current);
+
+            if (
+                current.protocol === "https:" &&
+                next.protocol === "http:"
+            ) {
+                throw new TargetNotAllowedError(
+                    "HTTPS to HTTP redirects are not allowed.",
+                );
+            }
+
+            const nextValidationError =
+                validateTarget(
+                    next,
+                    allowPrivate,
+                );
+
+            if (nextValidationError) {
+                throw new TargetNotAllowedError(
+                    `Redirect target rejected: ${nextValidationError}`,
+                );
+            }
+
+            current = next;
         }
 
-        const location =
-            response.headers.get("location");
-
-        if (!location) {
-            return response;
-        }
-
-        if (hop >= MAX_REDIRECTS) {
-            throw new TargetNotAllowedError(
-                `Too many redirects. Maximum allowed is ${MAX_REDIRECTS}.`,
-            );
-        }
-
-        const next =
-            new URL(location, current);
-
-        if (
-            current.protocol === "https:" &&
-            next.protocol === "http:"
-        ) {
-            throw new TargetNotAllowedError(
-                "HTTPS to HTTP redirects are not allowed.",
-            );
-        }
-
-        const nextValidationError =
-            validateTarget(
-                next,
-                allowPrivate,
-            );
-
-        if (nextValidationError) {
-            throw new TargetNotAllowedError(
-                `Redirect target rejected: ${nextValidationError}`,
-            );
-        }
-
-        current = next;
+        throw new TargetNotAllowedError(
+            "Redirect limit exceeded.",
+        );
+    } catch (error) {
+        if (controller.signal.aborted) throw controller.signal.reason;
+        throw error;
+    } finally {
+        clearTimeout(timeout);
     }
-
-    throw new TargetNotAllowedError(
-        "Redirect limit exceeded.",
-    );
 }
 
 function ageSeconds(iso: string): number {
@@ -1561,9 +1563,10 @@ function publicWatchConfig(
 async function parseRequestBody(
     request: Request,
 ): Promise<Record<string, unknown>> {
+    const bytes = await readRequestBody(request);
     try {
         const body =
-            await request.json<unknown>();
+            JSON.parse(new TextDecoder().decode(bytes)) as unknown;
 
         if (
             !body ||
@@ -1581,6 +1584,47 @@ async function parseRequestBody(
             "invalid_json",
             "Request body must be a valid JSON object.",
         );
+    }
+}
+
+function existingRegistration(existing: WatchRow, concurrent = false): Response {
+    return json({
+        ...publicWatchConfig(existing.watch_id, configFromWatch(existing)),
+        created: false,
+        baseline_created: false,
+        hash: existing.hash,
+        content_kind: existing.content_kind,
+        first_seen_at: existing.created_at,
+        checked_at: existing.checked_at,
+        normalizer_version: existing.normalizer_version,
+        note: concurrent
+            ? "Concurrent registration returned the stored baseline. Use the paid check endpoint to refresh it."
+            : "Existing baseline returned without refetching. Use the paid check endpoint to refresh it.",
+    });
+}
+
+async function limitNewRegistration(env: FreshnessEnv, url: string): Promise<Response | null> {
+    try {
+        // The core path also serves MCP. Keys cannot be reset by changing selectors,
+        // URL paths/queries, caller-supplied headers or transport.
+        const host = new URL(url).hostname.toLowerCase().replace(/\.$/, "");
+        const target = await env.REGISTER_TARGET_LIMITER.limit({ key: `fresh402:register:host:${host}` });
+        const allowed = target.success && (await env.REGISTER_GLOBAL_LIMITER.limit({
+            key: "fresh402:register:all",
+        })).success;
+        if (allowed) return null;
+        const response = json({
+            error: "registration_rate_limited",
+            message: "Too many new free registrations. Retry in 60 seconds.",
+        }, 429);
+        response.headers.set("retry-after", "60");
+        return response;
+    } catch {
+        // Missing/unavailable bindings must never silently enable unbounded fetches.
+        return json({
+            error: "registration_unavailable",
+            message: "Free registration is temporarily unavailable. Try again later.",
+        }, 503);
     }
 }
 
@@ -1608,29 +1652,14 @@ async function handleRegister(
         );
 
     if (existing) {
-        return json({
-            ...publicWatchConfig(
-                watchId,
-                configFromWatch(existing),
-            ),
-            created: false,
-            baseline_created: false,
-            hash: existing.hash,
-            content_kind:
-                existing.content_kind,
-            first_seen_at:
-                existing.created_at,
-            checked_at:
-                existing.checked_at,
-            normalizer_version:
-                existing.normalizer_version,
-            note:
-                "Existing baseline returned without refetching. Use the paid check endpoint to refresh it.",
-        });
+        return existingRegistration(existing);
     }
 
+    const limited = await limitNewRegistration(env, config.url);
+    if (limited) return limited;
+
     const startedAt = Date.now();
-    const response =
+    const { response, body: responseBody, finalUrl } =
         await fetchTarget(
             new URL(config.url),
             allowPrivate,
@@ -1652,18 +1681,26 @@ async function handleRegister(
         await normalizeResponse(
             response,
             config,
+            responseBody,
+            finalUrl,
         );
 
     const now =
         new Date().toISOString();
 
-    await saveNewWatch(
+    const created = await saveNewWatch(
         env.DB,
         watchId,
         config,
         payload,
         now,
     );
+
+    if (!created) {
+        const winner = await getWatch(env.DB, watchId);
+        if (!winner) throw new Error("Concurrent baseline could not be loaded.");
+        return existingRegistration(winner, true);
+    }
 
     return json({
         ...publicWatchConfig(
@@ -1940,7 +1977,7 @@ async function handleCheck(
 
     const startedAt = Date.now();
 
-    const response =
+    const { response, body: responseBody, finalUrl } =
         await fetchTarget(
             new URL(config.url),
             allowPrivate,
@@ -2051,7 +2088,18 @@ async function handleCheck(
         await normalizeResponse(
             response,
             config,
+            responseBody,
+            finalUrl,
         );
+
+    const baselineCreated = !existing && await saveNewWatch(
+        env.DB, watchId, config, payload, now,
+    );
+    if (!existing && !baselineCreated) {
+        existing = await getWatch(env.DB, watchId);
+        if (!existing) throw new Error("Concurrent baseline could not be loaded.");
+        resolved.existing = existing;
+    }
 
     const comparisonHash =
         previousHash ??
@@ -2099,17 +2147,9 @@ async function handleCheck(
     let checkCount = 1;
     let firstSeenAt = now;
 
-    if (!existing) {
-        await saveNewWatch(
-            env.DB,
-            watchId,
-            config,
-            payload,
-            now,
-        );
-
+    if (baselineCreated) {
         snapshotSaved = true;
-    } else {
+    } else if (existing) {
         snapshotSaved =
             await updateWatchAfterFetch(
                 env.DB,
@@ -2141,9 +2181,9 @@ async function handleCheck(
         final_url:
             payload.final_url,
         first_seen:
-            firstSeenAt === now,
+            baselineCreated,
         baseline_created:
-            firstSeenAt === now,
+            baselineCreated,
         rebaselined: false,
         changed,
         raw_changed:
@@ -2665,7 +2705,7 @@ export async function handleCoreRequest(
 
         if (
             error instanceof
-            Fresh402InputError
+            Fresh402InputError || error instanceof BodyReadError
         ) {
             return json(
                 {

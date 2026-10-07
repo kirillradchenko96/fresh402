@@ -13,6 +13,7 @@ import {
 
 import { z } from "zod";
 import { BodyReadError, readRequestBody } from "./body";
+import { buildOpenApiDocument, buildX402Manifest } from "./discovery";
 
 import { SignJWT, importJWK } from "jose";
 import { declareDiscoveryExtension } from "@x402/extensions/bazaar";
@@ -1185,6 +1186,15 @@ app.all("/mcp", async (c) => {
 });
 
 
+app.get("/openapi.json", (c) => {
+  const origin = new URL(c.req.url).origin;
+  return c.json(buildOpenApiDocument(origin));
+});
+
+app.get("/.well-known/x402", (c) => {
+  const origin = new URL(c.req.url).origin;
+  return c.json(buildX402Manifest(origin));
+});
 app.get("/.well-known/glama.json", (c) => {
   return c.json({"$schema":"https://glama.ai/mcp/schemas/connector.json","claim":"glama_claim_TphUzhTwuiiTc3VXeWc1uMARmUyUI2zV"});
 });

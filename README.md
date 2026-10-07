@@ -1,4 +1,5 @@
 ﻿# Fresh402
+[![Smithery badge](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402) 
 
 **A low-cost freshness oracle for AI agents, powered by x402.**
 

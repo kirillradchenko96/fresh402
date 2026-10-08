@@ -28,3 +28,7 @@ jobs:
       - run: npx tsc --noEmit
       - run: npx tsc --noEmit -p test/tsconfig.json
       - run: npm test -- --run
+      - run: npm run openapi:generate
+      - run: git diff --exit-code -- docs/openapi.json
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high

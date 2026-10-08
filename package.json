@@ -7,16 +7,19 @@
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "test": "vitest",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "postinstall": "patch-package"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.0.0",
     "@types/node": "^26.6.3",
+    "patch-package": "^8.0.1",
     "typescript": "^5.5.2",
     "vitest": "~4.1.0",
     "wrangler": "^4.143.0"
   },
   "dependencies": {
+    "@cfworker/json-schema": "4.1.1",
     "@modelcontextprotocol/server": "2.1.0",
     "@x402/core": "^2.27.0",
     "@x402/evm": "^2.27.0",

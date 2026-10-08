@@ -28,7 +28,10 @@ jobs:
       - run: npx tsc --noEmit
       - run: npx tsc --noEmit -p test/tsconfig.json
       - run: npm test -- --run
+      - run: npm run test:tools
+      - run: npm run staging:check
       - run: npm run openapi:generate
       - run: git diff --exit-code -- docs/openapi.json
       - run: npm run build
+      - run: npm run build:staging
       - run: npm audit --omit=dev --audit-level=high

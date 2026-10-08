@@ -1,18 +1,21 @@
 {
   "name": "fresh402",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-rc.1",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "test": "vitest",
-    "cf-typegen": "wrangler types",
+    "cf-typegen": "wrangler types --strict-vars false",
     "postinstall": "patch-package",
     "typecheck": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json",
     "build": "wrangler deploy --dry-run --outdir dist",
     "test:run": "vitest --run",
-    "openapi:generate": "node scripts/generate-openapi.mjs"
+    "openapi:generate": "node scripts/generate-openapi.mjs",
+    "build:staging": "wrangler deploy --env staging --dry-run --outdir dist/staging",
+    "test:tools": "node --test scripts/*.test.mjs",
+    "staging:check": "node scripts/staging-check.mjs"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.0.0",
@@ -33,7 +36,8 @@
     "entities": "8.1.0",
     "hono": "~4.13.13",
     "jose": "^6.2.12",
-    "zod": "4.4.3"
+    "zod": "4.4.3",
+    "viem": "2.56.9"
   },
   "overrides": {
     "undici": "7.29.1",

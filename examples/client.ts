@@ -10,10 +10,12 @@ async function main(): Promise<void> {
 const base = process.env.FRESH402_BASE_URL ?? "http://localhost:8787";
 const target = process.env.FRESH402_TARGET_URL ?? "https://example.com/";
 const payment = process.argv.includes("--paid") ? process.env.FRESH402_PAYMENT_SIGNATURE : undefined;
+const recoveryToken = process.env.FRESH402_RECOVERY_TOKEN;
 if (process.argv.includes("--paid") && !payment) throw new Error("Set a locally generated x402 payment payload; never paste wallet secrets into source.");
+if (payment && !recoveryToken) throw new Error("Generate and save FRESH402_RECOVERY_TOKEN (32 random bytes as hex/base64url) before the paid request.");
 const response = await fetch(new URL("/v2/extract", base), {
   method: "POST",
-  headers: { "content-type": "application/json", ...(payment ? { "payment-signature": payment } : {}) },
+  headers: { "content-type": "application/json", ...(payment ? { "payment-signature": payment } : {}), ...(recoveryToken ? { "x-fresh402-recovery-token": recoveryToken } : {}), ...(process.env.FRESH402_STAGING_TOKEN ? { authorization: `Bearer ${process.env.FRESH402_STAGING_TOKEN}` } : {}) },
   body: JSON.stringify({ url: target, max_chars: 20000 }),
   signal: AbortSignal.timeout(60000),
   redirect: "error",

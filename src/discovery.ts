@@ -9,8 +9,8 @@ const array = (items: unknown) => ({ type: "array", items });
 const json = (schema: unknown) => ({ "application/json": { schema } });
 const ref = (name: string) => ({ $ref: `#/components/schemas/${name}` });
 const paymentResponse = { description: "Base64 x402 v2 settlement receipt", schema: string };
-const errors = Object.fromEntries([400,403,404,408,409,413,415,422,429,500,502,503,504].map(code => [String(code), {
-  description: ({400:"Invalid request or disallowed target",403:"MCP Origin rejected",404:"Watch or snapshot not found",408:"Request body timed out",409:"Baseline incompatible",413:"Input, target, stored document or output too large",415:"Unsupported target media type",422:"Selector not found, incompatible scope or complexity budget",429:"Rate or concurrency limit",500:"Legacy core failure",502:"Upstream or DNS failure",503:"Service or payment unavailable",504:"Target timed out"} as Record<number,string>)[code],
+const errors = Object.fromEntries([400,403,404,408,409,410,413,415,422,429,500,502,503,504].map(code => [String(code), {
+  description: ({400:"Invalid request or disallowed target",403:"MCP Origin or staging access rejected",404:"Watch or snapshot not found",408:"Request body timed out",409:"Baseline incompatible or recovery pending/mismatched",410:"Paid response retention expired",413:"Input, target, stored document or output too large",415:"Unsupported target media type",422:"Selector not found, incompatible scope or complexity budget",429:"Rate, concurrency or daily operation budget",500:"Legacy core failure",502:"Upstream or DNS failure",503:"Service unavailable or settlement needs reconciliation; never automatically replace the payment",504:"Target timed out"} as Record<number,string>)[code],
   content: json(ref("Error")),
 }]));
 const challenge = {
@@ -27,6 +27,7 @@ export function buildOpenApiDocument(origin: string) {
       operationId: spec.tool, summary: spec.description, tags: [service], security: [{ x402Payment: [] }],
       "x-payment-info": { protocols: [{ x402: {} }], price: { mode: "fixed", currency: "USD", amount: spec.price.slice(1) } },
       "x-mcp-tool": spec.tool,
+      parameters: [{ name: "X-Fresh402-Recovery-Token", in: "header", required: false, schema: { type: "string", minLength: 43, maxLength: 128, pattern: "^[A-Za-z0-9_-]+$" }, description: "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery." }],
       requestBody: { required: true, content: { "application/json": { schema: inputJsonSchema(service), example: spec.example } } },
       responses: { "200": { description: "Paid result after confirmed settlement", headers: { "PAYMENT-RESPONSE": paymentResponse }, content: json(ref(service === "extract" ? "ExtractResult" : service === "smart_diff" ? "SmartDiffResult" : "CheckResult")) }, "402": challenge, ...errors },
     } };
@@ -49,7 +50,7 @@ export function buildOpenApiDocument(origin: string) {
     responses:{"200":{description:"JSON-RPC or MCP envelope; JSON or SSE",content:{...json(object({})),"text/event-stream":{schema:string}}},"202":{description:"Notification accepted"},...errors},
   },get:{operationId:"fresh402_mcp_get",summary:"Sessionless MCP; GET not supported",responses:{"405":{description:"Method not allowed"}}},delete:{operationId:"fresh402_mcp_delete",summary:"Sessionless MCP; DELETE not supported",responses:{"405":{description:"Method not allowed"}}} };
   const change = object({path:string,before:{},after:{}},["path"]);
-  return { openapi:"3.1.0",info:{title:"Fresh402 Web Intelligence API",version:FRESH402_VERSION,description:"2.0 Beta: paid extraction, structural comparison and backward-compatible freshness. No browser rendering or LLM inference.",contact:{url:"https://github.com/kirillradchenko96/fresh402/issues"}},servers:[{url:origin}],paths,
+  return { openapi:"3.1.0",info:{title:"Fresh402 Web Intelligence API",version:FRESH402_VERSION,description:"2.0 Release Candidate: durable payment results, private recovery, extraction, structural comparison and backward-compatible freshness. No browser rendering or LLM inference.",contact:{url:"https://github.com/kirillradchenko96/fresh402/issues"}},servers:[{url:origin}],paths,
     components:{securitySchemes:{x402Payment:{type:"apiKey",in:"header",name:"PAYMENT-SIGNATURE",description:"x402 v2 exact USDC on Base (eip155:8453); use PAYMENT-REQUIRED challenge."}},schemas:{
       Error:object({error:string,message:string,issues:array(object({path:array({}),message:string}))},["error"]),
       RegisterResult:object({watch_id:string,url:string,final_url:string,created:boolean,baseline_created:boolean,hash:string,content_kind:{enum:["html","json","text"]},normalizer_version:integer,content_length:integer,snapshot_truncated:boolean,created_at:string,checked_at:string},["watch_id","url","created","baseline_created","hash"]),

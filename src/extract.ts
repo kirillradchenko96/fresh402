@@ -67,7 +67,9 @@ export async function analyzeContent(body: string, contentType: string, finalUrl
     }
   } else {
     let titleText = "", ldText = "", ldActive = false, ldBytes = 0;
+    let sourceElements = 0;
     await transform(body, new HTMLRewriter()
+      .on("*", { element() { if (++sourceElements > 10000) throw new ServiceError("content_too_complex", "At most 10,000 HTML elements are supported.", 422); } })
       .on("title", { text(chunk) { if (titleText.length < 2048) titleText += chunk.text.slice(0, 2048 - titleText.length); } })
       .on('meta[name="description"], meta[property="og:description"]', { element(el) { description ??= el.getAttribute("content")?.slice(0, 2048) ?? null; } })
       .on('link[rel="canonical"]', { element(el) { canonicalUrl ??= safeLink(el.getAttribute("href"), finalUrl); } })
@@ -100,32 +102,55 @@ export async function analyzeContent(body: string, contentType: string, finalUrl
     let looseText = "";
     const flushLoose = () => {
       const text = normalizeText(looseText); looseText = "";
-      if (text) blocks.push({ kind: "text", key: null, text });
+      if (text) {
+        if (blocks.length >= 1000) throw new ServiceError("content_too_complex", "At most 1,000 content blocks are supported.", 422);
+        blocks.push({ kind: "text", key: null, text });
+      }
     };
     let currentLink: { url: string; text: string } | null = null;
-    await transform(cleaned, new HTMLRewriter()
-      .on(scope, { element(el) { matches++; selectedDepth++; el.onEndTag(() => { selectedDepth--; }); }, text(chunk) { textChunks.push(chunk.text); if (!stack.length) looseText += chunk.text; } })
-      .on("h1,h2,h3,h4,h5,h6,p,li,pre,tr,dt,dd", {
-        element(el) {
-          if (!selectedDepth) return;
-          flushLoose();
-          if (blocks.length >= 1000) throw new ServiceError("content_too_complex", "At most 1,000 content blocks are supported.", 422);
-          const block: Block = { kind: el.tagName, key: el.getAttribute("id")?.slice(0, 256) ?? null, text: "" };
-          stack.push(block); blocks.push(block); textChunks.push(" ");
-          el.onEndTag(() => { stack.splice(stack.indexOf(block), 1); textChunks.push(" "); });
-        },
-        text(chunk) { if (stack.length) stack[stack.length - 1].text += chunk.text; },
-      })
-      .on("br", { element() { textChunks.push(" "); if (stack.length) stack[stack.length - 1].text += " "; } })
-      .on("a[href]", {
-        element(el) {
-          const url = selectedDepth ? safeLink(el.getAttribute("href"), finalUrl) : null;
-          currentLink = url && links.length < 100 ? { url, text: "" } : null;
-          if (currentLink) links.push(currentLink);
-          el.onEndTag(() => { currentLink = null; });
-        },
-        text(chunk) { if (currentLink && currentLink.text.length < 500) currentLink.text += chunk.text.slice(0, 500 - currentLink.text.length); },
-      }));
+    // An element has one end-tag callback. Combining all bookkeeping in one
+    // handler prevents nested scope/block handlers from overwriting each other.
+    const marker = "data-fresh402-selected";
+    const scoped = await transform(cleaned, new HTMLRewriter()
+      .on("*", { element(el) { el.removeAttribute(marker); } })
+      .on(scope, { element(el) { matches++; el.setAttribute(marker, "1"); } }));
+    const voidTags = new Set(["area","base","br","col","embed","hr","img","input","link","meta","param","source","track","wbr"]);
+    const boundaryTags = new Set(["div","section","article","main","ul","ol","table","td","th","blockquote"]);
+    const blockTags = new Set(["h1","h2","h3","h4","h5","h6","p","li","pre","tr","dt","dd"]);
+    let nodes = 0;
+    await transform(scoped, new HTMLRewriter().on("*", { element(el) {
+      if (++nodes > 10000) throw new ServiceError("content_too_complex", "At most 10,000 HTML elements are supported.", 422);
+      const selected = el.getAttribute(marker) === "1" && !voidTags.has(el.tagName);
+      if (selected) selectedDepth++;
+      if (!selectedDepth) return;
+      const boundary = boundaryTags.has(el.tagName);
+      if (boundary || el.tagName === "br") { textChunks.push(" "); if (stack.length) stack[stack.length-1].text += " "; else looseText += " "; }
+      let block: Block | undefined;
+      if (blockTags.has(el.tagName)) {
+        flushLoose();
+        if (blocks.length >= 1000) throw new ServiceError("content_too_complex", "At most 1,000 content blocks are supported.", 422);
+        block = { kind: el.tagName, key: el.getAttribute("id")?.slice(0,256) ?? null, text: "" };
+        stack.push(block); blocks.push(block); textChunks.push(" ");
+      }
+      const previousLink = currentLink;
+      const anchor = el.tagName === "a";
+      if (anchor) {
+        const url = safeLink(el.getAttribute("href"),finalUrl);
+        currentLink = url && links.length < 100 ? {url,text:""} : null;
+        if (currentLink) links.push(currentLink);
+      }
+      if (!voidTags.has(el.tagName)) el.onEndTag(() => {
+        if (block) { const index=stack.indexOf(block); if(index>=0) stack.splice(index,1); textChunks.push(" "); }
+        if (boundary) { textChunks.push(" "); if(stack.length) stack[stack.length-1].text += " "; else looseText += " "; }
+        if (anchor) currentLink=previousLink;
+        if (selected) selectedDepth--;
+      });
+    } }).onDocument({text(chunk) {
+      if (!selectedDepth) return;
+      textChunks.push(chunk.text);
+      if (stack.length) stack[stack.length-1].text += chunk.text; else looseText += chunk.text;
+      if (currentLink && currentLink.text.length < 500) currentLink.text += chunk.text.slice(0,500-currentLink.text.length);
+    } }));
     flushLoose();
     if (!matches && input.selector) throw new ServiceError("selector_not_found", "The CSS selector did not match any element.", 422);
     // HTML fragments can omit body. Preserve a bounded fallback.
@@ -137,12 +162,13 @@ export async function analyzeContent(body: string, contentType: string, finalUrl
     for (const link of links) link.text = cleanText(link.text);
   }
   const meaningful = blocks.filter(b => b.text);
+  if (kind === "html" && text.length < 80) warnings.push("limited_static_content_may_require_javascript");
   const document: IntelligenceDocument = { kind, text, data, fidelity: "structural", blocks: meaningful.length ? meaningful : [{ kind: "text", key: null, text }] };
   return { document, title, description, canonical_url: canonicalUrl, headings, links, structured_data: structuredData, warnings: [...new Set(warnings)] };
 }
 
-export async function extract(input: ExtractInput) {
-  const fetched = await fetchTarget(new URL(input.url), false);
+export async function extract(input: ExtractInput, allowedHosts?: string) {
+  const fetched = await fetchTarget(new URL(input.url), false, undefined, allowedHosts);
   if (!fetched.response.ok) throw new ServiceError("upstream_error", `Target returned HTTP ${fetched.response.status}.`, 502);
   const analyzed = await analyzeContent(fetched.body, fetched.response.headers.get("content-type") ?? "", fetched.finalUrl, input);
   const { document, ...metadata } = analyzed;

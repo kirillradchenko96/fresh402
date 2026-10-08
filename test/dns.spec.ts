@@ -6,6 +6,20 @@ beforeEach(()=>{ vi.spyOn(globalThis,"fetch").mockRejectedValue(new Error("Unmoc
 afterEach(()=>{vi.restoreAllMocks();vi.useRealTimers();});
 const isBlocked = (host:string) => Boolean(validateTarget(new URL(`https://${host.includes(":") ? `[${host}]` : host}/`),false));
 describe("DNS and redirect SSRF defense",()=>{
+  it("checks the operator host allowlist on every redirect before DNS or fetch",async()=>{
+    const targets:string[]=[];
+    vi.mocked(fetch).mockImplementation(async input=>{
+      const url=new URL(String(input));
+      if(url.hostname==="cloudflare-dns.com") return dns([{type:1,data:"93.184.216.34"}]);
+      targets.push(url.href);return new Response(null,{status:302,headers:{location:"https://other.example/"}});
+    });
+    await expect(fetchTarget(new URL("https://public.example/"),false,undefined,"public.example")).rejects.toThrow("allowlist");
+    expect(targets).toEqual(["https://public.example/"]);
+  });
+  it("fails closed for an empty operator allowlist",async()=>{
+    await expect(fetchTarget(new URL("https://public.example/"),false,undefined,"")).rejects.toThrow("allowlist");
+    expect(fetch).not.toHaveBeenCalled();
+  });
   it.each(["127.0.0.1","10.0.0.1","169.254.169.254","192.168.0.1","100.64.0.1","0.0.0.0","192.0.2.1","198.51.100.1","203.0.113.1","::1","fd00::1","::ffff:127.0.0.1","64:ff9b::7f00:1","ff02::1"])("rejects DNS answers containing %s",async address=>{
     vi.mocked(fetch).mockImplementation(async()=>dns([{type:address.includes(":")?28:1,data:address}]));
     await expect(fetchTarget(new URL("https://public.example/"),false)).rejects.toMatchObject({code:"target_not_allowed"});

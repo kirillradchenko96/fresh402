@@ -8,19 +8,12 @@ import { handleCoreRequest, FRESH402_VERSION } from "./freshness";
 import { buildOpenApiDocument, buildX402Manifest } from "./discovery";
 import { SERVICES, type ServiceId, registerSchema, ServiceError } from "./contracts";
 import { paymentConfig, paymentServer, defaultFacilitator, type Bindings, type FacilitatorFactory } from "./payments";
-import { acquireCapacity, prepareOperation, errorResponse, type PreparedOperation } from "./operations";
+import { acquireCapacity, prepareOperation, errorResponse, type PreparedOperation, type CapacityRelease } from "./operations";
 import { analytics, trafficClass } from "./analytics";
 import { stats } from "./stats";
+import { PaymentJournal, validateRecoveryToken } from "./payment-journal";
+import { cleanupTemporaryData } from "./maintenance";
 
-async function commitResult(prepared: PreparedOperation): Promise<Response> {
-  if (!prepared.commit) return prepared.response;
-  try { await prepared.commit(); return prepared.response; }
-  catch {
-    console.error("fresh402_paid_persistence_failed");
-    const body = await prepared.response.json<Record<string, unknown>>();
-    return Response.json({ ...body, snapshot_saved: false, persistence_error: "Snapshot could not be saved. The returned result is valid." });
-  }
-}
 async function toolResult(response: Response) {
   const result = await response.json<Record<string, unknown>>();
   return { content: [{ type: "text" as const, text: JSON.stringify(result) }], structuredContent: result, ...(response.ok ? {} : { isError: true }) };
@@ -29,10 +22,16 @@ async function toolResult(response: Response) {
 /** Dependency injection is code-only for tests; no environment variable can bypass billing. */
 export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacilitator) {
   const app = new Hono<{ Bindings: Bindings }>();
-  app.onError(() => errorResponse(new ServiceError("service_unavailable", "Service temporarily unavailable.", 503)));
+  app.onError(error => errorResponse(error));
   app.use("*", async (c, next) => {
     c.header("X-Content-Type-Options", "nosniff");
     c.header("Cache-Control", "no-store");
+    if (c.env.ENVIRONMENT === "staging") {
+      const expected = c.env.STAGING_ACCESS_TOKEN;
+      const supplied = c.req.header("authorization")?.replace(/^Bearer /, "");
+      if (!expected || expected.length < 32 || !supplied || supplied.length !== expected.length || !crypto.subtle.timingSafeEqual(new TextEncoder().encode(supplied), new TextEncoder().encode(expected))) return c.json({ error: "staging_access_required" }, 403);
+      if (c.req.path.startsWith("/.well-known/")) return c.json({ error: "not_found" }, 404);
+    }
     {
       const allowed = await c.env.REQUEST_LIMITER.limit({ key: `${c.req.method === "POST" ? "request" : "read"}:${c.req.header("cf-connecting-ip") ?? "unknown"}` });
       if (!allowed.success) { c.header("Retry-After", "60"); return c.json({ error: "request_rate_limited" }, 429); }
@@ -50,7 +49,7 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
   app.get("/.well-known/glama.json", c => c.json({ "$schema": "https://glama.ai/mcp/schemas/connector.json", claim: "glama_claim_TphUzhTwuiiTc3VXeWc1uMARmUyUI2zV" }));
   app.get("/v1/stats", c => stats(c.env.DB));
   app.post("/v1/register", async c => {
-    const release = await acquireCapacity(c.env.DB, await c.req.raw.clone().json().catch(() => null));
+    const release = await acquireCapacity(c.env.DB, await c.req.raw.clone().json().catch(() => null), Number(c.env.OPERATION_DAILY_LIMIT ?? "10000"));
     try {
       const response = await handleCoreRequest(c.req.raw, c.env);
       if (response.ok) {
@@ -69,13 +68,20 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
       const count = analytics(c.env.DB, "rest", trafficClass(c.req.raw));
       const attempted = Boolean(c.req.header("payment-signature") || c.req.header("x-payment"));
       if (attempted) await count(service, "payment_attempt");
-      const payment = await paymentServer(c.env, service, "rest", trafficClass(c.req.raw), facilitatorFactory);
-      const gate = paymentMiddleware({ [`POST ${SERVICES[service].path}`]: paymentConfig(service, "rest") }, payment.server, undefined, undefined, false);
-      let prepared: PreparedOperation | undefined, release: (() => Promise<void>) | undefined;
+      const journal = new PaymentJournal(c.env.DB, service, "rest", parsed.data, validateRecoveryToken(c.req.header("x-fresh402-recovery-token")));
+      const header = c.req.header("payment-signature") || c.req.header("x-payment");
+      let payload;
+      try { if (header) payload = JSON.parse(atob(header)); } catch { /* SDK reports malformed payment. */ }
+      const recovered = payload ? await journal.recover(payload) : undefined;
+      if (recovered) { recovered.response.headers.set("payment-response", btoa(JSON.stringify(recovered.receipt))); return recovered.response; }
+      const payment = await paymentServer(c.env, service, "rest", trafficClass(c.req.raw), facilitatorFactory, journal);
+      const gate = paymentMiddleware({ [`POST ${SERVICES[service].path}`]: paymentConfig(service, "rest", c.env.ENVIRONMENT !== "staging") }, payment.server, undefined, undefined, false);
+      let prepared: PreparedOperation | undefined, release: CapacityRelease | undefined;
       try {
         const result = await gate(c, async () => {
-          release = await acquireCapacity(c.env.DB, parsed.data);
+          release = await acquireCapacity(c.env.DB, parsed.data, Number(c.env.OPERATION_DAILY_LIMIT ?? "10000"));
           prepared = await prepareOperation(service, parsed.data, c.env);
+          await journal.stage(prepared, release.owner);
           // SDK consumes the response body before settlement. Keep the original
           // available to report persistence failures after a confirmed charge.
           c.res = prepared.response.clone();
@@ -83,10 +89,11 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
         let response = result instanceof Response ? result : c.res;
         if (response.status === 402 && !attempted) await count(service, "initial_402");
         if (response.ok && payment.wasSettled() && prepared) {
-          const committed = await commitResult(prepared);
-          if (committed !== prepared.response) response = new Response(committed.body, { status: committed.status, headers: response.headers });
+          const committed = await journal.paidResponse();
+          if (committed) response = new Response(committed.body, { status: committed.status, headers: response.headers });
           await count(service, "paid_result");
-        } else if (prepared) await count(service, "operation_failed");
+        } else if (journal.wasAttempted()) response = errorResponse(new ServiceError("settlement_pending", "Settlement requires reconciliation. Retry only with the original recovery token and payment; do not sign a replacement.", 503));
+        else if (prepared) await count(service, "operation_failed");
         c.res = response;
         return response;
       } finally { if (release) await release(); }
@@ -101,9 +108,9 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
       server.registerTool("fresh402_register", {
         description: "Create or retrieve a free persistent baseline. Existing registrations never refetch the target. No JavaScript execution.", inputSchema: registerSchema,
       }, async args => {
-        let release: (() => Promise<void>) | undefined;
+        let release: CapacityRelease | undefined;
         try {
-          release = await acquireCapacity(c.env.DB, args);
+          release = await acquireCapacity(c.env.DB, args, Number(c.env.OPERATION_DAILY_LIMIT ?? "10000"));
           const response = await handleCoreRequest(new Request("https://fresh402.internal/v1/register", { method: "POST", body: JSON.stringify(args) }), c.env);
           if (response.ok) {
             const body = await response.clone().json<{ created: boolean }>();
@@ -117,30 +124,36 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
         server.registerTool(SERVICES[service].tool, {
           description: SERVICES[service].description, inputSchema: SERVICES[service].schema as z.ZodType<Record<string, unknown>>,
         }, async (args, ctx) => {
-          let release: (() => Promise<void>) | undefined;
+          let release: CapacityRelease | undefined;
           try {
             const attempted = Boolean(ctx.mcpReq._meta?.["x402/payment"]);
             if (attempted) await count(service, "payment_attempt");
-            const payment = await paymentServer(c.env, service, "mcp", trafficClass(c.req.raw), facilitatorFactory);
-            const config = paymentConfig(service, "mcp");
+            const journal = new PaymentJournal(c.env.DB, service, "mcp", args, validateRecoveryToken(ctx.mcpReq._meta?.["fresh402/recovery-token"]));
+            const payload = ctx.mcpReq._meta?.["x402/payment"];
+            const recovered = payload ? await journal.recover(payload as import("@x402/core/types").PaymentPayload) : undefined;
+            if (recovered) return { ...await toolResult(recovered.response), _meta: { "x402/payment-response": recovered.receipt } };
+            const payment = await paymentServer(c.env, service, "mcp", trafficClass(c.req.raw), facilitatorFactory, journal);
+            const config = paymentConfig(service, "mcp", c.env.ENVIRONMENT !== "staging");
             const accepts = await payment.server.buildPaymentRequirements(config.accepts);
             let prepared: PreparedOperation | undefined;
             const paid = createPaymentWrapper(payment.server, {
               accepts, extensions: config.extensions,
               resource: { url: `${new URL(c.req.url).origin}/mcp#${SERVICES[service].tool}`, description: config.description, mimeType: config.mimeType },
             })(async () => {
-              release = await acquireCapacity(c.env.DB, args);
+              release = await acquireCapacity(c.env.DB, args, Number(c.env.OPERATION_DAILY_LIMIT ?? "10000"));
               prepared = await prepareOperation(service, args, c.env);
+              await journal.stage(prepared, release.owner);
               return toolResult(prepared.response.clone());
             });
             const result = await paid(args, { _meta: ctx.mcpReq._meta, signal: ctx.mcpReq.signal, requestId: ctx.mcpReq.id });
             if (result.isError && !attempted) await count(service, "initial_402");
             if (!result.isError && payment.wasSettled() && prepared) {
-              const committed = await commitResult(prepared);
-              const body = await toolResult(committed);
+              const committed = await journal.paidResponse();
+              const body = await toolResult(committed ?? prepared.response);
               await count(service, "paid_result");
               return { ...result, ...body };
             }
+            if (journal.wasAttempted()) return toolResult(errorResponse(new ServiceError("settlement_pending", "Settlement requires reconciliation. Do not sign a replacement payment.", 503)));
             if (prepared) await count(service, "operation_failed");
             return result;
           } catch (error) { return toolResult(errorResponse(error)); }
@@ -172,4 +185,4 @@ export async function boundedFetch(request: Request, env: Bindings, ctx: Executi
   }
   return application.fetch(request, env, ctx);
 }
-export default { fetch: boundedFetch } satisfies ExportedHandler<Bindings>;
+export default { fetch: boundedFetch, async scheduled(_event, env) { await cleanupTemporaryData(env.DB); } } satisfies ExportedHandler<Bindings>;

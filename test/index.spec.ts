@@ -10,7 +10,7 @@ import {
 beforeAll(async () => { await applyD1Migrations(env.DB, env.TEST_MIGRATIONS); });
 
 describe("Fresh402", () => {
-    it("preserves health metadata and advertises the beta", async () => {
+    it("preserves health metadata and advertises the release candidate", async () => {
         const response = await SELF.fetch("http://example.com/");
 
         expect(response.status).toBe(200);
@@ -27,7 +27,7 @@ describe("Fresh402", () => {
 
         expect(body.name).toBe("Fresh402");
         expect(body.status).toBe("ok");
-        expect(body.version).toBe("2.0.0-beta.1");
+        expect(body.version).toBe("2.0.0-rc.1");
         expect(body.normalizer_version).toBe(2);
         expect(body.pricing.register).toBe("free");
         expect(body.pricing.check).toContain("0.005");

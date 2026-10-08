@@ -1,9 +1,10 @@
+import { sql, statements as buildStatements, type SqlWrite } from "./sql";
 ﻿import { BodyReadError, readRequestBody } from "./body";
 
 import { fetchTarget, validateTarget, TargetNotAllowedError } from "./safe-fetch";
 
 export const NORMALIZER_VERSION = 2;
-export const FRESH402_VERSION = "2.0.0-beta.1";
+export const FRESH402_VERSION = "2.0.0-rc.1";
 
 const MAX_REDIRECTS = 5;
 const MAX_BODY_BYTES = 5_000_000;
@@ -15,13 +16,14 @@ const MAX_JSON_PATH_LENGTH = 256;
 const MAX_CACHE_AGE_SECONDS = 86_400;
 const DIFF_EXCERPT_LIMIT = 1_200;
 
-type DeferredWrites = (statements: D1PreparedStatement[]) => void;
+type DeferredWrites = (statements: SqlWrite[]) => void;
 
-async function writeBatch(db: D1Database, statements: D1PreparedStatement[], defer?: DeferredWrites): Promise<void> {
-    if (defer) defer(statements); else await db.batch(statements);
+async function writeBatch(db: D1Database, statements: SqlWrite[], defer?: DeferredWrites): Promise<void> {
+    if (defer) defer(statements); else await db.batch(buildStatements(db, statements));
 }
 
 export interface FreshnessEnv {
+    TARGET_HOST_ALLOWLIST?: string;
     deferWrites?: DeferredWrites;
     DB: D1Database;
     REGISTER_TARGET_LIMITER: RateLimit;
@@ -808,7 +810,7 @@ async function saveNewWatch(
     const stored = storedContent(payload.normalized);
 
     const statements = [
-        db.prepare(
+        sql(
             `INSERT INTO watches (
                 watch_id,
                 url,
@@ -850,7 +852,7 @@ async function saveNewWatch(
             now,
             NORMALIZER_VERSION,
         ),
-        db.prepare(
+        sql(
             `INSERT INTO watch_snapshots (
                 watch_id,
                 hash,
@@ -874,7 +876,7 @@ async function saveNewWatch(
         ),
     ];
     if (defer) { defer(statements); return true; }
-    const results = await db.batch(statements);
+    const results = await db.batch(buildStatements(db, statements));
 
     // D1 batch is transactional: only the winning insert creates a snapshot.
     return results[0].meta.changes === 1;
@@ -891,7 +893,7 @@ async function updateWatchAfterFetch(
     const newCheckCount = row.check_count + 1;
 
     if (!storedChanged) {
-        await writeBatch(db, [db.prepare(
+        await writeBatch(db, [sql(
                 `UPDATE watches
                  SET
                     final_url = ?,
@@ -922,7 +924,7 @@ async function updateWatchAfterFetch(
     const stored = storedContent(payload.normalized);
 
     await writeBatch(db, [
-        db.prepare(
+        sql(
             `UPDATE watches
              SET
                 final_url = ?,
@@ -953,7 +955,7 @@ async function updateWatchAfterFetch(
             NORMALIZER_VERSION,
             row.watch_id,
         ),
-        db.prepare(
+        sql(
             `INSERT INTO watch_snapshots (
                 watch_id,
                 hash,
@@ -988,7 +990,7 @@ async function markRevalidated(
     now: string,
     defer?: DeferredWrites,
 ): Promise<void> {
-    await writeBatch(db, [db.prepare(
+    await writeBatch(db, [sql(
             `UPDATE watches
              SET
                 checked_at = ?,
@@ -1007,7 +1009,7 @@ async function pruneSnapshots(
     watchId: string,
     defer?: DeferredWrites,
 ): Promise<void> {
-    await writeBatch(db, [db.prepare(
+    await writeBatch(db, [sql(
             `DELETE FROM watch_snapshots
              WHERE watch_id = ?
                AND id NOT IN (
@@ -1391,6 +1393,8 @@ async function handleRegister(
         await fetchTarget(
             new URL(config.url),
             allowPrivate,
+            undefined,
+            env.TARGET_HOST_ALLOWLIST,
         );
 
     if (!response.ok) {
@@ -1716,6 +1720,7 @@ async function handleCheck(
                           existing.last_modified,
                   }
                 : undefined,
+            env.TARGET_HOST_ALLOWLIST,
         );
 
     const now =

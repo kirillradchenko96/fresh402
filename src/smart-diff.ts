@@ -2,6 +2,7 @@ import { analyzeContent, normalizeText, digest, checkJsonComplexity, type Block,
 import { ServiceError, type SmartDiffInput } from "./contracts";
 import { fetchTarget } from "./safe-fetch";
 import { stableJsonStringify, normalizeHtml } from "./freshness";
+import { sql, statements } from "./sql";
 
 type Change = { path: string; before?: unknown; after?: unknown };
 export interface Changes { added: Change[]; removed: Change[]; modified: Change[] }
@@ -64,9 +65,15 @@ export function compareDocuments(before: IntelligenceDocument, after: Intelligen
     const unused = new Set(right.map((_, i) => i));
     const unmatched: Array<[Block, number]> = [];
     // Exact content matches ignore DOM wrappers, attributes and block reordering.
+    const exact = new Map<string, { indexes: number[]; next: number }>();
+    for (const [i, block] of right.entries()) {
+      const entry = exact.get(block.text) ?? { indexes: [], next: 0 };
+      entry.indexes.push(i); exact.set(block.text, entry);
+    }
     for (const [i, block] of left.entries()) {
-      const match = right.findIndex((b, j) => unused.has(j) && b.text === block.text);
-      if (match >= 0) unused.delete(match); else unmatched.push([block, i]);
+      const entry = exact.get(block.text);
+      const match = entry?.indexes[entry.next++];
+      if (match !== undefined) unused.delete(match); else unmatched.push([block, i]);
     }
     let similarityWork = 0;
     const rightWords = right.map(b => new Set(b.text.toLowerCase().split(/\s+/).slice(0, 1000)));
@@ -117,7 +124,7 @@ function legacyDocument(row: LegacySnapshot): IntelligenceDocument {
   if (data !== null) checkJsonComplexity(data);
   return { kind: row.content_kind, text: row.normalized_content, data, blocks: [{ kind: "text", key: null, text: row.normalized_content }], fidelity: row.content_kind === "json" ? "structural" : "legacy_text" };
 }
-export async function prepareSmartDiff(db: D1Database, input: SmartDiffInput) {
+export async function prepareSmartDiff(db: D1Database, input: SmartDiffInput, allowedHosts?: string) {
   const watch = await db.prepare("SELECT * FROM watches WHERE watch_id = ?").bind(input.watch_id).first<Watch>();
   if (!watch) throw new ServiceError("watch_not_found", "Register a baseline with /v1/register first.", 404);
   let saved: Snapshot | null;
@@ -137,7 +144,7 @@ export async function prepareSmartDiff(db: D1Database, input: SmartDiffInput) {
     if (!row) throw new ServiceError("snapshot_not_found", "Requested snapshot is unavailable or outside retention.", 404);
     prior = legacyDocument(row); previousHash = row.hash; source = "v1_snapshot";
   }
-  const fetched = await fetchTarget(new URL(watch.url), false);
+  const fetched = await fetchTarget(new URL(watch.url), false, undefined, allowedHosts);
   if (!fetched.response.ok) throw new ServiceError("upstream_error", `Target returned HTTP ${fetched.response.status}.`, 502);
   const { document: current } = await analyzeContent(fetched.body, fetched.response.headers.get("content-type") ?? "", fetched.finalUrl, {
     selector: watch.selector ?? undefined, ignore_selectors: JSON.parse(watch.ignore_selectors_json), ignore_json_paths: JSON.parse(watch.ignore_json_paths_json),
@@ -156,20 +163,19 @@ export async function prepareSmartDiff(db: D1Database, input: SmartDiffInput) {
       url: watch.url, selector: watch.selector, ignore_selectors: JSON.parse(watch.ignore_selectors_json), ignore_json_paths: JSON.parse(watch.ignore_json_paths_json),
     }) : fetched.body.replace(/\s+/g, " ").trim(),
   } : current;
+  const writes = [
+    sql("INSERT OR IGNORE INTO smart_baselines(watch_id, hash, document_json, created_at) VALUES (?, ?, ?, ?)").bind(input.watch_id, baselineHash, JSON.stringify(baseline), createdAt),
+    sql("INSERT INTO smart_snapshots(watch_id, hash, document_json, created_at) VALUES (?, ?, ?, ?)").bind(input.watch_id, hash, serialized, createdAt),
+    sql("DELETE FROM smart_snapshots WHERE watch_id = ? AND id NOT IN (SELECT id FROM smart_snapshots WHERE watch_id = ? ORDER BY id DESC LIMIT 20)").bind(input.watch_id, input.watch_id),
+  ];
   return {
+    writes,
     result: {
       watch_id: input.watch_id, url: watch.url, final_url: fetched.finalUrl, content_kind: current.kind,
       previous_hash: previousHash, hash, comparison_source: source, compare_to: input.previous_hash ? "hash" : input.compare_to,
       ...compareDocuments(prior, comparable), fetched_at: createdAt,
       warnings: [...(prior.fidelity === "legacy_text" ? ["legacy_baseline_has_no_html_structure"] : []), "significance_is_a_rule_based_hint"],
     },
-    // This is invoked exclusively by the payment boundary after successful settlement.
-    async commit() {
-      await db.batch([
-        db.prepare("INSERT OR IGNORE INTO smart_baselines(watch_id, hash, document_json, created_at) VALUES (?, ?, ?, ?)").bind(input.watch_id, baselineHash, JSON.stringify(baseline), createdAt),
-        db.prepare("INSERT INTO smart_snapshots(watch_id, hash, document_json, created_at) VALUES (?, ?, ?, ?)").bind(input.watch_id, hash, serialized, createdAt),
-        db.prepare("DELETE FROM smart_snapshots WHERE watch_id = ? AND id NOT IN (SELECT id FROM smart_snapshots WHERE watch_id = ? ORDER BY id DESC LIMIT 20)").bind(input.watch_id, input.watch_id),
-      ]);
-    },
+    async commit() { await db.batch(statements(db, writes)); },
   };
 }

@@ -160,6 +160,7 @@ export async function fetchTarget(
         etag?: string | null;
         last_modified?: string | null;
     },
+    allowedHosts?: string,
 ): Promise<{ response: Response; body: string; finalUrl: string }> {
     let current = new URL(target.toString());
     const controller = new AbortController();
@@ -174,6 +175,9 @@ export async function fetchTarget(
             hop <= MAX_REDIRECTS;
             hop++
         ) {
+            if (allowedHosts !== undefined && !allowedHosts.split(",").map(host => host.trim().toLowerCase()).includes(current.hostname.toLowerCase())) {
+                throw new TargetNotAllowedError("Destination is outside the operator-approved host allowlist.");
+            }
             const validationError =
                 validateTarget(current, allowPrivate);
 
@@ -186,7 +190,7 @@ export async function fetchTarget(
             if (!allowPrivate) await assertPublicDns(current.hostname, controller.signal, isPrivateHostname);
 
             const headers: Record<string, string> = {
-                "user-agent": "Fresh402/2.0.0-beta.1",
+                "user-agent": "Fresh402/2.0.0-rc.1",
                 accept:
                     "text/html,application/json,text/plain,application/*+json;q=0.9,text/*;q=0.8,*/*;q=0.1",
             };

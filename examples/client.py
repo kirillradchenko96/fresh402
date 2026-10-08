@@ -22,12 +22,20 @@ def main() -> int:
     base = os.environ.get("FRESH402_BASE_URL", "http://localhost:8787").rstrip("/")
     target = os.environ.get("FRESH402_TARGET_URL", "https://example.com/")
     headers = {"Content-Type": "application/json"}
+    recovery_token = os.environ.get("FRESH402_RECOVERY_TOKEN")
+    if recovery_token:
+        headers["X-Fresh402-Recovery-Token"] = recovery_token
+    if os.environ.get("FRESH402_STAGING_TOKEN"):
+        headers["Authorization"] = "Bearer " + os.environ["FRESH402_STAGING_TOKEN"]
     if "--paid" in sys.argv:
         payment = os.environ.get("FRESH402_PAYMENT_SIGNATURE")
         if not payment:
             print("Supply a locally generated x402 payload, never a wallet private key.", file=sys.stderr)
             return 1
         headers["PAYMENT-SIGNATURE"] = payment
+        if not recovery_token:
+            print("Save FRESH402_RECOVERY_TOKEN (32 random bytes as hex/base64url) before paying.", file=sys.stderr)
+            return 1
     request = Request(base + "/v2/extract", data=json.dumps({"url": target, "max_chars": 20000}).encode(), headers=headers, method="POST")
     try:
         with build_opener(NoRedirect).open(request, timeout=60) as response:

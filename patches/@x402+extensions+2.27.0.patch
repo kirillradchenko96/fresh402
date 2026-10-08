@@ -1,0 +1,107 @@
+diff --git a/node_modules/@x402/extensions/dist/cjs/bazaar/index.js b/node_modules/@x402/extensions/dist/cjs/bazaar/index.js
+index a4da5a3..9a21268 100644
+--- a/node_modules/@x402/extensions/dist/cjs/bazaar/index.js
++++ b/node_modules/@x402/extensions/dist/cjs/bazaar/index.js
+@@ -741,17 +741,17 @@ function validateDiscoveryExtension(extension) {
+         errors: ["schema must not contain external $ref/$id references"]
+       };
+     }
+-    const ajv = new import__.default({ strict: false, allErrors: true });
+-    const validate = ajv.compile(extension.schema);
+-    const valid = validate(extension.info);
+-    if (valid) {
+-      return { valid: true };
+-    }
+-    const errors = validate.errors?.map((err) => {
+-      const path = err.instancePath || "(root)";
+-      return `${path}: ${err.message}`;
+-    }) || ["Unknown validation error"];
+-    return { valid: false, errors };
++    const { Validator } = require("@cfworker/json-schema");
++const validator = new Validator(extension.schema, "2020-12", false);
++const result = validator.validate(extension.info);
++if (result.valid) {
++return { valid: true };
++}
++const errors = result.errors?.map((err) => {
++const path = err.instanceLocation?.replace(/^#/, "") || "(root)";
++return `${path}: ${err.error}`;
++}) || ["Unknown validation error"];
++return { valid: false, errors };
+   } catch (error) {
+     return {
+       valid: false,
+diff --git a/node_modules/@x402/extensions/dist/cjs/index.js b/node_modules/@x402/extensions/dist/cjs/index.js
+index d3d8fe1..0c6c310 100644
+--- a/node_modules/@x402/extensions/dist/cjs/index.js
++++ b/node_modules/@x402/extensions/dist/cjs/index.js
+@@ -865,17 +865,17 @@ function validateDiscoveryExtension(extension) {
+         errors: ["schema must not contain external $ref/$id references"]
+       };
+     }
+-    const ajv = new import__.default({ strict: false, allErrors: true });
+-    const validate = ajv.compile(extension.schema);
+-    const valid = validate(extension.info);
+-    if (valid) {
+-      return { valid: true };
+-    }
+-    const errors = validate.errors?.map((err) => {
+-      const path = err.instancePath || "(root)";
+-      return `${path}: ${err.message}`;
+-    }) || ["Unknown validation error"];
+-    return { valid: false, errors };
++    const { Validator } = require("@cfworker/json-schema");
++const validator = new Validator(extension.schema, "2020-12", false);
++const result = validator.validate(extension.info);
++if (result.valid) {
++return { valid: true };
++}
++const errors = result.errors?.map((err) => {
++const path = err.instanceLocation?.replace(/^#/, "") || "(root)";
++return `${path}: ${err.error}`;
++}) || ["Unknown validation error"];
++return { valid: false, errors };
+   } catch (error) {
+     return {
+       valid: false,
+diff --git a/node_modules/@x402/extensions/dist/esm/chunk-SV2YHMOC.mjs b/node_modules/@x402/extensions/dist/esm/chunk-SV2YHMOC.mjs
+index 0ec86d3..de4c62a 100644
+--- a/node_modules/@x402/extensions/dist/esm/chunk-SV2YHMOC.mjs
++++ b/node_modules/@x402/extensions/dist/esm/chunk-SV2YHMOC.mjs
+@@ -405,7 +405,7 @@ var bazaarResourceServerExtension = {
+ 
+ // src/bazaar/facilitator.ts
+ import { domainToASCII } from "url";
+-import Ajv from "ajv/dist/2020.js";
++import { Validator } from "@cfworker/json-schema";
+ 
+ // src/bazaar/v1/facilitator.ts
+ function hasV1OutputSchema(obj) {
+@@ -683,17 +683,16 @@ function validateDiscoveryExtension(extension) {
+         errors: ["schema must not contain external $ref/$id references"]
+       };
+     }
+-    const ajv = new Ajv({ strict: false, allErrors: true });
+-    const validate = ajv.compile(extension.schema);
+-    const valid = validate(extension.info);
+-    if (valid) {
+-      return { valid: true };
+-    }
+-    const errors = validate.errors?.map((err) => {
+-      const path = err.instancePath || "(root)";
+-      return `${path}: ${err.message}`;
+-    }) || ["Unknown validation error"];
+-    return { valid: false, errors };
++    const validator = new Validator(extension.schema, "2020-12", false);
++const result = validator.validate(extension.info);
++if (result.valid) {
++return { valid: true };
++}
++const errors = result.errors?.map((err) => {
++const path = err.instanceLocation?.replace(/^#/, "") || "(root)";
++return `${path}: ${err.error}`;
++}) || ["Unknown validation error"];
++return { valid: false, errors };
+   } catch (error) {
+     return {
+       valid: false,

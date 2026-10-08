@@ -43,6 +43,7 @@ Open http://localhost:8787/openapi.json. MCP tools/list and free registration ne
 
 ## Documentation
 
+- [Технический отчёт на русском](docs/REPORT_RU.md)
 - [Complete REST reference](docs/API.md) and [OpenAPI specification](docs/openapi.json)
 - [MCP tools and agent workflows](docs/MCP.md)
 - [curl, TypeScript and Python examples](examples/README.md)

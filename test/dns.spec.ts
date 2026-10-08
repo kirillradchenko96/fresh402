@@ -20,9 +20,14 @@ describe("DNS and redirect SSRF defense",()=>{
     await expect(fetchTarget(new URL("https://public.example/"),false,undefined,"")).rejects.toThrow("allowlist");
     expect(fetch).not.toHaveBeenCalled();
   });
-  it.each(["127.0.0.1","10.0.0.1","169.254.169.254","192.168.0.1","100.64.0.1","0.0.0.0","192.0.2.1","198.51.100.1","203.0.113.1","::1","fd00::1","::ffff:127.0.0.1","64:ff9b::7f00:1","ff02::1"])("rejects DNS answers containing %s",async address=>{
+  it.each(["127.0.0.1","10.0.0.1","169.254.169.254","192.168.0.1","100.64.0.1","0.0.0.0","192.0.2.1","198.51.100.1","203.0.113.1","192.88.99.1","2001::1","2001:2::1","3fff::1","::1","fd00::1","::ffff:127.0.0.1","64:ff9b::7f00:1","ff02::1"])("rejects DNS answers containing %s",async address=>{
     vi.mocked(fetch).mockImplementation(async()=>dns([{type:address.includes(":")?28:1,data:address}]));
     await expect(fetchTarget(new URL("https://public.example/"),false)).rejects.toMatchObject({code:"target_not_allowed"});
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+  it.each([{type:1,data:"999.0.0.1"},{type:28,data:"2001:not-an-ip"}])("rejects malformed DNS IP answers %j",async answer=>{
+    vi.mocked(fetch).mockImplementation(async()=>dns([answer]));
+    await expect(fetchTarget(new URL("https://public.example/"),false)).rejects.toMatchObject({code:"dns_unavailable"});
     expect(fetch).toHaveBeenCalledTimes(2);
   });
   it("rejects a private answer even alongside a public address",async()=>{

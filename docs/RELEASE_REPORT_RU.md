@@ -11,6 +11,7 @@
 - Несколько HTMLRewriter handlers задавали `onEndTag` одному элементу и перезаписывали bookkeeping scope. Вложенные селекторы могли включать внешний текст. Не все границы HTML обеспечивали пробелы; существовал риск квадратичных сравнений одинаковых блоков.
 - Документация ссылалась на публичную маршрутизацию Cloudflare как на дополнительную гарантию против DNS rebinding. Текущая документация описывает маршрутизацию и обход same-zone origin, но не гарантирует pinning произвольного TLS peer.
 - Проверяемой изолированной staging-конфигурации не было.
+- Заключительная проверка выявила неполную валидацию DNS IP syntax и пропущенные special-purpose/transition диапазоны. Добавлены канонический разбор IP, блокировка этих диапазонов и шесть дополнительных DNS regression cases.
 
 ## 2. Выполненные исправления
 
@@ -52,12 +53,12 @@ Cron подготовлен на каждые десять минут. Удал�
 |---|---|
 | Clean `npm ci` | Успешно; Bazaar patch 2.27.0 применён |
 | TypeScript приложения и тестов | Успешно |
-| Full Vitest в workerd | **168/168**, 6 файлов |
+| Full Vitest в workerd | **174/174**, 6 файлов |
 | Node tests сверки/staging guards | **21/21** |
 | REST/MCP/x402 | Входят в полный suite: verify/settle/replay, совпадение цены, приватность, параллельность, modern MCP |
 | Сбои платежей | До settlement, потеря lease, сетевой timeout, `settlement_pending`, ошибка receipt D1 и snapshots, restart/recovery |
 | Миграции | 0006 → 0008 сохраняет watches/snapshots/payments; 0007 → 0008 сохраняет активные claims/leases |
-| Production dry-run | Успешно: 1973.01 KiB / gzip 377.34 KiB; публикации нет |
+| Production dry-run | Успешно: 1973.65 KiB / gzip 377.47 KiB; публикации нет |
 | Staging dry-run | Успешно; отдельные D1/limiters/allowlist/budget |
 | Runtime npm audit | **0 уязвимостей** |
 | Gitleaks 8.30.1, SHA-256 архива проверен | Repository working-tree snapshot: секретов не найдено |
@@ -66,11 +67,11 @@ Cron подготовлен на каждые десять минут. Удал�
 | Local Explorer | Подтверждены `fresh402-staging` и отдельный local D1 sentinel; private bindings отсутствуют |
 | Local Worker/Cron | Без staging secret `/` возвращает 403; scheduled cleanup выполнен; explorer traces `ok` |
 
-Это **189 автоматизированных тестов**, а не 189 реальных платежей. Проверки не доказывают mainnet settlement, облачный load profile или DNS peer pinning. Реальные USDC-платежи не выполнялись.
+Это **195 автоматизированных тестов**, а не 195 реальных платежей. Проверки не доказывают mainnet settlement, облачный load profile или DNS peer pinning. Реальные USDC-платежи не выполнялись.
 
 ## 7. GitHub Actions
 
-Существующий Draft PR #8 сохраняется. CI дополнен Node tests, staging configuration guard и staging dry-run. Требуется успешный запуск для итогового pushed SHA; фактическая ссылка на завершённый run и результат приводятся в финальной передаче. [Текущие checks PR #8](https://github.com/kirillradchenko96/fresh402/pull/8/checks). Локальное прохождение не подменяет GitHub Actions.
+Существующий Draft PR #8 сохраняется; заголовок и описание обновлены. CI дополнен Node tests, staging configuration guard и staging dry-run. [CI #19](https://github.com/kirillradchenko96/fresh402/actions/runs/37832041731) успешно прошёл для `e09fc15590e026176087382736a894b2c97789c7`: все шаги, включая clean install, оба TypeScript checks, suites, OpenAPI consistency, две сборки и runtime audit, завершились `success`. Дополнительный DNS hardening отправляется отдельным commit; окончательный exact-head результат проверяется в [checks PR #8](https://github.com/kirillradchenko96/fresh402/pull/8/checks) и указывается в финальной передаче. Локальное прохождение не подменяет GitHub Actions.
 
 ## 8. Что требуется для staging
 

@@ -38,6 +38,7 @@ function isPrivateIpv4(hostname: string): boolean {
     if (a === 192 && b === 0) return true;
     if (a === 198 && b === 51 && c === 100) return true;
     if (a === 203 && b === 0 && c === 113) return true;
+    if (a === 192 && b === 88 && c === 99) return true;
     if (a >= 224) return true;
 
     return false;
@@ -93,7 +94,11 @@ function isPrivateHostname(hostname: string): boolean {
 
     // Only globally routable IPv6 unicast; reject transition, multicast,
     // documentation and other special-purpose ranges conservatively.
-    if (host.includes(":")) return !/^[23][0-9a-f]{3}:/.test(host) || host.startsWith("2001:db8:") || host.startsWith("2001:0:") || host.startsWith("2002:");
+    if (host.includes(":")) {
+        const words = host.split(":");
+        const special2001 = words[0] === "2001" && (parseInt(words[1] || "0", 16) < 0x200);
+        return !/^[23][0-9a-f]{3}:/.test(host) || special2001 || host.startsWith("2001:db8:") || host.startsWith("2002:") || host.startsWith("3fff:");
+    }
 
     return false;
 }

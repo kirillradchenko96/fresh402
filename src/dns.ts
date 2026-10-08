@@ -17,11 +17,15 @@ export async function assertPublicDns(host: string, signal: AbortSignal, blocked
   let addresses = 0;
   for (const answer of results.flat()) {
     if (![1, 5, 28].includes(answer.type)) continue;
-    if (typeof answer.data !== "string" || blocked(answer.data)) throw new BodyReadError("target_not_allowed", "DNS points to a private or reserved destination.", 400);
+    if (typeof answer.data !== "string") throw new BodyReadError("dns_unavailable", "Malformed DNS answer.", 502);
     if (answer.type === 1 || answer.type === 28) {
       if (answer.type === 1 && !/^\d{1,3}(\.\d{1,3}){3}$/.test(answer.data) || answer.type === 28 && !answer.data.includes(":")) throw new BodyReadError("dns_unavailable", "Malformed DNS address.", 502);
+      let canonical: string;
+      try { canonical = new URL(`https://${answer.type === 28 ? `[${answer.data}]` : answer.data}/`).hostname; }
+      catch { throw new BodyReadError("dns_unavailable", "Malformed DNS address.", 502); }
+      if (blocked(canonical)) throw new BodyReadError("target_not_allowed", "DNS points to a private or reserved destination.", 400);
       addresses++;
-    }
+    } else if (blocked(answer.data)) throw new BodyReadError("target_not_allowed", "DNS points to a private or reserved destination.", 400);
   }
   if (!addresses) throw new BodyReadError("dns_unavailable", "Target has no public address.", 502);
 }

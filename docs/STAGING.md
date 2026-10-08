@@ -2,7 +2,7 @@
 
 `wrangler.jsonc` defines `env.staging` for **fresh402-staging**, a distinct **fresh402-staging-db**, separate rate-limit namespaces, a 1,000 ms CPU ceiling, 50 subrequests, a 1,000/day UTC global expensive-operation budget, no version preview URLs, a maintenance Cron and the exact target allowlist `example.com`. A client-specific Bearer token protects every application route; missing staging credentials fail closed. `/.well-known/*` returns 404 even to authorized callers, and payment challenges omit Bazaar extensions. No staging directory registration is performed.
 
-The D1 UUID is deliberately `00000000-0000-0000-0000-000000000000`, a provisioning sentinel. **No cloud resource, secret, mainnet payment or remote migration has been created/applied by this work.** Staging configuration never falls back to the production binding. Staging requires independent credentials; production CDP secrets must not be copied. Without CDP configuration, paid routes return unavailable while authenticated free registration/MCP discovery can be reviewed.
+The owner-provisioned staging D1 UUID is `ba10c4f4-d845-4f6f-9494-b0592dcaf19b`. Migrations 0001-0008 are applied remotely, and the authenticated staging Worker is deployed at https://fresh402-staging.kirilllabs.workers.dev. No mainnet payment has been performed. See [the staging verification report](STAGING_REPORT_RU.md). Staging configuration never falls back to the production binding. Staging requires independent credentials; production CDP secrets must not be copied. Without CDP configuration, paid routes return unavailable while authenticated free registration/MCP discovery can be reviewed.
 
 ## Fully local checks
 
@@ -74,3 +74,15 @@ npx wrangler deploy --env staging
 Keep additive migrations 0007/0008 and all user/financial data. Disable expensive admission (`OPERATION_DAILY_LIMIT=0`) during an incident, record and resolve all `settling`/`settled` operations, and retain a recovery-capable deployment. Rolling back to 1.1.1 removes journal-aware recovery and quarantine checks; do not route paid traffic to it while unresolved 2.0 operations exist.
 
 An unrestricted public launch is blocked until the DNS TOCTOU boundary has a verified egress policy/gateway or an explicitly scoped trusted-host launch design. `global_fetch_strictly_public` documents Internet routing and same-zone security behavior, not arbitrary-host peer pinning. Staging's owned-host allowlist is a controlled-test boundary, not a general DNS-rebinding proof. Production additionally needs successful cloud acceptance, owner-approved real payment evidence, reconciliation operations, account cost/log controls and a release/rollback approval. No merge or production deploy is part of this task.
+
+
+## Owner access to the deployed staging
+
+The existing access token is encrypted using Windows CurrentUser DPAPI in `%LOCALAPPDATA%\Fresh402\staging\access-token.dpapi`, with owner-only filesystem permissions. It is not in the repository and is never printed. Run from this checkout on the owner's Windows profile:
+
+```powershell
+.\scripts\staging-access.ps1 -CopyToClipboard
+.\scripts\staging-access.ps1 -Smoke -Url https://fresh402-staging.kirilllabs.workers.dev
+```
+
+Clipboard mode is an explicit owner action; smoke mode supplies the token only in process memory. The remote Worker has the token as `secret_text`, with no CDP secrets. The historical provisioning instructions above apply to a future replacement environment; do not recreate the existing database or rotate the current access token automatically.

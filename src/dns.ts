@@ -7,7 +7,9 @@ export async function assertPublicDns(host: string, signal: AbortSignal, blocked
   const results = await Promise.all(["A", "AAAA"].map(async type => {
     const endpoint = new URL("https://cloudflare-dns.com/dns-query");
     endpoint.searchParams.set("name", host); endpoint.searchParams.set("type", type);
-    const response = await fetch(endpoint, { headers: { accept: "application/dns-json" }, redirect: "error", signal });
+    // Workers implements follow/manual, but not the browser/Node "error" mode.
+    // Manual plus the non-2xx guard below still refuses every DNS redirect.
+    const response = await fetch(endpoint, { headers: { accept: "application/dns-json" }, redirect: "manual", signal });
     if (!response.ok) { cancelBody(response.body); throw new BodyReadError("dns_unavailable", "DNS validation failed.", 502); }
     const bytes = await readBoundedBody(response, 32768, new BodyReadError("dns_unavailable", "DNS response exceeded its limit.", 502), signal);
     const result = JSON.parse(new TextDecoder().decode(bytes)) as { Status?: number; Answer?: Array<{ type: number; data: string }> };

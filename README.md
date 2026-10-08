@@ -68,3 +68,5 @@ Repository: https://github.com/kirillradchenko96/fresh402
 Existing production: https://fresh402.kirilllabs.workers.dev (new 2.0 endpoints are not advertised as deployed).
 
 Release review: [payment recovery](docs/PAYMENT_RECOVERY.md), [isolated staging](docs/STAGING.md), [Russian audit report](docs/RELEASE_REPORT_RU.md).
+
+Owner-approved authenticated staging is deployed. See [cloud staging verification and registration fix](docs/STAGING_REPORT_RU.md). Real paid execution remains gated on independent staging CDP credentials and owner-approved transaction testing.

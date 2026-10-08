@@ -1,4 +1,4 @@
-// Staging D1 ID is a sentinel. Provision only with owner approval; see docs/STAGING.md.
+// Owner-approved isolated staging D1; production binding remains separate.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "fresh402",
@@ -76,7 +76,7 @@
         {
           "binding": "DB",
           "database_name": "fresh402-staging-db",
-          "database_id": "00000000-0000-0000-0000-000000000000",
+          "database_id": "ba10c4f4-d845-4f6f-9494-b0592dcaf19b",
           "migrations_dir": "migrations"
         }
       ],

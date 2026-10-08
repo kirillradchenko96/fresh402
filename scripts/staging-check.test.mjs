@@ -4,7 +4,12 @@ import { readFile } from "node:fs/promises";
 import { checkStaging } from "./staging-check.mjs";
 const raw=await readFile(new URL("../wrangler.jsonc",import.meta.url),"utf8");
 const config=JSON.parse(raw.slice(raw.indexOf("{")));
-test("staging is isolated and a sentinel D1 cannot pass the provisioned check",()=>{checkStaging(config);assert.throws(()=>checkStaging(config,true),/not been provisioned/);});
+test("provisioned staging is isolated and an unprovisioned sentinel is still rejected",()=>{
+  checkStaging(config,true);
+  const unprovisioned=structuredClone(config);
+  unprovisioned.env.staging.d1_databases[0].database_id="00000000-0000-0000-0000-000000000000";
+  assert.throws(()=>checkStaging(unprovisioned,true),/not been provisioned/);
+});
 for(const [name,mutate] of [
   ["production database",c=>{c.env.staging.d1_databases[0].database_id=c.d1_databases[0].database_id;}],
   ["production limiter",c=>{c.env.staging.ratelimits[0].namespace_id=c.ratelimits[0].namespace_id;}],

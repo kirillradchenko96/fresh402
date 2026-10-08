@@ -27,6 +27,18 @@ function register(input: Record<string, unknown>, selectedEnv = bindings) {
     return handleCoreRequest(request("/v1/register", input), selectedEnv);
 }
 
+it.each(["lookup", "insert"])("does not expose unexpected D1 %s errors in a registration response or log", async stage => {
+    const privateMessage = "D1_ERROR SELECT private_customer_data; api_key=never-expose-this";
+    const logs = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(fetch).mockResolvedValue(textResponse());
+    if (stage === "lookup") vi.spyOn(bindings.DB, "prepare").mockImplementationOnce(() => { throw new Error(privateMessage); });
+    else vi.spyOn(bindings.DB, "batch").mockRejectedValueOnce(new Error(privateMessage));
+    const response = await register({ url: "https://public.example/" });
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ error: "check_failed", message: "Unable to process the target. Retry later." });
+    expect(JSON.stringify(logs.mock.calls)).not.toContain(privateMessage);
+});
+
 function check(input: Record<string, unknown>) {
     // Exercises the paid core without contacting the facilitator or settling money.
     return handleCoreRequest(request("/v1/check", input), bindings);

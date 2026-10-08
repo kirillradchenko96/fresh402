@@ -2476,10 +2476,7 @@ export async function handleCoreRequest(
             {
                 error:
                     "check_failed",
-                message:
-                    error instanceof Error
-                        ? error.message
-                        : "Unable to process the target.",
+                message: "Unable to process the target. Retry later.",
             },
             500,
         );

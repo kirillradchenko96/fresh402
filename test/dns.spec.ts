@@ -6,6 +6,24 @@ beforeEach(()=>{ vi.spyOn(globalThis,"fetch").mockRejectedValue(new Error("Unmoc
 afterEach(()=>{vi.restoreAllMocks();vi.useRealTimers();});
 const isBlocked = (host:string) => Boolean(validateTarget(new URL(`https://${host.includes(":") ? `[${host}]` : host}/`),false));
 describe("DNS and redirect SSRF defense",()=>{
+  it("uses the Workers-supported manual redirect mode for both DNS lookups",async()=>{
+    vi.mocked(fetch).mockImplementation(async(_input,init)=>{
+      if(init?.redirect === "error") throw new TypeError('Invalid redirect value; Workers supports follow/manual only');
+      return dns([{type:1,data:"93.184.216.34"}]);
+    });
+    await assertPublicDns("public.example",new AbortController().signal,isBlocked);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    for(const [,init] of vi.mocked(fetch).mock.calls) expect(init?.redirect).toBe("manual");
+  });
+  it("never follows a DNS redirect or fetches its destination",async()=>{
+    vi.mocked(fetch).mockResolvedValue(new Response(null,{status:302,headers:{location:"http://127.0.0.1/private"}}));
+    await expect(fetchTarget(new URL("https://public.example/"),false)).rejects.toMatchObject({code:"dns_unavailable"});
+    expect(fetch).toHaveBeenCalledTimes(2);
+    for(const [input,init] of vi.mocked(fetch).mock.calls) {
+      expect(String(input)).toMatch(/^https:\/\/cloudflare-dns\.com\//);
+      expect(init?.redirect).toBe("manual");
+    }
+  });
   it("checks the operator host allowlist on every redirect before DNS or fetch",async()=>{
     const targets:string[]=[];
     vi.mocked(fetch).mockImplementation(async input=>{

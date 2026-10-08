@@ -1,13 +1,16 @@
-import { SELF } from "cloudflare:test";
-import { describe, expect, it } from "vitest";
+import { env } from "cloudflare:workers";
+import { SELF, applyD1Migrations } from "cloudflare:test";
+import { beforeAll, describe, expect, it } from "vitest";
 import {
     applyJsonIgnorePaths,
     buildTextDiff,
     stableJsonStringify,
 } from "../src/freshness";
 
+beforeAll(async () => { await applyD1Migrations(env.DB, env.TEST_MIGRATIONS); });
+
 describe("Fresh402", () => {
-    it("returns the v1.1 health endpoint", async () => {
+    it("preserves health metadata and advertises the beta", async () => {
         const response = await SELF.fetch("http://example.com/");
 
         expect(response.status).toBe(200);
@@ -24,7 +27,7 @@ describe("Fresh402", () => {
 
         expect(body.name).toBe("Fresh402");
         expect(body.status).toBe("ok");
-        expect(body.version).toBe("1.1.1");
+        expect(body.version).toBe("2.0.0-beta.1");
         expect(body.normalizer_version).toBe(2);
         expect(body.pricing.register).toBe("free");
         expect(body.pricing.check).toContain("0.005");
@@ -193,6 +196,8 @@ describe("Fresh402", () => {
         expect(manifest.version).toBe(1);
         expect(manifest.resources).toEqual([
             "http://example.com/v1/check",
+            "http://example.com/v2/extract",
+            "http://example.com/v2/smart-diff",
         ]);
     });
     it("returns 404 for an unknown route", async () => {

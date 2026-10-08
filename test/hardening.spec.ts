@@ -1,3 +1,5 @@
+// Target network is mocked; DNS has dedicated security tests.
+vi.mock("../src/dns", () => ({ assertPublicDns: vi.fn(async () => {}) }));
 import { env } from "cloudflare:workers";
 import { applyD1Migrations, SELF, type D1Migration } from "cloudflare:test";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";

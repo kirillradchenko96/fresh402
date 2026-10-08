@@ -6,6 +6,28 @@ beforeEach(()=>{ vi.spyOn(globalThis,"fetch").mockRejectedValue(new Error("Unmoc
 afterEach(()=>{vi.restoreAllMocks();vi.useRealTimers();});
 const isBlocked = (host:string) => Boolean(validateTarget(new URL(`https://${host.includes(":") ? `[${host}]` : host}/`),false));
 describe("DNS and redirect SSRF defense",()=>{
+  it.each(["http://public.example/","https://public.example:8443/"])("rejects insecure scheme/port under an approved-host launch: %s",async url=>{
+    await expect(fetchTarget(new URL(url),false,undefined,"public.example")).rejects.toThrow("HTTPS on port 443");
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it.each(["https://attacker.public.example/","https://public.example.attacker.net/"])("requires exact approved host equality: %s",async url=>{
+    await expect(fetchTarget(new URL(url),false,undefined,"public.example")).rejects.toThrow("allowlist");
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it("still blocks private destinations even if mistakenly allowlisted",async()=>{
+    await expect(fetchTarget(new URL("https://127.0.0.1/"),false,undefined,"127.0.0.1")).rejects.toThrow("Private");
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it("rechecks same-host DNS between redirects without following a private answer",async()=>{
+    let queries=0;const targets:string[]=[];
+    vi.mocked(fetch).mockImplementation(async input=>{
+      const url=new URL(String(input));
+      if(url.hostname==="cloudflare-dns.com")return dns([{type:1,data:++queries<=2?"93.184.216.34":"127.0.0.1"}]);
+      targets.push(url.href);return new Response(null,{status:302,headers:{location:"/next"}});
+    });
+    await expect(fetchTarget(new URL("https://public.example/"),false,undefined,"public.example")).rejects.toMatchObject({code:"target_not_allowed"});
+    expect(targets).toEqual(["https://public.example/"]);
+  });
   it("uses the Workers-supported manual redirect mode for both DNS lookups",async()=>{
     vi.mocked(fetch).mockImplementation(async(_input,init)=>{
       if(init?.redirect === "error") throw new TypeError('Invalid redirect value; Workers supports follow/manual only');

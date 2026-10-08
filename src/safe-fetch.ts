@@ -180,6 +180,9 @@ export async function fetchTarget(
             hop <= MAX_REDIRECTS;
             hop++
         ) {
+            if (allowedHosts !== undefined && (current.protocol !== "https:" || current.port !== "" && current.port !== "443")) {
+                throw new TargetNotAllowedError("Approved-host launches require HTTPS on port 443.");
+            }
             if (allowedHosts !== undefined && !allowedHosts.split(",").map(host => host.trim().toLowerCase()).includes(current.hostname.toLowerCase())) {
                 throw new TargetNotAllowedError("Destination is outside the operator-approved host allowlist.");
             }

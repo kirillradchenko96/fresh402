@@ -1,19 +1,19 @@
-# Fresh402 2.0 Beta architecture
+# Fresh402 2.0 Release Candidate architecture
 
-Fresh402 serves bounded web intelligence over REST and MCP with per-operation x402 billing. Version 2.0.0-beta.1 extends the v1 core; normalizer version 2 and deterministic `w_` identifiers remain unchanged.
+Fresh402 serves bounded web intelligence over REST and MCP with per-operation x402 billing. Version 2.0.0-rc.1 extends the v1 core; normalizer version 2 and deterministic `w_` identifiers remain unchanged.
 
 ## Request lifecycle
 
 1. Read at most 65,536 request bytes with a 10-second deadline before cloning/parsing.
 2. Apply edge admission limits and validate the operation schema. No target or DNS fetch at this stage.
 3. The x402 SDK constructs the service-specific challenge or verifies the supplied EIP-3009 authorization through CDP.
-4. Atomically claim the verified payer/asset/nonce identity in D1. A concurrent replay is rejected before execution. Only a SHA-256 identity digest and expiry are retained.
+4. Atomically claim the verified payer/asset/nonce identity in D1. A concurrent replay is rejected before execution. The private journal also binds canonical arguments, transport, a proof digest and an optional independent recovery-token hash. Signatures and bearer secrets are never stored.
 5. Acquire one of eight global D1 capacity leases. Load target data through the shared safe-fetch implementation.
-6. Prepare a bounded result and deferred storage writes. SDK settlement follows successful execution; upstream errors are not settled.
-7. After confirmed settlement, commit state and deliver the result with the SDK receipt. Settlement failure returns no paid content and leaves snapshots unchanged.
+6. Persist the bounded result and server-generated SQL write plan BEFORE settlement. A compare-and-set moves prepared to settling before exactly one facilitator submission; SDK retries cannot cross that gate. Upstream errors are not settled.
+7. Persist the confirmed receipt and financial ledger in one D1 batch. Finalize snapshots plus completed state in another atomic D1 batch, protected against duplicate finalization by a database trigger. Settlement uncertainty returns no paid content and quarantines the target.
 8. Release capacity and increment privacy-limited aggregate counters. Analytics failures do not fail a successful customer response.
 
-REST and MCP call the same [operation dispatcher](../src/operations.ts), [service catalog](../src/contracts.ts), [payment hooks](../src/payments.ts), and [analytics counters](../src/analytics.ts). SDK instances and hooks are request-local, avoiding cached closures over stale D1 bindings or credentials.
+REST and MCP call the same [operation dispatcher](../src/operations.ts), [service catalog](../src/contracts.ts), [payment adapter](../src/payments.ts), and [analytics counters](../src/analytics.ts). SDK instances and hooks are request-local, avoiding cached closures over stale D1 bindings or credentials.
 
 ## Modules
 
@@ -41,6 +41,8 @@ Migrations 0001–0006 are untouched. Legacy `resources`, `snapshots`, `watches`
 
 The fixed baseline is the earliest **retained** snapshot on first Smart Diff use, not a promise to recover a v1 baseline already pruned before upgrade. Explicit `previous_hash` can address either retained v1 or Smart Diff snapshots; the field overrides `compare_to`. Watch IDs identify shared configuration, not accounts or secrets.
 
+Migration 0008 adds `payment_operations`, a completion trigger, and the global daily `operation_budget`. An indexed Cron cleanup handles temporary claims/leases and scrubs completed recovery payloads after seven days without removing payment history. Ambiguous/settled-but-unfinalized operations remain for reconciliation. See [retention policy](PAYMENT_RECOVERY.md).
+
 ## Extraction
 
 Public HTTP(S), no browser, no JavaScript execution, cookies, authentication forwarding or interaction. Prefer `main`, then `article`, then body; explicit CSS scope wins. Native HTMLRewriter removes scripts/styles/navigation/noise, captures headings and text blocks, and extracts bounded metadata/links/JSON-LD. `entities` decodes character references without code generation. JSON is parsed and canonicalized with the existing ignore-path implementation; text is whitespace-normalized.
@@ -59,7 +61,7 @@ Limits are explicit: 200 returned changes with total counts, 1,000 blocks, 250,0
 
 ## Reliability boundaries
 
-On-chain settlement and D1 cannot be one transaction. A crash after settlement may leave a paid request without delivery/state persistence; replay protection deliberately prevents automatic recharging/re-execution with that authorization. Operator reconciliation uses the transaction receipt. There is no automatic refund or durable response replay in this beta. A storage failure after settlement returns the result with `persistence_error`; clients must retain it.
+On-chain settlement and D1 cannot be one transaction. [The durable payment journal](PAYMENT_RECOVERY.md) keeps the result before settlement, recovers completed/settled operations with a separate private token, and quarantines settling operations until operator reconciliation. Public signatures/transaction hashes never authorize recovery. Failed snapshot finalization can return paid content with a persistence warning while remaining safely retryable. There is no automatic refund, universal facilitator idempotency promise or indefinite response retention.
 
 The facilitator `/supported` call currently happens per paid request (including challenge); no cross-request I/O promise cache is used. This favors isolation and correctness over latency. CDP request deadlines are 15 seconds; upstream loading has a separate 10-second deadline.
 

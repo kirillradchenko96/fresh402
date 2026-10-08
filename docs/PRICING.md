@@ -13,12 +13,12 @@ An initial HTTP 402 is a challenge, **not a sale**. A payment header is an attem
 
 No subscriptions, API keys, prepaid credits, LLM fees or browser-rendering charges are implemented. The service does not sign buyer payments or initiate real transactions without a client-provided authorization.
 
-The beta accepts the default USDC EIP-3009 authorization shape with `validBefore` at most 24 hours in the future. Verified authorization identities are single-use across endpoints and transports. Permit2/custom authorization formats are explicitly unsupported in this beta, even if another facilitator supports them.
+The release candidate accepts the default USDC EIP-3009 authorization shape with `validBefore` at most 24 hours in the future. Verified authorization identities are single-use across endpoints and transports. Permit2/custom authorization formats are explicitly unsupported in this release, even if another facilitator supports them.
 
 ## Retries and uncertain outcomes
 
 The SDK settles after successful computation. An authorization is claimed before the target fetch and stays claimed even when the operation or settlement fails. This bounds unpaid repeated work. Use a new authorization only after verifying the previous attempt did not settle; never blindly retry with a newly signed payment after a timeout.
 
-Settlement and D1/delivery cannot be atomic. A process crash or disconnect after settlement can lose the response. There is no automatic refund or response-replay guarantee yet. Preserve transaction receipts and contact the operator for reconciliation. If only snapshot persistence fails, the service returns paid data plus `persistence_error` and `snapshot_saved: false`.
+Settlement and D1/delivery cannot be atomic. The result and deferred write plan are now stored before submission. Private recovery is available for seven days to clients that save an independent 32-byte random token before paying. Retrying identical input/payment/token does not verify, fetch or settle again. A settling operation stays quarantined until onchain reconciliation; missing acknowledgement never authorizes automatic replacement payment. Snapshot finalization failures return valid paid data plus a persistence warning and can be retried safely. See [payment recovery](PAYMENT_RECOVERY.md) for the exact guarantees and exceptions.
 
 The historical test-wallet classification is bookkeeping, not a payment exemption. `X-Fresh402-Purpose: probe` classifies analytics only; it never changes billing.

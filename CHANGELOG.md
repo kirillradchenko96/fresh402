@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.0-rc.1 ? unreleased
+
+- Persist bounded paid results and write plans before settlement; atomically record receipts and revenue, then finalize snapshots with a completion trigger.
+- Add private seven-day REST/MCP recovery using a client-generated bearer token. Public payment signatures and transaction hashes never authorize replay.
+- Quarantine ambiguous settlements and target writes; fence SDK settlement retries. Add offline finalized-USDC proof validation and guarded operator SQL generation.
+- Add migration 0008, bounded Cron cleanup, global daily operation budgets and isolated authenticated staging with separate D1/limiters, target allowlist and CPU/subrequest ceilings.
+- Fix nested HTML scope leakage, duplicate text, block boundaries and sparse static content warnings; replace quadratic exact block matching with indexed matching.
+- Preserve v1 IDs/history/normalizer and existing services/prices. No 2.1 services, deployment, live payments or production data changes.
+- Production remains gated on actual Cloudflare staging, owner-approved payment validation and the unresolved arbitrary-host DNS TOCTOU boundary. See RELEASE_REPORT_RU.md.
+
+
 ## 2.0.0-beta.1 — unreleased
 
 - Add Web Extract REST/MCP service ($0.01) for HTML, JSON and text, metadata, headings, links, JSON-LD and CSS scope.

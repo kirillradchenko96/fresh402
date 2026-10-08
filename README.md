@@ -1,8 +1,8 @@
-# Fresh402 2.0 Beta
+# Fresh402 2.0 Release Candidate
 
 **Web Intelligence API for AI Agents — public web extraction, persistent freshness and structured change detection.**
 
-This branch is an unreleased beta. Production remains at the owner's deployed version until a separate release. No browser rendering, LLM API or live-payment test is required to run the test suite.
+This branch is release candidate 2.0.0-rc.1, ready for owner-approved isolated staging; public production release is still gated. Production remains at the owner's deployed version until a separate release. No browser rendering, LLM API or live-payment test is required to run the test suite.
 
 | Service | REST | MCP tool | Price (USDC on Base) |
 |---|---|---|---:|
@@ -57,12 +57,14 @@ Open http://localhost:8787/openapi.json. MCP tools/list and free registration ne
 
 ## Compatibility and boundaries
 
-Existing /v1 endpoints, watch IDs, normalizer version 2 and D1 tables remain supported. Migration 0007 only adds tables. V1 history/diff continue to expose shared stored v1 data; they never fetch a fresh paid result or expose v2 structural documents. Rolling back the Worker does not require deleting data or reverting the additive migration.
+Existing /v1 endpoints, watch IDs, normalizer version 2 and D1 tables remain supported. Migrations 0007 and 0008 only add tables and a journal finalization trigger. V1 history/diff continue to expose shared stored v1 data; they never fetch a fresh paid result or expose v2 structural documents. Rolling back the Worker does not require deleting data or reverting the additive migration.
 
 All paid results require SDK-verified payment and confirmed settlement. A 402 response is not a sale. New state is committed only after settlement. Free registrations have quotas; all operations have bounded streams/deadlines and D1 capacity leases.
 
-Beta limits matter: JS-only and authenticated pages are unsupported; HTML main-content selection and significance are heuristic; old HTML baselines lack DOM structure; there is no durable paid-response replay after crashes. DNS answers and redirect destinations are checked, but Workers cannot pin arbitrary-host TLS peers: see the [network boundary](docs/SECURITY.md). Batch, Price Track, Alerts and prepaid credits are architecture/roadmap only.
+Release limits matter: JS-only and authenticated pages are unsupported; HTML main-content selection and significance are heuristic; old HTML baselines lack DOM structure; private seven-day recovery requires a client-generated token saved before paying; ambiguous settlement requires operator reconciliation. DNS answers and redirect destinations are checked, but Workers cannot pin arbitrary-host TLS peers: see the [network boundary](docs/SECURITY.md). Batch, Price Track, Alerts and prepaid credits are architecture/roadmap only.
 
 Repository: https://github.com/kirillradchenko96/fresh402
 
-Existing production: https://fresh402.kirilllabs.workers.dev (new beta endpoints are not advertised as deployed).
+Existing production: https://fresh402.kirilllabs.workers.dev (new 2.0 endpoints are not advertised as deployed).
+
+Release review: [payment recovery](docs/PAYMENT_RECOVERY.md), [isolated staging](docs/STAGING.md), [Russian audit report](docs/RELEASE_REPORT_RU.md).

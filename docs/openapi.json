@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Fresh402 Web Intelligence API",
-    "version": "2.0.0-beta.1",
-    "description": "2.0 Beta: paid extraction, structural comparison and backward-compatible freshness. No browser rendering or LLM inference.",
+    "version": "2.0.0-rc.1",
+    "description": "2.0 Release Candidate: durable payment results, private recovery, extraction, structural comparison and backward-compatible freshness. No browser rendering or LLM inference.",
     "contact": {
       "url": "https://github.com/kirillradchenko96/fresh402/issues"
     }
@@ -39,6 +39,20 @@
           }
         },
         "x-mcp-tool": "fresh402_check",
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -162,7 +176,7 @@
             }
           },
           "403": {
-            "description": "MCP Origin rejected",
+            "description": "MCP Origin or staging access rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -192,7 +206,17 @@
             }
           },
           "409": {
-            "description": "Baseline incompatible",
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -232,7 +256,7 @@
             }
           },
           "429": {
-            "description": "Rate or concurrency limit",
+            "description": "Rate, concurrency or daily operation budget",
             "content": {
               "application/json": {
                 "schema": {
@@ -262,7 +286,7 @@
             }
           },
           "503": {
-            "description": "Service or payment unavailable",
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
             "content": {
               "application/json": {
                 "schema": {
@@ -309,6 +333,20 @@
           }
         },
         "x-mcp-tool": "fresh402_extract",
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -422,7 +460,7 @@
             }
           },
           "403": {
-            "description": "MCP Origin rejected",
+            "description": "MCP Origin or staging access rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -452,7 +490,17 @@
             }
           },
           "409": {
-            "description": "Baseline incompatible",
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -492,7 +540,7 @@
             }
           },
           "429": {
-            "description": "Rate or concurrency limit",
+            "description": "Rate, concurrency or daily operation budget",
             "content": {
               "application/json": {
                 "schema": {
@@ -522,7 +570,7 @@
             }
           },
           "503": {
-            "description": "Service or payment unavailable",
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
             "content": {
               "application/json": {
                 "schema": {
@@ -569,6 +617,20 @@
           }
         },
         "x-mcp-tool": "fresh402_smart_diff",
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -655,7 +717,7 @@
             }
           },
           "403": {
-            "description": "MCP Origin rejected",
+            "description": "MCP Origin or staging access rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -685,7 +747,17 @@
             }
           },
           "409": {
-            "description": "Baseline incompatible",
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -725,7 +797,7 @@
             }
           },
           "429": {
-            "description": "Rate or concurrency limit",
+            "description": "Rate, concurrency or daily operation budget",
             "content": {
               "application/json": {
                 "schema": {
@@ -755,7 +827,7 @@
             }
           },
           "503": {
-            "description": "Service or payment unavailable",
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
             "content": {
               "application/json": {
                 "schema": {
@@ -849,7 +921,7 @@
             }
           },
           "403": {
-            "description": "MCP Origin rejected",
+            "description": "MCP Origin or staging access rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -879,7 +951,17 @@
             }
           },
           "409": {
-            "description": "Baseline incompatible",
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -919,7 +1001,7 @@
             }
           },
           "429": {
-            "description": "Rate or concurrency limit",
+            "description": "Rate, concurrency or daily operation budget",
             "content": {
               "application/json": {
                 "schema": {
@@ -949,7 +1031,7 @@
             }
           },
           "503": {
-            "description": "Service or payment unavailable",
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
             "content": {
               "application/json": {
                 "schema": {
@@ -1018,7 +1100,7 @@
             }
           },
           "403": {
-            "description": "MCP Origin rejected",
+            "description": "MCP Origin or staging access rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -1048,7 +1130,17 @@
             }
           },
           "409": {
-            "description": "Baseline incompatible",
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1088,7 +1180,7 @@
             }
           },
           "429": {
-            "description": "Rate or concurrency limit",
+            "description": "Rate, concurrency or daily operation budget",
             "content": {
               "application/json": {
                 "schema": {
@@ -1118,7 +1210,7 @@
             }
           },
           "503": {
-            "description": "Service or payment unavailable",
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
             "content": {
               "application/json": {
                 "schema": {
@@ -1187,7 +1279,7 @@
             }
           },
           "403": {
-            "description": "MCP Origin rejected",
+            "description": "MCP Origin or staging access rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -1217,7 +1309,17 @@
             }
           },
           "409": {
-            "description": "Baseline incompatible",
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1257,7 +1359,7 @@
             }
           },
           "429": {
-            "description": "Rate or concurrency limit",
+            "description": "Rate, concurrency or daily operation budget",
             "content": {
               "application/json": {
                 "schema": {
@@ -1287,7 +1389,7 @@
             }
           },
           "503": {
-            "description": "Service or payment unavailable",
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
             "content": {
               "application/json": {
                 "schema": {
@@ -1517,7 +1619,7 @@
             }
           },
           "403": {
-            "description": "MCP Origin rejected",
+            "description": "MCP Origin or staging access rejected",
             "content": {
               "application/json": {
                 "schema": {
@@ -1547,7 +1649,17 @@
             }
           },
           "409": {
-            "description": "Baseline incompatible",
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
             "content": {
               "application/json": {
                 "schema": {
@@ -1587,7 +1699,7 @@
             }
           },
           "429": {
-            "description": "Rate or concurrency limit",
+            "description": "Rate, concurrency or daily operation budget",
             "content": {
               "application/json": {
                 "schema": {
@@ -1617,7 +1729,7 @@
             }
           },
           "503": {
-            "description": "Service or payment unavailable",
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
             "content": {
               "application/json": {
                 "schema": {

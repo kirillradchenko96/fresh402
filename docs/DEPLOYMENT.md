@@ -1,6 +1,6 @@
 # Local review, deployment and rollback
 
-This branch is a beta. It does not deploy automatically. Do not publish `server.json` to a directory as a beta service until the corresponding runtime is actually available. Main/production remain owner-controlled.
+This branch is release candidate 2.0.0-rc.1. It does not deploy automatically. Do not publish `server.json` to a directory as a beta service until the corresponding runtime is actually available. Main/production remain owner-controlled.
 
 ## Prerequisites
 
@@ -51,8 +51,10 @@ The automatic suite applies 0001–0007 in local D1 and exercises existing watch
 
 ## Rollback
 
-Roll back the Worker to the previously recorded 1.1.1 deployment. **Leave migration 0007 tables in place.** They are additive and unused by 1.1.1. Do not delete snapshots, watches, claims or ledger rows to roll back code. Leave the additional rate-limit binding unused, or remove it later through a reviewed configuration change. Old secrets/recipient do not change.
+Roll back the Worker to the previously recorded 1.1.1 deployment. **Leave migrations 0007 and 0008 tables in place.** They are additive and unused by 1.1.1. Do not delete snapshots, watches, claims or ledger rows to roll back code. Leave the additional rate-limit binding unused, or remove it later through a reviewed configuration change. Old secrets/recipient do not change.
 
 Historical payments/new v1 checks remain in the existing tables; never restore an old database backup merely to undo a code release, because it would discard customer activity. Old v1 stats already aggregate all routes' recorded amounts. V2-only Smart Diff documents remain stored for a future re-upgrade. A rollback restores old behavior, including the old payment-write timing; use admission controls if rolling back to investigate a payment incident.
 
-Expired metadata cleanup is a separate reviewed operator procedure. No destructive down migration or production cleanup is supplied or executed.
+Bounded temporary cleanup runs through the prepared Cron handler after an owner-approved deploy. It never deletes customer watches, snapshots or financial history. No production cleanup or migration was executed.
+
+For the fully isolated staging configuration, authorization requirements, local explorer checks and exact owner commands, use [STAGING.md](STAGING.md). Before rollback, disable expensive admission and reconcile all settling/settled rows; old 1.1.1 code has no journal-aware recovery. Keep the journal and a recovery-capable deployment available until incidents are resolved.

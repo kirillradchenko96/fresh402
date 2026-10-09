@@ -3,6 +3,7 @@ import { sql, statements as buildStatements, type SqlWrite } from "./sql";
 
 import { fetchTarget, validateTarget, TargetNotAllowedError } from "./safe-fetch";
 import {gatewayFromBindings,type EgressBindings} from "./egress";
+import {ServiceError} from "./contracts";
 import type {CapacityBindings} from './capacity-config';
 
 export const NORMALIZER_VERSION = 2;
@@ -2454,11 +2455,11 @@ export async function handleCoreRequest(
             404,
         );
     } catch (error) {
-        console.error("fresh402_core_error", error instanceof Fresh402InputError || error instanceof BodyReadError ? error.code : "internal_error");
+        console.error("fresh402_core_error", error instanceof Fresh402InputError || error instanceof BodyReadError || error instanceof ServiceError ? error.code : "internal_error");
 
         if (
             error instanceof
-            Fresh402InputError || error instanceof BodyReadError
+            Fresh402InputError || error instanceof BodyReadError || error instanceof ServiceError
         ) {
             return json(
                 {

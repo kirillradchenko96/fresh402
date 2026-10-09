@@ -725,6 +725,12 @@ describe("release extraction regression fixtures",()=>{
 });
 
 describe('expired staging pilot control',()=>{
+  it('returns 429 for exhausted free registration capacity without fetching or disclosing D1 errors',async()=>{
+    const fetch=vi.fn();bindings={...bindings,TARGET_FETCH_MODE:'container',CONTAINER_EGRESS_ENABLED:'1',GATEWAY_BUDGET_WINDOW:'capacity-test',GATEWAY_BUDGET_EXPIRES_MS:String(Date.now()+120000),GATEWAY_POOL_SIZE:'1',GATEWAY_INSTANCE_CONCURRENCY:'4',EGRESS_GATEWAY_TOKEN:'synthetic-gateway-token-'.repeat(3),EGRESS_CONTAINER:{getByName:()=>({fetch})} as unknown as NonNullable<Bindings['EGRESS_CONTAINER']>};
+    const held=[];for(const suffix of ['a','b','c'])held.push(await acquireCapacity(env.DB,{url:'https://public.example/held-'+suffix},1000,{concurrency:4,registration:true,freeLimit:50,slotsPerInstance:4}));
+    try {const response=await request('/v1/register',{url:'https://public.example/overload'});expect(response.status).toBe(429);expect((await response.json() as {error:string}).error).toBe('capacity_exceeded');expect(fetch).not.toHaveBeenCalled();expect(facilitator.verify).not.toHaveBeenCalled();}
+    finally {for(const release of held)await release();}
+  });
   it('permits authenticated inspection and shutdown after expiry without permitting a new target operation',async()=>{
     const secret='synthetic-stage-token-'.repeat(3),shutdown=vi.fn(async()=>{}),diagnostics=vi.fn(async()=>({running:false,reserved_ms:60000})),fetch=vi.fn();
     bindings={...bindings,ENVIRONMENT:'staging',STAGING_ACCESS_TOKEN:secret,TARGET_FETCH_MODE:'container',CONTAINER_EGRESS_ENABLED:'1',GATEWAY_POOL_SIZE:'1',GATEWAY_BUDGET_WINDOW:'expired',GATEWAY_BUDGET_EXPIRES_MS:'1',EGRESS_CONTAINER:{getByName:()=>({shutdown,diagnostics,fetch})} as unknown as NonNullable<Bindings['EGRESS_CONTAINER']>};

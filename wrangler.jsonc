@@ -58,8 +58,19 @@
       "name": "fresh402-staging",
       "vars": {
         "ENVIRONMENT": "staging",
-        "TARGET_HOST_ALLOWLIST": "example.com",
-        "OPERATION_DAILY_LIMIT": "1000"
+        "TARGET_FETCH_MODE": "container",
+        "OPERATION_DAILY_LIMIT": "1000",
+        "CONTAINER_EGRESS_ENABLED": "0",
+        "GATEWAY_POOL_SIZE": "1",
+        "GATEWAY_INSTANCE_CONCURRENCY": "4",
+        "GATEWAY_RUNTIME_BUDGET_SECONDS": "300",
+        "GATEWAY_CODE_HASH": "5b1a79a30976ca0a934ebfe87aca9850366dbab896b0a5ec38aa3fae06ba53bf",
+        "OPERATION_CONCURRENCY": "4",
+        "FREE_REGISTRATION_DAILY_LIMIT": "50",
+        "GATEWAY_BUDGET_WINDOW": "pilot-awaiting-verification",
+        "GATEWAY_BUDGET_EXPIRES_MS": "0",
+        "OPERATION_ISOLATE_CONCURRENCY": "4",
+        "VERIFIED_PAYMENT_DAILY_LIMIT": "2000"
       },
       "workers_dev": true,
       "preview_urls": false,
@@ -104,6 +115,31 @@
             "limit": 15,
             "period": 60
           }
+        }
+      ],
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "EGRESS_CONTAINER",
+            "class_name": "Fresh402Egress"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "staging-egress-v1",
+          "new_sqlite_classes": [
+            "Fresh402Egress"
+          ]
+        }
+      ],
+      "containers": [
+        {
+          "class_name": "Fresh402Egress",
+          "image": "./gateway/Dockerfile",
+          "image_build_context": ".",
+          "max_instances": 1,
+          "instance_type": "lite"
         }
       ]
     }

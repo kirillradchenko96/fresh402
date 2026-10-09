@@ -8,6 +8,8 @@ export async function cleanupTemporaryData(db: D1Database, now = Date.now()) {
     db.prepare(`UPDATE payment_operations SET response_json = NULL, writes_json = NULL
       WHERE claim_hash IN (SELECT claim_hash FROM payment_operations WHERE state = 'completed' AND result_expires <= ? AND response_json IS NOT NULL ORDER BY result_expires LIMIT 100)`).bind(now),
     db.prepare("DELETE FROM operation_budget WHERE day < ?").bind(new Date(now - 30*86400000).toISOString().slice(0,10)),
+    db.prepare("DELETE FROM verified_payment_budget WHERE day < ?").bind(new Date(now - 30*86400000).toISOString().slice(0,10)),
+    db.prepare("DELETE FROM gateway_runtime_budget WHERE expires_at < ?").bind(now-30*86400000),
   ]);
   return results.map(result => result.meta.changes);
 }

@@ -76,6 +76,7 @@ beforeEach(async () => {
         env.DB.prepare("DELETE FROM watches"),
     ]);
     bindings = {
+        TARGET_HOST_ALLOWLIST: "public.example,public.example.,other.example,quota.example,fdocs.example",
         DB: env.DB,
         REGISTER_TARGET_LIMITER: { limit: vi.fn(async () => ({ success: true })) },
         REGISTER_GLOBAL_LIMITER: { limit: vi.fn(async () => ({ success: true })) },
@@ -91,6 +92,14 @@ afterEach(() => {
 });
 
 describe("free registration limits", () => {
+    it("cancelled registration performs no target fetch or watch insert", async () => {
+        const controller = new AbortController(); controller.abort();
+        const response = await register({ url: "https://public.example/cancelled" }, { ...bindings, requestSignal: controller.signal });
+        expect(response.status).toBe(408);
+        expect(await response.json()).toMatchObject({ error: "request_cancelled" });
+        expect(fetch).not.toHaveBeenCalled();
+        expect(await env.DB.prepare("SELECT COUNT(*) n FROM watches").first("n")).toBe(0);
+    });
     it("enforces the configured host quota before fetching or writing new watches", async () => {
         vi.mocked(fetch).mockImplementation(async () => textResponse());
         let first: Record<string, any> | undefined;
@@ -115,7 +124,7 @@ describe("free registration limits", () => {
         const variants = [
             { url: "https://PUBLIC.example/a", selector: "#one" },
             { url: "https://public.example./b?q=2", selector: "#two" },
-            { url: "http://public.example:8080/c", ignore_selectors: [".noise"] },
+            { url: "https://public.example:443/c", ignore_selectors: [".noise"] },
             { url: "https://public.example/d", ignore_json_paths: ["/timestamp"] },
         ];
         for (const input of variants) {

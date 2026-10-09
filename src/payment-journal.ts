@@ -12,7 +12,7 @@ interface OperationRow {
   claim_hash: string; request_hash: string; proof_hash: string; recovery_hash: string | null;
   service: ServiceId; transport: "rest" | "mcp"; payer: string; asset: string; nonce: string;
   state: string; response_json: string | null; writes_json: string | null; receipt_json: string | null;
-  result_expires: number; created_at: number; resource_key: string | null;
+  result_expires: number; created_at: number; updated_at:number;lease_owner:string|null;resource_key: string | null;
 }
 function authorization(payload: PaymentPayload) {
   const auth = payload.payload?.authorization;
@@ -65,7 +65,19 @@ export class PaymentJournal {
         .bind(id.claim, await this.requestHash(), id.proof, this.token ? await digest(this.token) : null, this.service, this.transport, id.payer, id.asset, id.nonce,
           SERVICES[this.service].atomic, await resourceKey(this.db, this.input), this.owner, id.expiry, now, now, now + RESULT_RETENTION_MS),
     ]);
-    if (result[1].meta.changes !== 1) return false;
+    if (result[1].meta.changes !== 1) {
+      if(!this.token)return false;
+      // Only pre-settlement work may be retried. A prepared result is discarded
+      // and recomputed after its capacity lease ends, avoiding stale writes.
+      // Failed/ambiguous settlement remains in settling and never passes.
+      // The facilitator has already reverified this original authorization.
+      const retry=await this.db.prepare(`UPDATE payment_operations SET state='preparing',owner=?,lease_owner=NULL,response_json=NULL,writes_json=NULL,updated_at=?
+        WHERE claim_hash=? AND receipt_json IS NULL AND recovery_hash=? AND request_hash=? AND proof_hash=? AND authorization_expires>?
+        AND (state='failed' OR state='prepared' AND NOT EXISTS(SELECT 1 FROM operation_leases WHERE owner=payment_operations.lease_owner AND expires_at>?)
+          OR state='preparing' AND updated_at<=? AND NOT EXISTS(SELECT 1 FROM operation_leases WHERE resource_key=payment_operations.resource_key AND expires_at>?))`)
+        .bind(this.owner,now,id.claim,await digest(this.token),await this.requestHash(),id.proof,seconds,now,now-120000,now).run();
+      if(retry.meta.changes!==1)return false;
+    }
     this.claim = id.claim;
     return true;
   }
@@ -83,6 +95,10 @@ export class PaymentJournal {
       AND EXISTS (SELECT 1 FROM operation_leases WHERE owner = ? AND expires_at > ?)`)
       .bind(body, writes, Date.now(), leaseOwner, this.claim, this.owner, leaseOwner, Date.now()).run();
     if (result.meta.changes !== 1) throw new ServiceError("payment_reservation_lost", "Operation reservation was lost.", 503);
+  }
+  async failPreparation():Promise<void> {
+    if(!this.claim)return;
+    await this.db.prepare("UPDATE payment_operations SET state='failed',updated_at=? WHERE claim_hash=? AND owner=? AND state='preparing' AND receipt_json IS NULL").bind(Date.now(),this.claim,this.owner).run();
   }
   async settle(operation: () => Promise<SettleResponse>): Promise<SettleResponse> {
     const result = await this.db.prepare(`UPDATE payment_operations SET state = 'settling', updated_at = ?
@@ -136,6 +152,11 @@ export class PaymentJournal {
     // A signature becomes public onchain. It is NOT a recovery credential.
     if (!row || !row.recovery_hash || !crypto.subtle.timingSafeEqual(new TextEncoder().encode(row.recovery_hash), new TextEncoder().encode(await digest(this.token)))) return undefined;
     if (row.request_hash !== await this.requestHash() || row.proof_hash !== id.proof) throw new ServiceError("payment_request_mismatch", "Recovery must use the original input, transport and payment.", 409);
+    // Failed preparation has not submitted a settlement. It must go through
+    // verification and the exact-identity reservation gate again, not replay.
+    if(row.state==='failed'&&!row.receipt_json)return undefined;
+    if(!row.receipt_json&&row.state==='prepared'&&!await this.db.prepare('SELECT owner FROM operation_leases WHERE owner=? AND expires_at>?').bind(row.lease_owner,Date.now()).first('owner'))return undefined;
+    if(!row.receipt_json&&row.state==='preparing'&&row.updated_at<=Date.now()-120000&&!await this.db.prepare('SELECT owner FROM operation_leases WHERE resource_key=? AND expires_at>?').bind(row.resource_key,Date.now()).first('owner'))return undefined;
     if (!["settled", "completed"].includes(row.state)) throw new ServiceError("settlement_pending", "Operation is pending or requires reconciliation. Do not sign a replacement payment.", 409);
     await this.finalize(id.claim);
     row = (await this.row(id.claim))!;

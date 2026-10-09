@@ -28,7 +28,7 @@ it("upgrades an existing 0006 database without changing any legacy watch or snap
   const mocked=vi.spyOn(globalThis,"fetch").mockResolvedValue(new Response('{"price":10}',{headers:{"content-type":"application/json"}}));
   try {
     const response=await handleCoreRequest(new Request("https://service.example/v1/register",{method:"POST",body:JSON.stringify({url:"https://public.example/"})}),{
-      DB:db,REGISTER_TARGET_LIMITER:{limit:async()=>({success:true})},REGISTER_GLOBAL_LIMITER:{limit:async()=>({success:true})},
+      TARGET_HOST_ALLOWLIST:"public.example",DB:db,REGISTER_TARGET_LIMITER:{limit:async()=>({success:true})},REGISTER_GLOBAL_LIMITER:{limit:async()=>({success:true})},
     });
     expect(response.status).toBe(200);
     const watch=await db.prepare("SELECT * FROM watches").first();

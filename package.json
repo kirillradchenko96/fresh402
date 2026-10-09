@@ -15,7 +15,8 @@
     "openapi:generate": "node scripts/generate-openapi.mjs",
     "build:staging": "wrangler deploy --env staging --dry-run --outdir dist/staging",
     "test:tools": "node --test scripts/*.test.mjs",
-    "staging:check": "node scripts/staging-check.mjs"
+    "staging:check": "node scripts/staging-check.mjs",
+    "test:gateway": "node --test gateway/*.test.mjs"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.0.0",

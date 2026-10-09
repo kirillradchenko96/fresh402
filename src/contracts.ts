@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { validateTarget } from "./safe-fetch";
+import { validateHttpsUrl } from "./network-policy.mjs";
 
 export class ServiceError extends Error {
   constructor(readonly code: string, message: string, readonly status = 400) {
@@ -10,7 +11,9 @@ export class ServiceError extends Error {
 const selector = z.string().min(1).max(256).refine(value => {
   try { new HTMLRewriter().on(value, {}); return true; } catch { return false; }
 }, "Invalid or unsupported CSS selector");
-const url = z.string().max(4096).url().refine(value => !validateTarget(new URL(value), false), "Public HTTP(S) URL required; credentials are forbidden");
+const url = z.string().max(4096).url().refine(value => {
+  try { return !validateTarget(validateHttpsUrl(value), false); } catch { return false; }
+}, "Public HTTPS URL on port 443 required; credentials are forbidden");
 const rules = {
   selector: selector.optional(),
   ignore_selectors: z.array(selector).max(20).optional(),

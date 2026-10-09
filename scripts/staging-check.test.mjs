@@ -13,8 +13,13 @@ test("provisioned staging is isolated and an unprovisioned sentinel is still rej
 for(const [name,mutate] of [
   ["production database",c=>{c.env.staging.d1_databases[0].database_id=c.d1_databases[0].database_id;}],
   ["production limiter",c=>{c.env.staging.ratelimits[0].namespace_id=c.ratelimits[0].namespace_id;}],
-  ["missing allowlist",c=>{delete c.env.staging.vars.TARGET_HOST_ALLOWLIST;}],
+  ["missing secure gateway mode",c=>{delete c.env.staging.vars.TARGET_FETCH_MODE;}],
+  ["legacy hostname restriction",c=>{c.env.staging.vars.TARGET_HOST_ALLOWLIST="example.com";}],
   ["public preview",c=>{c.env.staging.preview_urls=true;}],
   ["private binding",c=>{c.env.staging.vpc_services=[];}],
   ["excessive CPU",c=>{c.env.staging.limits.cpu_ms=10000;}],
+  ["unbounded Container pool",c=>{c.env.staging.containers[0].max_instances=100;}],
+  ["unbounded Container runtime",c=>{c.env.staging.vars.GATEWAY_RUNTIME_BUDGET_SECONDS='100000';}],
+  ["unreviewed gateway image",c=>{c.env.staging.containers[0].image='docker.io/unreviewed/public:latest';}],
+  ["production Container class binding",c=>{c.env.staging.durable_objects.bindings[0].script_name='fresh402';}],
 ]) test("staging guard rejects "+name,()=>{const copy=structuredClone(config);mutate(copy);assert.throws(()=>checkStaging(copy));});

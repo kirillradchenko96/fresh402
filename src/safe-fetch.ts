@@ -1,5 +1,7 @@
 import { BodyReadError, BODY_TIMEOUT_MS, cancelBody, readBoundedBody } from "./body";
 import { assertPublicDns } from "./dns";
+import { isPublicAddress, isServiceHostname, validateHttpsUrl } from "./network-policy.mjs";
+import {fetchViaGateway,type EgressGateway} from "./egress";
 const MAX_REDIRECTS = 5;
 const MAX_BODY_BYTES = 5_000_000;
 
@@ -10,39 +12,7 @@ export class TargetNotAllowedError extends Error {
     }
 }
 
-function isPrivateIpv4(hostname: string): boolean {
-    const parts = hostname.split(".").map(Number);
-
-    if (
-        parts.length !== 4 ||
-        parts.some(
-            (part) =>
-                !Number.isInteger(part) ||
-                part < 0 ||
-                part > 255,
-        )
-    ) {
-        return false;
-    }
-
-    const [a, b, c] = parts;
-
-    if (a === 0) return true;
-    if (a === 10) return true;
-    if (a === 127) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 100 && b >= 64 && b <= 127) return true;
-    if (a === 198 && (b === 18 || b === 19)) return true;
-    if (a === 192 && b === 0) return true;
-    if (a === 198 && b === 51 && c === 100) return true;
-    if (a === 203 && b === 0 && c === 113) return true;
-    if (a === 192 && b === 88 && c === 99) return true;
-    if (a >= 224) return true;
-
-    return false;
-}
+function isPrivateIpv4(hostname: string): boolean { return /^\d+\.\d+\.\d+\.\d+$/.test(hostname) && !isPublicAddress(hostname); }
 
 function isPrivateHostname(hostname: string): boolean {
     const host = hostname
@@ -50,6 +20,8 @@ function isPrivateHostname(hostname: string): boolean {
         .replace(/^\[/, "")
         .replace(/\]$/, "")
         .replace(/\.$/, "");
+
+    if (isServiceHostname(host)) return true;
 
     if (
         host === "localhost" ||
@@ -66,39 +38,7 @@ function isPrivateHostname(hostname: string): boolean {
         return true;
     }
 
-    if (
-        host.includes(":") && (
-            host === "::1" ||
-            host === "::" ||
-            host.startsWith("fc") ||
-            host.startsWith("fd") ||
-            host.startsWith("fe8") ||
-            host.startsWith("fe9") ||
-            host.startsWith("fea") ||
-            host.startsWith("feb")
-        )
-    ) {
-        return true;
-    }
-
-    if (host.startsWith("::ffff:")) {
-        // URL canonicalizes IPv4-mapped addresses to two hexadecimal words.
-        const words = host.slice(7).split(":");
-        if (words.length === 2) {
-            const high = parseInt(words[0], 16);
-            const low = parseInt(words[1], 16);
-            return isPrivateIpv4(`${high >> 8}.${high & 255}.${low >> 8}.${low & 255}`);
-        }
-        return isPrivateIpv4(host.slice(7));
-    }
-
-    // Only globally routable IPv6 unicast; reject transition, multicast,
-    // documentation and other special-purpose ranges conservatively.
-    if (host.includes(":")) {
-        const words = host.split(":");
-        const special2001 = words[0] === "2001" && (parseInt(words[1] || "0", 16) < 0x200);
-        return !/^[23][0-9a-f]{3}:/.test(host) || special2001 || host.startsWith("2001:db8:") || host.startsWith("2002:") || host.startsWith("3fff:");
-    }
+    if (host.includes(":")) return !isPublicAddress(host);
 
     return false;
 }
@@ -113,10 +53,12 @@ export function validateTarget(
     ) {
         return "Only HTTP and HTTPS URLs are supported.";
     }
+    if(!allowPrivate&&(target.protocol!=="https:"||target.port!==""))return "Public URLs require HTTPS on port 443.";
 
     if (target.username || target.password) {
         return "URLs containing usernames or passwords are not supported.";
     }
+    if (!allowPrivate && isServiceHostname(target.hostname)) return "Fresh402 and privileged service targets are not allowed.";
 
     const sensitiveQueryNames = new Set([
         "access_token",
@@ -164,11 +106,18 @@ export async function fetchTarget(
     validators?: {
         etag?: string | null;
         last_modified?: string | null;
+        origin?: string;
     },
     allowedHosts?: string,
+    gateway?: EgressGateway,
+    signal?: AbortSignal,
 ): Promise<{ response: Response; body: string; finalUrl: string }> {
     let current = new URL(target.toString());
     const controller = new AbortController();
+    const abort = () => controller.abort(new BodyReadError("request_cancelled", "Request was cancelled.", 408));
+    signal?.addEventListener("abort", abort, { once: true });
+    if (signal?.aborted) abort();
+    const validatorOrigin = validators?.origin ?? target.origin;
     // One deadline includes every redirect, response headers and streamed body.
     const timeout = setTimeout(() => controller.abort(new BodyReadError(
         "upstream_timeout", "Target response timed out.", 504,
@@ -180,7 +129,8 @@ export async function fetchTarget(
             hop <= MAX_REDIRECTS;
             hop++
         ) {
-            if (allowedHosts !== undefined && (current.protocol !== "https:" || current.port !== "" && current.port !== "443")) {
+            controller.signal.throwIfAborted();
+            if (!allowPrivate && (current.protocol !== "https:" || current.port !== "" && current.port !== "443")) {
                 throw new TargetNotAllowedError("Approved-host launches require HTTPS on port 443.");
             }
             if (allowedHosts !== undefined && !allowedHosts.split(",").map(host => host.trim().toLowerCase()).includes(current.hostname.toLowerCase())) {
@@ -194,6 +144,9 @@ export async function fetchTarget(
                     validationError,
                 );
             }
+            if (gateway && current.hostname.toLowerCase().replace(/\.$/, "") === new URL(gateway.url).hostname.toLowerCase().replace(/\.$/, "")) {
+                throw new TargetNotAllowedError("Secure egress infrastructure cannot be a target.");
+            }
 
             if (!allowPrivate) await assertPublicDns(current.hostname, controller.signal, isPrivateHostname);
 
@@ -203,17 +156,21 @@ export async function fetchTarget(
                     "text/html,application/json,text/plain,application/*+json;q=0.9,text/*;q=0.8,*/*;q=0.1",
             };
 
-            if (validators?.etag) {
+            // Validators may identify private content at the prior final origin.
+            // Never disclose them to a different redirect destination.
+            const scopedValidators = current.origin === validatorOrigin ? { etag: validators?.etag, last_modified: validators?.last_modified } : undefined;
+            if (scopedValidators?.etag) {
                 headers["if-none-match"] =
-                    validators.etag;
+                    scopedValidators.etag;
             }
 
-            if (validators?.last_modified) {
+            if (scopedValidators?.last_modified) {
                 headers["if-modified-since"] =
-                    validators.last_modified;
+                    scopedValidators.last_modified;
             }
 
-            const response = await fetch(current.toString(), {
+            if(!gateway&&!allowPrivate&&allowedHosts===undefined)throw new BodyReadError("egress_unavailable","Unrestricted fetching requires the secure outbound gateway.",503);
+            const response = gateway ? await fetchViaGateway(current,scopedValidators,gateway,controller.signal) : await fetch(current.toString(), {
                 redirect: "manual",
                 signal: controller.signal,
                 headers,
@@ -260,8 +217,14 @@ export async function fetchTarget(
                 );
             }
 
-            const next =
-                new URL(location, current);
+            let next: URL;
+            try {
+                if (/[\u0000-\u0020\u007f\\]/.test(location)) throw new Error();
+                next = new URL(location, current);
+                if (!allowPrivate) validateHttpsUrl(next.href);
+            } catch {
+                throw new TargetNotAllowedError("Redirect target is invalid or unsafe.");
+            }
 
             if (
                 current.protocol === "https:" &&
@@ -295,6 +258,7 @@ export async function fetchTarget(
         throw error;
     } finally {
         clearTimeout(timeout);
+        signal?.removeEventListener("abort", abort);
     }
 }
 

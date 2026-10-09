@@ -1,0 +1,9 @@
+# Send only the reviewed gateway runtime to the image builder.
+**
+!src/
+!src/network-policy.mjs
+!gateway/
+!gateway/Dockerfile
+!gateway/egress.mjs
+!gateway/server.mjs
+!gateway/network-self-test.mjs

@@ -167,8 +167,8 @@ export async function analyzeContent(body: string, contentType: string, finalUrl
   return { document, title, description, canonical_url: canonicalUrl, headings, links, structured_data: structuredData, warnings: [...new Set(warnings)] };
 }
 
-export async function extract(input: ExtractInput, allowedHosts?: string) {
-  const fetched = await fetchTarget(new URL(input.url), false, undefined, allowedHosts);
+export async function extract(input: ExtractInput, allowedHosts?: string, gateway?: import('./egress').EgressGateway, signal?: AbortSignal) {
+  const fetched = await fetchTarget(new URL(input.url), false, undefined, allowedHosts, gateway, signal);
   if (!fetched.response.ok) throw new ServiceError("upstream_error", `Target returned HTTP ${fetched.response.status}.`, 502);
   const analyzed = await analyzeContent(fetched.body, fetched.response.headers.get("content-type") ?? "", fetched.finalUrl, input);
   const { document, ...metadata } = analyzed;

@@ -8,15 +8,23 @@ import { handleCoreRequest, FRESH402_VERSION } from "./freshness";
 import { buildOpenApiDocument, buildX402Manifest } from "./discovery";
 import { SERVICES, type ServiceId, registerSchema, ServiceError } from "./contracts";
 import { paymentConfig, paymentServer, defaultFacilitator, type Bindings, type FacilitatorFactory } from "./payments";
-import { acquireCapacity, prepareOperation, errorResponse, type PreparedOperation, type CapacityRelease } from "./operations";
+import { admitOperation, admittedBindings, prepareOperation, errorResponse, type PreparedOperation, type CapacityRelease } from "./operations";
 import { analytics, trafficClass } from "./analytics";
 import { stats } from "./stats";
 import { PaymentJournal, validateRecoveryToken } from "./payment-journal";
 import { cleanupTemporaryData } from "./maintenance";
+import {capacityConfiguration} from './capacity-config';
+export {Fresh402Egress} from './container-egress';
 
 async function toolResult(response: Response) {
   const result = await response.json<Record<string, unknown>>();
   return { content: [{ type: "text" as const, text: JSON.stringify(result) }], structuredContent: result, ...(response.ok ? {} : { isError: true }) };
+}
+
+function stagingAccessDenied(request: Request, env: Bindings): boolean {
+  if (env.ENVIRONMENT !== "staging") return false;
+  const expected = env.STAGING_ACCESS_TOKEN, supplied = request.headers.get("authorization")?.replace(/^Bearer /, "");
+  return !expected || expected.length < 32 || !supplied || supplied.length !== expected.length || !crypto.subtle.timingSafeEqual(new TextEncoder().encode(supplied), new TextEncoder().encode(expected));
 }
 
 /** Dependency injection is code-only for tests; no environment variable can bypass billing. */
@@ -27,9 +35,7 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
     c.header("X-Content-Type-Options", "nosniff");
     c.header("Cache-Control", "no-store");
     if (c.env.ENVIRONMENT === "staging") {
-      const expected = c.env.STAGING_ACCESS_TOKEN;
-      const supplied = c.req.header("authorization")?.replace(/^Bearer /, "");
-      if (!expected || expected.length < 32 || !supplied || supplied.length !== expected.length || !crypto.subtle.timingSafeEqual(new TextEncoder().encode(supplied), new TextEncoder().encode(expected))) return c.json({ error: "staging_access_required" }, 403);
+      if (stagingAccessDenied(c.req.raw, c.env)) return c.json({ error: "staging_access_required" }, 403);
       if (c.req.path.startsWith("/.well-known/")) return c.json({ error: "not_found" }, 404);
     }
     {
@@ -48,16 +54,29 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
   });
   app.get("/.well-known/glama.json", c => c.json({ "$schema": "https://glama.ai/mcp/schemas/connector.json", claim: "glama_claim_TphUzhTwuiiTc3VXeWc1uMARmUyUI2zV" }));
   app.get("/v1/stats", c => stats(c.env.DB));
+  app.get('/__staging/egress',async c=>{
+    if(c.env.ENVIRONMENT!=='staging')return c.json({error:'not_found'},404);
+    const config=capacityConfiguration(c.env);
+    if(!c.env.EGRESS_CONTAINER)return c.json({enabled:false,pool_size:config.poolSize,running_instances:0});
+    const instances=[];for(let instance=0;instance<config.poolSize;instance++)instances.push({instance,metrics:await c.env.EGRESS_CONTAINER.getByName('fresh402-egress-'+instance).diagnostics()});
+    return c.json({enabled:config.enabled,pool_size:config.poolSize,instances});
+  });
+  app.post('/__staging/egress/stop',async c=>{
+    if(c.env.ENVIRONMENT!=='staging')return c.json({error:'not_found'},404);
+    const config=capacityConfiguration(c.env);
+    if(c.env.EGRESS_CONTAINER)for(let instance=0;instance<config.poolSize;instance++)await c.env.EGRESS_CONTAINER.getByName('fresh402-egress-'+instance).shutdown();
+    return c.json({stopped:true,pool_size:config.poolSize});
+  });
   app.post("/v1/register", async c => {
-    const release = await acquireCapacity(c.env.DB, await c.req.raw.clone().json().catch(() => null), Number(c.env.OPERATION_DAILY_LIMIT ?? "10000"));
+    const input=await c.req.raw.clone().json().catch(()=>null);let release:CapacityRelease|undefined;
     try {
-      const response = await handleCoreRequest(c.req.raw, c.env);
+      const response = await handleCoreRequest(c.req.raw,{...c.env,beforeRegisterFetch:async()=>{release=await admitOperation(c.env,input,true);return admittedBindings(c.env,release);}});
       if (response.ok) {
         const body = await response.clone().json<{ created: boolean }>();
         await analytics(c.env.DB, "rest", trafficClass(c.req.raw))("register", body.created ? "registration_created" : "registration_existing");
       }
       return response;
-    } finally { await release(); }
+    } finally { if(release)await release(); }
   });
   for (const service of Object.keys(SERVICES) as ServiceId[]) {
     app.post(SERVICES[service].path, async c => {
@@ -79,14 +98,17 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
       let prepared: PreparedOperation | undefined, release: CapacityRelease | undefined;
       try {
         const result = await gate(c, async () => {
-          release = await acquireCapacity(c.env.DB, parsed.data, Number(c.env.OPERATION_DAILY_LIMIT ?? "10000"));
-          prepared = await prepareOperation(service, parsed.data, c.env);
-          await journal.stage(prepared, release.owner);
+          try {
+            release = await admitOperation(c.env, parsed.data);
+            prepared = await prepareOperation(service, parsed.data, { ...admittedBindings(c.env,release), requestSignal: c.req.raw.signal });
+            await journal.stage(prepared, release.owner);
+          }catch(error){await journal.failPreparation();throw error;}
           // SDK consumes the response body before settlement. Keep the original
           // available to report persistence failures after a confirmed charge.
           c.res = prepared.response.clone();
         });
         let response = result instanceof Response ? result : c.res;
+        if(payment.wasAdmissionRejected())response=errorResponse(new ServiceError('payment_capacity_exceeded','Verified payment admission is exhausted. Retry later with the original authorization.',429));
         if (response.status === 402 && !attempted) await count(service, "initial_402");
         if (response.ok && payment.wasSettled() && prepared) {
           const committed = await journal.paidResponse();
@@ -107,11 +129,10 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
       const server = new McpServer({ name: "Fresh402", version: FRESH402_VERSION });
       server.registerTool("fresh402_register", {
         description: "Create or retrieve a free persistent baseline. Existing registrations never refetch the target. No JavaScript execution.", inputSchema: registerSchema,
-      }, async args => {
+      }, async (args, ctx) => {
         let release: CapacityRelease | undefined;
         try {
-          release = await acquireCapacity(c.env.DB, args, Number(c.env.OPERATION_DAILY_LIMIT ?? "10000"));
-          const response = await handleCoreRequest(new Request("https://fresh402.internal/v1/register", { method: "POST", body: JSON.stringify(args) }), c.env);
+          const response = await handleCoreRequest(new Request("https://fresh402.internal/v1/register", { method: "POST", body: JSON.stringify(args) }), { ...c.env, requestSignal: ctx.mcpReq.signal,beforeRegisterFetch:async()=>{release=await admitOperation(c.env,args,true);return admittedBindings(c.env,release);} });
           if (response.ok) {
             const body = await response.clone().json<{ created: boolean }>();
             await count("register", body.created ? "registration_created" : "registration_existing");
@@ -140,12 +161,15 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
               accepts, extensions: config.extensions,
               resource: { url: `${new URL(c.req.url).origin}/mcp#${SERVICES[service].tool}`, description: config.description, mimeType: config.mimeType },
             })(async () => {
-              release = await acquireCapacity(c.env.DB, args, Number(c.env.OPERATION_DAILY_LIMIT ?? "10000"));
-              prepared = await prepareOperation(service, args, c.env);
-              await journal.stage(prepared, release.owner);
+              try {
+                release = await admitOperation(c.env, args);
+                prepared = await prepareOperation(service, args, { ...admittedBindings(c.env,release), requestSignal: ctx.mcpReq.signal });
+                await journal.stage(prepared, release.owner);
+              }catch(error){await journal.failPreparation();throw error;}
               return toolResult(prepared.response.clone());
             });
             const result = await paid(args, { _meta: ctx.mcpReq._meta, signal: ctx.mcpReq.signal, requestId: ctx.mcpReq.id });
+            if(payment.wasAdmissionRejected())return toolResult(errorResponse(new ServiceError('payment_capacity_exceeded','Verified payment admission is exhausted. Retry later with the original authorization.',429)));
             if (result.isError && !attempted) await count(service, "initial_402");
             if (!result.isError && payment.wasSettled() && prepared) {
               const committed = await journal.paidResponse();
@@ -176,6 +200,8 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
 }
 const app = createApp();
 export async function boundedFetch(request: Request, env: Bindings, ctx: ExecutionContext, application = app): Promise<Response> {
+  // Authenticate before allocating or waiting for an attacker-controlled body.
+  if (stagingAccessDenied(request, env)) return Response.json({ error: "staging_access_required" }, { status: 403, headers: { "cache-control": "no-store", "x-content-type-options": "nosniff" } });
   if (request.method === "POST") {
     try { request = new Request(request, { body: await readRequestBody(request) }); }
     catch (error) {

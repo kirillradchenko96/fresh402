@@ -6,23 +6,28 @@ import type { PaymentRequired, PaymentPayload } from "@x402/core/types";
 import { boundedFetch, createApp } from "../src/index";
 import { NETWORK, PAY_TO, type Bindings } from "../src/payments";
 import { SERVICES, type ServiceId, extractSchema } from "../src/contracts";
-import { analyzeContent, extract, type IntelligenceDocument } from "../src/extract";
-import { compareDocuments, prepareSmartDiff } from "../src/smart-diff";
+import { analyzeContent, extract as extractUnscoped, type IntelligenceDocument } from "../src/extract";
+import { compareDocuments, prepareSmartDiff as prepareSmartDiffUnscoped } from "../src/smart-diff";
 import { handleCoreRequest } from "../src/freshness";
-import { acquireCapacity } from "../src/operations";
+import { acquireCapacity,admitOperation } from "../src/operations";
 import { cleanupTemporaryData } from "../src/maintenance";
+import {EgressController} from '../src/container-egress';
+import {PaymentJournal} from '../src/payment-journal';
+import {reserveGlobalRuntime} from '../src/container-runtime';
 import { digest } from "../src/extract";
 import { validateDiscoveryExtension } from "@x402/extensions/bazaar";
 import { PROTOCOL_VERSION_META_KEY, CLIENT_INFO_META_KEY, CLIENT_CAPABILITIES_META_KEY } from "@modelcontextprotocol/server";
 
 vi.mock("../src/dns", () => ({ assertPublicDns: vi.fn(async () => {}) }));
 declare global { namespace Cloudflare { interface Env { TEST_MIGRATIONS: D1Migration[] } } }
+const extract = (input: Parameters<typeof extractUnscoped>[0]) => extractUnscoped(input,"public.example");
+const prepareSmartDiff = (db: D1Database,input: Parameters<typeof prepareSmartDiffUnscoped>[1]) => prepareSmartDiffUnscoped(db,input,"public.example");
 const payer = "0x1111111111111111111111111111111111111111";
 let facilitator: FacilitatorClient, bindings: Bindings, application: ReturnType<typeof createApp>;
 let errorLog: { mock: { calls: unknown[][] } };
 beforeAll(async () => { await applyD1Migrations(env.DB, env.TEST_MIGRATIONS); });
 beforeEach(async () => {
-  await env.DB.batch(["operation_budget", "payment_operations", "smart_snapshots", "smart_baselines", "watch_snapshots", "watches", "operation_leases", "payment_claims", "analytics_daily", "payment_events"].map(table => env.DB.prepare(`DELETE FROM ${table}`)));
+  await env.DB.batch(["gateway_runtime_budget","verified_payment_budget","operation_budget", "payment_operations", "smart_snapshots", "smart_baselines", "watch_snapshots", "watches", "operation_leases", "payment_claims", "analytics_daily", "payment_events"].map(table => env.DB.prepare(`DELETE FROM ${table}`)));
   facilitator = {
     getSupported: vi.fn(async () => ({ kinds: [{ x402Version: 2, scheme: "exact", network: NETWORK }], extensions: [], signers: {} })),
     verify: vi.fn(async () => ({ isValid: true, payer })),
@@ -66,7 +71,110 @@ async function rpc(result: Response): Promise<any> {
   return text.startsWith("event:") || text.startsWith("data:") ? JSON.parse(text.split("\n").find(s => s.startsWith("data:"))!.slice(5)) : JSON.parse(text);
 }
 
+describe('paid API through the admitted Container controller',()=>{
+  const token=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
+  const authHeaders=(value:string)=>({'x-fresh402-recovery-token':value});
+  function containerGateway() {
+    let price=10,crash=false;const values=new Map<string,unknown>(),codeHash='a'.repeat(64),gatewayToken='x'.repeat(43);
+    const nodeFetch=vi.fn(async(input:string|Request)=>{
+      if(String(input).endsWith('/health'))return Response.json({policy:'literal-public-tls-v1',code_hash:codeHash});
+      if(crash)throw new Error('simulated gateway process termination');
+      return new Response(JSON.stringify({product:'fixture',price}),{headers:{'content-type':'application/json','x-fresh402-upstream-status':'200','x-fresh402-egress-policy':'literal-public-tls-v1'}});
+    });
+    const container={running:false,start:vi.fn(()=>{container.running=true;}),setInactivityTimeout:vi.fn(async()=>{}),getTcpPort:()=>({fetch:nodeFetch}),destroy:vi.fn(async()=>{container.running=false;})};
+    const storage:any={get:async(key:string)=>values.get(key),put:async(key:string,value:unknown)=>{values.set(key,value);},setAlarm:async()=>{},deleteAlarm:async()=>{},transaction:async(fn:any)=>fn(storage)};
+    bindings={...bindings,TARGET_HOST_ALLOWLIST:undefined,TARGET_FETCH_MODE:'container',CONTAINER_EGRESS_ENABLED:'1',GATEWAY_BUDGET_WINDOW:'unit',GATEWAY_BUDGET_EXPIRES_MS:String(Date.now()+3600000),GATEWAY_POOL_SIZE:'1',GATEWAY_INSTANCE_CONCURRENCY:'4',GATEWAY_RUNTIME_BUDGET_SECONDS:'300',GATEWAY_CODE_HASH:codeHash,EGRESS_GATEWAY_TOKEN:gatewayToken};
+    const controller=new EgressController({container,storage,blockConcurrencyWhile:async(fn:any)=>fn()} as any,bindings);
+    const getByName=vi.fn(()=>({fetch:(input:Request)=>controller.fetch(input)}));bindings.EGRESS_CONTAINER={getByName} as any;
+    return {container,nodeFetch,getByName,setPrice:(value:number)=>{price=value;},setCrash:(value:boolean)=>{crash=value;}};
+  }
+  it('discovery, initial challenges and invalid payment verification never boot a Container',async()=>{
+    const gateway=containerGateway(),input={url:'https://public.example/'};
+    const offered=await request('/v2/extract',input);expect(offered.status).toBe(402);
+    vi.mocked(facilitator.verify).mockResolvedValueOnce({isValid:false,invalidReason:'invalid_signature'});
+    const payment=paymentFor(JSON.parse(atob(offered.headers.get('payment-required')!)));
+    expect((await request('/v2/extract',input,payment)).status).toBe(402);
+    expect(gateway.container.start).not.toHaveBeenCalled();expect(gateway.getByName).not.toHaveBeenCalled();expect(facilitator.settle).not.toHaveBeenCalled();
+    expect(await env.DB.prepare('SELECT COUNT(*) n FROM verified_payment_budget').first('n')).toBe(0);
+  });
+  it('verified unpaid demand is rejected before unlimited journal creation or Container startup',async()=>{
+    const gateway=containerGateway(),input={url:'https://public.example/'},payment=await getPayment('extract',input);bindings.VERIFIED_PAYMENT_DAILY_LIMIT='0';
+    expect((await request('/v2/extract',input,payment,authHeaders(token()))).status).toBe(429);expect(await env.DB.prepare('SELECT COUNT(*) n FROM payment_operations').first('n')).toBe(0);expect(gateway.container.start).not.toHaveBeenCalled();expect(facilitator.settle).not.toHaveBeenCalled();
+  });
+  it('registration, paid Check and completed recovery retain snapshots without restarting egress',async()=>{
+    const gateway=containerGateway(),registered=await request('/v1/register',{url:'https://public.example/'});expect(registered.status).toBe(200);const watch=await registered.json<{watch_id:string}>();
+    gateway.setPrice(20);const input={watch_id:watch.watch_id,include_diff:true},payment=await getPayment('check',input),recovery=token();
+    const checked=await request('/v1/check',input,payment,authHeaders(recovery));expect(checked.status).toBe(200);expect(await checked.json()).toMatchObject({changed:true});
+    const before=gateway.nodeFetch.mock.calls.length;await gateway.container.destroy();
+    expect((await request('/v1/check',input,payment,authHeaders(recovery))).status).toBe(200);expect(gateway.nodeFetch.mock.calls.length).toBe(before);expect(facilitator.settle).toHaveBeenCalledOnce();
+    expect(await env.DB.prepare('SELECT COUNT(*) n FROM watch_snapshots').first('n')).toBe(2);expect(await env.DB.prepare("SELECT COUNT(*) n FROM payment_operations WHERE state='completed'").first('n')).toBe(1);
+  });
+  it('existing registration returns during a disabled fetch budget without starting egress',async()=>{
+    const gateway=containerGateway(),input={url:'https://public.example/'};expect((await request('/v1/register',input)).status).toBe(200);
+    const before=gateway.nodeFetch.mock.calls.length,admissions=await env.DB.prepare('SELECT started FROM operation_budget').first('started');bindings.OPERATION_DAILY_LIMIT='0';bindings.FREE_REGISTRATION_DAILY_LIMIT='0';
+    const repeated=await request('/v1/register',input);expect(repeated.status).toBe(200);expect(await repeated.json()).toMatchObject({created:false});expect(gateway.nodeFetch.mock.calls.length).toBe(before);expect(await env.DB.prepare('SELECT started FROM operation_budget').first('started')).toBe(admissions);
+  });
+  it('paid Extract persists a result through the private Container transport',async()=>{
+    const gateway=containerGateway(),input={url:'https://public.example/'},payment=await getPayment('extract',input);
+    const response=await request('/v2/extract',input,payment,authHeaders(token()));expect(response.status).toBe(200);expect(await response.json()).toMatchObject({data:{product:'fixture',price:10}});expect(facilitator.settle).toHaveBeenCalledOnce();expect(gateway.container.start).toHaveBeenCalledOnce();
+  });
+  it('paid Smart Diff uses the same admitted transport and durable finalization',async()=>{
+    const gateway=containerGateway();const registered=await request('/v1/register',{url:'https://public.example/'});const watch=await registered.json<{watch_id:string}>();
+    const input={watch_id:watch.watch_id,compare_to:'previous'},payment=await getPayment('smart_diff',input);
+    const result=await request('/v2/smart-diff',input,payment,authHeaders(token()));expect(result.status).toBe(200);expect(facilitator.settle).toHaveBeenCalledOnce();expect(gateway.getByName).toHaveBeenCalledWith('fresh402-egress-0');
+  });
+  it('a gateway crash rejects before settlement and a safe original-proof retry settles once',async()=>{
+    const gateway=containerGateway(),input={url:'https://public.example/'},payment=await getPayment('extract',input),recovery=token();
+    gateway.setCrash(true);expect((await request('/v2/extract',input,payment,authHeaders(recovery))).status).toBe(503);expect(facilitator.settle).not.toHaveBeenCalled();
+    gateway.setCrash(false);expect((await request('/v2/extract',input,payment,authHeaders(recovery))).status).toBe(200);expect(facilitator.settle).toHaveBeenCalledOnce();
+  });
+  it('concurrent original-proof retries after a failed preparation cannot settle twice',async()=>{
+    const gateway=containerGateway(),input={url:'https://public.example/'},payment=await getPayment('extract',input),recovery=token();
+    gateway.setCrash(true);expect((await request('/v2/extract',input,payment,authHeaders(recovery))).status).toBe(503);gateway.setCrash(false);
+    const responses=await Promise.all([request('/v2/extract',input,payment,authHeaders(recovery)),request('/v2/extract',input,payment,authHeaders(recovery))]);
+    expect(responses.some(response=>response.status===200)).toBe(true);expect(facilitator.settle).toHaveBeenCalledOnce();expect(await env.DB.prepare('SELECT COUNT(*) n FROM payment_events').first('n')).toBe(1);
+  });
+  it('changed request or wrong recovery credential cannot take over a failed preparation',async()=>{
+    const gateway=containerGateway(),input={url:'https://public.example/'},payment=await getPayment('extract',input),recovery=token();gateway.setCrash(true);
+    expect((await request('/v2/extract',input,payment,authHeaders(recovery))).status).toBe(503);gateway.setCrash(false);
+    expect((await request('/v2/extract',{...input,max_chars:100},payment,authHeaders(recovery))).status).toBe(409);
+    expect((await request('/v2/extract',input,payment,authHeaders(token()))).status).toBe(402);expect(facilitator.settle).not.toHaveBeenCalled();
+    expect(await env.DB.prepare('SELECT state FROM payment_operations').first('state')).toBe('failed');
+  });
+  it('capacity rejection before preparation preserves a safe original-proof retry',async()=>{
+    const gateway=containerGateway(),input={url:'https://public.example/'},payment=await getPayment('extract',input),recovery=token();bindings.OPERATION_DAILY_LIMIT='0';
+    expect((await request('/v2/extract',input,payment,authHeaders(recovery))).status).toBe(429);expect(facilitator.settle).not.toHaveBeenCalled();expect(gateway.container.start).not.toHaveBeenCalled();
+    bindings.OPERATION_DAILY_LIMIT='1000';expect((await request('/v2/extract',input,payment,authHeaders(recovery))).status).toBe(200);expect(facilitator.settle).toHaveBeenCalledOnce();
+  });
+  it('a Worker restart after preparation recomputes data only after the old lease ends',async()=>{
+    const gateway=containerGateway(),input={url:'https://public.example/'},payment=await getPayment('extract',input),recovery=token(),journal=new PaymentJournal(env.DB,'extract','rest',extractSchema.parse(input),recovery);
+    expect(await journal.reserve(payment,payment.accepted)).toBe(true);const lease=await acquireCapacity(env.DB,input);
+    await journal.stage({response:Response.json({data:{price:1},old_unsettled_result:true})},lease.owner);
+    expect((await request('/v2/extract',input,payment,authHeaders(recovery))).status).toBe(409);expect(facilitator.settle).not.toHaveBeenCalled();
+    await lease();gateway.setPrice(20);const result=await request('/v2/extract',input,payment,authHeaders(recovery));expect(result.status).toBe(200);expect(await result.json()).toMatchObject({data:{price:20}});expect(facilitator.settle).toHaveBeenCalledOnce();
+  });
+  it('abandoned preparing work becomes reclaimable after its bounded lease window without paying twice',async()=>{
+    const gateway=containerGateway(),input={url:'https://public.example/'},payment=await getPayment('extract',input),recovery=token(),journal=new PaymentJournal(env.DB,'extract','rest',extractSchema.parse(input),recovery);
+    expect(await journal.reserve(payment,payment.accepted)).toBe(true);expect((await request('/v2/extract',input,payment,authHeaders(recovery))).status).toBe(409);
+    await env.DB.prepare('UPDATE payment_operations SET updated_at=?').bind(Date.now()-120001).run();
+    expect((await request('/v2/extract',input,payment,authHeaders(recovery))).status).toBe(200);expect(facilitator.settle).toHaveBeenCalledOnce();expect(gateway.container.start).toHaveBeenCalledOnce();
+  });
+});
+
 describe("Web Extract", () => {
+  it("cancelled paid preparation never settles or records a financial event", async () => {
+    const input = { url: "https://public.example/" }, payment = await getPayment("extract", input);
+    const controller = new AbortController(), ctx = createExecutionContext(); controller.abort();
+    const response = await boundedFetch(new Request("https://service.example/v2/extract", {
+      method: "POST", signal: controller.signal, headers: { "content-type": "application/json", "payment-signature": btoa(JSON.stringify(payment)) }, body: JSON.stringify(input),
+    }), bindings, ctx, application);
+    await waitOnExecutionContext(ctx);
+    expect(response.status).toBe(408);
+    expect(facilitator.settle).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+    expect(await env.DB.prepare("SELECT COUNT(*) n FROM payment_events").first("n")).toBe(0);
+    expect(await env.DB.prepare("SELECT COUNT(*) n FROM payment_operations WHERE state IN ('settling','settled','completed')").first("n")).toBe(0);
+  });
   it("extracts scoped main content, entities, metadata, links and JSON-LD without executing scripts", async () => {
     vi.mocked(fetch).mockResolvedValueOnce(target(`<html><head><title>A &amp; B</title><meta name="description" content="Example"><link rel="canonical" href="/canonical"><script type="application/ld+json">{"@type":"Product","price":9}</script></head><body><nav>menu</nav><main><h1>Product</h1><p>Hello <strong>world</strong> &copy;</p><a href="/next">Next</a><a href="javascript:alert(1)">bad</a><script>fetch('https://evil.example')</script><div class="cookie">cookie noise</div></main><aside>ad</aside></body></html>`));
     const result = await extract(extractSchema.parse({ url: "https://public.example/" }));
@@ -324,11 +432,45 @@ describe("MCP compatibility", () => {
 });
 
 describe("capacity and analytics", () => {
+  it("uses one atomic runtime ceiling across instances and pool expansion",async()=>{
+    const expiry=Date.now()+3600000,results=await Promise.allSettled(Array.from({length:3},()=>reserveGlobalRuntime(env.DB,'approved',expiry,120000)));
+    expect(results.filter(result=>result.status==='fulfilled')).toHaveLength(2);expect(await env.DB.prepare('SELECT reserved_ms FROM gateway_runtime_budget').first('reserved_ms')).toBe(120000);
+    await expect(reserveGlobalRuntime(env.DB,'approved',expiry,120000)).rejects.toMatchObject({code:'egress_budget_exhausted'});
+    await expect(reserveGlobalRuntime(env.DB,'approved',expiry+1000,180000)).rejects.toMatchObject({code:'egress_budget_exhausted'});
+  });
   it("allows only eight global operations and releases leases", async () => {
     const releases = await Promise.all(Array.from({length:8},()=>acquireCapacity(env.DB)));
     await expect(acquireCapacity(env.DB)).rejects.toMatchObject({ code:"capacity_exceeded" });
     await releases[0](); const next = await acquireCapacity(env.DB); await next();
     await Promise.all(releases.slice(1).map(fn=>fn()));
+  });
+  it("expands global leases beyond eight while filling a bounded two-instance pool",async()=>{
+    const releases=await Promise.all(Array.from({length:12},()=>acquireCapacity(env.DB,undefined,100,{concurrency:12})));
+    expect(new Set(releases.map(release=>release.slot)).size).toBe(12);
+    await expect(acquireCapacity(env.DB,undefined,100,{concurrency:12})).rejects.toMatchObject({code:'capacity_exceeded'});
+    await Promise.all(releases.map(release=>release()));
+  });
+  it("packs admitted work into the warm instance before using another instance",async()=>{
+    const releases=await Promise.all(Array.from({length:8},()=>acquireCapacity(env.DB,undefined,100,{concurrency:8})));
+    expect(releases.map(release=>Math.floor(release.slot/4)).sort()).toEqual([0,0,0,0,1,1,1,1]);
+    await releases[1]();const again=await acquireCapacity(env.DB,undefined,100,{concurrency:8});expect(again.slot).toBe(1);await again();await Promise.all(releases.filter((_,i)=>i!==1).map(release=>release()));
+  });
+  it("reserves independent free-registration admission without excluding paid demand",async()=>{
+    const free=await acquireCapacity(env.DB,undefined,10,{registration:true,freeLimit:1});await free();
+    await expect(acquireCapacity(env.DB,undefined,10,{registration:true,freeLimit:1})).rejects.toMatchObject({code:'capacity_exceeded'});
+    const paid=await acquireCapacity(env.DB,undefined,10,{registration:false,freeLimit:1});await paid();
+    expect(await env.DB.prepare('SELECT free_started FROM operation_budget').first('free_started')).toBe(1);
+  });
+  it("reserves a per-instance seat for verified paid demand during a free-registration surge",async()=>{
+    const free=await Promise.all(Array.from({length:3},()=>acquireCapacity(env.DB,undefined,100,{concurrency:4,registration:true,slotsPerInstance:4})));
+    await expect(acquireCapacity(env.DB,undefined,100,{concurrency:4,registration:true,slotsPerInstance:4})).rejects.toMatchObject({code:'capacity_exceeded'});
+    const paid=await acquireCapacity(env.DB,undefined,100,{concurrency:4,slotsPerInstance:4});expect(paid.slot).toBe(3);await paid();await Promise.all(free.map(release=>release()));
+  });
+  it("bounds per-isolate buffers independently of expanded global capacity and releases admission once",async()=>{
+    const selected={...bindings,OPERATION_CONCURRENCY:'16',OPERATION_ISOLATE_CONCURRENCY:'2'};
+    const first=await admitOperation(selected,undefined),second=await admitOperation(selected,undefined);
+    await expect(admitOperation(selected,undefined)).rejects.toMatchObject({code:'capacity_exceeded'});
+    await first();await first();const third=await admitOperation(selected,undefined);await third();await second();
   });
   it("serializes the same resource across URL and watch-id calls",async()=>{
     const watch=await baseline();
@@ -539,6 +681,12 @@ describe("release payment recovery and failure isolation", () => {
     const challenge=await request("/v2/extract",input,undefined,{authorization:"Bearer "+bindings.STAGING_ACCESS_TOKEN});
     expect(challenge.status).toBe(402);
     expect(JSON.parse(atob(challenge.headers.get("payment-required")!)).extensions ?? {}).toEqual({});
+  });
+  it("rejects unauthenticated staging requests before reading a hanging body",async()=>{
+    bindings={...bindings,ENVIRONMENT:"staging",STAGING_ACCESS_TOKEN:token()};
+    const pull=vi.fn(),stream=new ReadableStream<Uint8Array>({pull},{highWaterMark:0}),ctx=createExecutionContext();
+    const response=await boundedFetch(new Request("https://service.example/v2/extract",{method:"POST",body:stream}),bindings,ctx,application);
+    expect(response.status).toBe(403);expect(pull).not.toHaveBeenCalled();expect(facilitator.verify).not.toHaveBeenCalled();await stream.cancel();
   });
   it.each(["short", "!".repeat(64)])("rejects invalid recovery tokens before verification: %s",async key=>{
     expect((await request("/v2/extract",input,undefined,authHeaders(key))).status).toBe(400);

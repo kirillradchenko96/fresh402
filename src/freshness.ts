@@ -2,6 +2,8 @@ import { sql, statements as buildStatements, type SqlWrite } from "./sql";
 ﻿import { BodyReadError, readRequestBody } from "./body";
 
 import { fetchTarget, validateTarget, TargetNotAllowedError } from "./safe-fetch";
+import {gatewayFromBindings,type EgressBindings} from "./egress";
+import type {CapacityBindings} from './capacity-config';
 
 export const NORMALIZER_VERSION = 2;
 export const FRESH402_VERSION = "2.0.0-rc.1";
@@ -22,7 +24,9 @@ async function writeBatch(db: D1Database, statements: SqlWrite[], defer?: Deferr
     if (defer) defer(statements); else await db.batch(buildStatements(db, statements));
 }
 
-export interface FreshnessEnv {
+export interface FreshnessEnv extends EgressBindings, CapacityBindings {
+    requestSignal?: AbortSignal;
+    beforeRegisterFetch?: () => Promise<FreshnessEnv>;
     TARGET_HOST_ALLOWLIST?: string;
     deferWrites?: DeferredWrites;
     DB: D1Database;
@@ -670,6 +674,7 @@ function parseUrlConfig(
     let target: URL;
 
     try {
+        if (!allowPrivate && (/[\u0000-\u0020\u007f\\]/.test(body.url) || !/^https:\/\//i.test(body.url))) throw new Error();
         target = new URL(body.url);
     } catch {
         throw new Fresh402InputError(
@@ -1388,6 +1393,10 @@ async function handleRegister(
     const limited = await limitNewRegistration(env, config.url);
     if (limited) return limited;
 
+    // Existing baselines return above. Only a new external fetch consumes the
+    // global/free budget or reserves a Container admission slot.
+    if(env.beforeRegisterFetch)env={...env,...await env.beforeRegisterFetch()};
+
     const startedAt = Date.now();
     const { response, body: responseBody, finalUrl } =
         await fetchTarget(
@@ -1395,6 +1404,8 @@ async function handleRegister(
             allowPrivate,
             undefined,
             env.TARGET_HOST_ALLOWLIST,
+            gatewayFromBindings(env),
+            env.requestSignal ?? request.signal,
         );
 
     if (!response.ok) {
@@ -1718,9 +1729,12 @@ async function handleCheck(
                       etag: existing.etag,
                       last_modified:
                           existing.last_modified,
+                      origin: new URL(existing.final_url).origin,
                   }
                 : undefined,
             env.TARGET_HOST_ALLOWLIST,
+            gatewayFromBindings(env),
+            env.requestSignal ?? request.signal,
         );
 
     const now =

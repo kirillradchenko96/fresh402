@@ -124,7 +124,7 @@ function legacyDocument(row: LegacySnapshot): IntelligenceDocument {
   if (data !== null) checkJsonComplexity(data);
   return { kind: row.content_kind, text: row.normalized_content, data, blocks: [{ kind: "text", key: null, text: row.normalized_content }], fidelity: row.content_kind === "json" ? "structural" : "legacy_text" };
 }
-export async function prepareSmartDiff(db: D1Database, input: SmartDiffInput, allowedHosts?: string) {
+export async function prepareSmartDiff(db: D1Database, input: SmartDiffInput, allowedHosts?: string, gateway?: import('./egress').EgressGateway, signal?: AbortSignal) {
   const watch = await db.prepare("SELECT * FROM watches WHERE watch_id = ?").bind(input.watch_id).first<Watch>();
   if (!watch) throw new ServiceError("watch_not_found", "Register a baseline with /v1/register first.", 404);
   let saved: Snapshot | null;
@@ -144,7 +144,7 @@ export async function prepareSmartDiff(db: D1Database, input: SmartDiffInput, al
     if (!row) throw new ServiceError("snapshot_not_found", "Requested snapshot is unavailable or outside retention.", 404);
     prior = legacyDocument(row); previousHash = row.hash; source = "v1_snapshot";
   }
-  const fetched = await fetchTarget(new URL(watch.url), false, undefined, allowedHosts);
+  const fetched = await fetchTarget(new URL(watch.url), false, undefined, allowedHosts, gateway, signal);
   if (!fetched.response.ok) throw new ServiceError("upstream_error", `Target returned HTTP ${fetched.response.status}.`, 502);
   const { document: current } = await analyzeContent(fetched.body, fetched.response.headers.get("content-type") ?? "", fetched.finalUrl, {
     selector: watch.selector ?? undefined, ignore_selectors: JSON.parse(watch.ignore_selectors_json), ignore_json_paths: JSON.parse(watch.ignore_json_paths_json),

@@ -14,6 +14,7 @@ import { cleanupTemporaryData } from "../src/maintenance";
 import {EgressController} from '../src/container-egress';
 import {PaymentJournal} from '../src/payment-journal';
 import {reserveGlobalRuntime} from '../src/container-runtime';
+import {egressReleaseIdentity} from '../src/egress-release';
 import { digest } from "../src/extract";
 import { validateDiscoveryExtension } from "@x402/extensions/bazaar";
 import { PROTOCOL_VERSION_META_KEY, CLIENT_INFO_META_KEY, CLIENT_CAPABILITIES_META_KEY } from "@modelcontextprotocol/server";
@@ -725,6 +726,18 @@ describe("release extraction regression fixtures",()=>{
 });
 
 describe('expired staging pilot control',()=>{
+  it('does not report readiness from the enabled front Worker when the actual DO is stale',async()=>{
+    const secret='synthetic-stage-token-'.repeat(3),diagnostics=vi.fn(async()=>({running:false}));
+    const old={...bindings,CONTAINER_EGRESS_ENABLED:'0',GATEWAY_BUDGET_WINDOW:'old',GATEWAY_BUDGET_EXPIRES_MS:'0'};
+    bindings={...bindings,ENVIRONMENT:'staging',STAGING_ACCESS_TOKEN:secret,CONTAINER_EGRESS_ENABLED:'1',GATEWAY_BUDGET_WINDOW:'new',GATEWAY_BUDGET_EXPIRES_MS:String(Date.now()+120000),EGRESS_CONTAINER:{getByName:()=>({diagnostics,releaseIdentity:()=>egressReleaseIdentity(old)})} as unknown as NonNullable<Bindings['EGRESS_CONTAINER']>};
+    const response=await application.fetch(new Request('https://service.example/__staging/egress',{headers:{authorization:'Bearer '+secret}}),bindings,createExecutionContext());expect(response.status).toBe(200);expect(await response.json()).toMatchObject({enabled:true,ready:false,coherent:false,instances:[{coherent:false,release:{enabled:false,approved:false}}]});
+  });
+  it('keeps production operator inspection private and usable with its independent gateway credential',async()=>{
+    const secret='synthetic-production-operator-'.repeat(3);bindings={...bindings,ENVIRONMENT:'production',EGRESS_GATEWAY_TOKEN:secret,CONTAINER_EGRESS_ENABLED:'0'};
+    expect((await application.fetch(new Request('https://service.example/__staging/egress'),bindings,createExecutionContext())).status).toBe(404);
+    expect((await application.fetch(new Request('https://service.example/__staging/egress',{headers:{authorization:'Bearer wrong'}}),bindings,createExecutionContext())).status).toBe(404);
+    expect((await application.fetch(new Request('https://service.example/__staging/egress',{headers:{authorization:'Bearer '+secret}}),bindings,createExecutionContext())).status).toBe(200);
+  });
   it('returns 429 for exhausted free registration capacity without fetching or disclosing D1 errors',async()=>{
     const fetch=vi.fn();bindings={...bindings,TARGET_FETCH_MODE:'container',CONTAINER_EGRESS_ENABLED:'1',GATEWAY_BUDGET_WINDOW:'capacity-test',GATEWAY_BUDGET_EXPIRES_MS:String(Date.now()+120000),GATEWAY_POOL_SIZE:'1',GATEWAY_INSTANCE_CONCURRENCY:'4',EGRESS_GATEWAY_TOKEN:'synthetic-gateway-token-'.repeat(3),EGRESS_CONTAINER:{getByName:()=>({fetch})} as unknown as NonNullable<Bindings['EGRESS_CONTAINER']>};
     const held=[];for(const suffix of ['a','b','c'])held.push(await acquireCapacity(env.DB,{url:'https://public.example/held-'+suffix},1000,{concurrency:4,registration:true,freeLimit:50,slotsPerInstance:4}));
@@ -733,7 +746,7 @@ describe('expired staging pilot control',()=>{
   });
   it('permits authenticated inspection and shutdown after expiry without permitting a new target operation',async()=>{
     const secret='synthetic-stage-token-'.repeat(3),shutdown=vi.fn(async()=>{}),diagnostics=vi.fn(async()=>({running:false,reserved_ms:60000})),fetch=vi.fn();
-    bindings={...bindings,ENVIRONMENT:'staging',STAGING_ACCESS_TOKEN:secret,TARGET_FETCH_MODE:'container',CONTAINER_EGRESS_ENABLED:'1',GATEWAY_POOL_SIZE:'1',GATEWAY_BUDGET_WINDOW:'expired',GATEWAY_BUDGET_EXPIRES_MS:'1',EGRESS_CONTAINER:{getByName:()=>({shutdown,diagnostics,fetch})} as unknown as NonNullable<Bindings['EGRESS_CONTAINER']>};
+    bindings={...bindings,ENVIRONMENT:'staging',STAGING_ACCESS_TOKEN:secret,TARGET_FETCH_MODE:'container',CONTAINER_EGRESS_ENABLED:'1',GATEWAY_POOL_SIZE:'1',GATEWAY_BUDGET_WINDOW:'expired',GATEWAY_BUDGET_EXPIRES_MS:'1',EGRESS_CONTAINER:{getByName:()=>({shutdown,diagnostics,fetch,releaseIdentity:()=>egressReleaseIdentity(bindings)})} as unknown as NonNullable<Bindings['EGRESS_CONTAINER']>};
     const headers={authorization:'Bearer '+secret};
     const inspected=await application.fetch(new Request('https://service.example/__staging/egress',{headers}),bindings,createExecutionContext());expect(inspected.status).toBe(200);expect((await inspected.json() as {enabled:boolean}).enabled).toBe(false);
     const stopped=await application.fetch(new Request('https://service.example/__staging/egress/stop',{method:'POST',headers}),bindings,createExecutionContext());expect(stopped.status).toBe(200);expect(shutdown).toHaveBeenCalledOnce();

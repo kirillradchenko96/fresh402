@@ -14,6 +14,7 @@ import { stats } from "./stats";
 import { PaymentJournal, validateRecoveryToken } from "./payment-journal";
 import { cleanupTemporaryData } from "./maintenance";
 import {boundedInteger} from './capacity-config';
+import {egressReleaseIdentity,releasesMatch} from './egress-release';
 export {Fresh402Egress} from './container-egress';
 
 async function toolResult(response: Response) {
@@ -25,6 +26,11 @@ function stagingAccessDenied(request: Request, env: Bindings): boolean {
   if (env.ENVIRONMENT !== "staging") return false;
   const expected = env.STAGING_ACCESS_TOKEN, supplied = request.headers.get("authorization")?.replace(/^Bearer /, "");
   return !expected || expected.length < 32 || !supplied || supplied.length !== expected.length || !crypto.subtle.timingSafeEqual(new TextEncoder().encode(supplied), new TextEncoder().encode(expected));
+}
+function egressControlAllowed(request:Request,env:Bindings):boolean {
+  if(env.ENVIRONMENT==='staging')return true;
+  const expected=env.EGRESS_GATEWAY_TOKEN,supplied=request.headers.get('authorization')?.replace(/^Bearer /,'');
+  return Boolean(expected&&expected.length>=43&&supplied&&supplied.length===expected.length&&crypto.subtle.timingSafeEqual(new TextEncoder().encode(expected),new TextEncoder().encode(supplied)));
 }
 
 /** Dependency injection is code-only for tests; no environment variable can bypass billing. */
@@ -55,14 +61,15 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
   app.get("/.well-known/glama.json", c => c.json({ "$schema": "https://glama.ai/mcp/schemas/connector.json", claim: "glama_claim_TphUzhTwuiiTc3VXeWc1uMARmUyUI2zV" }));
   app.get("/v1/stats", c => stats(c.env.DB));
   app.get('/__staging/egress',async c=>{
-    if(c.env.ENVIRONMENT!=='staging')return c.json({error:'not_found'},404);
-    const poolSize=boundedInteger(c.env.GATEWAY_POOL_SIZE,1,1,64),enabled=c.env.CONTAINER_EGRESS_ENABLED==='1'&&Number(c.env.GATEWAY_BUDGET_EXPIRES_MS)>Date.now();
+    if(!egressControlAllowed(c.req.raw,c.env))return c.json({error:'not_found'},404);
+    const poolSize=boundedInteger(c.env.GATEWAY_POOL_SIZE,1,1,64),expected=await egressReleaseIdentity(c.env),enabled=expected.enabled&&expected.approved;
     if(!c.env.EGRESS_CONTAINER)return c.json({enabled:false,pool_size:poolSize,running_instances:0});
-    const instances=[];for(let instance=0;instance<poolSize;instance++)instances.push({instance,metrics:await c.env.EGRESS_CONTAINER.getByName('fresh402-egress-'+instance).diagnostics()});
-    return c.json({enabled,pool_size:poolSize,instances});
+    const instances=[];for(let instance=0;instance<poolSize;instance++){const stub=c.env.EGRESS_CONTAINER.getByName('fresh402-egress-'+instance),actual=await stub.releaseIdentity();instances.push({instance,release:actual,coherent:releasesMatch(expected,actual),metrics:await stub.diagnostics()});}
+    const coherent=instances.every(instance=>instance.coherent);
+    return c.json({enabled,ready:enabled&&instances.every(instance=>instance.coherent&&instance.release.enabled&&instance.release.approved),coherent,release:expected,pool_size:poolSize,instances});
   });
   app.post('/__staging/egress/stop',async c=>{
-    if(c.env.ENVIRONMENT!=='staging')return c.json({error:'not_found'},404);
+    if(!egressControlAllowed(c.req.raw,c.env))return c.json({error:'not_found'},404);
     const poolSize=boundedInteger(c.env.GATEWAY_POOL_SIZE,1,1,64);
     if(c.env.EGRESS_CONTAINER)for(let instance=0;instance<poolSize;instance++)await c.env.EGRESS_CONTAINER.getByName('fresh402-egress-'+instance).shutdown();
     return c.json({stopped:true,pool_size:poolSize});

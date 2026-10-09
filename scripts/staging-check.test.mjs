@@ -22,4 +22,6 @@ for(const [name,mutate] of [
   ["unbounded Container runtime",c=>{c.env.staging.vars.GATEWAY_RUNTIME_BUDGET_SECONDS='100000';}],
   ["unreviewed gateway image",c=>{c.env.staging.containers[0].image='docker.io/unreviewed/public:latest';}],
   ["production Container class binding",c=>{c.env.staging.durable_objects.bindings[0].script_name='fresh402';}],
+  ["missing release metadata",c=>{delete c.env.staging.version_metadata;}],
+  ["deferred Durable Object activation",c=>{c.env.staging.durable_objects.code_update_strategy={mode:'deferred',max_delay:300};}],
 ]) test("staging guard rejects "+name,()=>{const copy=structuredClone(config);mutate(copy);assert.throws(()=>checkStaging(copy));});

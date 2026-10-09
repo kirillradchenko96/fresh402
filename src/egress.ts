@@ -1,14 +1,15 @@
 import {BodyReadError,readBoundedBody,cancelBody} from './body';
 import {validateHttpsUrl} from './network-policy.mjs';
 import {capacityConfiguration,type CapacityBindings} from './capacity-config';
-export interface EgressBindings extends CapacityBindings {EGRESS_GATEWAY_URL?:string;EGRESS_GATEWAY_TOKEN?:string;EGRESS_CONTAINER?:{getByName(name:string):{fetch(request:Request):Promise<Response>}};egressLeaseOwner?:string;egressInstance?:number}
-export interface EgressGateway {url:string;token:string;fetcher?:(request:Request)=>Promise<Response>;admission?:string;instance?:number}
+import {egressReleaseIdentity,type EgressReleaseBindings} from './egress-release';
+export interface EgressBindings extends CapacityBindings,EgressReleaseBindings {EGRESS_GATEWAY_URL?:string;EGRESS_GATEWAY_TOKEN?:string;EGRESS_CONTAINER?:{getByName(name:string):{fetch(request:Request):Promise<Response>}};egressLeaseOwner?:string;egressInstance?:number}
+export interface EgressGateway {url:string;token:string;fetcher?:(request:Request)=>Promise<Response>;admission?:string;instance?:number;releaseBindings?:EgressReleaseBindings}
 export function gatewayFromBindings(env:EgressBindings):EgressGateway|undefined {
   if(env.TARGET_FETCH_MODE==='container') {
     const config=capacityConfiguration(env),instance=env.egressInstance;
     if(!config.enabled||!env.EGRESS_CONTAINER||!env.EGRESS_GATEWAY_TOKEN||env.EGRESS_GATEWAY_TOKEN.length<43||!env.egressLeaseOwner||!Number.isSafeInteger(instance)||instance!<0||instance!>=config.poolSize)throw new BodyReadError('egress_unavailable','Secure container fetching is not configured or admitted.',503);
     const stub=env.EGRESS_CONTAINER.getByName('fresh402-egress-'+instance);
-    return {url:'https://fresh402-egress.invalid/fetch',token:env.EGRESS_GATEWAY_TOKEN,admission:env.egressLeaseOwner,instance,fetcher:request=>stub.fetch(request)};
+    return {url:'https://fresh402-egress.invalid/fetch',token:env.EGRESS_GATEWAY_TOKEN,admission:env.egressLeaseOwner,instance,releaseBindings:env,fetcher:request=>stub.fetch(request)};
   }
   if(env.TARGET_FETCH_MODE==='gateway'||env.EGRESS_GATEWAY_URL||env.EGRESS_GATEWAY_TOKEN) {
     if(!env.EGRESS_GATEWAY_URL||!env.EGRESS_GATEWAY_TOKEN||env.EGRESS_GATEWAY_TOKEN.length<43)throw new BodyReadError('egress_unavailable','Secure outbound fetching is not configured.',503);
@@ -19,7 +20,10 @@ export function gatewayFromBindings(env:EgressBindings):EgressGateway|undefined 
 }
 export async function fetchViaGateway(target:URL,validators:{etag?:string|null;last_modified?:string|null}|undefined,gateway:EgressGateway,signal:AbortSignal):Promise<Response> {
   let response:Response;
+  const release=gateway.releaseBindings?await egressReleaseIdentity(gateway.releaseBindings):undefined;
+  if(release&&!release.version_id)throw new BodyReadError('egress_release_mismatch','Secure egress release identity is unavailable.',503);
   const init:RequestInit={method:'POST',redirect:'manual',signal,headers:{'content-type':'application/json',authorization:`Bearer ${gateway.token}`,...(gateway.admission?{'x-fresh402-admission':gateway.admission,'x-fresh402-instance':String(gateway.instance)}:{})},body:JSON.stringify({url:target.href,validators:validators??{}})};
+  if(release){const headers=new Headers(init.headers);headers.set('x-fresh402-release-version',release.version_id!);headers.set('x-fresh402-release-config',release.configuration_hash);init.headers=headers;}
   try {response=gateway.fetcher?await gateway.fetcher(new Request(gateway.url,init)):await fetch(gateway.url,init);}
   catch {if(signal.aborted)throw signal.reason;throw new BodyReadError('egress_unavailable','Secure outbound fetching failed.',503);}
   if(!response.ok) {
@@ -34,6 +38,7 @@ export async function fetchViaGateway(target:URL,validators:{etag?:string|null;l
     if(code==='upstream_error'||code==='unsupported_content_encoding'||code==='upstream_upgrade_not_allowed')throw new BodyReadError(code,'Target response could not be read safely.',502);
     if(code==='egress_capacity_exceeded')throw new BodyReadError(code,'Secure outbound capacity is exhausted. Retry later.',429);
     if(code==='egress_budget_exhausted')throw new BodyReadError(code,'Secure outbound operating budget is exhausted. Retry later.',429);
+    if(code==='egress_release_mismatch')throw new BodyReadError(code,'Secure egress activation is incomplete. Retry later.',503);
     throw new BodyReadError('egress_unavailable','Secure outbound fetching failed.',503);
   }
   const status=Number(response.headers.get('x-fresh402-upstream-status'));

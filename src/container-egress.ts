@@ -4,6 +4,7 @@ import {BodyReadError,readBoundedBody} from './body';
 import {ContainerRuntime,reserveRuntime,reserveGlobalRuntime,type RuntimeBudget} from './container-runtime';
 import {validateHttpsUrl} from './network-policy.mjs';
 import type {Bindings} from './payments';
+import {egressReleaseIdentity,releasesMatch,type EgressReleaseIdentity} from './egress-release';
 
 export class EgressController {
   private runtime?:ContainerRuntime;
@@ -20,6 +21,8 @@ export class EgressController {
     const timer=setTimeout(()=>controller.abort(new BodyReadError('upstream_timeout','Target response timed out.',504)),10_000);
     let admitted=false;
     try {
+      const actual=await this.releaseIdentity();
+      if(!releasesMatch({...actual,version_id:request.headers.get('x-fresh402-release-version'),configuration_hash:request.headers.get('x-fresh402-release-config')??''},actual))throw new BodyReadError('egress_release_mismatch','Secure egress activation is incomplete.',503);
       const config=capacityConfiguration(this.env);
       if(!config.enabled||!this.ctx.container||!this.env.GATEWAY_CODE_HASH)throw new BodyReadError('egress_unavailable','Secure container fetching is not configured.',503);
       if(this.active>=config.perInstance)throw new BodyReadError('egress_capacity_exceeded','Secure outbound capacity is exhausted.',429);
@@ -48,6 +51,7 @@ export class EgressController {
     }catch(error){const safe=error instanceof BodyReadError?error:new BodyReadError('egress_unavailable','Secure outbound fetching failed.',503);console.log(JSON.stringify({event:'fresh402_egress_failed',code:safe.code}));return Response.json({error:safe.code},{status:safe.status});}
     finally{if(admitted)this.active--;clearTimeout(timer);request.signal.removeEventListener('abort',abort);if(this.active===0)await this.scheduleIdleStop();}
   }
+  async releaseIdentity():Promise<EgressReleaseIdentity>{return {...await egressReleaseIdentity(this.env),object_id:this.ctx.id?.toString()};}
   private async scheduleIdleStop():Promise<void> {
     if(!this.ctx.container?.running)return;
     const budget=await this.ctx.storage.get<RuntimeBudget>('runtime');
@@ -76,4 +80,5 @@ export class Fresh402Egress extends DurableObject<Bindings> {
   alarm():Promise<void>{return this.controller.alarm();}
   shutdown():Promise<void>{return this.controller.shutdown();}
   diagnostics():Promise<Record<string,unknown>>{return this.controller.diagnostics();}
+  releaseIdentity():Promise<EgressReleaseIdentity>{return this.controller.releaseIdentity();}
 }

@@ -52,7 +52,7 @@ describe('Container controller authentication and admission',()=>{
   function controller() {
     const data=new Map<string,unknown>(),setAlarm=vi.fn(async(_when:number)=>{}),f=fixture();
     const storage={get:vi.fn(async(key:string)=>data.get(key)),put:vi.fn(async(key:string,value:unknown)=>{data.set(key,value);}),setAlarm,deleteAlarm:vi.fn(async()=>{}),transaction:async(fn:any)=>fn(storage)};
-    const env={TARGET_FETCH_MODE:'container',CONTAINER_EGRESS_ENABLED:'1',GATEWAY_BUDGET_WINDOW:'unit',GATEWAY_BUDGET_EXPIRES_MS:String(Date.now()+3600000),GATEWAY_POOL_SIZE:'1',GATEWAY_INSTANCE_CONCURRENCY:'4',GATEWAY_RUNTIME_BUDGET_SECONDS:'120',GATEWAY_CODE_HASH:hash,EGRESS_GATEWAY_TOKEN:token,DB:{prepare:vi.fn(()=>({bind:vi.fn(()=>({first:vi.fn(async()=>0)}))}))}};
+    const env={TARGET_FETCH_MODE:'container',CONTAINER_EGRESS_ENABLED:'1',GATEWAY_BUDGET_WINDOW:'unit',GATEWAY_BUDGET_EXPIRES_MS:String(Date.now()+3600000),GATEWAY_POOL_SIZE:'1',GATEWAY_INSTANCE_CONCURRENCY:'4',GATEWAY_RUNTIME_BUDGET_SECONDS:'120',GATEWAY_CODE_HASH:hash,EGRESS_GATEWAY_TOKEN:token,DB:{prepare:vi.fn((_sql:string)=>({bind:vi.fn(()=>({first:vi.fn(async()=>0)}))}))}};
     const ctx={container:f.container,storage,blockConcurrencyWhile:async(fn:any)=>fn()};
     return {instance:new EgressController(ctx as any,env as any),...f,env,storage,data};
   }
@@ -87,5 +87,12 @@ describe('Container controller authentication and admission',()=>{
     const f=controller();expect((await f.instance.diagnostics()).running).toBe(false);expect(f.container.start).not.toHaveBeenCalled();
     await f.instance.fetch(request(admitted));const budget=f.data.get('runtime') as {until:number};await f.instance.diagnostics();
     expect(f.storage.setAlarm.mock.calls.at(-1)![0]).toBeLessThanOrEqual(budget.until);expect(f.data.get('runtime')).toMatchObject({reservedMs:60000});
+  });
+  it('shares one durable runtime reservation among concurrent cold requests',async()=>{
+    const f=controller();f.env.GATEWAY_RUNTIME_BUDGET_SECONDS='60';
+    const responses=await Promise.all([f.instance.fetch(request(admitted)),f.instance.fetch(request(admitted)),f.instance.fetch(request(admitted))]);
+    expect(responses.map(response=>response.status)).toEqual([200,200,200]);
+    expect(f.env.DB.prepare.mock.calls.filter(([sql])=>String(sql).includes('INSERT INTO gateway_runtime_budget'))).toHaveLength(1);
+    expect(f.data.get('runtime')).toMatchObject({reservedMs:60000});expect(f.container.start).toHaveBeenCalledOnce();
   });
 });

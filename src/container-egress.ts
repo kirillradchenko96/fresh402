@@ -8,6 +8,7 @@ import type {Bindings} from './payments';
 export class EgressController {
   private runtime?:ContainerRuntime;
   private active=0;
+  private reservation:Promise<void>=Promise.resolve();
   constructor(private readonly ctx:DurableObjectState,private readonly env:Bindings) {
     if(ctx.container?.running)void ctx.blockConcurrencyWhile(()=>ctx.container!.setInactivityTimeout(5000));
   }
@@ -31,12 +32,14 @@ export class EgressController {
       if(!/^[\da-f-]{36}$/i.test(owner)||!Number.isInteger(instance)||instance<0||instance>=config.poolSize)throw new BodyReadError('admission_invalid','Gateway admission is invalid.',403);
       const lease=await this.env.DB.prepare('SELECT slot FROM operation_leases WHERE owner=? AND expires_at>?').bind(owner,Date.now()).first<number>('slot');
       if(lease===null||Math.floor(lease/config.perInstance)!==instance)throw new BodyReadError('admission_invalid','Gateway admission is invalid.',403);
-      await this.ctx.storage.transaction(async storage=>{
+      const reservation=this.reservation.then(()=>this.ctx.storage.transaction(async storage=>{
         const assigned=await storage.get<number>('instance');if(assigned!==undefined&&assigned!==instance)throw new BodyReadError('admission_invalid','Gateway instance mismatch.',403);
         const reservation=reserveRuntime(await storage.get<RuntimeBudget>('runtime'),Date.now(),Math.floor(config.runtimeBudgetSeconds*1000/config.poolSize),config.budgetWindow);
         if(reservation.changed){await reserveGlobalRuntime(this.env.DB,config.budgetWindow,config.budgetExpires,config.runtimeBudgetSeconds*1000);reservation.budget.until=Math.min(reservation.budget.until,config.budgetExpires);await storage.put('runtime',reservation.budget);await storage.setAlarm(reservation.budget.until);}
         if(assigned===undefined)await storage.put('instance',instance);
-      });
+      }));
+      this.reservation=reservation.catch(()=>{});
+      await reservation;
       controller.signal.throwIfAborted();
       this.runtime??=new ContainerRuntime(this.ctx.container,expected,config.perInstance,this.env.GATEWAY_CODE_HASH);
       const result=await this.runtime.fetch(body,controller.signal);

@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "deploy": "wrangler deploy",
+    "deploy": "wrangler deploy --config wrangler.production.jsonc --durable-objects-code-update-mode immediate",
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "test": "vitest",

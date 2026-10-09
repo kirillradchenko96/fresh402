@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Fresh402 Web Intelligence API",
-    "version": "2.0.0-rc.1",
+    "version": "2.0.0",
     "description": "2.0 Release Candidate: durable payment results, private recovery, extraction, structural comparison and backward-compatible freshness. No browser rendering or LLM inference.",
     "contact": {
       "url": "https://github.com/kirillradchenko96/fresh402/issues"

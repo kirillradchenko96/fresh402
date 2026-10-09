@@ -7,7 +7,7 @@ import {ServiceError} from "./contracts";
 import type {CapacityBindings} from './capacity-config';
 
 export const NORMALIZER_VERSION = 2;
-export const FRESH402_VERSION = "2.0.0-rc.1";
+export const FRESH402_VERSION = "2.0.0";
 
 const MAX_REDIRECTS = 5;
 const MAX_BODY_BYTES = 5_000_000;

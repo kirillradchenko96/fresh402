@@ -30,7 +30,7 @@ try {
   const wrong=await request("/",{extraHeaders:{authorization:"Bearer "+"0".repeat(token.length)}});
   assert.equal(wrong.status,403);await wrong.body?.cancel();
   check = "authorized health";
-  const health=await request("/");assert.equal(health.status,200);assert.equal((await health.json()).version,"2.0.0-rc.1");
+  const health=await request("/");assert.equal(health.status,200);assert.equal((await health.json()).version,"2.0.0");
   check = "REST OpenAPI";
   const openapi=await request("/openapi.json");assert.equal(openapi.status,200);
   const schema=await openapi.json();assert.ok(schema.paths["/v2/extract"] && schema.paths["/mcp"]);

@@ -27,7 +27,7 @@ describe("Fresh402", () => {
 
         expect(body.name).toBe("Fresh402");
         expect(body.status).toBe("ok");
-        expect(body.version).toBe("2.0.0-rc.1");
+        expect(body.version).toBe("2.0.0");
         expect(body.normalizer_version).toBe(2);
         expect(body.pricing.register).toBe("free");
         expect(body.pricing.check).toContain("0.005");

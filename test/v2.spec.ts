@@ -723,3 +723,15 @@ describe("release extraction regression fixtures",()=>{
     expect(({} as Record<string,unknown>).x).toBeUndefined();
   });
 });
+
+describe('expired staging pilot control',()=>{
+  it('permits authenticated inspection and shutdown after expiry without permitting a new target operation',async()=>{
+    const secret='synthetic-stage-token-'.repeat(3),shutdown=vi.fn(async()=>{}),diagnostics=vi.fn(async()=>({running:false,reserved_ms:60000})),fetch=vi.fn();
+    bindings={...bindings,ENVIRONMENT:'staging',STAGING_ACCESS_TOKEN:secret,TARGET_FETCH_MODE:'container',CONTAINER_EGRESS_ENABLED:'1',GATEWAY_POOL_SIZE:'1',GATEWAY_BUDGET_WINDOW:'expired',GATEWAY_BUDGET_EXPIRES_MS:'1',EGRESS_CONTAINER:{getByName:()=>({shutdown,diagnostics,fetch})} as unknown as NonNullable<Bindings['EGRESS_CONTAINER']>};
+    const headers={authorization:'Bearer '+secret};
+    const inspected=await application.fetch(new Request('https://service.example/__staging/egress',{headers}),bindings,createExecutionContext());expect(inspected.status).toBe(200);expect((await inspected.json() as {enabled:boolean}).enabled).toBe(false);
+    const stopped=await application.fetch(new Request('https://service.example/__staging/egress/stop',{method:'POST',headers}),bindings,createExecutionContext());expect(stopped.status).toBe(200);expect(shutdown).toHaveBeenCalledOnce();
+    expect((await request('/v1/register',{url:'https://public.example/expired'},undefined,headers)).status).toBe(429);expect(fetch).not.toHaveBeenCalled();expect(facilitator.verify).not.toHaveBeenCalled();
+    expect((await application.fetch(new Request('https://service.example/__staging/egress/stop',{method:'POST'}),bindings,createExecutionContext())).status).toBe(403);expect(shutdown).toHaveBeenCalledOnce();
+  });
+});

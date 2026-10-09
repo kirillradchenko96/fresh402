@@ -6,6 +6,10 @@ beforeEach(()=>{ vi.spyOn(globalThis,"fetch").mockRejectedValue(new Error("Unmoc
 afterEach(()=>{vi.restoreAllMocks();vi.useRealTimers();});
 const isBlocked = (host:string) => Boolean(validateTarget(new URL(`https://${host.includes(":") ? `[${host}]` : host}/`),false));
 describe("DNS and redirect SSRF defense",()=>{
+  it.each(['http://public.example/','https://public.example:80/','https://public.example:8080/','https://public.example:8443/'])('keeps previously listed non-public ports closed after redundant port-list removal: %s',url=>{
+    expect(validateTarget(new URL(url),false)).toBe('Public URLs require HTTPS on port 443.');
+    expect(validateTarget(new URL('https://public.example:443/'),false)).toBeNull();
+  });
   it.each(["http://public.example/","https://public.example:8443/"])("rejects insecure scheme/port under an approved-host launch: %s",async url=>{
     await expect(fetchTarget(new URL(url),false,undefined,"public.example")).rejects.toThrow("HTTPS on port 443");
     expect(fetch).not.toHaveBeenCalled();

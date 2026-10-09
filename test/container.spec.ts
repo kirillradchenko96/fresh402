@@ -50,7 +50,7 @@ describe('private instance routing',()=>{
 
 describe('Container controller authentication and admission',()=>{
   function controller() {
-    const data=new Map<string,unknown>(),setAlarm=vi.fn(async()=>{}),f=fixture();
+    const data=new Map<string,unknown>(),setAlarm=vi.fn(async(_when:number)=>{}),f=fixture();
     const storage={get:vi.fn(async(key:string)=>data.get(key)),put:vi.fn(async(key:string,value:unknown)=>{data.set(key,value);}),setAlarm,deleteAlarm:vi.fn(async()=>{}),transaction:async(fn:any)=>fn(storage)};
     const env={TARGET_FETCH_MODE:'container',CONTAINER_EGRESS_ENABLED:'1',GATEWAY_BUDGET_WINDOW:'unit',GATEWAY_BUDGET_EXPIRES_MS:String(Date.now()+3600000),GATEWAY_POOL_SIZE:'1',GATEWAY_INSTANCE_CONCURRENCY:'4',GATEWAY_RUNTIME_BUDGET_SECONDS:'120',GATEWAY_CODE_HASH:hash,EGRESS_GATEWAY_TOKEN:token,DB:{prepare:vi.fn(()=>({bind:vi.fn(()=>({first:vi.fn(async()=>0)}))}))}};
     const ctx={container:f.container,storage,blockConcurrencyWhile:async(fn:any)=>fn()};
@@ -64,11 +64,28 @@ describe('Container controller authentication and admission',()=>{
   it('rejects header injection before startup',async()=>{const f=controller();expect((await f.instance.fetch(request(admitted,{url:'https://public.example/',validators:{etag:'\r\nAuthorization: secret'}}))).status).toBe(400);expect(f.container.start).not.toHaveBeenCalled();});
   it('reserves its operating window durably before startup and serves the admitted operation',async()=>{
     const f=controller();const order:string[]=[];f.storage.setAlarm.mockImplementation(async()=>{order.push('reserved');});vi.mocked(f.container.start).mockImplementation(()=>{order.push('started');f.container.running=true;});
-    expect((await f.instance.fetch(request(admitted))).status).toBe(200);expect(order).toEqual(['reserved','started']);expect(f.data.get('runtime')).toMatchObject({reservedMs:60000});
+    expect((await f.instance.fetch(request(admitted))).status).toBe(200);expect(order.slice(0,2)).toEqual(['reserved','started']);expect(f.data.get('runtime')).toMatchObject({reservedMs:60000});
   });
   it('shutdown preserves spent budget and a future request cannot reset it',async()=>{const f=controller();await f.instance.fetch(request(admitted));await f.instance.shutdown();expect(f.data.get('runtime')).toMatchObject({reservedMs:60000,until:0});expect(f.container.destroy).toHaveBeenCalledOnce();});
   it('budget exhaustion rejects before startup',async()=>{const f=controller();f.data.set('runtime',{month:'unit',reservedMs:120000,until:0});expect((await f.instance.fetch(request(admitted))).status).toBe(429);expect(f.container.start).not.toHaveBeenCalled();});
   it('calendar rollover cannot renew an explicitly approved operating window',()=>{const period='billing-cycle-20261008';const first=reserveRuntime(undefined,Date.UTC(2026,9,31),60000,period);expect(()=>reserveRuntime(first.budget,Date.UTC(2026,10,1),60000,period)).toThrow('exhausted');});
   it('lowering the approved runtime ceiling also stops an already reserved warm window',()=>{const now=Date.now(),first=reserveRuntime(undefined,now,120000,'unit');expect(()=>reserveRuntime(first.budget,now+1000,0,'unit')).toThrow('exhausted');});
   it('expired pilot approval rejects before startup even if a runtime reservation remains',async()=>{const f=controller();f.env.GATEWAY_BUDGET_EXPIRES_MS='1';expect((await f.instance.fetch(request(admitted))).status).toBe(429);expect(f.container.start).not.toHaveBeenCalled();});
+  it('durably stops an idle instance before the operating reservation expires and retains spent budget',async()=>{
+    const f=controller();await f.instance.fetch(request(admitted));const budget=f.data.get('runtime') as {until:number};
+    const idle=f.storage.setAlarm.mock.calls.at(-1)![0];expect(idle).toBeLessThanOrEqual(Date.now()+5000);expect(idle).toBeLessThan(budget.until);
+    await f.instance.alarm();expect(f.container.running).toBe(false);expect(f.data.get('runtime')).toMatchObject({reservedMs:60000,until:0});
+  });
+  it('does not kill an active target on an idle alarm, but retains the hard operating deadline',async()=>{
+    const f=controller();let complete!:(response:Response)=>void,entered!:()=>void;const pending=new Promise<void>(resolve=>{entered=resolve;});
+    f.fetch.mockImplementation(async input=>{if(String(input).endsWith('/health'))return Response.json({policy:'literal-public-tls-v1',code_hash:hash});entered();return new Promise<Response>(resolve=>{complete=resolve;});});
+    const target=f.instance.fetch(request(admitted));await pending;await f.instance.alarm();expect(f.container.destroy).not.toHaveBeenCalled();
+    expect(f.storage.setAlarm.mock.calls.at(-1)![0]).toBeLessThanOrEqual((f.data.get('runtime') as {until:number}).until);
+    complete(new Response('public document'));expect((await target).status).toBe(200);await f.instance.alarm();expect(f.container.running).toBe(false);
+  });
+  it('operator metrics never boot an instance and cannot extend its hard operating deadline',async()=>{
+    const f=controller();expect((await f.instance.diagnostics()).running).toBe(false);expect(f.container.start).not.toHaveBeenCalled();
+    await f.instance.fetch(request(admitted));const budget=f.data.get('runtime') as {until:number};await f.instance.diagnostics();
+    expect(f.storage.setAlarm.mock.calls.at(-1)![0]).toBeLessThanOrEqual(budget.until);expect(f.data.get('runtime')).toMatchObject({reservedMs:60000});
+  });
 });

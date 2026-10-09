@@ -139,7 +139,11 @@
           "image": "./gateway/Dockerfile",
           "image_build_context": ".",
           "max_instances": 1,
-          "instance_type": "lite"
+          "instance_type": "lite",
+          "authorized_keys": [],
+          "ssh": {
+            "enabled": false
+          }
         }
       ]
     }

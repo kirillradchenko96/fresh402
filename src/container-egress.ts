@@ -43,12 +43,17 @@ export class EgressController {
       console.log(JSON.stringify({event:'fresh402_egress_completed',instance,status:result.status}));
       return result;
     }catch(error){const safe=error instanceof BodyReadError?error:new BodyReadError('egress_unavailable','Secure outbound fetching failed.',503);console.log(JSON.stringify({event:'fresh402_egress_failed',code:safe.code}));return Response.json({error:safe.code},{status:safe.status});}
-    finally{if(admitted)this.active--;clearTimeout(timer);request.signal.removeEventListener('abort',abort);}
+    finally{if(admitted)this.active--;clearTimeout(timer);request.signal.removeEventListener('abort',abort);if(this.active===0)await this.scheduleIdleStop();}
+  }
+  private async scheduleIdleStop():Promise<void> {
+    if(!this.ctx.container?.running)return;
+    const budget=await this.ctx.storage.get<RuntimeBudget>('runtime');
+    if(budget)await this.ctx.storage.setAlarm(Math.min(budget.until,Date.now()+5000));
   }
   async alarm():Promise<void> {
     const budget=await this.ctx.storage.get<RuntimeBudget>('runtime');
-    if(!budget||budget.until<=Date.now()){await this.ctx.container?.destroy();this.runtime=undefined;console.log('fresh402_egress_stopped');}
-    else await this.ctx.storage.setAlarm(budget.until);
+    if(!budget||budget.until<=Date.now()||this.active===0){await this.ctx.container?.destroy();this.runtime=undefined;if(budget)await this.ctx.storage.put('runtime',{...budget,until:0});console.log('fresh402_egress_stopped');}
+    else await this.ctx.storage.setAlarm(Math.min(budget.until,Date.now()+5000));
   }
   async shutdown():Promise<void>{await this.ctx.container?.destroy();this.runtime=undefined;await this.ctx.storage.deleteAlarm();const budget=await this.ctx.storage.get<RuntimeBudget>('runtime');if(budget)await this.ctx.storage.put('runtime',{...budget,until:0});}
   async diagnostics():Promise<Record<string,unknown>> {
@@ -56,6 +61,7 @@ export class EgressController {
     if(!running)return {running:false,reserved_ms:budget?.reservedMs??0,active:this.active};
     const response=await this.ctx.container!.getTcpPort(8080).fetch('http://gateway/health',{headers:{authorization:'Bearer '+this.env.EGRESS_GATEWAY_TOKEN},signal:AbortSignal.timeout(1000)});
     const bytes=await readBoundedBody(response,8192,new BodyReadError('egress_unavailable','Gateway metrics unavailable.',503),AbortSignal.timeout(1000));
+    await this.scheduleIdleStop();
     return {running:true,reserved_ms:budget?.reservedMs??0,active:this.active,gateway:JSON.parse(new TextDecoder().decode(bytes))};
   }
 }

@@ -78,18 +78,6 @@ export function validateTarget(
         }
     }
 
-    const allowedPorts = new Set([
-        "",
-        "80",
-        "443",
-        "8080",
-        "8443",
-    ]);
-
-    if (!allowPrivate && !allowedPorts.has(target.port)) {
-        return "This port is not allowed.";
-    }
-
     if (
         !allowPrivate &&
         isPrivateHostname(target.hostname)

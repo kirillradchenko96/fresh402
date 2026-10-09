@@ -13,7 +13,7 @@ import { analytics, trafficClass } from "./analytics";
 import { stats } from "./stats";
 import { PaymentJournal, validateRecoveryToken } from "./payment-journal";
 import { cleanupTemporaryData } from "./maintenance";
-import {capacityConfiguration} from './capacity-config';
+import {boundedInteger} from './capacity-config';
 export {Fresh402Egress} from './container-egress';
 
 async function toolResult(response: Response) {
@@ -56,16 +56,16 @@ export function createApp(facilitatorFactory: FacilitatorFactory = defaultFacili
   app.get("/v1/stats", c => stats(c.env.DB));
   app.get('/__staging/egress',async c=>{
     if(c.env.ENVIRONMENT!=='staging')return c.json({error:'not_found'},404);
-    const config=capacityConfiguration(c.env);
-    if(!c.env.EGRESS_CONTAINER)return c.json({enabled:false,pool_size:config.poolSize,running_instances:0});
-    const instances=[];for(let instance=0;instance<config.poolSize;instance++)instances.push({instance,metrics:await c.env.EGRESS_CONTAINER.getByName('fresh402-egress-'+instance).diagnostics()});
-    return c.json({enabled:config.enabled,pool_size:config.poolSize,instances});
+    const poolSize=boundedInteger(c.env.GATEWAY_POOL_SIZE,1,1,64),enabled=c.env.CONTAINER_EGRESS_ENABLED==='1'&&Number(c.env.GATEWAY_BUDGET_EXPIRES_MS)>Date.now();
+    if(!c.env.EGRESS_CONTAINER)return c.json({enabled:false,pool_size:poolSize,running_instances:0});
+    const instances=[];for(let instance=0;instance<poolSize;instance++)instances.push({instance,metrics:await c.env.EGRESS_CONTAINER.getByName('fresh402-egress-'+instance).diagnostics()});
+    return c.json({enabled,pool_size:poolSize,instances});
   });
   app.post('/__staging/egress/stop',async c=>{
     if(c.env.ENVIRONMENT!=='staging')return c.json({error:'not_found'},404);
-    const config=capacityConfiguration(c.env);
-    if(c.env.EGRESS_CONTAINER)for(let instance=0;instance<config.poolSize;instance++)await c.env.EGRESS_CONTAINER.getByName('fresh402-egress-'+instance).shutdown();
-    return c.json({stopped:true,pool_size:config.poolSize});
+    const poolSize=boundedInteger(c.env.GATEWAY_POOL_SIZE,1,1,64);
+    if(c.env.EGRESS_CONTAINER)for(let instance=0;instance<poolSize;instance++)await c.env.EGRESS_CONTAINER.getByName('fresh402-egress-'+instance).shutdown();
+    return c.json({stopped:true,pool_size:poolSize});
   });
   app.post("/v1/register", async c => {
     const input=await c.req.raw.clone().json().catch(()=>null);let release:CapacityRelease|undefined;

@@ -1,334 +1,75 @@
-﻿# Fresh402
-[![Smithery badge](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402) 
+# Fresh402 v2.0 — Web Intelligence API for AI Agents
 
-**A low-cost freshness oracle for AI agents, powered by x402.**
+[![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
-Fresh402 lets an AI agent register a web resource once, then cheaply check whether it has materially changed before spending money on a browser session, scraper, API call, or LLM context.
+**Check whether a source changed, extract usable content, and compare structured snapshots. Pay per call with x402 USDC on Base.**
 
-- Free baseline registration
-- $0.005 USDC per freshness check
-- REST API
-- MCP support
-- x402 payments on Base mainnet
-- Persistent watch IDs
-- HTML, JSON, and text monitoring
-- Noise filtering and deterministic diffs
+The hosted production API reports **2.0.0**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
 
-## Why Fresh402?
+| Product | MCP tool | REST endpoint | Price per call |
+|---|---|---|---:|
+| Persistent baseline | `fresh402_register` | `POST /v1/register` | Free |
+| Freshness Check | `fresh402_check` | `POST /v1/check` | $0.005 USDC |
+| Web Extract | `fresh402_extract` | `POST /v2/extract` | $0.01 USDC |
+| Smart Diff | `fresh402_smart_diff` | `POST /v2/smart-diff` | $0.015 USDC |
 
-AI agents often need to answer a simple question:
+## Choose the operation
 
-> Has this resource changed since the last time I looked at it?
+- **Register** once to establish a persistent baseline and receive a `watch_id`. Re-registering the same watch returns its existing baseline without loading the target again.
+- **Check** before reusing a web source or spending on downstream browsing and reasoning. Get a change signal, noise filtering, conditional HTTP revalidation and an optional compact deterministic text diff. A cached Check is still a paid operation.
+- **Extract** when an agent needs content for retrieval: text, titles, metadata, headings, links and JSON-LD from public HTML, JSON or text, with optional CSS scoping.
+- **Smart Diff** when the change itself matters: compare a watch with its previous Smart Diff snapshot or fixed baseline, get structured additions/removals/modifications, and inspect significance scores with explainable deterministic rules.
 
-Fetching, rendering, parsing, and sending an entire page through an LLM can cost much more than answering that question.
+Requests fetch eligible **public HTTPS** sources on demand. Fresh402 does not execute page JavaScript, render a browser, access authenticated sites, perform LLM-powered semantic analysis, continuously poll watches, or send push alerts. Security checks and rate, size, concurrency and operation limits apply; capacity failures may require a later retry.
 
-Fresh402 acts as a cheap first step:
+## Start with discovery
 
-1. Register a resource for free.
-2. Receive a persistent `watch_id`.
-3. Ask Fresh402 whether it changed.
-4. Only perform expensive downstream work when necessary.
+- [Live OpenAPI 3.1 reference](https://fresh402.kirilllabs.workers.dev/openapi.json): current request schemas, examples, response formats and payment headers.
+- [API guide](docs/API.md), [MCP integration](docs/MCP.md), [pricing](docs/PRICING.md), [request examples](examples/README.md).
+- [x402 resource manifest](https://fresh402.kirilllabs.workers.dev/.well-known/x402), [agent guide](https://fresh402.kirilllabs.workers.dev/llms.txt), [release notes](CHANGELOG.md).
+- [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.kirillradchenko96%2Ffresh402/versions/latest): the existing identity is `io.github.kirillradchenko96/fresh402`.
+- [Discovery audit](docs/DISCOVERY_AUDIT.md): externally verified catalog status and outstanding reindexing or authorization requirements.
 
-## Live API
+Free service metadata and MCP `initialize` / `tools/list` let a new agent learn all four tools without paying or fetching a target.
 
-Production:
+## REST quick start
 
-```text
-https://fresh402.kirilllabs.workers.dev
+Register a baseline for free:
+
+```sh
+curl https://fresh402.kirilllabs.workers.dev/v1/register \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://example.com/"}'
 ```
 
-Health and service metadata:
+Use the returned `watch_id` in a Check or Smart Diff. The following unsigned request retrieves payment requirements, not a paid result:
 
-```text
-GET /
+```sh
+curl -i https://fresh402.kirilllabs.workers.dev/v2/extract \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://example.com/","max_chars":20000}'
 ```
 
-## Pricing
+Expect **HTTP 402** and a `PAYMENT-REQUIRED` header describing the exact amount, USDC asset, Base network and recipient. Use an x402 v2 compatible client and a payer-controlled wallet to authorize the exact amount, then retry the same request with `PAYMENT-SIGNATURE`. Never share a wallet seed phrase or private key. No unlimited token approval is required by the exact authorization flow.
 
-| Operation | Price |
-|---|---:|
-| Register baseline | Free |
-| Freshness check | $0.005 USDC |
-| Network | Base mainnet |
-| Payment protocol | x402 |
+Persist a client-generated recovery token before paying; [the API guide](docs/API.md#payment-and-recovery) explains the public client contract. A confirmed paid result carries a `PAYMENT-RESPONSE` settlement receipt. An HTTP 402 challenge is not a successful payment; a pending settlement must not trigger a replacement authorization.
 
-## Quick start
+## MCP quick start
 
-### 1. Register a baseline
-
-Registration is free.
-
-```bash
-curl -X POST \
-  https://fresh402.kirilllabs.workers.dev/v1/register \
-  -H "Content-Type: application/json" \
-  -d '{"url":"https://example.com"}'
-```
-
-Example response:
-
-```json
-{
-  "watch_id": "w_0123456789abcdef0123456789abcdef",
-  "url": "https://example.com",
-  "created": true,
-  "baseline_created": true,
-  "content_kind": "html"
-}
-```
-
-Registering the same resource again returns the existing baseline without refetching it.
-
-That prevents the free registration endpoint from being used as a free repeated freshness check.
-
-### 2. Check the resource
-
-```bash
-curl -X POST \
-  https://fresh402.kirilllabs.workers.dev/v1/check \
-  -H "Content-Type: application/json" \
-  -d '{"watch_id":"w_0123456789abcdef0123456789abcdef","include_diff":true}'
-```
-
-Without payment, Fresh402 returns an x402 payment requirement.
-
-The current price is **$0.005 USDC** on Base mainnet (`eip155:8453`).
-
-An x402-compatible client can satisfy the payment requirement and retry the request automatically.
-
-## REST API
-
-### `POST /v1/register`
-
-Create or retrieve a persistent baseline for free.
-
-Example with HTML scoping:
-
-```json
-{
-  "url": "https://example.com/pricing",
-  "selector": "#pricing",
-  "ignore_selectors": [
-    ".timestamp",
-    ".advertisement"
-  ]
-}
-```
-
-For JSON resources:
-
-```json
-{
-  "url": "https://api.example.com/data",
-  "ignore_json_paths": [
-    "/generated_at",
-    "/items/*/last_seen"
-  ]
-}
-```
-
-Wildcard `*` JSON Pointer segments are supported.
-
-### `POST /v1/check`
-
-Paid freshness check.
-
-```json
-{
-  "watch_id": "w_0123456789abcdef0123456789abcdef",
-  "max_age_seconds": 300,
-  "include_diff": true
-}
-```
-
-Supported inputs include:
-
-- `watch_id`
-- `url`
-- `previous_hash`
-- `selector`
-- `ignore_selectors`
-- `ignore_json_paths`
-- `max_age_seconds`
-- `include_diff`
-
-`max_age_seconds` lets agents reuse sufficiently fresh shared Fresh402 state instead of forcing another upstream fetch.
-
-### `GET /v1/history`
-
-Retrieve stored snapshot history using a `watch_id` or URL.
-
-### `GET /v1/diff`
-
-Retrieve change information for a watched resource.
-
-### `GET /v1/stats`
-
-Retrieve public service usage statistics.
-
-## MCP
-
-Fresh402 exposes a Streamable HTTP MCP endpoint:
+Add this URL as a **remote Streamable HTTP MCP server** in a compatible client:
 
 ```text
 https://fresh402.kirilllabs.workers.dev/mcp
 ```
 
-Available tools:
+The client performs `initialize` and `tools/list`; all four tools use the names and prices above. Free discovery does not require a Fresh402 API key. Paid tool calls require an x402-capable client; an ordinary MCP client can list tools and register a baseline but cannot automatically complete payment unless it implements x402.
 
-### `fresh402_register`
+MCP payment challenges are tool results with `isError: true` and requirements in `structuredContent`. **HTTP 200 alone is not success.** The payment belongs in `params._meta["x402/payment"]`, and the settlement receipt is in `result._meta["x402/payment-response"]`. See [MCP examples](docs/MCP.md).
 
-Free.
+## Public data and operational boundaries
 
-Creates or retrieves a persistent baseline and returns a `watch_id`.
+Watch identifiers and legacy snapshot history are shared public service data. Do not use Fresh402 for private pages or submit secrets in target URLs. Free `GET /v1/history` and `GET /v1/diff` read retained legacy data without fetching a target; they do not expose paid Smart Diff results. Recovery tokens are private client credentials and must not appear in URLs, public repositories or logs.
 
-### `fresh402_check`
+The live API is the authority for the deployed contract. Catalog descriptions and cached schemas can lag it; [the audit](docs/DISCOVERY_AUDIT.md) records that distinction. There is no claim that an unsigned 402 response proves Coinbase Bazaar indexing.
 
-Costs **$0.005 USDC**.
-
-Checks whether a registered or caller-supplied resource changed.
-
-The tool exposes x402 payment metadata so compatible agents can discover and pay for the operation programmatically.
-
-## Change detection
-
-Fresh402 is designed to reduce false positives from irrelevant page noise.
-
-### HTML selector scoping
-
-Monitor only part of a page:
-
-```json
-{
-  "url": "https://example.com/pricing",
-  "selector": "#pricing"
-}
-```
-
-### HTML noise filtering
-
-Remove volatile elements before fingerprinting:
-
-```json
-{
-  "ignore_selectors": [
-    ".timestamp",
-    ".visitor-counter",
-    ".advertisement"
-  ]
-}
-```
-
-### Canonical JSON
-
-JSON is canonicalized before hashing, so object key ordering does not cause false changes.
-
-### JSON Pointer ignores
-
-Known volatile JSON fields can be removed before fingerprinting.
-
-```json
-{
-  "ignore_json_paths": [
-    "/generated_at",
-    "/items/*/last_seen"
-  ]
-}
-```
-
-### Conditional HTTP revalidation
-
-Fresh402 can use upstream `ETag` and `Last-Modified` metadata when available.
-
-### Deterministic diff
-
-When comparable previous content exists, `include_diff: true` can return a compact deterministic change summary.
-
-## Persistent watches
-
-Fresh402 v1.1 introduced persistent agent watches.
-
-A registered resource receives a stable identifier:
-
-```text
-w_0123456789abcdef0123456789abcdef
-```
-
-Fresh402 stores watch state and bounded snapshot history in Cloudflare D1.
-
-Repeated free registration does not refresh an existing watch. A paid check is required to fetch fresh upstream state.
-
-## Architecture
-
-Fresh402 currently uses:
-
-- Cloudflare Workers
-- Cloudflare D1
-- Coinbase / CDP x402 infrastructure
-- Base mainnet
-- USDC
-- Model Context Protocol (MCP)
-- TypeScript
-
-The goal is to keep freshness checks cheap enough that agents can use Fresh402 before more expensive browsing, scraping, or reasoning work.
-
-## Security
-
-Fresh402 validates outbound targets and includes protections intended to reduce SSRF risk.
-
-Payment credentials and deployment secrets are supplied through runtime environment configuration and are not stored in this repository.
-
-### Resource limits
-
-- New free registrations (REST and MCP combined) are limited to 10 attempts per target hostname and 60 attempts overall per 60 seconds, in each Cloudflare location. Paths, queries, ports and selector/ignore-rule variants share the hostname limit. Failed upstream attempts also consume quota. Existing watches are returned without a fetch or quota charge; paid checks do not use these limits.
-- REST returns `429 registration_rate_limited` with `Retry-After: 60` when a limit is reached. Missing or unavailable rate limit bindings return `503 registration_unavailable` for new registrations. MCP reports these through the existing tool-error path.
-- Every incoming POST body is capped at 65,536 bytes before JSON parsing, payment handling, MCP dispatch or cloning (`413 request_too_large`). Reading an incoming body has a 10-second deadline (`408 request_timeout`).
-- Upstream response bodies are streamed with a 5,000,000-byte limit (`413 content_too_large`), including when `Content-Length` is absent or misleading. A single 10-second deadline covers redirects, headers and body reading (`504 upstream_timeout`). Unused and rejected streams are cancelled.
-- Concurrent creation of the same watch saves only one baseline and one initial snapshot. A losing free registration returns the stored baseline; overlapping initial requests can still perform separate upstream fetches, subject to the registration limits.
-
-The two rate limit bindings and their thresholds are declared in `wrangler.jsonc`; keep their namespace IDs unique within the Cloudflare account. These [Cloudflare limits](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/) are local to each location and eventually consistent. They mitigate bursts but are not a strict worldwide quota or a storage/billing cap. Legitimate users sharing a target hostname also share its allowance. The `global_fetch_strictly_public` compatibility flag remains enabled to protect against private addresses reached through DNS.
-
-### Local verification
-
-Use Node.js 24, then run:
-
-```sh
-npm ci
-npx tsc --noEmit
-npx tsc --noEmit -p test/tsconfig.json
-npm test -- --run
-```
-
-Tests use a local Workers runtime, isolated D1 data and mocked upstream requests. They do not require payment credentials or access production. GitHub Actions runs these same checks on pull requests and pushes to `main`; the workflow has no deployment step.
-
-## Current release
-
-**v1.1.1**
-
-Highlights:
-
-- Persistent `watch_id`
-- Free baseline registration
-- Anti-free-refresh behavior
-- HTML selector scoping
-- HTML ignore selectors
-- Canonical JSON monitoring
-- Wildcard JSON Pointer ignore paths
-- Shared freshness caching
-- Caller-supplied `previous_hash`
-- Deterministic inline diff
-- ETag / Last-Modified revalidation
-- Bounded snapshot retention
-- REST and MCP support
-
-## Status
-
-Fresh402 is live and usable today.
-
-The project is still early and the API may evolve as real agent usage patterns become clearer.
-
-## Author
-
-Built and maintained by **Kirill Radchenko**.
-
-Issues, integrations, feedback, and AI-agent use cases are welcome.
+Built and maintained by **Kirill Radchenko**. [Report an integration issue](https://github.com/kirillradchenko96/fresh402/issues).

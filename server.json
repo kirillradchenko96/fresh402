@@ -1,9 +1,10 @@
 {
     "$schema":  "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
     "name":  "io.github.kirillradchenko96/fresh402",
-    "title":  "Fresh402",
-    "description":  "Detect webpage and API changes. Free baseline; $0.005 USDC per check via x402 on Base.",
-    "version":  "1.1.1",
+    "title":  "Fresh402 Web Intelligence API",
+    "description":  "Web intelligence: free baseline; Check $0.005, Extract $0.01, Smart Diff $0.015 USDC on Base.",
+    "version":  "2.0.0",
+    "websiteUrl": "https://fresh402.kirilllabs.workers.dev",
     "repository":  {
                        "url":  "https://github.com/kirillradchenko96/fresh402",
                        "source":  "github"

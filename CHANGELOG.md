@@ -1,34 +1,18 @@
-# Changelog
+# Hosted service release notes
 
-## 2.0.0-rc.1 ? unreleased
+These notes describe the deployed API, independently of the legacy source package version in this repository. Documentation publication does not deploy infrastructure or merge the backend release PR.
 
-- Persist bounded paid results and write plans before settlement; atomically record receipts and revenue, then finalize snapshots with a completion trigger.
-- Add private seven-day REST/MCP recovery using a client-generated bearer token. Public payment signatures and transaction hashes never authorize replay.
-- Quarantine ambiguous settlements and target writes; fence SDK settlement retries. Add offline finalized-USDC proof validation and guarded operator SQL generation.
-- Add migration 0008, bounded Cron cleanup, global daily operation budgets and isolated authenticated staging with separate D1/limiters, target allowlist and CPU/subrequest ceilings.
-- Fix nested HTML scope leakage, duplicate text, block boundaries and sparse static content warnings; replace quadratic exact block matching with indexed matching.
-- Preserve v1 IDs/history/normalizer and existing services/prices. No 2.1 services, deployment, live payments or production data changes.
-- Production remains gated on actual Cloudflare staging, owner-approved payment validation and the unresolved arbitrary-host DNS TOCTOU boundary. See RELEASE_REPORT_RU.md.
+## 2.0.0 — October 9, 2026
 
+- Four MCP tools at the existing endpoint: free fresh402_register, Freshness Check (fresh402_check, $0.005 USDC), Web Extract (fresh402_extract, $0.01 USDC) and Smart Diff (fresh402_smart_diff, $0.015 USDC).
+- Web Extract returns bounded text, titles, metadata, headings, links and JSON-LD from supported public HTTPS content without executing JavaScript.
+- Smart Diff reports structural changes and significance with explainable deterministic rules, without an LLM.
+- Durable paid results and private client recovery allow retained results to be retried using identical input/payment/token without another settlement.
+- Existing REST paths, MCP URL, Registry identity, Base network, native USDC and the Check price are preserved.
+- Public OpenAPI and x402 discovery describe all three paid REST products. robots.txt, sitemap.xml and English llms.txt are live.
 
-## 2.0.0-beta.1 — unreleased
+This is an on-demand API; continuous monitoring, push alerts, authenticated-site access and browser rendering are not released capabilities. A working payment challenge is distinct from external marketplace indexing; see [the discovery audit](docs/DISCOVERY_AUDIT.md).
 
-- Add Web Extract REST/MCP service ($0.01) for HTML, JSON and text, metadata, headings, links, JSON-LD and CSS scope.
-- Add deterministic Smart Diff ($0.015): typed JSON Pointer changes, HTML/text block comparison, explicit significance rules, fixed/previous/hash baselines and private bounded history.
-- Preserve Freshness Check ($0.005), free registration, existing watch IDs, normalizer version 2, v1 endpoints and migrations 0001–0006.
-- Share pricing, validation, discovery and operation execution across REST and MCP; preserve Bazaar's Workers-compatible schema patch.
-- Defer paid v1/v2 state writes until successful settlement; reject concurrent/repeated authorizations before loading targets.
-- Add request limits, global D1 capacity leases, per-target serialization, DNS/redirect validation and bounded extraction/diff complexity.
-- Add additive migration 0007 and daily privacy-limited conversion counters. Keep challenges distinct from confirmed revenue.
-- Add REST/OpenAPI, MCP, deployment/rollback/security/analytics/positioning/roadmap documentation and safe client examples.
-- Extend workerd regression/integration tests with simulated payments; no live transaction or production deployment performed.
+## 1.1.1 — historical hosted release
 
-Known beta limitations: no browser rendering or model-based semantics; legacy HTML comparison has reduced structure; no durable paid-response replay/refund; DNS preflight cannot pin arbitrary-host fetch connections; remaining development-only braces advisory; future batch/price/alerts/credits are not implemented.
-
-## 1.1.1
-
-- Fix Bazaar validation in Cloudflare Workers with `@cfworker/json-schema` and `patch-package` (PR #7).
-
-## 1.1
-
-- Persistent watch IDs, free baseline registration, HTML/JSON/text normalization and filters, caller hashes, shared cache, conditional HTTP and bounded snapshot history.
+Persistent watch IDs, free baseline registration without free refresh, paid $0.005 Check, HTML/JSON/text normalization, scoped noise filtering, caching, conditional HTTP and deterministic legacy diffs. The existing legacy source and history are retained.

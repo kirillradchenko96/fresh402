@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validatePilotAllowances} from './container-preflight.mjs';
+const now=Date.now(),record={account_id:'158ce1c5e76daae3f8e9e662a8d5de3b',containers_authorized:true,verified:true,source:'cloudflare-dashboard',verified_at:new Date(now).toISOString(),billing_period_end:new Date(now+86400000).toISOString(),image_storage_verified:true,remaining:{memory_gib_hours:25,cpu_minutes:375,disk_gb_hours:200,do_gb_seconds:400000,egress_gb:1000}};
+test('an authenticated current quota record bounds the whole pilot, not each instance',()=>{const required=validatePilotAllowances(record,300,now);assert.equal(required.cpu_minutes,0.3125);assert.equal(required.memory_gib_hours,300/14400);});
+for(const [name,change]of [['nominal plan only',r=>{r.verified=false;}],['unavailable Container authorization',r=>{r.containers_authorized=false;}],['stale quota',r=>{r.verified_at=new Date(now-3600001).toISOString();}],['insufficient remaining quota',r=>{r.remaining.memory_gib_hours=0;}],['unknown image storage',r=>{r.image_storage_verified=false;}]])test('pilot rejects '+name,()=>{const copy=structuredClone(record);change(copy);assert.throws(()=>validatePilotAllowances(copy,300,now));});

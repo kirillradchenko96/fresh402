@@ -66,6 +66,9 @@ export async function readBoundedBody(
 
 export async function readRequestBody(request: Request): Promise<Uint8Array<ArrayBuffer>> {
     const controller = new AbortController();
+    const abort = () => controller.abort(new BodyReadError("request_cancelled", "Request was cancelled.", 408));
+    request.signal.addEventListener("abort", abort, { once: true });
+    if (request.signal.aborted) abort();
     const timeout = setTimeout(() => controller.abort(new BodyReadError(
         "request_timeout", "Request body timed out.", 408,
     )), BODY_TIMEOUT_MS);
@@ -77,5 +80,6 @@ export async function readRequestBody(request: Request): Promise<Uint8Array<Arra
         ), controller.signal);
     } finally {
         clearTimeout(timeout);
+        request.signal.removeEventListener("abort", abort);
     }
 }

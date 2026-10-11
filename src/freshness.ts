@@ -1,7 +1,13 @@
-﻿import { BodyReadError, BODY_TIMEOUT_MS, cancelBody, readBoundedBody, readRequestBody } from "./body";
+import { sql, statements as buildStatements, type SqlWrite } from "./sql";
+﻿import { BodyReadError, readRequestBody } from "./body";
+
+import { fetchTarget, validateTarget, TargetNotAllowedError } from "./safe-fetch";
+import {gatewayFromBindings,type EgressBindings} from "./egress";
+import {ServiceError} from "./contracts";
+import type {CapacityBindings} from './capacity-config';
 
 export const NORMALIZER_VERSION = 2;
-export const FRESH402_VERSION = "1.1.1";
+export const FRESH402_VERSION = "2.0.0";
 
 const MAX_REDIRECTS = 5;
 const MAX_BODY_BYTES = 5_000_000;
@@ -13,7 +19,17 @@ const MAX_JSON_PATH_LENGTH = 256;
 const MAX_CACHE_AGE_SECONDS = 86_400;
 const DIFF_EXCERPT_LIMIT = 1_200;
 
-export interface FreshnessEnv {
+type DeferredWrites = (statements: SqlWrite[]) => void;
+
+async function writeBatch(db: D1Database, statements: SqlWrite[], defer?: DeferredWrites): Promise<void> {
+    if (defer) defer(statements); else await db.batch(buildStatements(db, statements));
+}
+
+export interface FreshnessEnv extends EgressBindings, CapacityBindings {
+    requestSignal?: AbortSignal;
+    beforeRegisterFetch?: () => Promise<FreshnessEnv>;
+    TARGET_HOST_ALLOWLIST?: string;
+    deferWrites?: DeferredWrites;
     DB: D1Database;
     REGISTER_TARGET_LIMITER: RateLimit;
     REGISTER_GLOBAL_LIMITER: RateLimit;
@@ -108,13 +124,6 @@ class Fresh402InputError extends Error {
     ) {
         super(message);
         this.name = "Fresh402InputError";
-    }
-}
-
-class TargetNotAllowedError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = "TargetNotAllowedError";
     }
 }
 
@@ -227,7 +236,7 @@ async function stripHtmlNoise(
         .text();
 }
 
-async function normalizeHtml(
+export async function normalizeHtml(
     html: string,
     config: WatchConfig,
 ): Promise<string> {
@@ -295,7 +304,7 @@ function sortJsonValue(value: unknown): unknown {
         typeof value === "object"
     ) {
         const input = value as Record<string, unknown>;
-        const output: Record<string, unknown> = {};
+        const output: Record<string, unknown> = Object.create(null);
 
         for (const key of Object.keys(input).sort()) {
             output[key] = sortJsonValue(input[key]);
@@ -397,7 +406,7 @@ function removeJsonPath(
         return;
     }
 
-    if (!(segment in record)) {
+    if (!Object.hasOwn(record, segment)) {
         return;
     }
 
@@ -515,149 +524,6 @@ export function buildTextDiff(
             removed.length > DIFF_EXCERPT_LIMIT ||
             added.length > DIFF_EXCERPT_LIMIT,
     };
-}
-
-function isLocalDevelopmentRequest(requestUrl: URL): boolean {
-    return (
-        requestUrl.hostname === "127.0.0.1" ||
-        requestUrl.hostname === "localhost" ||
-        requestUrl.hostname === "::1"
-    );
-}
-
-function isPrivateIpv4(hostname: string): boolean {
-    const parts = hostname.split(".").map(Number);
-
-    if (
-        parts.length !== 4 ||
-        parts.some(
-            (part) =>
-                !Number.isInteger(part) ||
-                part < 0 ||
-                part > 255,
-        )
-    ) {
-        return false;
-    }
-
-    const [a, b] = parts;
-
-    if (a === 0) return true;
-    if (a === 10) return true;
-    if (a === 127) return true;
-    if (a === 169 && b === 254) return true;
-    if (a === 172 && b >= 16 && b <= 31) return true;
-    if (a === 192 && b === 168) return true;
-    if (a === 100 && b >= 64 && b <= 127) return true;
-    if (a === 198 && (b === 18 || b === 19)) return true;
-    if (a >= 224) return true;
-
-    return false;
-}
-
-function isPrivateHostname(hostname: string): boolean {
-    const host = hostname
-        .toLowerCase()
-        .replace(/^\[/, "")
-        .replace(/\]$/, "")
-        .replace(/\.$/, "");
-
-    if (
-        host === "localhost" ||
-        host.endsWith(".localhost") ||
-        host.endsWith(".local") ||
-        host.endsWith(".internal") ||
-        host.endsWith(".lan")
-    ) {
-        return true;
-    }
-
-    if (isPrivateIpv4(host)) {
-        return true;
-    }
-
-    if (
-        host.includes(":") && (
-            host === "::1" ||
-            host === "::" ||
-            host.startsWith("fc") ||
-            host.startsWith("fd") ||
-            host.startsWith("fe8") ||
-            host.startsWith("fe9") ||
-            host.startsWith("fea") ||
-            host.startsWith("feb")
-        )
-    ) {
-        return true;
-    }
-
-    if (host.startsWith("::ffff:")) {
-        // URL canonicalizes IPv4-mapped addresses to two hexadecimal words.
-        const words = host.slice(7).split(":");
-        if (words.length === 2) {
-            const high = parseInt(words[0], 16);
-            const low = parseInt(words[1], 16);
-            return isPrivateIpv4(`${high >> 8}.${high & 255}.${low >> 8}.${low & 255}`);
-        }
-        return isPrivateIpv4(host.slice(7));
-    }
-
-    return false;
-}
-
-function validateTarget(
-    target: URL,
-    allowPrivate: boolean,
-): string | null {
-    if (
-        target.protocol !== "http:" &&
-        target.protocol !== "https:"
-    ) {
-        return "Only HTTP and HTTPS URLs are supported.";
-    }
-
-    if (target.username || target.password) {
-        return "URLs containing usernames or passwords are not supported.";
-    }
-
-    const sensitiveQueryNames = new Set([
-        "access_token",
-        "api_key",
-        "apikey",
-        "auth",
-        "authorization",
-        "token",
-        "signature",
-        "x-amz-signature",
-        "x-goog-signature",
-    ]);
-
-    for (const name of target.searchParams.keys()) {
-        if (sensitiveQueryNames.has(name.toLowerCase())) {
-            return "URLs containing likely credentials in query parameters are not supported.";
-        }
-    }
-
-    const allowedPorts = new Set([
-        "",
-        "80",
-        "443",
-        "8080",
-        "8443",
-    ]);
-
-    if (!allowPrivate && !allowedPorts.has(target.port)) {
-        return "This port is not allowed.";
-    }
-
-    if (
-        !allowPrivate &&
-        isPrivateHostname(target.hostname)
-    ) {
-        return "Private, local, and internal network targets are not allowed.";
-    }
-
-    return null;
 }
 
 function canonicalizeUrl(target: URL): string {
@@ -809,6 +675,7 @@ function parseUrlConfig(
     let target: URL;
 
     try {
+        if (!allowPrivate && (/[\u0000-\u0020\u007f\\]/.test(body.url) || !/^https:\/\//i.test(body.url))) throw new Error();
         target = new URL(body.url);
     } catch {
         throw new Fresh402InputError(
@@ -944,11 +811,12 @@ async function saveNewWatch(
     config: WatchConfig,
     payload: NormalizedPayload,
     now: string,
+    defer?: DeferredWrites,
 ): Promise<boolean> {
     const stored = storedContent(payload.normalized);
 
-    const results = await db.batch([
-        db.prepare(
+    const statements = [
+        sql(
             `INSERT INTO watches (
                 watch_id,
                 url,
@@ -990,7 +858,7 @@ async function saveNewWatch(
             now,
             NORMALIZER_VERSION,
         ),
-        db.prepare(
+        sql(
             `INSERT INTO watch_snapshots (
                 watch_id,
                 hash,
@@ -1012,7 +880,9 @@ async function saveNewWatch(
             now,
             NORMALIZER_VERSION,
         ),
-    ]);
+    ];
+    if (defer) { defer(statements); return true; }
+    const results = await db.batch(buildStatements(db, statements));
 
     // D1 batch is transactional: only the winning insert creates a snapshot.
     return results[0].meta.changes === 1;
@@ -1023,13 +893,13 @@ async function updateWatchAfterFetch(
     row: WatchRow,
     payload: NormalizedPayload,
     now: string,
+    defer?: DeferredWrites,
 ): Promise<boolean> {
     const storedChanged = row.hash !== payload.hash;
     const newCheckCount = row.check_count + 1;
 
     if (!storedChanged) {
-        await db
-            .prepare(
+        await writeBatch(db, [sql(
                 `UPDATE watches
                  SET
                     final_url = ?,
@@ -1052,16 +922,15 @@ async function updateWatchAfterFetch(
                 payload.content_kind,
                 NORMALIZER_VERSION,
                 row.watch_id,
-            )
-            .run();
+            )], defer);
 
         return false;
     }
 
     const stored = storedContent(payload.normalized);
 
-    await db.batch([
-        db.prepare(
+    await writeBatch(db, [
+        sql(
             `UPDATE watches
              SET
                 final_url = ?,
@@ -1092,7 +961,7 @@ async function updateWatchAfterFetch(
             NORMALIZER_VERSION,
             row.watch_id,
         ),
-        db.prepare(
+        sql(
             `INSERT INTO watch_snapshots (
                 watch_id,
                 hash,
@@ -1114,9 +983,9 @@ async function updateWatchAfterFetch(
             now,
             NORMALIZER_VERSION,
         ),
-    ]);
+    ], defer);
 
-    await pruneSnapshots(db, row.watch_id);
+    await pruneSnapshots(db, row.watch_id, defer);
 
     return true;
 }
@@ -1125,9 +994,9 @@ async function markRevalidated(
     db: D1Database,
     row: WatchRow,
     now: string,
+    defer?: DeferredWrites,
 ): Promise<void> {
-    await db
-        .prepare(
+    await writeBatch(db, [sql(
             `UPDATE watches
              SET
                 checked_at = ?,
@@ -1138,16 +1007,15 @@ async function markRevalidated(
             now,
             row.check_count + 1,
             row.watch_id,
-        )
-        .run();
+        )], defer);
 }
 
 async function pruneSnapshots(
     db: D1Database,
     watchId: string,
+    defer?: DeferredWrites,
 ): Promise<void> {
-    await db
-        .prepare(
+    await writeBatch(db, [sql(
             `DELETE FROM watch_snapshots
              WHERE watch_id = ?
                AND id NOT IN (
@@ -1162,8 +1030,7 @@ async function pruneSnapshots(
             watchId,
             watchId,
             MAX_SNAPSHOTS_PER_WATCH,
-        )
-        .run();
+        )], defer);
 }
 
 async function findSnapshotByHash(
@@ -1401,137 +1268,6 @@ async function normalizeResponse(
     };
 }
 
-async function fetchTarget(
-    target: URL,
-    allowPrivate: boolean,
-    validators?: {
-        etag?: string | null;
-        last_modified?: string | null;
-    },
-): Promise<{ response: Response; body: string; finalUrl: string }> {
-    let current = new URL(target.toString());
-    const controller = new AbortController();
-    // One deadline includes every redirect, response headers and streamed body.
-    const timeout = setTimeout(() => controller.abort(new BodyReadError(
-        "upstream_timeout", "Target response timed out.", 504,
-    )), BODY_TIMEOUT_MS);
-
-    try {
-        for (
-            let hop = 0;
-            hop <= MAX_REDIRECTS;
-            hop++
-        ) {
-            const validationError =
-                validateTarget(current, allowPrivate);
-
-            if (validationError) {
-                throw new TargetNotAllowedError(
-                    validationError,
-                );
-            }
-
-            const headers: Record<string, string> = {
-                "user-agent": "Fresh402/1.1.1",
-                accept:
-                    "text/html,application/json,text/plain,application/*+json;q=0.9,text/*;q=0.8,*/*;q=0.1",
-            };
-
-            if (validators?.etag) {
-                headers["if-none-match"] =
-                    validators.etag;
-            }
-
-            if (validators?.last_modified) {
-                headers["if-modified-since"] =
-                    validators.last_modified;
-            }
-
-            const response = await fetch(current.toString(), {
-                redirect: "manual",
-                signal: controller.signal,
-                headers,
-            });
-
-            const redirectStatuses =
-                new Set([
-                    301,
-                    302,
-                    303,
-                    307,
-                    308,
-                ]);
-
-            if (
-                !redirectStatuses.has(
-                    response.status,
-                )
-            ) {
-                if (!response.ok) {
-                    cancelBody(response.body);
-                    return { response, body: "", finalUrl: current.toString() };
-                }
-                const bytes = await readBoundedBody(response, MAX_BODY_BYTES, new BodyReadError(
-                    "content_too_large",
-                    `Target content exceeds the ${MAX_BODY_BYTES / 1_000_000} MB limit.`,
-                    413,
-                ), controller.signal);
-                return { response, body: new TextDecoder().decode(bytes), finalUrl: current.toString() };
-            }
-
-            const location =
-                response.headers.get("location");
-
-            cancelBody(response.body);
-
-            if (!location) {
-                return { response, body: "", finalUrl: current.toString() };
-            }
-
-            if (hop >= MAX_REDIRECTS) {
-                throw new TargetNotAllowedError(
-                    `Too many redirects. Maximum allowed is ${MAX_REDIRECTS}.`,
-                );
-            }
-
-            const next =
-                new URL(location, current);
-
-            if (
-                current.protocol === "https:" &&
-                next.protocol === "http:"
-            ) {
-                throw new TargetNotAllowedError(
-                    "HTTPS to HTTP redirects are not allowed.",
-                );
-            }
-
-            const nextValidationError =
-                validateTarget(
-                    next,
-                    allowPrivate,
-                );
-
-            if (nextValidationError) {
-                throw new TargetNotAllowedError(
-                    `Redirect target rejected: ${nextValidationError}`,
-                );
-            }
-
-            current = next;
-        }
-
-        throw new TargetNotAllowedError(
-            "Redirect limit exceeded.",
-        );
-    } catch (error) {
-        if (controller.signal.aborted) throw controller.signal.reason;
-        throw error;
-    } finally {
-        clearTimeout(timeout);
-    }
-}
-
 function ageSeconds(iso: string): number {
     const timestamp = Date.parse(iso);
 
@@ -1658,11 +1394,19 @@ async function handleRegister(
     const limited = await limitNewRegistration(env, config.url);
     if (limited) return limited;
 
+    // Existing baselines return above. Only a new external fetch consumes the
+    // global/free budget or reserves a Container admission slot.
+    if(env.beforeRegisterFetch)env={...env,...await env.beforeRegisterFetch()};
+
     const startedAt = Date.now();
     const { response, body: responseBody, finalUrl } =
         await fetchTarget(
             new URL(config.url),
             allowPrivate,
+            undefined,
+            env.TARGET_HOST_ALLOWLIST,
+            gatewayFromBindings(env),
+            env.requestSignal ?? request.signal,
         );
 
     if (!response.ok) {
@@ -1986,8 +1730,12 @@ async function handleCheck(
                       etag: existing.etag,
                       last_modified:
                           existing.last_modified,
+                      origin: new URL(existing.final_url).origin,
                   }
                 : undefined,
+            env.TARGET_HOST_ALLOWLIST,
+            gatewayFromBindings(env),
+            env.requestSignal ?? request.signal,
         );
 
     const now =
@@ -2001,6 +1749,7 @@ async function handleCheck(
             env.DB,
             existing,
             now,
+            env.deferWrites,
         );
 
         const comparisonHash =
@@ -2093,7 +1842,7 @@ async function handleCheck(
         );
 
     const baselineCreated = !existing && await saveNewWatch(
-        env.DB, watchId, config, payload, now,
+        env.DB, watchId, config, payload, now, env.deferWrites,
     );
     if (!existing && !baselineCreated) {
         existing = await getWatch(env.DB, watchId);
@@ -2156,6 +1905,7 @@ async function handleCheck(
                 existing,
                 payload,
                 now,
+                env.deferWrites,
             );
 
         checkCount =
@@ -2595,10 +2345,7 @@ export async function handleCoreRequest(
     const requestUrl =
         new URL(request.url);
 
-    const allowPrivate =
-        isLocalDevelopmentRequest(
-            requestUrl,
-        );
+    const allowPrivate = false;
 
     try {
         if (
@@ -2617,8 +2364,13 @@ export async function handleCoreRequest(
                         "free",
                     check:
                         "$0.005 USDC",
+                    extract: "$0.01 USDC",
+                    smart_diff: "$0.015 USDC",
                 },
                 endpoints: {
+                    extract: "POST /v2/extract",
+                    smart_diff: "POST /v2/smart-diff",
+                    openapi: "GET /openapi.json",
                     register:
                         "POST /v1/register",
                     check:
@@ -2633,6 +2385,8 @@ export async function handleCoreRequest(
                         "POST /mcp",
                 },
                 features: [
+                    "bounded web extraction without JavaScript",
+                    "structural JSON and HTML Smart Diff",
                     "free baseline registration",
                     "persistent watch_id",
                     "caller previous_hash comparison",
@@ -2701,11 +2455,11 @@ export async function handleCoreRequest(
             404,
         );
     } catch (error) {
-        console.error(error);
+        console.error("fresh402_core_error", error instanceof Fresh402InputError || error instanceof BodyReadError || error instanceof ServiceError ? error.code : "internal_error");
 
         if (
             error instanceof
-            Fresh402InputError || error instanceof BodyReadError
+            Fresh402InputError || error instanceof BodyReadError || error instanceof ServiceError
         ) {
             return json(
                 {
@@ -2737,13 +2491,9 @@ export async function handleCoreRequest(
             {
                 error:
                     "check_failed",
-                message:
-                    error instanceof Error
-                        ? error.message
-                        : "Unable to process the target.",
+                message: "Unable to process the target. Retry later.",
             },
             500,
         );
     }
 }
-

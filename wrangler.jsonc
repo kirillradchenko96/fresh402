@@ -1,62 +1,160 @@
-/**
- * For more details on how to configure Wrangler, refer to:
- * https://developers.cloudflare.com/workers/wrangler/configuration/
- */
+// Owner-approved isolated staging D1; production binding remains separate.
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "fresh402",
-	"main": "src/index.ts",
-	"compatibility_date": "2026-09-26",
-    "compatibility_flags": ["global_fetch_strictly_public"],
-	"observability": {
-		"enabled": true
-	},
-	"upload_source_maps": true,
-	"ratelimits": [
-		{
-			"name": "REGISTER_TARGET_LIMITER",
-			"namespace_id": "4021001",
-			"simple": { "limit": 10, "period": 60 }
-		},
-		{
-			"name": "REGISTER_GLOBAL_LIMITER",
-			"namespace_id": "4021002",
-			"simple": { "limit": 60, "period": 60 }
-		}
-	],
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "fresh402-db",
-			"database_id": "0339b063-141f-49e4-9dc7-0fe251a6a3c2"
-		}
-	]
-	/**
-	 * Smart Placement
-	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-	 */
-	// "placement": {  "mode": "smart" }
-	/**
-	 * Bindings
-	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
-	 * databases, object storage, AI inference, real-time communication and more.
-	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
-	 */
-	/**
-	 * Environment Variables
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-	 * Note: Use secrets to store sensitive data.
-	 * https://developers.cloudflare.com/workers/configuration/secrets/
-	 */
-	// "vars": {  "MY_VARIABLE": "production_value" }
-	/**
-	 * Static Assets
-	 * https://developers.cloudflare.com/workers/static-assets/binding/
-	 */
-	// "assets": {  "directory": "./public/",  "binding": "ASSETS" }
-	/**
-	 * Service Bindings (communicate between multiple Workers)
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-	 */
-	// "services": [  {   "binding": "MY_SERVICE",   "service": "my-service"  } ]
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fresh402",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-26",
+  "compatibility_flags": [
+    "global_fetch_strictly_public"
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "upload_source_maps": true,
+  "version_metadata": {
+    "binding": "CF_VERSION_METADATA"
+  },
+  "ratelimits": [
+    {
+      "name": "REQUEST_LIMITER",
+      "namespace_id": "4022001",
+      "simple": {
+        "limit": 120,
+        "period": 60
+      }
+    },
+    {
+      "name": "REGISTER_TARGET_LIMITER",
+      "namespace_id": "4021001",
+      "simple": {
+        "limit": 10,
+        "period": 60
+      }
+    },
+    {
+      "name": "REGISTER_GLOBAL_LIMITER",
+      "namespace_id": "4021002",
+      "simple": {
+        "limit": 60,
+        "period": 60
+      }
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fresh402-db",
+      "database_id": "0339b063-141f-49e4-9dc7-0fe251a6a3c2"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production",
+    "OPERATION_DAILY_LIMIT": "10000"
+  },
+  "triggers": {
+    "crons": [
+      "*/10 * * * *"
+    ]
+  },
+  "env": {
+    "staging": {
+      "name": "fresh402-staging",
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "TARGET_FETCH_MODE": "container",
+        "OPERATION_DAILY_LIMIT": "1000",
+        "CONTAINER_EGRESS_ENABLED": "0",
+        "GATEWAY_POOL_SIZE": "1",
+        "GATEWAY_INSTANCE_CONCURRENCY": "4",
+        "GATEWAY_RUNTIME_BUDGET_SECONDS": "300",
+        "GATEWAY_CODE_HASH": "5b1a79a30976ca0a934ebfe87aca9850366dbab896b0a5ec38aa3fae06ba53bf",
+        "OPERATION_CONCURRENCY": "4",
+        "FREE_REGISTRATION_DAILY_LIMIT": "50",
+        "GATEWAY_BUDGET_WINDOW": "pilot-awaiting-verification",
+        "GATEWAY_BUDGET_EXPIRES_MS": "0",
+        "OPERATION_ISOLATE_CONCURRENCY": "4",
+        "VERIFIED_PAYMENT_DAILY_LIMIT": "2000"
+      },
+      "workers_dev": true,
+      "preview_urls": false,
+      "version_metadata": {
+        "binding": "CF_VERSION_METADATA"
+      },
+      "limits": {
+        "cpu_ms": 1000,
+        "subrequests": 50
+      },
+      "triggers": {
+        "crons": [
+          "*/10 * * * *"
+        ]
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "fresh402-staging-db",
+          "database_id": "ba10c4f4-d845-4f6f-9494-b0592dcaf19b",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "ratelimits": [
+        {
+          "name": "REQUEST_LIMITER",
+          "namespace_id": "4023001",
+          "simple": {
+            "limit": 30,
+            "period": 60
+          }
+        },
+        {
+          "name": "REGISTER_TARGET_LIMITER",
+          "namespace_id": "4023002",
+          "simple": {
+            "limit": 5,
+            "period": 60
+          }
+        },
+        {
+          "name": "REGISTER_GLOBAL_LIMITER",
+          "namespace_id": "4023003",
+          "simple": {
+            "limit": 15,
+            "period": 60
+          }
+        }
+      ],
+      "durable_objects": {
+        "code_update_strategy": {
+          "mode": "immediate"
+        },
+        "bindings": [
+          {
+            "name": "EGRESS_CONTAINER",
+            "class_name": "Fresh402Egress"
+          }
+        ]
+      },
+      "migrations": [
+        {
+          "tag": "staging-egress-v1",
+          "new_sqlite_classes": [
+            "Fresh402Egress"
+          ]
+        }
+      ],
+      "containers": [
+        {
+          "class_name": "Fresh402Egress",
+          "image": "./gateway/Dockerfile",
+          "image_build_context": ".",
+          "max_instances": 1,
+          "instance_type": "lite",
+          "authorized_keys": [],
+          "ssh": {
+            "enabled": false
+          }
+        }
+      ]
+    }
+  }
 }

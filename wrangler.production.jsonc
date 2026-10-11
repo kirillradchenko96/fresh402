@@ -1,0 +1,109 @@
+{
+  "name": "fresh402",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-26",
+  "compatibility_flags": [
+    "global_fetch_strictly_public"
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "upload_source_maps": true,
+  "version_metadata": {
+    "binding": "CF_VERSION_METADATA"
+  },
+  "ratelimits": [
+    {
+      "name": "REQUEST_LIMITER",
+      "namespace_id": "4022001",
+      "simple": {
+        "limit": 120,
+        "period": 60
+      }
+    },
+    {
+      "name": "REGISTER_TARGET_LIMITER",
+      "namespace_id": "4021001",
+      "simple": {
+        "limit": 10,
+        "period": 60
+      }
+    },
+    {
+      "name": "REGISTER_GLOBAL_LIMITER",
+      "namespace_id": "4021002",
+      "simple": {
+        "limit": 60,
+        "period": 60
+      }
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fresh402-db",
+      "database_id": "0339b063-141f-49e4-9dc7-0fe251a6a3c2",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production",
+    "TARGET_FETCH_MODE": "container",
+    "CONTAINER_EGRESS_ENABLED": "1",
+    "OPERATION_DAILY_LIMIT": "1000",
+    "OPERATION_CONCURRENCY": "4",
+    "OPERATION_ISOLATE_CONCURRENCY": "4",
+    "VERIFIED_PAYMENT_DAILY_LIMIT": "2000",
+    "FREE_REGISTRATION_DAILY_LIMIT": "100",
+    "GATEWAY_POOL_SIZE": "1",
+    "GATEWAY_INSTANCE_CONCURRENCY": "4",
+    "GATEWAY_RUNTIME_BUDGET_SECONDS": "360000",
+    "GATEWAY_BUDGET_WINDOW": "production-202610",
+    "GATEWAY_BUDGET_EXPIRES_MS": "1793491200000",
+    "GATEWAY_CODE_HASH": "5b1a79a30976ca0a934ebfe87aca9850366dbab896b0a5ec38aa3fae06ba53bf"
+  },
+  "triggers": {
+    "crons": [
+      "*/10 * * * *"
+    ]
+  },
+  "account_id": "158ce1c5e76daae3f8e9e662a8d5de3b",
+  "workers_dev": true,
+  "preview_urls": false,
+  "limits": {
+    "cpu_ms": 1000,
+    "subrequests": 50
+  },
+  "durable_objects": {
+    "code_update_strategy": {
+      "mode": "immediate"
+    },
+    "bindings": [
+      {
+        "name": "EGRESS_CONTAINER",
+        "class_name": "Fresh402Egress"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "production-egress-v1",
+      "new_sqlite_classes": [
+        "Fresh402Egress"
+      ]
+    }
+  ],
+  "containers": [
+    {
+      "class_name": "Fresh402Egress",
+      "image": "registry.cloudflare.com/158ce1c5e76daae3f8e9e662a8d5de3b/fresh402-staging-fresh402egress-staging@sha256:8e2fb211aff5bc728d1486bf8f9a48bfba368c8554367a4bb5c644cb17bd6cd0",
+      "max_instances": 1,
+      "instance_type": "lite",
+      "authorized_keys": [],
+      "ssh": {
+        "enabled": false
+      }
+    }
+  ],
+  "$schema": "node_modules/wrangler/config-schema.json"
+}

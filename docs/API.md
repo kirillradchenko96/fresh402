@@ -74,4 +74,6 @@ Do not place a recovery token in a URL or log. A public transaction hash or paym
 
 Targets must be public HTTPS URLs on port 443 without embedded credentials. Private addresses and unsafe redirects are rejected. Requests are on demand; there is no continuous monitoring, authenticated-site access or push alert service. Payload, target, stored-content and output limits apply.
 
+HTML UI pruning applies automatically without an explicit scope. An explicit CSS selector preserves its visible scope; use ignore rules for noise inside it. Scripts, styles and hidden content remain excluded. JSON processing is bounded to 64 nesting levels and 10,000 nodes before normalization/storage. Corrected pruning may make previously omitted content visible to an existing watch on its next check; watch IDs, retained snapshots and previously paid responses are preserved.
+
 Use the documented error code and message: 400/422 invalid input or comparison; 404 missing watch; 408/504 timeout; 413 oversized data; 415 unsupported media; 429 rate, concurrency or operation budget; 409 pending or mismatched recovery; 503 unavailable service or pending settlement. Do not automatically create a new payment in response to uncertainty.

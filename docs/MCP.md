@@ -58,4 +58,6 @@ Validate exact USDC amounts, Base mainnet, recipient and resource before a payer
 
 Successful settlement exposes `result._meta["x402/payment-response"]`; inspect the structured result and receipt. Retrying identical input/payment/token recovers a retained result without a second settlement. If settlement is pending, retain those same values and do not sign a replacement. Never log the token or authorization signature.
 
+Nonpayment tool errors include their numeric HTTP-equivalent `status` in `structuredContent`, alongside `error` and `message`; for example a changed recovery request is 409. x402 challenges retain the standard PaymentRequired shape. Inspect `isError` and the structured status instead of treating every HTTP 200 tool response as success or every tool error as temporary. A runnable [TypeScript customer integration](../examples/knowledge-base/README.md) demonstrates both transports and safe recovery.
+
 The API processes public HTTPS HTML, JSON and text on demand. Extraction does not render a browser or execute JavaScript, and Smart Diff uses deterministic rules rather than an LLM. See [API.md](API.md) and [PRICING.md](PRICING.md).

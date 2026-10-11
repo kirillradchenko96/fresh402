@@ -1,0 +1,6 @@
+{
+  "name": "fresh402-knowledge-base-example",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" }
+}

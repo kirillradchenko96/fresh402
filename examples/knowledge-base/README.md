@@ -38,3 +38,8 @@ The five-poll contract demo uses two Extracts and four Checks: $0.040 in **simul
 Public contract: [OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json), [API usage](../../docs/API.md), [MCP usage](../../docs/MCP.md), [pricing](../../docs/PRICING.md).
 
 Owner-review proposal: [prepaid client preview](PREPAID_PREVIEW.md). This draft is not a live package offer and contains no automatic purchase flow.
+
+
+## Inactive 2.2 candidate preview
+
+[Tariff-v3 workflow economics](PREPAID.md) and [OpenAPI Contract Diff](OPENAPI.md) are review candidates, not newly deployed production capabilities. Original x402 prices remain unchanged. Read deployed discovery/quotes before using a tool; the client cannot auto-fund or fall back from prepaid to x402. The new example uses public REST/MCP contracts only.

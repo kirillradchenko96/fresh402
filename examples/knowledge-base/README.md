@@ -42,4 +42,6 @@ Owner-review proposal: [prepaid client preview](PREPAID_PREVIEW.md). This draft 
 
 ## Inactive 2.2 candidate preview
 
+See [current availability](../../docs/RELEASE_AVAILABILITY.md): production remains2.0.0; prepaid purchases and OpenAPI Contract Diff are unavailable. Do not interpret this client preview as a production activation.
+
 [Tariff-v3 workflow economics](PREPAID.md) and [OpenAPI Contract Diff](OPENAPI.md) are review candidates, not newly deployed production capabilities. Original x402 prices remain unchanged. Read deployed discovery/quotes before using a tool; the client cannot auto-fund or fall back from prepaid to x402. The new example uses public REST/MCP contracts only.

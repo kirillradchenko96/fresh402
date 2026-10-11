@@ -59,6 +59,8 @@ Legacy public history/diff is separate from paid Smart Diff results. MCP uses PO
 
 Payment is **x402 v2**, scheme **exact**, native **USDC on Base mainnet** (`eip155:8453`, chain ID 8453). The asset is `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`; the receiving address currently advertised is `0x58B4b483fBE31860335eCeB12CCCF4338b251085`. Always validate the current challenge before signing.
 
+An empty unsigned POST to any of the three paid REST resources returns a discovery challenge without executing the operation. The challenge's schema still requires the actual application input. Supplied malformed or unsafe input can be rejected before payment. A signed request requires valid input and existing watch/comparison prerequisites before settlement; completed private recovery retains its original result semantics. Smart Diff clients must register first and use the returned watch ID.
+
 1. Submit the intended request without payment and read its HTTP 402 `PAYMENT-REQUIRED` header (Base64 JSON).
 2. Check resource URL, network, asset, recipient, exact atomic amount (5000 / 10000 / 15000), expiry and input. Preserve the advertised `resource` and `extensions`, including `bazaar`, in the payment payload as specified by x402.
 3. Persist a private recovery token generated from 32 cryptographically random bytes, encoded as hex or Base64url. Follow the live OpenAPI length and format constraints; send it in `X-Fresh402-Recovery-Token` on the payment attempt and retries.

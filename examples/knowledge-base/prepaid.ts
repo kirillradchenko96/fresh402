@@ -1,0 +1,42 @@
+import { randomUUID } from 'node:crypto';
+import { ApiError } from './client.ts';
+type Json=Record<string,any>;
+export type PrepaidRequest={key:string;service:'check'|'extract'|'smart_diff';input:Json;cost:number;tariffVersion?:1|2;state:'pending'|'completed'|'released';result?:Json};
+export class PendingPrepaid extends Error {declare operation:PrepaidRequest;constructor(operation:PrepaidRequest){super('Prepaid outcome uncertain. Recover the ORIGINAL idempotency key.');Object.defineProperty(this,'operation',{value:operation,enumerable:false});}}
+const cost={check:1,extract:2,smart_diff:3};
+/** REST prepaid-only: this client has no signer or payment submission path. */
+export class PrepaidClient {
+ base:string;budget:number;reserved=0;timeout:number;tariffVersion:1|2;persist:(op:PrepaidRequest)=>Promise<void>;declare credential:string;
+ constructor(base:string,credential:string,options:{maxCredits:number;persist:(op:PrepaidRequest)=>Promise<void>;timeoutMs?:number;restoredCredits?:number;tariffVersion?:1|2}){
+  const u=new URL(base);if(u.username||u.password||u.search||u.hash||u.pathname!=='/'||!(u.protocol==='https:'||u.protocol==='http:'&&['127.0.0.1','localhost'].includes(u.hostname)))throw new Error('Use an HTTPS origin or local loopback');
+  if(!/^fp_[a-f0-9]{64}$/.test(credential)||!Number.isSafeInteger(options.maxCredits)||options.maxCredits<0||typeof options.persist!=='function')throw new Error('Credential, integer credit cap and private persistence are required');
+  this.base=u.origin;this.budget=options.maxCredits;this.persist=options.persist;this.timeout=options.timeoutMs??15000;
+  this.tariffVersion=options.tariffVersion??1;if(![1,2].includes(this.tariffVersion))throw new Error('Unknown tariff');
+  const restored=options.restoredCredits??0;if(!Number.isSafeInteger(restored)||restored<0||restored>this.budget)throw new Error('Invalid restored credit budget');this.reserved=restored;
+  Object.defineProperty(this,'credential',{value:credential,enumerable:false});
+ }
+ async request(path:string,input?:Json,key?:string,authorization?:{version:number;maximum:number}){
+  const r=await fetch(this.base+path,{method:input===undefined?'GET':'POST',redirect:'error',headers:{'x-fresh402-api-key':this.credential,...(input===undefined?{}:{'content-type':'application/json'}),...(key?{'idempotency-key':key}:{}),...(authorization?.version===2?{'x-fresh402-tariff-version':'2','x-fresh402-max-credits':String(authorization.maximum)}:{})},...(input===undefined?{}:{body:JSON.stringify(input)}),signal:AbortSignal.timeout(this.timeout)});
+  if(!r.body)throw new Error('Empty service response');const reader=r.body.getReader(),parts:Uint8Array[]=[];let size=0;try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>1000000)throw new Error('Response too large');parts.push(value);}}catch(e){await reader.cancel().catch(()=>{});throw e;}finally{reader.releaseLock();}
+  return{response:r,json:JSON.parse(Buffer.concat(parts).toString('utf8'))};
+ }
+ async balance(){const {response,json}=await this.request('/v2/prepaid/balance');if(!response.ok)throw new ApiError(json.error??'prepaid_error',response.status);if(json.access_method!=='prepaid'||!Number.isSafeInteger(json.available)||json.available<0||!Number.isSafeInteger(json.reserved)||json.reserved<0)throw new Error('Invalid balance response');return json;}
+ async usage(){const {response,json}=await this.request('/v2/prepaid/usage');if(!response.ok)throw new ApiError(json.error??'prepaid_error',response.status);return json;}
+ quote(service:PrepaidRequest['service']){if(!Object.hasOwn(cost,service))throw new Error('Unknown prepaid product');return{tariff_version:this.tariffVersion,resource_class:'fixed',maximum_credits:this.tariffVersion===2&&service==='check'?2:cost[service]};}
+ async quoteRemote(){const {response,json}=await this.request('/v2/prepaid/quote');if(!response.ok)throw new ApiError(json.error??'prepaid_error',response.status);if(![1,2].includes(json.tariff_version)||json.resource_class!=='fixed'||['check','extract','smart_diff'].some(s=>json.credits?.[s]!== (json.tariff_version===2&&s==='check'?2:cost[s as keyof typeof cost])))throw new Error('Unsupported pricing contract');this.tariffVersion=json.tariff_version;return json;}
+ async register(input:Json){const {response,json}=await this.request('/v1/register',input);if(!response.ok)throw new ApiError(json.error??'registration_error',response.status);return json;}
+ async execute(service:PrepaidRequest['service'],input:Json){
+  const charge=this.quote(service).maximum_credits;if(this.reserved+charge>this.budget)throw new ApiError('client_credit_budget_exceeded',402);
+  const op:PrepaidRequest={key:randomUUID(),service,input:structuredClone(input),cost:charge,...(this.tariffVersion===2?{tariffVersion:2 as const}:{}),state:'pending'};this.reserved+=charge;
+  try{await this.persist(op);}catch(e){this.reserved-=charge;throw e;}
+  return this.recover(op);
+ }
+ async recover(op:PrepaidRequest){
+  const version=op.tariffVersion??1;if(![1,2].includes(version)||!Object.hasOwn(cost,op.service)||op.cost!==(version===2&&op.service==='check'?2:cost[op.service])||!/^[A-Za-z0-9_-]{16,128}$/.test(op.key))throw new Error('Invalid persisted prepaid operation');
+  let r;try{r=await this.request('/v2/prepaid/'+op.service.replace('_','-'),op.input,op.key,{version,maximum:op.cost});}catch{throw new PendingPrepaid(op);}
+  const durable=r.response.headers.get('x-fresh402-access')==='prepaid',charged=r.response.headers.get('x-fresh402-credits');
+  if(r.response.ok){if(!durable||charged!==String(op.cost))throw new PendingPrepaid(op);op.state='completed';op.result=r.json;await this.persist(op);return r.json;}
+  if(durable&&charged==='0'||r.response.status<500&&![409,410].includes(r.response.status)){if(op.state==='pending')this.reserved=Math.max(0,this.reserved-op.cost);op.state='released';await this.persist(op);throw new ApiError(r.json.error??'prepaid_error',r.response.status);}
+  throw new PendingPrepaid(op);
+ }
+}

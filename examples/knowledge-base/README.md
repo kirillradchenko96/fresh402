@@ -36,3 +36,5 @@ Persistent shared watches, explicit noise rules, compact changes and paid-result
 The five-poll contract demo uses two Extracts and four Checks: $0.040 in **simulated service amounts**, compared with $0.050 for five Extracts. Three full document outputs are avoided. These are reproducible workflow mechanics, not real customer savings, profit or commercial traction.
 
 Public contract: [OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json), [API usage](../../docs/API.md), [MCP usage](../../docs/MCP.md), [pricing](../../docs/PRICING.md).
+
+Owner-review proposal: [prepaid client preview](PREPAID_PREVIEW.md). This draft is not a live package offer and contains no automatic purchase flow.

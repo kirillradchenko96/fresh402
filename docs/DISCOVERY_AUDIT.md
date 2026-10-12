@@ -2,7 +2,9 @@
 
 Verified October 10, 2026 (America/Anchorage), after the authorized discovery compatibility release. This records live validation and catalog results; a payment challenge, an accepted refresh and actual indexing are different outcomes.
 
-## Verified production contract
+Current availability update, October 12, 2026 (UTC): the hosted runtime reports **2.2.0**. The same four public tools, REST/MCP URLs, original prices and Glama verification are preserved. OpenAPI Contract Diff and prepaid remain disabled previews. Directory observations below retain their original audit date; no new listing or registry publication is implied.
+
+## Historical production contract (October 10)
 
 The [production service](https://fresh402.kirilllabs.workers.dev/) reports **2.0.0**. [OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) has the stable 2.0.0 description, input/output schemas and all three prices. The [x402 manifest](https://fresh402.kirilllabs.workers.dev/.well-known/x402) contains their canonical URLs. [MCP](https://fresh402.kirilllabs.workers.dev/mcp) initialize/tools/list exposes **fresh402_register**, **fresh402_check**, **fresh402_extract** and **fresh402_smart_diff**.
 

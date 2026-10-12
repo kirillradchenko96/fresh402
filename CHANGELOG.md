@@ -2,6 +2,12 @@
 
 These notes describe the deployed API, independently of the legacy source package version in this repository. Documentation publication does not deploy infrastructure or merge the backend release PR.
 
+## 2.2.0 - October 12, 2026
+
+- The hosted runtime is 2.2.0; existing REST paths, four MCP tools and the three public x402 prices are unchanged.
+- Gateway lifecycle handling passed bounded staging acceptance before release. Capacity and outbound security controls remain enforced.
+- OpenAPI Contract Diff and prepaid purchasing/execution remain disabled previews, pending owner-controlled payment acceptance and commercial activation.
+
 ## 2.0.0 — October 9, 2026
 
 - Four MCP tools at the existing endpoint: free fresh402_register, Freshness Check (fresh402_check, $0.005 USDC), Web Extract (fresh402_extract, $0.01 USDC) and Smart Diff (fresh402_smart_diff, $0.015 USDC).

@@ -1,6 +1,6 @@
 # Current service availability
 
-The authoritative production service currently reports **2.0.0** at [the existing endpoint](https://fresh402.kirilllabs.workers.dev/). Register, Check ($0.005 USDC), Extract ($0.010) and Smart Diff ($0.015) remain the available REST/MCP products. Inspect [live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) and the actual x402 challenge before signing.
+The authoritative production service currently reports **2.2.0** at [the existing endpoint](https://fresh402.kirilllabs.workers.dev/). Register, Check ($0.005 USDC), Extract ($0.010) and Smart Diff ($0.015) remain the available REST/MCP products. Inspect [live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) and the actual x402 challenge before signing.
 
 The 2.2 client examples and catalogue are **inactive previews**. OpenAPI Contract Diff and prepaid package purchasing are unavailable until their release acceptance and commercial activation gates pass. Proposed Starter ($2.50/1,000 credits), Developer ($15/10,000) and tariff-v3 weights2/3/4/5 are not public purchase offers. No Volume package is approved.
 

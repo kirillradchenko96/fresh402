@@ -1,10 +1,10 @@
-# Fresh402 v2.0 — Web Intelligence API for AI Agents
+# Fresh402 v2.2 — Web Intelligence API for AI Agents
 
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
 **Check whether a source changed, extract usable content, and compare structured snapshots. Pay per call with x402 USDC on Base.**
 
-The hosted production API reports **2.0.0**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
+The hosted production API reports **2.2.0**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
 
 | Product | MCP tool | REST endpoint | Price per call |
 |---|---|---|---:|

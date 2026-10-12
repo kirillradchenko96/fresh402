@@ -36,3 +36,12 @@ Persistent shared watches, explicit noise rules, compact changes and paid-result
 The five-poll contract demo uses two Extracts and four Checks: $0.040 in **simulated service amounts**, compared with $0.050 for five Extracts. Three full document outputs are avoided. These are reproducible workflow mechanics, not real customer savings, profit or commercial traction.
 
 Public contract: [OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json), [API usage](../../docs/API.md), [MCP usage](../../docs/MCP.md), [pricing](../../docs/PRICING.md).
+
+Owner-review proposal: [prepaid client preview](PREPAID_PREVIEW.md). This draft is not a live package offer and contains no automatic purchase flow.
+
+
+## Inactive 2.2 candidate preview
+
+See [current availability](../../docs/RELEASE_AVAILABILITY.md): production remains2.0.0; prepaid purchases and OpenAPI Contract Diff are unavailable. Do not interpret this client preview as a production activation.
+
+[Tariff-v3 workflow economics](PREPAID.md) and [OpenAPI Contract Diff](OPENAPI.md) are review candidates, not newly deployed production capabilities. Original x402 prices remain unchanged. Read deployed discovery/quotes before using a tool; the client cannot auto-fund or fall back from prepaid to x402. The new example uses public REST/MCP contracts only.

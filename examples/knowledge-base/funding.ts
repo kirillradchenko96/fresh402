@@ -1,0 +1,10 @@
+/** Pure wallet adapter preparation. Does not connect, sign, broadcast or submit a payment. */
+const USDC='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',RECEIVER='0x58b4b483fbe31860335eceb12cccf4338b251085';
+export function prepareFundingAuthorization(intent:any,challenge:any,owner:{chainId:number;payer:string;authorizedAtomicUSDC:bigint}){
+ const r=challenge?.accepts?.[0];if(owner.chainId!==8453||!/^0x[a-f0-9]{40}$/i.test(owner.payer)||owner.payer.toLowerCase()===RECEIVER)throw new Error('Use the designated distinct payer on Base mainnet');
+ if(challenge.x402Version!==2||challenge.accepts.length!==1||r.scheme!=='exact'||r.network!=='eip155:8453'||r.asset.toLowerCase()!==USDC||r.payTo.toLowerCase()!==RECEIVER||r.amount!==String(intent.amount_atomic)||!Number.isSafeInteger(intent.amount_atomic)||intent.amount_atomic<1||BigInt(r.amount)>owner.authorizedAtomicUSDC||challenge.resource?.url!==intent.resource||!/^0x[a-f0-9]{64}$/i.test(intent.nonce)||r.extra?.fresh402FundingNonce!==intent.nonce)throw new Error('Funding challenge does not match the explicit authorized purchase');
+ const deadline=Math.floor(intent.expires_at/1000)-1;if(!Number.isSafeInteger(deadline)||deadline<=Math.floor(Date.now()/1000)||deadline>Math.floor(Date.now()/1000)+300)throw new Error('Funding intent lifetime is invalid');
+ const authorization={from:owner.payer,to:r.payTo,value:r.amount,validAfter:'0',validBefore:String(deadline),nonce:intent.nonce};
+ const typedData={domain:{name:'USD Coin',version:'2',chainId:8453,verifyingContract:r.asset},primaryType:'TransferWithAuthorization',types:{TransferWithAuthorization:[{name:'from',type:'address'},{name:'to',type:'address'},{name:'value',type:'uint256'},{name:'validAfter',type:'uint256'},{name:'validBefore',type:'uint256'},{name:'nonce',type:'bytes32'}]},message:{...authorization,value:BigInt(r.amount),validAfter:0n,validBefore:BigInt(deadline)}};
+ return{typedData,payloadForSignature:(signature:string)=>{if(!/^0x[a-f0-9]{130}$/i.test(signature))throw new Error('An owner-confirmed EIP-3009 signature is required');return{x402Version:2,resource:challenge.resource,accepted:r,payload:{signature,authorization}};}};
+}

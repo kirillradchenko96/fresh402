@@ -28,3 +28,6 @@ jobs:
       - run: npx tsc --noEmit
       - run: npx tsc --noEmit -p test/tsconfig.json
       - run: npm test -- --run
+      - run: npx tsc --noEmit -p examples/knowledge-base/tsconfig.json
+      - run: node --test examples/knowledge-base/*.test.ts
+      - run: node examples/knowledge-base/prepaid-run.ts --demo

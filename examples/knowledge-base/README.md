@@ -45,3 +45,8 @@ Owner-review proposal: [prepaid client preview](PREPAID_PREVIEW.md). This draft 
 See [current availability](../../docs/RELEASE_AVAILABILITY.md): production remains2.0.0; prepaid purchases and OpenAPI Contract Diff are unavailable. Do not interpret this client preview as a production activation.
 
 [Tariff-v3 workflow economics](PREPAID.md) and [OpenAPI Contract Diff](OPENAPI.md) are review candidates, not newly deployed production capabilities. Original x402 prices remain unchanged. Read deployed discovery/quotes before using a tool; the client cannot auto-fund or fall back from prepaid to x402. The new example uses public REST/MCP contracts only.
+
+
+## Wallet-owned customer onboarding
+
+[CustomerClient](onboarding.ts) manages ownership challenges, original funding intents, account history and replacement API keys. [Complete examples](onboarding-example.ts) cover Starter plus Check, Developer tools and intentional top-ups. Wallet connection and each exact payment confirmation are externally supplied explicit actions. No example automatically pays. Read [availability, finality and recovery rules](../../docs/SELF_SERVICE.md); public signup and package purchasing remain gated.

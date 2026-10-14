@@ -1,0 +1,3706 @@
+{
+  "x-customer-onboarding": {
+    "account_creation": false,
+    "package_purchasing": false,
+    "terms_approved": false,
+    "wallet_signatures": "EIP-712, 65-byte EOA only; contract wallets unsupported",
+    "session_header": "X-Fresh402-Customer-Session",
+    "credential_header": "X-Fresh402-API-Key",
+    "finality": "Finalized Base receipt, canonical block, direct native USDC EIP-3009 call and matching authorization/transfer logs",
+    "recovery": "Recover the original intent. Never replace a submitted authorization. Recover lost keys by wallet authentication and replacement.",
+    "plans_url": "/v2/prepaid/plans",
+    "customer_api": "/v2/prepaid/customer"
+  },
+  "x-prepaid-availability": {
+    "execution": "configured-account-access",
+    "purchasing": "not-a-public-offer",
+    "candidate_packages": "Immutable package IDs and exact terms are listed at /v2/prepaid/plans; inspect its independent public signup/purchasing flags. No automatic wallet connection or funding."
+  },
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Fresh402 Web Intelligence API",
+    "version": "2.3.0",
+    "description": "Fresh402 2.3.0: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
+    "contact": {
+      "url": "https://github.com/kirillradchenko96/fresh402/issues"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://fresh402.kirilllabs.workers.dev"
+    }
+  ],
+  "paths": {
+    "/v2/prepaid/plans": {
+      "get": {
+        "operationId": "fresh402_prepaid_plans",
+        "summary": "Exact Starter/Developer terms and current public availability",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/challenge": {
+      "post": {
+        "operationId": "fresh402_customer_challenge",
+        "summary": "Create a five-minute single-use Base EIP-712 ownership challenge",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "wallet": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  }
+                },
+                "required": [
+                  "wallet"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/sessions": {
+      "post": {
+        "operationId": "fresh402_customer_session",
+        "summary": "Prove EOA wallet ownership; create or recover the same zero-credit account",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "challenge_id": {
+                    "type": "string",
+                    "pattern": "^cc_[a-f0-9]{64}$"
+                  },
+                  "signature": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{130}$"
+                  }
+                },
+                "required": [
+                  "challenge_id",
+                  "signature"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/account": {
+      "get": {
+        "operationId": "fresh402_customer_account",
+        "summary": "Available/reserved credits and immutable tariff",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/usage": {
+      "get": {
+        "operationId": "fresh402_customer_usage",
+        "summary": "Latest 100 account operations",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/purchases": {
+      "get": {
+        "operationId": "fresh402_customer_purchases",
+        "summary": "Latest 100 original funding intents",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/credentials": {
+      "get": {
+        "operationId": "fresh402_customer_credentials",
+        "summary": "Credential identifiers and revocation metadata",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/funding": {
+      "post": {
+        "operationId": "fresh402_customer_purchase",
+        "summary": "Idempotent package quote; no payment or credits created",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "package_id": {
+                    "type": "string",
+                    "enum": [
+                      "candidate-starter-v3",
+                      "candidate-developer-v3"
+                    ]
+                  }
+                },
+                "required": [
+                  "package_id"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/funding/{intent}": {
+      "get": {
+        "operationId": "fresh402_customer_funding_status",
+        "summary": "Inspect the original account-scoped funding intent",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "intent",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^pf_[a-f0-9]{32}$"
+            }
+          },
+          {
+            "name": "PAYMENT-SIGNATURE",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Original x402 authorization only. Omit for recovery; never sign a replacement for a submitted intent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      },
+      "post": {
+        "operationId": "fresh402_customer_funding",
+        "summary": "Obtain x402 challenge, explicitly submit original authorization, or recover finalized settlement",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {},
+                "required": []
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "intent",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^pf_[a-f0-9]{32}$"
+            }
+          },
+          {
+            "name": "PAYMENT-SIGNATURE",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Original x402 authorization only. Omit for recovery; never sign a replacement for a submitted intent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/credentials/claim": {
+      "post": {
+        "operationId": "fresh402_customer_claim",
+        "summary": "Replace all prior API keys after finalized funding; lost responses are recoverable by repeating with wallet authentication",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {},
+                "required": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/credentials/rotate": {
+      "post": {
+        "operationId": "fresh402_customer_rotate",
+        "summary": "Replace all prior API keys after finalized funding; lost responses are recoverable by repeating with wallet authentication",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {},
+                "required": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/credentials/revoke": {
+      "post": {
+        "operationId": "fresh402_customer_revoke",
+        "summary": "Revoke an account-owned API credential",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "credential_id": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "credential_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v1/check": {
+      "post": {
+        "operationId": "fresh402_check",
+        "summary": "Check a persistent watch or URL for changes, with noise filtering, conditional HTTP and a compact deterministic diff. $0.005 USDC.",
+        "description": "Detect website, API documentation and public JSON changes. Reuse a baseline, filter noise and return a compact freshness result. On-demand polling, not a background monitor.",
+        "tags": [
+          "check"
+        ],
+        "security": [
+          {
+            "x402Payment": []
+          }
+        ],
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.005"
+          }
+        },
+        "x-mcp-tool": "fresh402_check",
+        "x-fresh402-tool": {
+          "id": "check",
+          "category": "freshness",
+          "limits": {
+            "transfer_bytes": 5000000,
+            "decoded_bytes": 5000000,
+            "output_bytes": 524288,
+            "parser_characters": 1000000,
+            "gateway_timeout_ms": 10000
+          },
+          "prepaid_credits": {
+            "1": 1,
+            "2": 2,
+            "3": 2
+          },
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "auth": "x402-or-prepaid",
+          "since": "2.0.0"
+        },
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri",
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]://",
+                    "description": "Public HTTPS URL on port 443; embedded credentials and private targets are rejected."
+                  },
+                  "watch_id": {
+                    "type": "string",
+                    "pattern": "^w_[a-f0-9]{32}$"
+                  },
+                  "selector": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "ignore_selectors": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    }
+                  },
+                  "ignore_json_paths": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256,
+                      "pattern": "^\\/"
+                    }
+                  },
+                  "previous_hash": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{64}$"
+                  },
+                  "max_age_seconds": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 86400
+                  },
+                  "include_diff": {
+                    "type": "boolean"
+                  }
+                },
+                "oneOf": [
+                  {
+                    "required": [
+                      "url"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "watch_id"
+                    ]
+                  }
+                ]
+              },
+              "example": {
+                "url": "https://example.com/",
+                "include_diff": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paid result after confirmed settlement",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required or rejected; never a sale. No paid data returned.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 x402 v2 requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/extract": {
+      "post": {
+        "operationId": "fresh402_extract",
+        "summary": "Extract main text, metadata, headings, links and JSON-LD from a public URL without executing JavaScript. HTML, JSON and text; CSS scoping. $0.01 USDC.",
+        "description": "Extract readable article or documentation content, metadata and links from public static HTML, JSON or text. CSS scope and noise exclusions; no JavaScript rendering.",
+        "tags": [
+          "extract"
+        ],
+        "security": [
+          {
+            "x402Payment": []
+          }
+        ],
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "x-mcp-tool": "fresh402_extract",
+        "x-fresh402-tool": {
+          "id": "extract",
+          "category": "extraction",
+          "limits": {
+            "transfer_bytes": 5000000,
+            "decoded_bytes": 5000000,
+            "output_bytes": 524288,
+            "parser_characters": 1000000,
+            "gateway_timeout_ms": 10000
+          },
+          "prepaid_credits": {
+            "1": 2,
+            "2": 2,
+            "3": 3
+          },
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "auth": "x402-or-prepaid",
+          "since": "2.0.0"
+        },
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri",
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]://",
+                    "description": "Public HTTPS URL on port 443; embedded credentials and private targets are rejected."
+                  },
+                  "selector": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "ignore_selectors": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    }
+                  },
+                  "ignore_json_paths": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256,
+                      "pattern": "^\\/"
+                    }
+                  },
+                  "max_chars": {
+                    "default": 20000,
+                    "type": "integer",
+                    "minimum": 100,
+                    "maximum": 50000
+                  },
+                  "include_links": {
+                    "default": true,
+                    "type": "boolean"
+                  },
+                  "include_structured_data": {
+                    "default": true,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "url": "https://example.com/",
+                "max_chars": 20000
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paid result after confirmed settlement",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required or rejected; never a sale. No paid data returned.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 x402 v2 requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/smart-diff": {
+      "post": {
+        "operationId": "fresh402_smart_diff",
+        "summary": "Compare a watch with its previous Smart Diff snapshot or fixed baseline. JSON Pointer changes, HTML block changes and explained significance rules; deterministic, no LLM. $0.015 USDC.",
+        "description": "Compare stored and current versions of a public web page or JSON document. Return structured changes and deterministic significance evidence; register a watch first. Not a complete API compatibility analyzer.",
+        "tags": [
+          "smart_diff"
+        ],
+        "security": [
+          {
+            "x402Payment": []
+          }
+        ],
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.015"
+          }
+        },
+        "x-mcp-tool": "fresh402_smart_diff",
+        "x-fresh402-tool": {
+          "id": "smart_diff",
+          "category": "document-diff",
+          "limits": {
+            "transfer_bytes": 5000000,
+            "decoded_bytes": 5000000,
+            "output_bytes": 524288,
+            "parser_characters": 1000000,
+            "gateway_timeout_ms": 10000
+          },
+          "prepaid_credits": {
+            "1": 3,
+            "2": 3,
+            "3": 4
+          },
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "auth": "x402-or-prepaid",
+          "since": "2.0.0"
+        },
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "watch_id": {
+                    "type": "string",
+                    "pattern": "^w_[a-f0-9]{32}$",
+                    "description": "Required ID returned by free fresh402_register or POST /v1/register. Example IDs are illustrative; replace them with a returned watch ID before paying."
+                  },
+                  "compare_to": {
+                    "default": "previous",
+                    "type": "string",
+                    "enum": [
+                      "previous",
+                      "baseline"
+                    ]
+                  },
+                  "previous_hash": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "watch_id"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "watch_id": "w_0123456789abcdef0123456789abcdef",
+                "compare_to": "previous"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paid result after confirmed settlement",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SmartDiffResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required or rejected; never a sale. No paid data returned.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 x402 v2 requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/openapi-contract-diff": {
+      "post": {
+        "operationId": "fresh402_openapi_contract_diff",
+        "summary": "Compare a registered public JSON OpenAPI 3.0/3.1 contract against its baseline or previous snapshot. Deterministic structural compatibility evidence; no remote references or LLM.",
+        "description": "Detect changes to API paths, methods, parameters, request requirements and response schemas, with conservative breaking-change evidence. Register the JSON contract first; no YAML, remote reference fetch or perfect compatibility guarantee.",
+        "tags": [
+          "openapi_diff"
+        ],
+        "security": [
+          {
+            "x402Payment": []
+          }
+        ],
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.020"
+          }
+        },
+        "x-mcp-tool": "fresh402_openapi_contract_diff",
+        "x-fresh402-tool": {
+          "id": "openapi_diff",
+          "category": "api-contract-diff",
+          "limits": {
+            "transfer_bytes": 5000000,
+            "decoded_bytes": 5000000,
+            "output_bytes": 131072,
+            "parser_characters": 256000,
+            "gateway_timeout_ms": 10000,
+            "document_bytes": 256000,
+            "paths": 100,
+            "operations": 500,
+            "work": 20000,
+            "ref_hops": 32,
+            "ref_resolutions": 2048,
+            "changes": 200
+          },
+          "prepaid_credits": {
+            "3": 5
+          },
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "auth": "x402-or-prepaid",
+          "since": "2.2.0"
+        },
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "watch_id": {
+                    "type": "string",
+                    "pattern": "^w_[a-f0-9]{32}$"
+                  },
+                  "compare_to": {
+                    "default": "previous",
+                    "type": "string",
+                    "enum": [
+                      "previous",
+                      "baseline"
+                    ]
+                  },
+                  "previous_hash": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "watch_id"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "watch_id": "w_0123456789abcdef0123456789abcdef",
+                "compare_to": "previous"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paid result after confirmed settlement",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OpenApiDiffResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required or rejected; never a sale. No paid data returned.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 x402 v2 requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/register": {
+      "post": {
+        "operationId": "fresh402_register",
+        "summary": "Create or retrieve a free persistent baseline; existing watches never refetch",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri"
+                  },
+                  "selector": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  "ignore_selectors": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    }
+                  },
+                  "ignore_json_paths": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256,
+                      "pattern": "^\\/"
+                    }
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Registration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/history": {
+      "get": {
+        "operationId": "fresh402_history",
+        "summary": "Read retained v1 snapshot metadata; never fetches a target",
+        "security": [],
+        "parameters": [
+          {
+            "name": "watch_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Provide watch_id or url"
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Provide watch_id or url"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stored v1 data (shared publicly); never v2 Smart Diff data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HistoryResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/diff": {
+      "get": {
+        "operationId": "fresh402_diff",
+        "summary": "Read a legacy deterministic diff of the latest two stored v1 snapshots; never fetches a target",
+        "security": [],
+        "parameters": [
+          {
+            "name": "watch_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Provide watch_id or url"
+          },
+          {
+            "name": "url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Provide watch_id or url"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stored v1 data (shared publicly); never v2 Smart Diff data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LegacyDiffResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/stats": {
+      "get": {
+        "operationId": "fresh402_stats",
+        "summary": "Confirmed settlement counts and USDC revenue; excludes 402 challenges",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Settlement totals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatsResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "operationId": "fresh402_health",
+        "summary": "Health, version, services and prices",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "normalizer_version": {
+                      "type": "integer"
+                    },
+                    "pricing": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "endpoints": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "features": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "operationId": "fresh402_openapi",
+        "summary": "This OpenAPI document",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "OpenAPI 3.1",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/x402": {
+      "get": {
+        "operationId": "fresh402_x402",
+        "summary": "x402 discovery manifest",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Paid REST resource URLs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "integer"
+                    },
+                    "resources": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/glama.json": {
+      "get": {
+        "operationId": "fresh402_glama",
+        "summary": "Glama ownership verification",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Existing ownership claim",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "$schema": {
+                      "type": "string"
+                    },
+                    "claim": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcp": {
+      "post": {
+        "operationId": "fresh402_mcp",
+        "summary": "MCP Streamable HTTP (2026-07-28 plus stateless 2025 compatibility)",
+        "security": [],
+        "description": "Five tools. Payment challenge is an isError tool result with structuredContent = PaymentRequired; payment goes in params._meta['x402/payment']; receipt in result._meta['x402/payment-response']. HTTP 200 alone is not success. See MCP.md.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "jsonrpc": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": [
+                      "string",
+                      "number"
+                    ]
+                  },
+                  "method": {
+                    "type": "string"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "JSON-RPC or MCP envelope; JSON or SSE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              },
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Notification accepted"
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "fresh402_mcp_get",
+        "summary": "Sessionless MCP; GET not supported",
+        "responses": {
+          "405": {
+            "description": "Method not allowed"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "fresh402_mcp_delete",
+        "summary": "Sessionless MCP; DELETE not supported",
+        "responses": {
+          "405": {
+            "description": "Method not allowed"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "customerSession": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Fresh402-Customer-Session",
+        "description": "15-minute wallet-authenticated account-management session; never a prepaid execution key."
+      },
+      "x402Payment": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "PAYMENT-SIGNATURE",
+        "description": "x402 v2 exact USDC on Base (eip155:8453); use PAYMENT-REQUIRED challenge."
+      }
+    },
+    "schemas": {
+      "OpenApiDiffResult": {
+        "type": "object",
+        "properties": {
+          "watch_id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "final_url": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "previous_hash": {
+            "type": "string"
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "descriptive_only": {
+            "type": "boolean"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "classification": {
+                  "enum": [
+                    "definitely_breaking",
+                    "potentially_breaking",
+                    "additive",
+                    "unclassified"
+                  ]
+                },
+                "rule": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "before": {
+                  "type": "string"
+                },
+                "after": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "classification",
+                "rule",
+                "path"
+              ]
+            }
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "definitely_breaking": {
+                "type": "integer"
+              },
+              "potentially_breaking": {
+                "type": "integer"
+              },
+              "additive": {
+                "type": "integer"
+              },
+              "unclassified": {
+                "type": "integer"
+              }
+            }
+          },
+          "changes_truncated": {
+            "type": "boolean"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "source_provenance": {
+            "type": "object",
+            "properties": {
+              "baseline_url": {
+                "type": "string"
+              },
+              "baseline_at": {
+                "type": "string"
+              },
+              "requested_url": {
+                "type": "string"
+              },
+              "final_url": {
+                "type": "string"
+              },
+              "raw_source_hash": {
+                "type": "string"
+              },
+              "registered_core_hash": {
+                "type": "string"
+              }
+            }
+          },
+          "compare_to": {
+            "enum": [
+              "previous",
+              "baseline",
+              "hash"
+            ]
+          },
+          "comparison_source": {
+            "type": "string"
+          },
+          "work_units": {
+            "type": "integer"
+          },
+          "reference_resolutions": {
+            "type": "integer"
+          },
+          "openapi_versions": {
+            "type": "object",
+            "properties": {
+              "before": {
+                "type": "string"
+              },
+              "after": {
+                "type": "string"
+              }
+            }
+          },
+          "rules_version": {
+            "type": "integer"
+          },
+          "algorithm": {
+            "type": "string"
+          },
+          "semantic_model_used": {
+            "type": "boolean"
+          },
+          "fetched_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "watch_id",
+          "hash",
+          "previous_hash",
+          "changed",
+          "changes",
+          "counts",
+          "source_provenance",
+          "rules_version"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "array",
+                  "items": {}
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "RegisterResult": {
+        "type": "object",
+        "properties": {
+          "watch_id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "final_url": {
+            "type": "string"
+          },
+          "created": {
+            "type": "boolean"
+          },
+          "baseline_created": {
+            "type": "boolean"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "content_kind": {
+            "enum": [
+              "html",
+              "json",
+              "text"
+            ]
+          },
+          "normalizer_version": {
+            "type": "integer"
+          },
+          "content_length": {
+            "type": "integer"
+          },
+          "snapshot_truncated": {
+            "type": "boolean"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "checked_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "watch_id",
+          "url",
+          "created",
+          "baseline_created",
+          "hash"
+        ]
+      },
+      "CheckResult": {
+        "type": "object",
+        "properties": {
+          "watch_id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "final_url": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "previous_hash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "changed": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "raw_changed": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "noise_detected": {
+            "type": "boolean"
+          },
+          "content_kind": {
+            "type": "string"
+          },
+          "cached": {
+            "type": "boolean"
+          },
+          "cache_status": {
+            "type": "string"
+          },
+          "network_fetched": {
+            "type": "boolean"
+          },
+          "comparison_source": {
+            "type": "string"
+          },
+          "normalizer_version": {
+            "type": "integer"
+          },
+          "diff": {
+            "$ref": "#/components/schemas/TextDiff"
+          },
+          "snapshot_saved": {
+            "type": "boolean"
+          },
+          "snapshot_truncated": {
+            "type": "boolean"
+          },
+          "checked_at": {
+            "type": "string"
+          },
+          "persistence_error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "watch_id",
+          "hash",
+          "changed",
+          "content_kind"
+        ]
+      },
+      "TextDiff": {
+        "type": "object",
+        "properties": {
+          "available": {
+            "type": "boolean"
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "change_ratio": {
+            "type": "number"
+          },
+          "removed_excerpt": {
+            "type": "string"
+          },
+          "added_excerpt": {
+            "type": "string"
+          },
+          "content_truncated": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "ExtractResult": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "final_url": {
+            "type": "string"
+          },
+          "content_kind": {
+            "enum": [
+              "html",
+              "json",
+              "text"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "canonical_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "text_length": {
+            "type": "integer"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "data": {},
+          "data_omitted": {
+            "type": "boolean"
+          },
+          "headings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "level": {
+                  "type": "integer"
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "structured_data": {
+            "type": "array",
+            "items": {}
+          },
+          "hash": {
+            "type": "string"
+          },
+          "fetched_at": {
+            "type": "string"
+          },
+          "extractor_version": {
+            "type": "integer"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "url",
+          "final_url",
+          "content_kind",
+          "text",
+          "truncated",
+          "hash"
+        ]
+      },
+      "SmartDiffResult": {
+        "type": "object",
+        "properties": {
+          "watch_id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "final_url": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "previous_hash": {
+            "type": "string"
+          },
+          "content_kind": {
+            "type": "string"
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "compare_to": {
+            "enum": [
+              "previous",
+              "baseline",
+              "hash"
+            ]
+          },
+          "comparison_source": {
+            "type": "string"
+          },
+          "comparison_quality": {
+            "enum": [
+              "structural",
+              "legacy_text"
+            ]
+          },
+          "changes": {
+            "type": "object",
+            "properties": {
+              "added": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "before": {},
+                    "after": {}
+                  },
+                  "required": [
+                    "path"
+                  ]
+                }
+              },
+              "removed": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "before": {},
+                    "after": {}
+                  },
+                  "required": [
+                    "path"
+                  ]
+                }
+              },
+              "modified": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "before": {},
+                    "after": {}
+                  },
+                  "required": [
+                    "path"
+                  ]
+                }
+              }
+            }
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "added": {
+                "type": "integer"
+              },
+              "removed": {
+                "type": "integer"
+              },
+              "modified": {
+                "type": "integer"
+              }
+            }
+          },
+          "changes_truncated": {
+            "type": "boolean"
+          },
+          "significance": {
+            "type": "object",
+            "properties": {
+              "score": {
+                "type": "integer"
+              },
+              "level": {
+                "enum": [
+                  "none",
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              },
+              "reasons": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "rules_version": {
+                "type": "integer"
+              }
+            }
+          },
+          "algorithm": {
+            "type": "string"
+          },
+          "semantic_model_used": {
+            "type": "boolean"
+          },
+          "fetched_at": {
+            "type": "string"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "persistence_error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "watch_id",
+          "hash",
+          "changed",
+          "changes",
+          "counts",
+          "significance"
+        ]
+      },
+      "HistoryResult": {
+        "type": "object",
+        "properties": {
+          "watch_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "normalizer_version": {
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "snapshots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "hash": {
+                  "type": "string"
+                },
+                "raw_hash": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "normalizer_version": {
+                  "type": "integer"
+                },
+                "content_kind": {
+                  "type": "string"
+                },
+                "content_truncated": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "LegacyDiffResult": {
+        "type": "object",
+        "properties": {
+          "watch_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "url": {
+            "type": "string"
+          },
+          "changed": {
+            "type": "boolean"
+          },
+          "normalizer_version": {
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          },
+          "snapshots_available": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "from": {
+            "type": "object",
+            "properties": {
+              "snapshot_id": {
+                "type": "integer"
+              },
+              "hash": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              }
+            }
+          },
+          "to": {
+            "type": "object",
+            "properties": {
+              "snapshot_id": {
+                "type": "integer"
+              },
+              "hash": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              }
+            }
+          },
+          "diff": {
+            "$ref": "#/components/schemas/TextDiff"
+          }
+        }
+      },
+      "StatsResult": {
+        "type": "object",
+        "properties": {
+          "paid_calls": {
+            "type": "integer"
+          },
+          "test_paid_calls": {
+            "type": "integer"
+          },
+          "external_paid_calls": {
+            "type": "integer"
+          },
+          "revenue_usdc": {
+            "type": "number"
+          },
+          "external_revenue_usdc": {
+            "type": "number"
+          },
+          "last_paid_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "last_external_paid_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

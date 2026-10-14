@@ -102,7 +102,7 @@ export class Fresh402Client {
             Json
         ]>) {
             const post = item.post;
-            if (post?.operationId?.startsWith('fresh402_'))
+            if (post?.operationId?.startsWith('fresh402_') && (post.operationId === 'fresh402_register' || post['x-payment-info']?.price))
                 this.operations.set(post.operationId, { path, schema: post.requestBody?.content?.['application/json']?.schema, price: post['x-payment-info']?.price, summary: post.summary });
         }
         for (const name of ['fresh402_register', 'fresh402_check', 'fresh402_extract', 'fresh402_smart_diff'])

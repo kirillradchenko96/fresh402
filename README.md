@@ -1,10 +1,10 @@
-# Fresh402 v2.2 — Web Intelligence API for AI Agents
+# Fresh402 v2.3 — Web Intelligence API for AI Agents
 
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
 **Check whether a source changed, extract usable content, and compare structured snapshots. Pay per call with x402 USDC on Base.**
 
-The hosted production API reports **2.2.0**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
+The hosted production API reports **2.3.0**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
 
 | Product | MCP tool | REST endpoint | Price per call |
 |---|---|---|---:|
@@ -12,6 +12,7 @@ The hosted production API reports **2.2.0**. Connect at [fresh402.kirilllabs.wor
 | Freshness Check | `fresh402_check` | `POST /v1/check` | $0.005 USDC |
 | Web Extract | `fresh402_extract` | `POST /v2/extract` | $0.01 USDC |
 | Smart Diff | `fresh402_smart_diff` | `POST /v2/smart-diff` | $0.015 USDC |
+| OpenAPI Contract Diff | `fresh402_openapi_contract_diff` | `POST /v2/openapi-contract-diff` | $0.020 USDC |
 
 ## Choose the operation
 
@@ -73,3 +74,8 @@ Watch identifiers and legacy snapshot history are shared public service data. Do
 The live API is the authority for the deployed contract. Catalog descriptions and cached schemas can lag it; [the audit](docs/DISCOVERY_AUDIT.md) records that distinction. There is no claim that an unsigned 402 response proves Coinbase Bazaar indexing.
 
 Built and maintained by **Kirill Radchenko**. [Report an integration issue](https://github.com/kirillradchenko96/fresh402/issues).
+
+
+## Self-service prepaid onboarding
+
+Fresh402 2.3 includes wallet-authenticated account recovery, immutable Starter ($2.50 / 1000 credits) and Developer ($15 / 10000 credits) funding, and automatic credential claim. **Public signup and package purchasing remain gated pending genuine payment acceptance and approved terms.** Existing x402 and configured prepaid access continue independently. Inspect [live plans](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans) and the [complete customer API and examples](docs/SELF_SERVICE.md). No payment is initiated by discovery or by the default examples.

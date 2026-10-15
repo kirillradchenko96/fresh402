@@ -1,8 +1,8 @@
-# Fresh402 2.0 public API
+# Fresh402 2.4 public API
 
 Base URL: https://fresh402.kirilllabs.workers.dev
 
-The hosted service reports version **2.0.0**. [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
+The hosted service reports version **2.4.0**. [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
 
 | Operation | Method and path | MCP tool | Price |
 |---|---|---|---:|
@@ -10,6 +10,7 @@ The hosted service reports version **2.0.0**. [Live OpenAPI](https://fresh402.ki
 | Check | POST /v1/check | fresh402_check | $0.005 USDC |
 | Extract | POST /v2/extract | fresh402_extract | $0.01 USDC |
 | Smart Diff | POST /v2/smart-diff | fresh402_smart_diff | $0.015 USDC |
+| OpenAPI Contract Diff | POST /v2/openapi-contract-diff | fresh402_openapi_contract_diff | $0.020 USDC |
 
 ## Register
 
@@ -54,6 +55,12 @@ Requires a registered watch. `compare_to` is `previous` (default) or `baseline`;
 - `POST /mcp`: free protocol and tool discovery, free Register, and the three paid tools.
 
 Legacy public history/diff is separate from paid Smart Diff results. MCP uses POST; GET /mcp returns 405.
+
+## OpenAPI Contract Diff
+
+Register a supported JSON OpenAPI document, then POST `{"watch_id":"YOUR_RETURNED_WATCH_ID","compare_to":"baseline"}` to `/v2/openapi-contract-diff`. The result reports bounded contract changes, classifications, warnings and source provenance. Classifications are descriptive; remote `$ref` documents are not fetched. Inspect live limits and schemas before paying.
+
+For wallet-owned prepaid accounts and automatic finalized-funding recovery, see [self-service](SELF_SERVICE.md). Public package purchasing is currently closed.
 
 ## Payment and recovery
 

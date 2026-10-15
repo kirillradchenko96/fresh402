@@ -14,10 +14,11 @@ export class CustomerClient{
   for(const [name,value] of Object.entries({session:options.sessionToken,stagingToken:options.stagingToken,pilotToken:options.pilotToken}))Object.defineProperty(this,name,{value,writable:true,enumerable:false});
  }
  private async call(path:string,body?:Json,headers:Record<string,string>={},acceptChallenge=false){
-  const r=await fetch(this.base+path,{method:body===undefined?'GET':'POST',redirect:'error',headers:{...(body===undefined?{}:{'content-type':'application/json'}),...(this.stagingToken?{authorization:'Bearer '+this.stagingToken}:{}),...(this.pilotToken?{'x-fresh402-onboarding-pilot':this.pilotToken}:{}),...(this.session?{'x-fresh402-customer-session':this.session}:{}),...headers},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(30000)});
+  let r:Response;
+  try{r=await fetch(this.base+path,{method:body===undefined?'GET':'POST',redirect:'error',headers:{...(body===undefined?{}:{'content-type':'application/json'}),...(this.stagingToken?{authorization:'Bearer '+this.stagingToken}:{}),...(this.pilotToken?{'x-fresh402-onboarding-pilot':this.pilotToken}:{}),...(this.session?{'x-fresh402-customer-session':this.session}:{}),...headers},...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(30000)});}catch{throw new ApiError('customer_transport_unavailable',0);}
   if(!r.body)throw Error('Empty customer response');const reader=r.body.getReader();let bytes=0;const parts:Uint8Array[]=[];
   try{while(true){const {value,done}=await reader.read();if(done)break;bytes+=value.byteLength;if(bytes>262144)throw Error('Customer response too large');parts.push(value);}}catch(e){void reader.cancel().catch(()=>{});throw e;}finally{reader.releaseLock();}
-  const json=JSON.parse(Buffer.concat(parts).toString('utf8'));if(!r.ok&&!(acceptChallenge&&r.status===402&&json.x402Version===2))throw new ApiError(json.error??'customer_error',r.status);return json;
+  const json=JSON.parse(Buffer.concat(parts).toString('utf8'));if(!r.ok&&!(acceptChallenge&&r.status===402&&json.x402Version===2))throw new ApiError(typeof json.error==='string'&&/^[a-z][a-z0-9_]{0,79}$/.test(json.error)?json.error:'customer_http_'+r.status,r.status);return json;
  }
  plans(){return this.call('/v2/prepaid/plans');}
  async beginSignup(wallet:string,key= randomUUID()){return validateOwnershipChallenge(await this.call('/v2/prepaid/customer/challenge',{wallet},{'idempotency-key':key}),wallet,this.base);}
@@ -29,7 +30,23 @@ export class CustomerClient{
  /** Explicit already-authorized payment only. Persist intent and authorization privately BEFORE calling. No retry/replacement fallback. */
  submitAuthorizedPayment(intent:Json,payload:Json){if(payload.resource?.url!==intent.resource||payload.payload?.authorization?.nonce!==intent.nonce)throw Error('Use the original persisted funding authorization');return this.call('/v2/prepaid/customer/funding/'+this.intentId(intent),{}, {'payment-signature':Buffer.from(JSON.stringify(payload)).toString('base64')});}
  fundingStatus(intent:Json){return this.call('/v2/prepaid/customer/funding/'+this.intentId(intent));}
- recoverFunding(intent:Json){return this.call('/v2/prepaid/customer/funding/'+this.intentId(intent),{});}
+ /** Read-only bounded polling. The server continues recovery even if this process closes. */
+ async awaitFunding(intent:Json,options:{timeoutMs?:number;intervalMs?:number;signal?:AbortSignal;onStatus?:(value:Json)=>void|Promise<void>;reauthenticate?:()=>Promise<void>}={}){
+  const timeout=options.timeoutMs??3600000,interval=options.intervalMs??15000;
+  if(!Number.isInteger(timeout)||timeout<1||timeout>7200000||!Number.isInteger(interval)||interval<1000||interval>60000)throw Error('Invalid funding polling budget');
+  const deadline=Date.now()+timeout;let attempts=0,reauthentications=0,lastReauthentication=-Infinity;
+  while(Date.now()<deadline){options.signal?.throwIfAborted();try{const status=await this.fundingStatus(intent);await options.onStatus?.(status);if(status.state==='credited'){if(!status.finalized||status.settlement_kind!=='real')throw Error('Genuine finalized funding required');return status;}if(status.recovery_status==='funding_authorization_expired_unused')throw new ApiError('funding_authorization_expired_unused',410);if(status.state==='intent')throw new ApiError('authorization_not_submitted',409);attempts=0;}catch(e){if(e instanceof ApiError&&[401,403].includes(e.status)&&options.reauthenticate&&reauthentications<4&&Date.now()-lastReauthentication>=60000){lastReauthentication=Date.now();reauthentications++;await options.reauthenticate();continue;}if(!(e instanceof ApiError)||![0,429,500,502,503,504].includes(e.status))throw e;attempts++;}
+   const ms=Math.min(deadline-Date.now(),Math.min(60000,interval*2**Math.min(attempts,2)));if(ms<=0)break;
+   await new Promise<void>((resolve,reject)=>{const done=()=>{options.signal?.removeEventListener('abort',abort);resolve();},timer=setTimeout(done,ms),abort=()=>{clearTimeout(timer);options.signal?.removeEventListener('abort',abort);reject(options.signal?.reason);};options.signal?.addEventListener('abort',abort,{once:true});if(options.signal?.aborted)abort();});
+  }
+  throw new ApiError('funding_still_pending_automatic_recovery',503);
+ }
+ /** No signature, signing callback, settlement retry or replacement purchase is permitted here. */
+ async recoverFunding(intent:Json){
+  try{const r=await this.call('/v2/prepaid/customer/funding/'+this.intentId(intent),{},{},true);
+   if(r.x402Version===2)return{intent_id:this.intentId(intent),state:'intent',recovery_status:'authorization_not_submitted',replacement_payment_authorized:false};return r;
+  }catch(e){if(e instanceof ApiError&&e.code==='funding_intent_expired'&&e.status===410)return{...await this.fundingStatus(intent),recovery_status:'intent_expired_authorization_unknown',replacement_payment_authorized:false};throw e;}
+ }
  claimCredential(){return this.call('/v2/prepaid/customer/credentials/claim',{});}
  rotateCredential(){return this.call('/v2/prepaid/customer/credentials/rotate',{});}
  credentials(){return this.call('/v2/prepaid/customer/credentials');}

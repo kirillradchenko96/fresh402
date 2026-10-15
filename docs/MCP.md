@@ -1,4 +1,4 @@
-# Fresh402 2.0 MCP integration
+# Fresh402 2.4 MCP integration
 
 Canonical endpoint: **https://fresh402.kirilllabs.workers.dev/mcp**.
 Transport: **Streamable HTTP**. Official Registry identity: **io.github.kirillradchenko96/fresh402**.
@@ -19,13 +19,13 @@ Send JSON-RPC POST requests with `Content-Type: application/json` and `Accept: a
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"my-agent","version":"1.0.0"}}}
 ```
 
-Inspect the negotiated protocol version and `serverInfo.version`. This compatibility handshake was verified against the hosted 2.0.0 service. Use the MCP client's normal initialization and notification sequence.
+Inspect the negotiated protocol version and `serverInfo.version`. This compatibility handshake was verified against the hosted 2.4.0 service. Use the MCP client's normal initialization and notification sequence.
 
 ```json
 {"jsonrpc":"2.0","id":2,"method":"tools/list"}
 ```
 
-The service is sessionless; GET /mcp is not supported. Follow the live tool schemas, including any metadata required by your negotiated MCP version.
+The service is sessionless. GET/HEAD `/mcp` return nonpaying discovery metadata; JSON-RPC execution uses POST and the required Accept headers. Unsupported content negotiation can legitimately return 406. Follow the live tool schemas, including any metadata required by your negotiated MCP version.
 
 | Tool | Purpose | Price |
 |---|---|---:|
@@ -33,6 +33,7 @@ The service is sessionless; GET /mcp is not supported. Follow the live tool sche
 | fresh402_check | URL/watch freshness, filtering and optional compact text diff | $0.005 USDC |
 | fresh402_extract | Text, metadata, headings, links and JSON-LD extraction | $0.01 USDC |
 | fresh402_smart_diff | Structural changes and explained deterministic significance | $0.015 USDC |
+| fresh402_openapi_contract_diff | Bounded JSON OpenAPI changes, classifications and provenance | $0.020 USDC |
 
 ## Calls
 

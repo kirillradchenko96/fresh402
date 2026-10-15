@@ -1,6 +1,6 @@
-# Fresh402 2.0 request examples
+# Fresh402 2.4 request examples
 
-These examples use the existing production URLs. Discovery is free. The three unsigned paid requests return HTTP 402 requirements and do not pay for or deliver the paid operation. The free Register example does fetch a new public target if you choose to execute it.
+These examples use the existing production URLs. Discovery is free. Unsigned paid requests return HTTP 402 requirements and do not pay for or deliver the paid operation. The free Register example does fetch a new public target if you choose to execute it.
 
 For a runnable TypeScript client and a local no-money documentation workflow, see [the knowledge-base integration](knowledge-base/README.md). It includes REST/MCP discovery, explicit payment caps, private recovery and automated tests. Its demo does not execute hosted paid operations.
 
@@ -53,3 +53,13 @@ curl -i https://fresh402.kirilllabs.workers.dev/v2/smart-diff \
 ```
 
 The Smart Diff ID above is illustrative. Replace it with a returned watch ID before a paid request. Without payment, inspect the `PAYMENT-REQUIRED` quote. Do not paste signatures, recovery tokens or wallet keys into source files. An x402-compatible client must obtain owner-approved payment authorization, preserve the challenge's resource/extensions, and supply a private recovery token before retrying. See [payment and recovery](../docs/API.md#payment-and-recovery).
+
+## OpenAPI Contract Diff: unsigned quote
+
+Register a supported public JSON OpenAPI document first, then use its returned watch ID. This unsigned request obtains a $0.020 USDC quote only.
+
+```sh
+curl https://fresh402.kirilllabs.workers.dev/v2/openapi-contract-diff \
+  -H 'Content-Type: application/json' \
+  -d '{"watch_id":"YOUR_RETURNED_WATCH_ID","compare_to":"baseline"}'
+```

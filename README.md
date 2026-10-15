@@ -1,10 +1,10 @@
-# Fresh402 v2.3 — Web Intelligence API for AI Agents
+# Fresh402 v2.4 — Web Intelligence API for AI Agents
 
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
 **Check whether a source changed, extract usable content, and compare structured snapshots. Pay per call with x402 USDC on Base.**
 
-The hosted production API reports **2.3.0**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
+The hosted production API reports **2.4.0**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
 
 | Product | MCP tool | REST endpoint | Price per call |
 |---|---|---|---:|
@@ -12,6 +12,7 @@ The hosted production API reports **2.3.0**. Connect at [fresh402.kirilllabs.wor
 | Freshness Check | `fresh402_check` | `POST /v1/check` | $0.005 USDC |
 | Web Extract | `fresh402_extract` | `POST /v2/extract` | $0.01 USDC |
 | Smart Diff | `fresh402_smart_diff` | `POST /v2/smart-diff` | $0.015 USDC |
+| OpenAPI Contract Diff | `fresh402_openapi_contract_diff` | `POST /v2/openapi-contract-diff` | $0.020 USDC |
 | OpenAPI Contract Diff | `fresh402_openapi_contract_diff` | `POST /v2/openapi-contract-diff` | $0.020 USDC |
 
 ## Choose the operation
@@ -31,7 +32,7 @@ Requests fetch eligible **public HTTPS** sources on demand. Fresh402 does not ex
 - [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.kirillradchenko96%2Ffresh402/versions/latest): the existing identity is `io.github.kirillradchenko96/fresh402`.
 - [Discovery audit](docs/DISCOVERY_AUDIT.md): externally verified catalog status and outstanding reindexing or authorization requirements.
 
-Free service metadata and MCP `initialize` / `tools/list` let a new agent learn all four tools without paying or fetching a target.
+Free service metadata and MCP `initialize` / `tools/list` let a new agent learn all five tools without paying or fetching a target.
 
 ## REST quick start
 
@@ -63,7 +64,7 @@ Add this URL as a **remote Streamable HTTP MCP server** in a compatible client:
 https://fresh402.kirilllabs.workers.dev/mcp
 ```
 
-The client performs `initialize` and `tools/list`; all four tools use the names and prices above. Free discovery does not require a Fresh402 API key. Paid tool calls require an x402-capable client; an ordinary MCP client can list tools and register a baseline but cannot automatically complete payment unless it implements x402.
+The client performs `initialize` and `tools/list`; all five tools use the names and prices above. Free discovery does not require a Fresh402 API key. Paid tool calls require an x402-capable client; an ordinary MCP client can list tools and register a baseline but cannot automatically complete payment unless it implements x402.
 
 MCP payment challenges are tool results with `isError: true` and requirements in `structuredContent`. **HTTP 200 alone is not success.** The payment belongs in `params._meta["x402/payment"]`, and the settlement receipt is in `result._meta["x402/payment-response"]`. See [MCP examples](docs/MCP.md).
 
@@ -78,4 +79,4 @@ Built and maintained by **Kirill Radchenko**. [Report an integration issue](http
 
 ## Self-service prepaid onboarding
 
-Fresh402 2.3 includes wallet-authenticated account recovery, immutable Starter ($2.50 / 1000 credits) and Developer ($15 / 10000 credits) funding, and automatic credential claim. **Public signup and package purchasing remain gated pending genuine payment acceptance and approved terms.** Existing x402 and configured prepaid access continue independently. Inspect [live plans](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans) and the [complete customer API and examples](docs/SELF_SERVICE.md). No payment is initiated by discovery or by the default examples.
+Fresh402 2.4 provides wallet-authenticated account recovery and automatic finalized-payment reconciliation. Starter remains $2.50 / 1,000 credits and Developer $15 / 10,000 credits. **Public signup and package purchasing remain closed pending approved commercial terms and final launch gates.** See the [account page](https://fresh402.kirilllabs.workers.dev/account), [live availability](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans), and [customer API](docs/SELF_SERVICE.md). Existing x402 and configured prepaid access operate independently; metadata never initiates a payment.

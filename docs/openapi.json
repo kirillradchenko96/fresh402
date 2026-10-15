@@ -8,6 +8,9 @@
     "credential_header": "X-Fresh402-API-Key",
     "finality": "Finalized Base receipt, canonical block, direct native USDC EIP-3009 call and matching authorization/transfer logs",
     "recovery": "Recover the original intent. Never replace a submitted authorization. Recover lost keys by wallet authentication and replacement.",
+    "account_url": "/account",
+    "terms_url": "/terms",
+    "automatic_recovery": "Server-side bounded Cron reconciliation continues independently of the client and session.",
     "plans_url": "/v2/prepaid/plans",
     "customer_api": "/v2/prepaid/customer"
   },
@@ -19,8 +22,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Fresh402 Web Intelligence API",
-    "version": "2.3.0",
-    "description": "Fresh402 2.3.0: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
+    "version": "2.4.0",
+    "description": "Fresh402 2.4.0: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
     "contact": {
       "url": "https://github.com/kirillradchenko96/fresh402/issues"
     }
@@ -571,6 +574,92 @@
                 "additionalProperties": false,
                 "properties": {},
                 "required": []
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "intent",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^pf_[a-f0-9]{32}$"
+            }
+          },
+          {
+            "name": "PAYMENT-SIGNATURE",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Original x402 authorization only. Omit for recovery; never sign a replacement for a submitted intent."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/prepaid/customer/funding/{intent}/inspect": {
+      "post": {
+        "operationId": "fresh402_customer_funding_inspect",
+        "summary": "Read-only original-signature and finalized-unused expiry inspection; never submits settlement",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "payment": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "payment"
+                ]
               }
             }
           }

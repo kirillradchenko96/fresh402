@@ -1,6 +1,6 @@
 # Self-service prepaid customer API
 
-Fresh402 2.4 provides wallet-authenticated customer onboarding alongside the independent x402 pay-per-call API. Public signup and package purchasing remain **closed pending approved commercial terms and final launch gates**. Read `GET /v2/prepaid/plans` and OpenAPI `x-customer-onboarding` before proceeding. A deployed endpoint, an HTTP 402, and a simulated settlement are not proof of a customer purchase.
+Fresh402 2.4 provides wallet-authenticated customer onboarding alongside the independent x402 pay-per-call API. Discover one-time, non-expiring credit packages through `GET /` → `prepaid_packages`. Read `GET /v2/prepaid/plans` and OpenAPI `x-customer-onboarding` for current public signup and purchasing availability before proceeding. A deployed endpoint, an HTTP 402, and a simulated settlement are not proof of a customer purchase.
 
 The five established MCP tool names and `/mcp` URL are unchanged. MCP supports standalone x402 operations without signup. Customer management and prepaid credit execution use REST; MCP discovery does not grant a prepaid credential or spend credits.
 
@@ -35,10 +35,10 @@ Use HTTPS and persist idempotency keys and pending operations confidentially. Ne
 
 ## Client examples and failure handling
 
-The [same-origin account page](https://fresh402.kirilllabs.workers.dev/account) supports EOA wallet browsers, explicit ownership/payment confirmations, encrypted local evidence and key download. Check availability before signing; public purchasing is currently closed. Never clear saved evidence during an uncertain payment.
+The [same-origin account page](https://fresh402.kirilllabs.workers.dev/account) supports EOA wallet browsers, explicit ownership/payment confirmations, encrypted local evidence and key download. Check live availability before signing. Never clear saved evidence during an uncertain payment.
 
 Use [CustomerClient](../examples/knowledge-base/onboarding.ts), [complete purchase/Check/Developer/top-up examples](../examples/knowledge-base/onboarding-example.ts) and [PrepaidClient](../examples/knowledge-base/prepaid.ts). Examples have no executable payment entry point. Wallet connection, identity signing and each exact purchase confirmation are explicit caller-supplied actions. Persist confidential state outside Git. For protected staging, obtain owner-provided access separately; public documentation contains no staging access material.
 
 Unauthenticated requests are denied; ownership proofs, sessions, account status, credential revocation and global prepaid controls are checked independently. Challenges, empty identities, pending intents, sessions, claims and operations have bounded quotas. Account state is isolated; credentials never authorize another customer's history. Failed target execution releases reserved credits. Pending payment recovery never falls back to a new charge. Product fetching remains subject to all existing SSRF, TLS, pinned-peer and capacity guards.
 
-Balances use integer credits and do not automatically expire in the current implementation. API keys expire independently after one year and can be replaced through wallet ownership. Durable tool results are retained for seven days; financial tombstones remain. Refund, closure and any future balance-expiry terms require owner approval before public sales; this engineering document does not establish approved sale terms.
+Purchased balances use integer credits and do not expire under the [published terms](https://fresh402.kirilllabs.workers.dev/terms). API keys expire independently after one year and can be replaced through wallet ownership. Durable tool results are retained for seven days; financial tombstones remain. Refunds and account closure follow the published terms and applicable mandatory rights.

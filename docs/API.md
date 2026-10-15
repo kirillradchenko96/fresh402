@@ -46,7 +46,7 @@ Requires a registered watch. `compare_to` is `previous` (default) or `baseline`;
 
 ## Free reads and discovery
 
-- `GET /`: version, health, endpoint and price metadata.
+- `GET /`: version, health, endpoint and standalone x402 prices, plus additive `prepaid_packages` discovery. Package IDs and integer credit amounts match `/v2/prepaid/plans`; `enabled` reflects public purchasing availability. Packages are one-time purchases with non-expiring credits, not subscriptions. Existing root fields and values are unchanged.
 - `GET /openapi.json`: OpenAPI 3.1 reference.
 - `GET /.well-known/x402`: all three paid REST resource URLs.
 - `GET /v1/history?watch_id=...`: retained legacy snapshot metadata.
@@ -60,7 +60,7 @@ Legacy public history/diff is separate from paid Smart Diff results. MCP uses PO
 
 Register a supported JSON OpenAPI document, then POST `{"watch_id":"YOUR_RETURNED_WATCH_ID","compare_to":"baseline"}` to `/v2/openapi-contract-diff`. The result reports bounded contract changes, classifications, warnings and source provenance. Classifications are descriptive; remote `$ref` documents are not fetched. Inspect live limits and schemas before paying.
 
-For wallet-owned prepaid accounts and automatic finalized-funding recovery, see [self-service](SELF_SERVICE.md). Public package purchasing is currently closed.
+For wallet-owned prepaid accounts and automatic finalized-funding recovery, see [self-service](SELF_SERVICE.md). Check live `/v2/prepaid/plans` availability before signing any payment.
 
 ## Payment and recovery
 

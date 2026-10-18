@@ -13,7 +13,6 @@ The hosted production API reports **2.4.0**. Connect at [fresh402.kirilllabs.wor
 | Web Extract | `fresh402_extract` | `POST /v2/extract` | $0.01 USDC |
 | Smart Diff | `fresh402_smart_diff` | `POST /v2/smart-diff` | $0.015 USDC |
 | OpenAPI Contract Diff | `fresh402_openapi_contract_diff` | `POST /v2/openapi-contract-diff` | $0.020 USDC |
-| OpenAPI Contract Diff | `fresh402_openapi_contract_diff` | `POST /v2/openapi-contract-diff` | $0.020 USDC |
 
 ## Choose the operation
 
@@ -21,6 +20,8 @@ The hosted production API reports **2.4.0**. Connect at [fresh402.kirilllabs.wor
 - **Check** before reusing a web source or spending on downstream browsing and reasoning. Get a change signal, noise filtering, conditional HTTP revalidation and an optional compact deterministic text diff. A cached Check is still a paid operation.
 - **Extract** when an agent needs content for retrieval: text, titles, metadata, headings, links and JSON-LD from public HTML, JSON or text, with optional CSS scoping.
 - **Smart Diff** when the change itself matters: compare a watch with its previous Smart Diff snapshot or fixed baseline, get structured additions/removals/modifications, and inspect significance scores with explainable deterministic rules.
+
+- **OpenAPI Contract Diff** compares a registered public JSON OpenAPI 3.0/3.1 contract with a baseline or previous snapshot, returning conservative compatibility evidence. It does not resolve remote references or parse YAML.
 
 Requests fetch eligible **public HTTPS** sources on demand. Fresh402 does not execute page JavaScript, render a browser, access authenticated sites, perform LLM-powered semantic analysis, continuously poll watches, or send push alerts. Security checks and rate, size, concurrency and operation limits apply; capacity failures may require a later retry.
 

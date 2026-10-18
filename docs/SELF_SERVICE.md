@@ -44,3 +44,5 @@ Unauthenticated requests are denied; ownership proofs, sessions, account status,
 Purchased balances use integer credits and do not expire under the [published terms](https://fresh402.kirilllabs.workers.dev/terms). API keys expire independently after one year and can be replaced through wallet ownership. Durable tool results are retained for seven days; financial tombstones remain. Refunds and account closure follow the published terms and applicable mandatory rights.
 
 Early inclusion is not finality. Limits, frozen/revoked status, precise machine-readable balance fields and prepaid MCP metadata are specified in [AGENT_PREPAID.md](AGENT_PREPAID.md). Use `spendable`, not legacy `available`, to exclude frozen early credits. No credits arise from a signature, broadcast or client transaction hash alone.
+
+MPP-capable agents may opt a **new** purchase into `payment_protocol: "mpp"` when live flags allow it. Omission defaults to x402. Persist the immutable protocol and original credential; use the same account, funding journal and unsigned recovery, not a second purchase. See [native MPP packages](MPP.md#starter-and-developer-through-mpp).

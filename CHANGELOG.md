@@ -2,6 +2,13 @@
 
 These notes describe the deployed API, independently of the legacy source package version in this repository. Documentation publication does not deploy infrastructure or merge the backend release PR.
 
+## 2.5.1 - October 18, 2026
+
+- Native MPP EVM charge can coexist with the existing x402 and prepaid contracts on Base native USDC, gated by live discovery flags. Same four paid tools, prices, resource budgets and ledger.
+- Opt-in MPP package intents fix their official SDK challenge-derived nonce without rewriting historical authorizations. Existing early-credit/finality policies remain unchanged.
+- Official SDK examples document private proof persistence, cumulative budgets and recovery without a replacement payment. Generic MCP client limitations are explicit.
+- Acceptance uses synthetic payments; no new real-money MPP mainnet settlement is claimed.
+
 ## 2.5.0 - October 18, 2026
 
 - Browserless EOA account recovery and exact one-time prepaid purchases are documented end to end, using a customer-controlled signer.

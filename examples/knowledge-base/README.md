@@ -50,3 +50,7 @@ See [current availability](../../docs/RELEASE_AVAILABILITY.md): production 2.5 e
 ## Wallet-owned customer onboarding
 
 [CustomerClient](onboarding.ts) manages ownership challenges, original funding intents, account history and replacement API keys. [Complete examples](onboarding-example.ts) cover Starter plus Check, Developer tools and intentional top-ups. Wallet connection and each exact payment confirmation are externally supplied explicit actions. No example automatically pays. Read [availability, finality and recovery rules](../../docs/SELF_SERVICE.md); read the independent live signup, purchasing and early-credit flags before signing.
+
+## Official MPP client fragment
+
+[mpp.ts](mpp.ts) uses `mppx@0.13.5` / `viem@2.57.1` for native Base USDC EVM charge. Supply an already authorized signer and encrypted private persistence with a cumulative budget. `authorizeMppRequest` saves the original proof before submission; `resumeMppRequest` cannot sign or replace it. See [MPP](../../docs/MPP.md) for REST, MCP and one-time package use. No automatic real payment entry point is included.

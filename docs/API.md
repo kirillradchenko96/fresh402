@@ -86,3 +86,7 @@ HTML UI pruning applies automatically without an explicit scope. An explicit CSS
 Use the documented error code and message: 400/422 invalid input or comparison; 404 missing watch; 408/504 timeout; 413 oversized data; 415 unsupported media; 429 rate, concurrency or operation budget; 409 pending or mismatched recovery; 503 unavailable service or pending settlement. Do not automatically create a new payment in response to uncertainty.
 
 For browserless EOA enrollment, exact package purchase, bounded early credits, finalized recovery and shared REST/MCP credit execution, use the [agent purchasing guide](AGENT_PREPAID.md). Follow live availability; early inclusion is not finality.
+
+## Native MPP option
+
+Read root `mpp_payments` for current enablement. The four existing per-call routes additionally offer `WWW-Authenticate: Payment`, accept native Base USDC EVM `Authorization: Payment` credentials and return `Payment-Receipt`. Existing x402 and prepaid schemas/prices are preserved. Never combine credentials. See [MPP](MPP.md) for exact body/resource binding, SDK examples, package opt-in and recovery.

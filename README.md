@@ -2,9 +2,9 @@
 
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
-**Check whether a source changed, extract usable content, and compare structured snapshots. Pay per call with x402 USDC on Base.**
+**Check whether a source changed, extract usable content, and compare structured snapshots. Pay per call with x402 or enabled native MPP USDC on Base, or use prepaid credits.**
 
-The hosted production API reports **2.5.0**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
+The hosted production API reports **2.5.1**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
 
 | Product | MCP tool | REST endpoint | Price per call |
 |---|---|---|---:|
@@ -28,6 +28,7 @@ Requests fetch eligible **public HTTPS** sources on demand. Fresh402 does not ex
 ## Start with discovery
 
 - [Live OpenAPI 3.1 reference](https://fresh402.kirilllabs.workers.dev/openapi.json): current request schemas, examples, response formats and payment headers.
+- [Native MPP, SDK examples and recovery](docs/MPP.md): inspect live enablement flags first. Base USDC EVM charge only; no newly real-money-validated MPP settlement is claimed.
 - [API guide](docs/API.md), [MCP integration](docs/MCP.md), [pricing](docs/PRICING.md), [request examples](examples/README.md).
 - [x402 resource manifest](https://fresh402.kirilllabs.workers.dev/.well-known/x402), [agent guide](https://fresh402.kirilllabs.workers.dev/llms.txt), [release notes](CHANGELOG.md).
 - [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.kirillradchenko96%2Ffresh402/versions/latest): the existing identity is `io.github.kirillradchenko96/fresh402`.

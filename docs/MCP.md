@@ -9,7 +9,7 @@ Add the canonical URL through your client's remote HTTP MCP connector. A client 
 {"mcpServers":{"fresh402":{"url":"https://fresh402.kirilllabs.workers.dev/mcp"}}}
 ```
 
-Clients that accept only local stdio commands need a compatible HTTP connector. Discovery and Register are free; paid calls require x402 support as well as MCP support.
+Clients that accept only local stdio commands need a compatible HTTP connector. Discovery and Register are free; paid calls require a configured x402 payment client, a native MPP client when enabled, or an existing prepaid API key with per-call metadata. MCP support alone does not provide a wallet or spending permission.
 
 ## Nonpaying handshake and discovery
 
@@ -19,7 +19,7 @@ Send JSON-RPC POST requests with `Content-Type: application/json` and `Accept: a
 {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"my-agent","version":"1.0.0"}}}
 ```
 
-Inspect the negotiated protocol version and `serverInfo.version`. This compatibility handshake was verified against the hosted 2.4.0 service. Use the MCP client's normal initialization and notification sequence.
+Inspect the negotiated protocol version and `serverInfo.version`. The official MCP TypeScript SDK handshake and discovery were verified against the hosted service. Use the MCP client's normal initialization and notification sequence.
 
 ```json
 {"jsonrpc":"2.0","id":2,"method":"tools/list"}
@@ -63,6 +63,10 @@ Nonpayment tool errors include their numeric HTTP-equivalent `status` in `struct
 
 The API processes public HTTPS HTML, JSON and text on demand. Extraction does not render a browser or execute JavaScript, and Smart Diff uses deterministic rules rather than an LLM. See [API.md](API.md) and [PRICING.md](PRICING.md).
 
+
+## Native MPP
+
+When root `mpp_payments.enabled` is true, the same four paid tools accept official MPP EVM charge on Base native USDC at the same prices. Use `mppx/mcp/client`, `org.paymentauth/credential` and `org.paymentauth/receipt`; the existing x402 challenge envelope remains compatible. Explicit MPP selection uses standard JSON-RPC payment errors. Persist the original credential, input and private recovery token before submission; never mix billing credentials or sign another payment after uncertainty. See [MPP setup, tested SDKs and recovery](MPP.md).
 
 ## Optional prepaid customer accounts
 

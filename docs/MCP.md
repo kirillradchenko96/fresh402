@@ -25,7 +25,7 @@ Inspect the negotiated protocol version and `serverInfo.version`. This compatibi
 {"jsonrpc":"2.0","id":2,"method":"tools/list"}
 ```
 
-The service is sessionless. GET/HEAD `/mcp` return nonpaying discovery metadata; JSON-RPC execution uses POST and the required Accept headers. Unsupported content negotiation can legitimately return 406. Follow the live tool schemas, including any metadata required by your negotiated MCP version.
+The service is sessionless. GET/HEAD `/mcp` return HTTP 405; this server does not offer a standalone SSE session. Nonpaying discovery and JSON-RPC execution use POST with the required Accept headers. Unsupported content negotiation can legitimately return 406. Follow the live tool schemas, including any metadata required by your negotiated MCP version.
 
 | Tool | Purpose | Price |
 |---|---|---:|
@@ -66,4 +66,4 @@ The API processes public HTTPS HTML, JSON and text on demand. Extraction does no
 
 ## Optional prepaid customer accounts
 
-The existing five MCP tools and MCP URL are unchanged. Standalone x402 needs no customer signup. Wallet ownership, package funding, API-key claim/recovery and credit execution use the [REST self-service contract](SELF_SERVICE.md) and [CustomerClient](../examples/knowledge-base/onboarding.ts). Public signup and purchasing are currently gated; consult `/v2/prepaid/plans`. Do not send prepaid credentials to MCP or automatically fall back to a new x402 payment.
+The existing five MCP tools and MCP URL are unchanged. Standalone x402 needs no customer signup. Wallet ownership, package funding, API-key claim/recovery and credit execution use the [REST self-service contract](SELF_SERVICE.md) and [CustomerClient](../examples/knowledge-base/onboarding.ts). Public signup and one-time purchasing are available when enabled in the live `/v2/prepaid/plans` response. Do not send prepaid credentials to MCP or automatically fall back to a new x402 payment.

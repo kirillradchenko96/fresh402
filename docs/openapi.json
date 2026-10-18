@@ -1,4 +1,15 @@
 {
+  "x-mpp-payments": {
+    "enabled": true,
+    "method": "evm",
+    "intent": "charge",
+    "network": "eip155:8453",
+    "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "credential_type": "authorization",
+    "prepaid_purchases": true,
+    "guide": "https://github.com/kirillradchenko96/fresh402/blob/main/docs/MPP.md",
+    "mainnet_settlement_newly_validated": false
+  },
   "x-customer-onboarding": {
     "account_creation": true,
     "package_purchasing": true,
@@ -45,8 +56,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Fresh402 Web Intelligence API",
-    "version": "2.5.0",
-    "description": "Fresh402 2.5.0: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
+    "version": "2.5.1",
+    "description": "Fresh402 2.5.1: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
     "contact": {
       "name": "Fresh402 support",
       "email": "fresh402@proton.me",
@@ -479,6 +490,14 @@
                       "candidate-starter-v3",
                       "candidate-developer-v3"
                     ]
+                  },
+                  "payment_protocol": {
+                    "type": "string",
+                    "enum": [
+                      "x402",
+                      "mpp"
+                    ],
+                    "description": "Optional; default x402. Use mpp only when root mpp_payments.prepaid_purchases is true. Persist the original purchase key and protocol."
                   }
                 },
                 "required": [
@@ -710,10 +729,24 @@
                 "properties": {
                   "payment": {
                     "type": "object"
+                  },
+                  "credential": {
+                    "type": "string",
+                    "description": "Original serialized MPP Payment credential; never a new signature."
                   }
                 },
-                "required": [
-                  "payment"
+                "required": [],
+                "oneOf": [
+                  {
+                    "required": [
+                      "payment"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "credential"
+                    ]
+                  }
                 ]
               }
             }
@@ -976,7 +1009,7 @@
     "/v1/check": {
       "post": {
         "operationId": "fresh402_check",
-        "summary": "Check whether public HTML, JSON or text changed; use for on-demand freshness checks and a compact deterministic text diff, not background monitoring. Supply exactly one of url or watch_id. A URL-based paid Check can create a watch; an ID reuses its saved URL/rules, so omit all content-rule fields. Reuse returned watch_id/hash for later checks; first URL check without prior state reports changed:null. Optional cache reuse still costs $0.005 USDC per call on Base mainnet (eip155:8453). Requires an x402-capable MCP payment client and funded native-USDC payer; an ordinary MCP client receives a payment challenge, not a paid result. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. Never combine prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. No JavaScript execution.",
+        "summary": "Check whether public HTML, JSON or text changed; use for on-demand freshness checks and a compact deterministic text diff, not background monitoring. Supply exactly one of url or watch_id. A URL-based paid Check can create a watch; an ID reuses its saved URL/rules, so omit all content-rule fields. Reuse returned watch_id/hash for later checks; first URL check without prior state reports changed:null. Optional cache reuse still costs $0.005 USDC per call on Base mainnet (eip155:8453). Requires an x402-capable MCP payment client and funded native-USDC payer; an ordinary MCP client receives a payment challenge, not a paid result. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. No JavaScript execution.",
         "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits.",
         "tags": [
           "check"
@@ -984,12 +1017,21 @@
         "security": [
           {
             "x402Payment": []
+          },
+          {
+            "mppPayment": []
           }
         ],
         "x-payment-info": {
           "protocols": [
             {
               "x402": {}
+            },
+            {
+              "mpp": {
+                "method": "evm",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -1133,6 +1175,12 @@
             "headers": {
               "PAYMENT-RESPONSE": {
                 "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Payment-Receipt": {
+                "description": "Base64url native MPP EVM receipt; inspect status and reference. Not proof of prepaid finality.",
                 "schema": {
                   "type": "string"
                 }
@@ -1615,7 +1663,7 @@
     "/v2/extract": {
       "post": {
         "operationId": "fresh402_extract",
-        "summary": "Extract readable text, metadata, headings, public links and embedded JSON-LD from one public HTTPS document. Use to read static HTML, JSON or plain text; no watch or prior registration is needed. Optional CSS scope and noise exclusions; max_chars defaults to 20000 and limits returned text, not fetch size. Does not render JavaScript, crawl links or compare versions. $0.010 USDC per call on Base mainnet (eip155:8453), requiring an x402-capable MCP payment client and funded native-USDC payer. An ordinary MCP client receives a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. Never combine prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery.",
+        "summary": "Extract readable text, metadata, headings, public links and embedded JSON-LD from one public HTTPS document. Use to read static HTML, JSON or plain text; no watch or prior registration is needed. Optional CSS scope and noise exclusions; max_chars defaults to 20000 and limits returned text, not fetch size. Does not render JavaScript, crawl links or compare versions. $0.010 USDC per call on Base mainnet (eip155:8453), requiring an x402-capable MCP payment client and funded native-USDC payer. An ordinary MCP client receives a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery.",
         "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base.",
         "tags": [
           "extract"
@@ -1623,12 +1671,21 @@
         "security": [
           {
             "x402Payment": []
+          },
+          {
+            "mppPayment": []
           }
         ],
         "x-payment-info": {
           "protocols": [
             {
               "x402": {}
+            },
+            {
+              "mpp": {
+                "method": "evm",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -1762,6 +1819,12 @@
             "headers": {
               "PAYMENT-RESPONSE": {
                 "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Payment-Receipt": {
+                "description": "Base64url native MPP EVM receipt; inspect status and reference. Not proof of prepaid finality.",
                 "schema": {
                   "type": "string"
                 }
@@ -2234,7 +2297,7 @@
     "/v2/smart-diff": {
       "post": {
         "operationId": "fresh402_smart_diff",
-        "summary": "Explain structured changes in a registered public document: JSON Pointer changes, HTML block changes and deterministic significance hints. Use instead of Check when a changed/unchanged flag or short text diff is insufficient. First obtain watch_id with free fresh402_register; saved URL/rules are reused. compare_to is previous (default) or baseline; previous_hash overrides it when the same-watch snapshot is retained. Up to 200 changes; legacy HTML may have text-only fidelity. No LLM, JavaScript rendering or complete API compatibility guarantee. $0.015 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. Never combine prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery.",
+        "summary": "Explain structured changes in a registered public document: JSON Pointer changes, HTML block changes and deterministic significance hints. Use instead of Check when a changed/unchanged flag or short text diff is insufficient. First obtain watch_id with free fresh402_register; saved URL/rules are reused. compare_to is previous (default) or baseline; previous_hash overrides it when the same-watch snapshot is retained. Up to 200 changes; legacy HTML may have text-only fidelity. No LLM, JavaScript rendering or complete API compatibility guarantee. $0.015 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery.",
         "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base.",
         "tags": [
           "smart_diff"
@@ -2242,12 +2305,21 @@
         "security": [
           {
             "x402Payment": []
+          },
+          {
+            "mppPayment": []
           }
         ],
         "x-payment-info": {
           "protocols": [
             {
               "x402": {}
+            },
+            {
+              "mpp": {
+                "method": "evm",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -2338,6 +2410,12 @@
             "headers": {
               "PAYMENT-RESPONSE": {
                 "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Payment-Receipt": {
+                "description": "Base64url native MPP EVM receipt; inspect status and reference. Not proof of prepaid finality.",
                 "schema": {
                   "type": "string"
                 }
@@ -2767,7 +2845,7 @@
     "/v2/openapi-contract-diff": {
       "post": {
         "operationId": "fresh402_openapi_contract_diff",
-        "summary": "Detect structural compatibility changes in a public JSON OpenAPI 3.0/3.1 contract: paths, methods, parameters, request requirements and response schemas. Use for API contract review; Smart Diff is for general documents. First register the contract URL with free fresh402_register, without selectors or ignore rules, then reuse watch_id. compare_to accepts previous (default) or baseline; an available same-watch previous_hash overrides it. Limits include 256000 decoded document bytes, 100 paths and 500 operations. No YAML, external reference fetching, API-operation execution, LLM or complete compatibility guarantee. $0.020 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. Never combine prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery.",
+        "summary": "Detect structural compatibility changes in a public JSON OpenAPI 3.0/3.1 contract: paths, methods, parameters, request requirements and response schemas. Use for API contract review; Smart Diff is for general documents. First register the contract URL with free fresh402_register, without selectors or ignore rules, then reuse watch_id. compare_to accepts previous (default) or baseline; an available same-watch previous_hash overrides it. Limits include 256000 decoded document bytes, 100 paths and 500 operations. No YAML, external reference fetching, API-operation execution, LLM or complete compatibility guarantee. $0.020 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery.",
         "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence after unfiltered free registration. Compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base.",
         "tags": [
           "openapi_diff"
@@ -2775,12 +2853,21 @@
         "security": [
           {
             "x402Payment": []
+          },
+          {
+            "mppPayment": []
           }
         ],
         "x-payment-info": {
           "protocols": [
             {
               "x402": {}
+            },
+            {
+              "mpp": {
+                "method": "evm",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -2876,6 +2963,12 @@
             "headers": {
               "PAYMENT-RESPONSE": {
                 "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Payment-Receipt": {
+                "description": "Base64url native MPP EVM receipt; inspect status and reference. Not proof of prepaid finality.",
                 "schema": {
                   "type": "string"
                 }
@@ -4632,7 +4725,7 @@
         "operationId": "fresh402_mcp",
         "summary": "MCP Streamable HTTP (2026-07-28 plus stateless 2025 compatibility)",
         "security": [],
-        "description": "Five tools. Payment challenge is an isError tool result with structuredContent = PaymentRequired; payment goes in params._meta['x402/payment']; receipt in result._meta['x402/payment-response']. HTTP 200 alone is not success. Alternatively use X-Fresh402-API-Key in HTTP with params._meta['fresh402/prepaid'] containing idempotency_key, tariff_version and max_credits. Never combine both billing methods. See docs/AGENT_PREPAID.md and MCP.md.",
+        "description": "Five tools. Payment challenge is an isError tool result with structuredContent = PaymentRequired; payment goes in params._meta['x402/payment']; receipt in result._meta['x402/payment-response']. HTTP 200 alone is not success. Alternatively use X-Fresh402-API-Key in HTTP with params._meta['fresh402/prepaid'] containing idempotency_key, tariff_version and max_credits. Never combine billing methods. When x-mpp-payments.enabled, official MPP clients may use params._meta['org.paymentauth/credential']; receipt is result._meta['org.paymentauth/receipt']. Legacy x402 errors also carry standard org.paymentauth/payment-required metadata. See docs/MPP.md, AGENT_PREPAID.md and MCP.md.",
         "requestBody": {
           "required": true,
           "content": {
@@ -4845,6 +4938,12 @@
   },
   "components": {
     "securitySchemes": {
+      "mppPayment": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "When mpp_payments.enabled: Payment credential from the original WWW-Authenticate challenge. Native EVM charge / Base USDC / EIP-3009. Persist original credential and private recovery token; never mix billing methods."
+      },
       "customerSession": {
         "type": "apiKey",
         "in": "header",
@@ -5685,6 +5784,14 @@
       "FundingStatus": {
         "type": "object",
         "properties": {
+          "payment_protocol": {
+            "type": "string",
+            "enum": [
+              "x402",
+              "mpp"
+            ],
+            "description": "Immutable purchase protocol; omitted input defaults to x402."
+          },
           "intent_id": {
             "type": "string",
             "pattern": "^pf_[a-f0-9]{32}$"

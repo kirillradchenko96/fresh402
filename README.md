@@ -1,10 +1,10 @@
-# Fresh402 v2.4 — Web Intelligence API for AI Agents
+# Fresh402 v2.5 — Web Intelligence API for AI Agents
 
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
 **Check whether a source changed, extract usable content, and compare structured snapshots. Pay per call with x402 USDC on Base.**
 
-The hosted production API reports **2.4.0**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
+The hosted production API reports **2.5.0**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
 
 | Product | MCP tool | REST endpoint | Price per call |
 |---|---|---|---:|
@@ -81,3 +81,5 @@ Built and maintained by **Kirill Radchenko**. [Report an integration issue](http
 ## Self-service prepaid onboarding
 
 Fresh402 2.4 provides wallet-authenticated account recovery and automatic finalized-payment reconciliation. Starter remains $2.50 / 1,000 credits and Developer $15 / 10,000 credits. Discover one-time packages and current credit costs in `GET /` → `prepaid_packages`; purchased credits do not expire. Check live purchasing availability before signing. See the [account page](https://fresh402.kirilllabs.workers.dev/account), [live availability](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans), and [customer API](docs/SELF_SERVICE.md). Existing x402 and prepaid access operate independently; metadata never initiates a payment.
+
+[Browserless agent purchasing, bounded early credits and REST/MCP prepaid execution](docs/AGENT_PREPAID.md): exact quotes, local signer integration, spending caps and original-payment recovery. Read live availability before signing; early inclusion is not finality.

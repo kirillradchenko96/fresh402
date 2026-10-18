@@ -37,16 +37,16 @@ The five-poll contract demo uses two Extracts and four Checks: $0.040 in **simul
 
 Public contract: [OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json), [API usage](../../docs/API.md), [MCP usage](../../docs/MCP.md), [pricing](../../docs/PRICING.md).
 
-Owner-review proposal: [prepaid client preview](PREPAID_PREVIEW.md). This draft is not a live package offer and contains no automatic purchase flow.
+Use the [agent purchasing guide](../../docs/AGENT_PREPAID.md) for the current browserless enrollment, explicit local signing and REST/MCP credit contract. PREPAID_PREVIEW.md is historical background, not the current contract.
 
 
-## Inactive 2.2 candidate preview
+## Current product availability
 
-See [current availability](../../docs/RELEASE_AVAILABILITY.md): production remains2.0.0; prepaid purchases and OpenAPI Contract Diff are unavailable. Do not interpret this client preview as a production activation.
+See [current availability](../../docs/RELEASE_AVAILABILITY.md): production 2.5 exposes all four paid products and one-time prepaid purchasing, subject to live feature flags.
 
-[Tariff-v3 workflow economics](PREPAID.md) and [OpenAPI Contract Diff](OPENAPI.md) are review candidates, not newly deployed production capabilities. Original x402 prices remain unchanged. Read deployed discovery/quotes before using a tool; the client cannot auto-fund or fall back from prepaid to x402. The new example uses public REST/MCP contracts only.
+[Tariff-v3 workflow economics](PREPAID.md) and [OpenAPI Contract Diff](OPENAPI.md) describe the deployed prepaid and specialized product contracts. Original x402 prices remain unchanged. Read deployed discovery/quotes before using a tool; the client cannot auto-fund or fall back from prepaid to x402. The new example uses public REST/MCP contracts only.
 
 
 ## Wallet-owned customer onboarding
 
-[CustomerClient](onboarding.ts) manages ownership challenges, original funding intents, account history and replacement API keys. [Complete examples](onboarding-example.ts) cover Starter plus Check, Developer tools and intentional top-ups. Wallet connection and each exact payment confirmation are externally supplied explicit actions. No example automatically pays. Read [availability, finality and recovery rules](../../docs/SELF_SERVICE.md); public signup and package purchasing remain gated.
+[CustomerClient](onboarding.ts) manages ownership challenges, original funding intents, account history and replacement API keys. [Complete examples](onboarding-example.ts) cover Starter plus Check, Developer tools and intentional top-ups. Wallet connection and each exact payment confirmation are externally supplied explicit actions. No example automatically pays. Read [availability, finality and recovery rules](../../docs/SELF_SERVICE.md); read the independent live signup, purchasing and early-credit flags before signing.

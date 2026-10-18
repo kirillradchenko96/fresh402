@@ -1,4 +1,4 @@
-# Fresh402 2.4 pricing and product comparison
+# Fresh402 2.5 pricing and product comparison
 
 | Product | MCP tool | Price | Atomic USDC | Use it when |
 |---|---|---:|---:|---|
@@ -14,4 +14,4 @@ Metadata, OpenAPI, MCP tool discovery and legacy stored history/diff reads are f
 
 The price table was checked against live production requirements and schemas. Always read the current [OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) and unsigned x402 challenge before signing. A 402 challenge is a quote, not proof of payment or catalog indexing. The [client payment contract](API.md#payment-and-recovery) covers receipts and private recovery.
 
-Tariff 3 prepaid costs are Check 2, Extract 3, Smart Diff 4 and OpenAPI Contract Diff 5 credits. Starter remains $2.50 / 1,000 credits and Developer $15 / 10,000 credits; historical tariffs retain their purchased terms. Public package purchasing is closed pending approved terms and final launch gates. Read [live availability](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans) and [self-service recovery](SELF_SERVICE.md).
+Tariff 3 prepaid costs are Check 2, Extract 3, Smart Diff 4 and OpenAPI Contract Diff 5 credits. Starter remains $2.50 / 1,000 credits and Developer $15 / 10,000 credits; historical tariffs retain their purchased terms. Public signup and one-time package purchasing are enabled in the verified 2.5 release. Read live availability before signing. Independently verified inclusion may unlock a bounded early tranche; full entitlement still requires canonical finality. See the [agent purchasing guide](AGENT_PREPAID.md). Read [live availability](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans) and [self-service recovery](SELF_SERVICE.md).

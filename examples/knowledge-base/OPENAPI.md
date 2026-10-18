@@ -1,6 +1,6 @@
-# OpenAPI Contract Diff — inactive 2.2 candidate
+# OpenAPI Contract Diff
 
-Production currently advertises Check, Extract and Smart Diff. This candidate is available only when the service explicitly advertises `fresh402_openapi_contract_diff`. The example uses public APIs and the existing client; it contains no backend imports or payment signer.
+Production 2.5 advertises all four paid products. Execute this product only when the service explicitly advertises `fresh402_openapi_contract_diff`. The example uses public APIs and the existing client; it contains no backend imports or payment signer.
 
 ```ts
 import { inspectContractProduct, compareOpenApi } from './openapi-example.ts';

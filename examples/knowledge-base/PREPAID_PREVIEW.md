@@ -1,6 +1,6 @@
 # Prepaid client preview
 
-This is an integration proposal for owner review. Prepaid packages are not an available production offer. It does not change the current public x402 prices or enable a purchase. There are no published package prices or approved balance/refund terms in this draft.
+Historical integration proposal. The current deployed 2.5 contract, approved package prices and terms are documented in [the agent purchasing guide](../../docs/AGENT_PREPAID.md) and [live plans](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans). Use those current sources; this page is not the purchasing contract.
 
 The example has no automatic payment fallback. It can inspect a balance, obtain an account-specific versioned quote, reserve an explicit local credit budget, and recover the original idempotency key. A 402 balance error stops execution. Unknown pricing contracts stop execution. Previously saved operations retain their original tariff and maximum charge.
 

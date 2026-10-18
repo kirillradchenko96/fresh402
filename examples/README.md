@@ -63,3 +63,5 @@ curl https://fresh402.kirilllabs.workers.dev/v2/openapi-contract-diff \
   -H 'Content-Type: application/json' \
   -d '{"watch_id":"YOUR_RETURNED_WATCH_ID","compare_to":"baseline"}'
 ```
+
+For browserless EOA enrollment, exact package purchase, bounded early credits, finalized recovery and shared REST/MCP credit execution, use the [agent purchasing guide](../docs/AGENT_PREPAID.md). Follow live availability; early inclusion is not finality.

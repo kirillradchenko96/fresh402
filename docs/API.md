@@ -90,3 +90,5 @@ For browserless EOA enrollment, exact package purchase, bounded early credits, f
 ## Native MPP option
 
 Read root `mpp_payments` for current enablement. The four existing per-call routes additionally offer `WWW-Authenticate: Payment`, accept native Base USDC EVM `Authorization: Payment` credentials and return `Payment-Receipt`. Existing x402 and prepaid schemas/prices are preserved. Never combine credentials. See [MPP](MPP.md) for exact body/resource binding, SDK examples, package opt-in and recovery.
+
+Circle Gateway is a separate optional x402 rail, not an MPP method. It is disabled pending acceptance; consult root `circle_gateway.enabled` and the [Circle Gateway guide](CIRCLE_GATEWAY.md). A Gateway transfer UUID is not a direct onchain receipt.

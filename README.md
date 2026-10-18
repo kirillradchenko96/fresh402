@@ -84,3 +84,7 @@ Built and maintained by **Kirill Radchenko**. [Report an integration issue](http
 Fresh402 2.4 provides wallet-authenticated account recovery and automatic finalized-payment reconciliation. Starter remains $2.50 / 1,000 credits and Developer $15 / 10,000 credits. Discover one-time packages and current credit costs in `GET /` → `prepaid_packages`; purchased credits do not expire. Check live purchasing availability before signing. See the [account page](https://fresh402.kirilllabs.workers.dev/account), [live availability](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans), and [customer API](docs/SELF_SERVICE.md). Existing x402 and prepaid access operate independently; metadata never initiates a payment.
 
 [Browserless agent purchasing, bounded early credits and REST/MCP prepaid execution](docs/AGENT_PREPAID.md): exact quotes, local signer integration, spending caps and original-payment recovery. Read live availability before signing; early inclusion is not finality.
+
+## Optional Circle Gateway payments
+
+[Circle Gateway integration guide](docs/CIRCLE_GATEWAY.md): optional Base USDC x402 batching for the four paid REST/MCP products. Acceptance is disabled pending real-money verification; inspect root `circle_gateway.enabled`. Existing Coinbase x402, native MPP and prepaid remain unchanged. Circle prepaid funding is unsupported.

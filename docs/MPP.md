@@ -119,3 +119,5 @@ This integration is tested with official `mppx` and x402 SDKs, local workerd/D1 
 Tempo, Stripe SPT, other chains/assets, swaps, subscriptions and payment sessions are not accepted. Future Tempo support would require an explicitly approved chain/asset/merchant and equally strong transaction/finality/replay verification. Stripe would require an approved merchant account, applicable activation/KYC, credentials and a separate proof/accounting review. None is activated or provisioned here.
 
 Official references: [EVM charge](https://mpp.dev/payment-methods/evm/charge), [x402 coexistence](https://mpp.dev/guides/use-mpp-with-x402), [MCP transport](https://mpp.dev/protocol/transports/mcp), [mppx](https://github.com/wevm/mppx).
+
+Circle Gateway is a separate optional x402 rail, not an MPP method. It is disabled pending acceptance; consult root `circle_gateway.enabled` and the [Circle Gateway guide](CIRCLE_GATEWAY.md). A Gateway transfer UUID is not a direct onchain receipt.

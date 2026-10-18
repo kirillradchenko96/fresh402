@@ -1,4 +1,4 @@
-# Fresh402 2.4 MCP integration
+# Fresh402 2.5 MCP integration
 
 Canonical endpoint: **https://fresh402.kirilllabs.workers.dev/mcp**.
 Transport: **Streamable HTTP**. Official Registry identity: **io.github.kirillradchenko96/fresh402**.
@@ -66,4 +66,4 @@ The API processes public HTTPS HTML, JSON and text on demand. Extraction does no
 
 ## Optional prepaid customer accounts
 
-The existing five MCP tools and MCP URL are unchanged. Standalone x402 needs no customer signup. Wallet ownership, package funding, API-key claim/recovery and credit execution use the [REST self-service contract](SELF_SERVICE.md) and [CustomerClient](../examples/knowledge-base/onboarding.ts). Public signup and one-time purchasing are available when enabled in the live `/v2/prepaid/plans` response. Do not send prepaid credentials to MCP or automatically fall back to a new x402 payment.
+The existing five MCP tools and MCP URL are unchanged. Standalone x402 needs no customer signup. Wallet ownership, package funding, API-key claim/recovery and credit execution use the [REST self-service contract](SELF_SERVICE.md) and [CustomerClient](../examples/knowledge-base/onboarding.ts). Public signup and one-time purchasing are available when enabled in the live `/v2/prepaid/plans` response. For prepaid MCP calls, pass X-Fresh402-API-Key in HTTP and params._meta["fresh402/prepaid"] containing idempotency_key, tariff_version and max_credits. Use the same 2/3/4/5 credit tariff and durable operation identity as REST. Never combine prepaid and x402 or automatically fall back to a new payment. See [the complete agent guide](AGENT_PREPAID.md) for signing, early-credit limits, key recovery and exact examples.

@@ -2,6 +2,13 @@
 
 These notes describe the deployed API, independently of the legacy source package version in this repository. Documentation publication does not deploy infrastructure or merge the backend release PR.
 
+## 2.5.0 - October 18, 2026
+
+- Browserless EOA account recovery and exact one-time prepaid purchases are documented end to end, using a customer-controlled signer.
+- Independently corroborated successful Base L2 inclusion may unlock up to 50 Starter or 100 Developer early credits. Full entitlement still requires canonical finality. Early access is conditional, revocable and bounded across accounts/payers/project exposure.
+- The four paid MCP tools now share existing REST prepaid credentials, integer debits, durable results and idempotent recovery. Standalone x402 prices, five tool names, package prices and tariff 3 costs remain unchanged.
+- Funding/balance discovery and the account page distinguish provisional, frozen, revoked and finalized states. Existing customer history, credentials and purchased balances are preserved by an additive migration.
+
 ## 2.4.0 - October 14, 2026
 
 - Submitted prepaid purchases reconcile automatically after canonical finalized Base settlement; session expiry and a closed browser do not require a replacement payment.

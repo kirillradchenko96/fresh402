@@ -1,8 +1,29 @@
-# Fresh402 2.0 discovery audit
+# Fresh402 public discovery status
+
+Verified October 17, 2026 (America/Anchorage). The hosted API reports **2.4.0**. Free POST MCP discovery exposes **five tools**: Register, Check, Extract, Smart Diff and OpenAPI Contract Diff. The four standalone paid calls cost $0.005 / $0.010 / $0.015 / $0.020 native USDC on Base. One-time Starter ($2.50 / 1,000 credits) and Developer ($15 / 10,000) packages, public account creation and purchasing are enabled in the live [plans response](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans). Credits do not expire; REST prepaid costs are 2 / 3 / 4 / 5. Installing an MCP connector does not give a generic client a payment signer. See [MCP integration](MCP.md).
+
+| Existing public surface | Independently verified result | Status |
+|---|---|---|
+| [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.kirillradchenko96%2Ffresh402/versions/latest) | Active latest **2.4.0**, description covers all four paid products; established identity and endpoint preserved | Updated and published |
+| [Glama Registry connector](https://glama.ai/mcp/connectors/io.github.kirillradchenko96/fresh402) and [domain connector](https://glama.ai/mcp/connectors/dev.workers.kirilllabs.fresh402/fresh402) | Both list all five tools; ownership verification retained. Domain title/description still lag | Tool inventory verified; description correction requested |
+| [Smithery](https://smithery.ai/servers/kirillradchenko96/fresh402) | Existing public page still lists two tools and the older Check-only description | Refresh requested; not claimed updated |
+| [x402scan](https://www.x402scan.com/server/dfd5b14d-f56d-4d5a-adb0-8511f02537ab) | Existing server page remains visible; cached description reports 2.0.0 | Same identity preserved; catalog lags live API |
+| [Agent402 merchant index](https://agent402.tools/api/index?seller=https%3A%2F%2Ffresh402.kirilllabs.workers.dev) | All four paid REST routes indexed; routing eligibility is false with `settlement_required`. Ten bounded search queries did not return Fresh402 among their first 25 results | Indexed; automated paid routing unproven |
+| [AgentBIT](https://agentbit.app/api/discover?q=fresh402) / Coinbase Bazaar | Existing Check resource present; complete Coinbase merchant response lists only Check | Other resources not yet indexed by Coinbase |
+| [MCPRush](https://mcprush.com/kirillradchenko96/fresh402-mcp) | Existing claim approved; public page challenged the automated HTTP reader | Metadata refresh requested; existing direct/free install retained, no subscription gateway enabled |
+| [mcpservers.org](https://mcpservers.org/servers/kirillradchenko96/fresh402) | Existing approval confirmed; search-indexed description is older; direct reader met a challenge | Correction requested; no duplicate submission |
+| [Awesome Remote MCP Servers submission](https://github.com/punkpeye/awesome-remote-mcp-servers/pull/2138) | New free, single-entry submission with direct endpoint, verified Glama badge and explicit paid-execution description | Submitted; publication requires upstream review |
+
+The live [x402 manifest](https://fresh402.kirilllabs.workers.dev/.well-known/x402), [OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json), [root package discovery](https://fresh402.kirilllabs.workers.dev/) and [agent guide](https://fresh402.kirilllabs.workers.dev/llms.txt) describe the current products. A valid unsigned challenge is not a payment, sale, registry publication or proof of index ranking. No new USDC transfer was made for these checks. Existing listings and URLs were preserved.
+
+## Historical October 10 audit
+
+The following section is historical evidence; its preview flags, versions and directory observations do not describe current production.
+
 
 Verified October 10, 2026 (America/Anchorage), after the authorized discovery compatibility release. This records live validation and catalog results; a payment challenge, an accepted refresh and actual indexing are different outcomes.
 
-Current availability update, October 12, 2026 (UTC): the hosted runtime reports **2.2.0**. The same four public tools, REST/MCP URLs, original prices and Glama verification are preserved. OpenAPI Contract Diff and prepaid remain disabled previews. Directory observations below retain their original audit date; no new listing or registry publication is implied.
+Historical availability update, October 12, 2026 (UTC): the hosted runtime reports **2.2.0**. The same four public tools, REST/MCP URLs, original prices and Glama verification are preserved. OpenAPI Contract Diff and prepaid remain disabled previews. Directory observations below retain their original audit date; no new listing or registry publication is implied.
 
 ## Historical production contract (October 10)
 

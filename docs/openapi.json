@@ -1097,7 +1097,7 @@
                 "type": "object",
                 "properties": {
                   "url": {
-                    "description": "Supply exactly one of url or watch_id. URL must be absolute public HTTPS on port 443, at most 4096 characters, with no credentials/private targets, e.g. 'https://example.com/docs'. With url, optional content rules identify the watch; an existing watch is reused or a new one is created by this paid Check. Separate registration is not required. No JavaScript rendering.",
+                    "description": "Supply exactly one of url or watch_id. URL must be absolute public HTTPS on port 443, at most 4096 characters, with no credentials/private targets, e.g. 'https://example.com/docs'. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. With url, optional content rules identify the watch; an existing watch is reused or a new one is created by this paid Check. Separate registration is not required. No JavaScript rendering.",
                     "type": "string",
                     "maxLength": 4096,
                     "format": "uri",
@@ -1428,7 +1428,7 @@
                 "type": "object",
                 "properties": {
                   "url": {
-                    "description": "Supply exactly one of url or watch_id. URL must be absolute public HTTPS on port 443, at most 4096 characters, with no credentials/private targets, e.g. 'https://example.com/docs'. With url, optional content rules identify the watch; an existing watch is reused or a new one is created by this paid Check. Separate registration is not required. No JavaScript rendering.",
+                    "description": "Supply exactly one of url or watch_id. URL must be absolute public HTTPS on port 443, at most 4096 characters, with no credentials/private targets, e.g. 'https://example.com/docs'. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. With url, optional content rules identify the watch; an existing watch is reused or a new one is created by this paid Check. Separate registration is not required. No JavaScript rendering.",
                     "type": "string",
                     "maxLength": 4096,
                     "format": "uri",
@@ -1754,7 +1754,7 @@
                     "type": "string",
                     "maxLength": 4096,
                     "format": "uri",
-                    "description": "Required absolute public HTTPS document URL, at most 4096 characters, e.g. 'https://example.com/docs'. Only port 443; no embedded credentials, private/local targets or authenticated pages. HTML, JSON and plain text are supported; JavaScript is not executed. DNS, redirect and size limits also apply.",
+                    "description": "Required absolute public HTTPS document URL, at most 4096 characters, e.g. 'https://example.com/docs'. Only port 443; no embedded credentials, private/local targets or authenticated pages. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. HTML, JSON and plain text are supported; JavaScript is not executed. DNS, redirect and size limits also apply.",
                     "pattern": "^[Hh][Tt][Tt][Pp][Ss]://"
                   },
                   "selector": {
@@ -2075,7 +2075,7 @@
                     "type": "string",
                     "maxLength": 4096,
                     "format": "uri",
-                    "description": "Required absolute public HTTPS document URL, at most 4096 characters, e.g. 'https://example.com/docs'. Only port 443; no embedded credentials, private/local targets or authenticated pages. HTML, JSON and plain text are supported; JavaScript is not executed. DNS, redirect and size limits also apply.",
+                    "description": "Required absolute public HTTPS document URL, at most 4096 characters, e.g. 'https://example.com/docs'. Only port 443; no embedded credentials, private/local targets or authenticated pages. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. HTML, JSON and plain text are supported; JavaScript is not executed. DNS, redirect and size limits also apply.",
                     "pattern": "^[Hh][Tt][Tt][Pp][Ss]://"
                   },
                   "selector": {
@@ -3925,7 +3925,7 @@
                     "type": "string",
                     "maxLength": 4096,
                     "format": "uri",
-                    "description": "Required absolute public HTTPS document URL, at most 4096 characters, e.g. 'https://example.com/docs'. Only port 443; no embedded credentials, private/local targets or authenticated pages. HTML, JSON and plain text are supported; JavaScript is not executed. DNS, redirect and size limits also apply."
+                    "description": "Required absolute public HTTPS document URL, at most 4096 characters, e.g. 'https://example.com/docs'. Only port 443; no embedded credentials, private/local targets or authenticated pages. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. HTML, JSON and plain text are supported; JavaScript is not executed. DNS, redirect and size limits also apply."
                   },
                   "selector": {
                     "type": "string",

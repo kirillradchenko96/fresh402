@@ -1,8 +1,8 @@
-# Fresh402 2.4 public API
+# Fresh402 2.5.1 public API
 
 Base URL: https://fresh402.kirilllabs.workers.dev
 
-The hosted service reports version **2.5.0**. [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
+The hosted service reports version **2.5.1**. [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
 
 | Operation | Method and path | MCP tool | Price |
 |---|---|---|---:|
@@ -48,17 +48,23 @@ Requires a registered watch. `compare_to` is `previous` (default) or `baseline`;
 
 - `GET /`: version, health, endpoint and standalone x402 prices, plus additive `prepaid_packages` discovery. Package IDs and integer credit amounts match `/v2/prepaid/plans`; `enabled` reflects public purchasing availability. Packages are one-time purchases with non-expiring credits, not subscriptions. Existing root fields and values are unchanged.
 - `GET /openapi.json`: OpenAPI 3.1 reference.
-- `GET /.well-known/x402`: all three paid REST resource URLs.
+- `GET /.well-known/x402`: all four paid REST resource URLs.
 - `GET /v1/history?watch_id=...`: retained legacy snapshot metadata.
 - `GET /v1/diff?watch_id=...`: a legacy deterministic diff of retained v1 snapshots, without a target fetch.
 - `GET /v1/stats`: public confirmed-settlement statistics.
-- `POST /mcp`: free protocol and tool discovery, free Register, and the three paid tools.
+- `POST /mcp`: free protocol and tool discovery, free Register, and the four paid tools.
 
 Legacy public history/diff is separate from paid Smart Diff results. MCP uses POST; GET /mcp returns 405.
 
 ## OpenAPI Contract Diff
 
-Register a supported JSON OpenAPI document, then POST `{"watch_id":"YOUR_RETURNED_WATCH_ID","compare_to":"baseline"}` to `/v2/openapi-contract-diff`. The result reports bounded contract changes, classifications, warnings and source provenance. Classifications are descriptive; remote `$ref` documents are not fetched. Inspect live limits and schemas before paying.
+Register an external supported JSON OpenAPI document without content rules, for example:
+
+```json
+{"url":"https://petstore3.swagger.io/api/v3/openapi.json"}
+```
+
+Fresh402's own `/openapi.json` describes this service for discovery; it cannot be registered as a target. Use the real returned watch ID in `{"watch_id":"YOUR_RETURNED_WATCH_ID","compare_to":"baseline"}` at `/v2/openapi-contract-diff`. The result reports bounded contract changes, classifications, warnings and source provenance. Classifications are descriptive; remote `$ref` documents are not fetched. Inspect live limits and schemas before paying.
 
 For wallet-owned prepaid accounts and automatic finalized-funding recovery, see [self-service](SELF_SERVICE.md). Check live `/v2/prepaid/plans` availability before signing any payment.
 
@@ -66,10 +72,10 @@ For wallet-owned prepaid accounts and automatic finalized-funding recovery, see 
 
 Payment is **x402 v2**, scheme **exact**, native **USDC on Base mainnet** (`eip155:8453`, chain ID 8453). The asset is `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`; the receiving address currently advertised is `0x58B4b483fBE31860335eCeB12CCCF4338b251085`. Always validate the current challenge before signing.
 
-An empty unsigned POST to any of the three paid REST resources returns a discovery challenge without executing the operation. The challenge's schema still requires the actual application input. Supplied malformed or unsafe input can be rejected before payment. A signed request requires valid input and existing watch/comparison prerequisites before settlement; completed private recovery retains its original result semantics. Smart Diff clients must register first and use the returned watch ID.
+An empty unsigned POST to any of the four paid REST resources returns a discovery challenge without executing the operation. The challenge's schema still requires the actual application input. Supplied malformed or unsafe input can be rejected before payment. A signed request requires valid input and existing watch/comparison prerequisites before settlement; completed private recovery retains its original result semantics. Smart Diff clients must register first and use the returned watch ID.
 
 1. Submit the intended request without payment and read its HTTP 402 `PAYMENT-REQUIRED` header (Base64 JSON).
-2. Check resource URL, network, asset, recipient, exact atomic amount (5000 / 10000 / 15000), expiry and input. Preserve the advertised `resource` and `extensions`, including `bazaar`, in the payment payload as specified by x402.
+2. Check resource URL, network, asset, recipient, exact atomic amount (5000 / 10000 / 15000 / 20000), expiry and input. Preserve the advertised `resource` and `extensions`, including `bazaar`, in the payment payload as specified by x402.
 3. Persist a private recovery token generated from 32 cryptographically random bytes, encoded as hex or Base64url. Follow the live OpenAPI length and format constraints; send it in `X-Fresh402-Recovery-Token` on the payment attempt and retries.
 4. Let an x402-compatible wallet client sign the exact USDC authorization. Never export or send the wallet seed phrase or private key, and do not request unlimited approvals.
 5. Retry identical input with `PAYMENT-SIGNATURE` (Base64 x402 PaymentPayload JSON). A confirmed paid result carries a Base64 `PAYMENT-RESPONSE` receipt.
@@ -79,7 +85,7 @@ Do not place a recovery token in a URL or log. A public transaction hash or paym
 
 ## Limits and errors
 
-Targets must be public HTTPS URLs on port 443 without embedded credentials. Private addresses and unsafe redirects are rejected. Requests are on demand; there is no continuous monitoring, authenticated-site access or push alert service. Payload, target, stored-content and output limits apply.
+Targets must be external public HTTPS URLs on port 443 without embedded credentials. Fresh402's own service URLs, private addresses and unsafe redirects are rejected. Requests are on demand; there is no continuous monitoring, authenticated-site access or push alert service. Payload, target, stored-content and output limits apply.
 
 HTML UI pruning applies automatically without an explicit scope. An explicit CSS selector preserves its visible scope; use ignore rules for noise inside it. Scripts, styles and hidden content remain excluded. JSON processing is bounded to 64 nesting levels and 10,000 nodes before normalization/storage. Corrected pruning may make previously omitted content visible to an existing watch on its next check; watch IDs, retained snapshots and previously paid responses are preserved.
 

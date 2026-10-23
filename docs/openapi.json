@@ -69,8 +69,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Fresh402 Web Intelligence API",
-    "version": "2.5.1",
-    "description": "Fresh402 2.5.1: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
+    "version": "2.6.0",
+    "description": "Fresh402 2.6.0: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
     "contact": {
       "name": "Fresh402 support",
       "email": "fresh402@proton.me",
@@ -1154,14 +1154,6 @@
                   }
                 },
                 "description": "Paid Check input: exactly one of url or watch_id is required. Content rules are allowed only on the url path; watch_id always reuses saved rules. Optional previous_hash overrides the reference hash; max_age_seconds controls cache reuse and include_diff controls text-diff output.",
-                "examples": [
-                  {
-                    "url": "https://example.com/docs",
-                    "selector": "main",
-                    "max_age_seconds": 0,
-                    "include_diff": true
-                  }
-                ],
                 "oneOf": [
                   {
                     "required": [
@@ -1172,6 +1164,14 @@
                     "required": [
                       "watch_id"
                     ]
+                  }
+                ],
+                "examples": [
+                  {
+                    "url": "https://example.com/docs",
+                    "selector": "main",
+                    "max_age_seconds": 0,
+                    "include_diff": true
                   }
                 ]
               },
@@ -1485,14 +1485,6 @@
                   }
                 },
                 "description": "Paid Check input: exactly one of url or watch_id is required. Content rules are allowed only on the url path; watch_id always reuses saved rules. Optional previous_hash overrides the reference hash; max_age_seconds controls cache reuse and include_diff controls text-diff output.",
-                "examples": [
-                  {
-                    "url": "https://example.com/docs",
-                    "selector": "main",
-                    "max_age_seconds": 0,
-                    "include_diff": true
-                  }
-                ],
                 "oneOf": [
                   {
                     "required": [
@@ -1503,6 +1495,14 @@
                     "required": [
                       "watch_id"
                     ]
+                  }
+                ],
+                "examples": [
+                  {
+                    "url": "https://example.com/docs",
+                    "selector": "main",
+                    "max_age_seconds": 0,
+                    "include_diff": true
                   }
                 ]
               },
@@ -1676,7 +1676,7 @@
     "/v2/extract": {
       "post": {
         "operationId": "fresh402_extract",
-        "summary": "Extract readable text, metadata, headings, public links and embedded JSON-LD from one public HTTPS document. Use to read static HTML, JSON or plain text; no watch or prior registration is needed. Optional CSS scope and noise exclusions; max_chars defaults to 20000 and limits returned text, not fetch size. Does not render JavaScript, crawl links or compare versions. $0.010 USDC per call on Base mainnet (eip155:8453), requiring an x402-capable MCP payment client and funded native-USDC payer. An ordinary MCP client receives a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
+        "summary": "Extract readable text, metadata, headings, public links and embedded JSON-LD from one public HTTPS document. Use to read static HTML, JSON or plain text; no watch or prior registration is needed. Optional CSS scope, noise exclusions and exact JSON Pointer selection via json_pointer (JSON only; missing fields return 422). Omit json_pointer to retain full-document extraction. max_chars defaults to 20000 and limits returned text, not fetch size. Does not render JavaScript, crawl links or compare versions. $0.010 USDC per call on Base mainnet (eip155:8453), requiring an x402-capable MCP payment client and funded native-USDC payer. An ordinary MCP client receives a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
         "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base.",
         "tags": [
           "extract"
@@ -1785,6 +1785,12 @@
                       "pattern": "^\\/",
                       "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
                     }
+                  },
+                  "json_pointer": {
+                    "description": "Optional exact RFC 6901 JSON Pointer, at most 256 characters, e.g. '/product/price' or '/items/0/name'. JSON documents only; '~0' means '~' and '~1' means '/'. Empty string selects the whole document. Omit to extract the entire normalized document. Selection runs after ignore_json_paths; a missing or excluded target returns 422. Array indices are zero-based canonical integers; '*' is a literal key, not a wildcard. Returned text/data/hash cover the selected value; max_chars and data_omitted still apply.",
+                    "type": "string",
+                    "maxLength": 256,
+                    "pattern": "^(?:\\/(?:[^~]|~[01])*)?$"
                   },
                   "max_chars": {
                     "default": 20000,
@@ -2106,6 +2112,12 @@
                       "pattern": "^\\/",
                       "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
                     }
+                  },
+                  "json_pointer": {
+                    "description": "Optional exact RFC 6901 JSON Pointer, at most 256 characters, e.g. '/product/price' or '/items/0/name'. JSON documents only; '~0' means '~' and '~1' means '/'. Empty string selects the whole document. Omit to extract the entire normalized document. Selection runs after ignore_json_paths; a missing or excluded target returns 422. Array indices are zero-based canonical integers; '*' is a literal key, not a wildcard. Returned text/data/hash cover the selected value; max_chars and data_omitted still apply.",
+                    "type": "string",
+                    "maxLength": 256,
+                    "pattern": "^(?:\\/(?:[^~]|~[01])*)?$"
                   },
                   "max_chars": {
                     "default": 20000,
@@ -5319,6 +5331,10 @@
           "content_truncated": {
             "type": "boolean"
           },
+          "excerpt_truncated": {
+            "type": "boolean",
+            "description": "True when bounded contextual added/removed excerpts were clipped; independent of retained snapshot completeness."
+          },
           "reason": {
             "type": "string"
           }
@@ -5370,6 +5386,10 @@
           "data": {},
           "data_omitted": {
             "type": "boolean"
+          },
+          "json_pointer": {
+            "type": "string",
+            "description": "Present only for an explicitly selected exact JSON Pointer; text, data and hash describe that selected value after exclusions."
           },
           "headings": {
             "type": "array",

@@ -1,10 +1,10 @@
-# Fresh402 v2.5 — Web Intelligence API for AI Agents
+# Fresh402 v2.6 — Web Intelligence API for AI Agents
 
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
 **Check whether a source changed, extract usable content, and compare structured snapshots. Pay per call with x402 or enabled native MPP USDC on Base, or use prepaid credits.**
 
-The hosted production API reports **2.5.1**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
+The hosted production API reports **2.6.0**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
 
 | Product | MCP tool | REST endpoint | Price per call |
 |---|---|---|---:|
@@ -18,7 +18,7 @@ The hosted production API reports **2.5.1**. Connect at [fresh402.kirilllabs.wor
 
 - **Register** once to establish a persistent baseline and receive a `watch_id`. Re-registering the same watch returns its existing baseline without loading the target again.
 - **Check** before reusing a web source or spending on downstream browsing and reasoning. Get a change signal, noise filtering, conditional HTTP revalidation and an optional compact deterministic text diff. A cached Check is still a paid operation.
-- **Extract** when an agent needs content for retrieval: text, titles, metadata, headings, links and JSON-LD from public HTML, JSON or text, with optional CSS scoping.
+- **Extract** when an agent needs content for retrieval: text, titles, metadata, headings, links and JSON-LD from public HTML, JSON or text, with optional CSS scoping or exact JSON field selection using `json_pointer`.
 - **Smart Diff** when the change itself matters: compare a watch with its previous Smart Diff snapshot or fixed baseline, get structured additions/removals/modifications, and inspect significance scores with explainable deterministic rules.
 
 - **OpenAPI Contract Diff** compares a registered public JSON OpenAPI 3.0/3.1 contract with a baseline or previous snapshot, returning conservative compatibility evidence. It does not resolve remote references or parse YAML.

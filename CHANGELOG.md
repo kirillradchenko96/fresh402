@@ -2,6 +2,14 @@
 
 These notes describe the deployed API, independently of the legacy source package version in this repository. Documentation publication does not deploy infrastructure or merge the backend release PR.
 
+## 2.6.0 - October 22, 2026
+
+- Extract accepts optional exact RFC 6901 `json_pointer` selection after existing exclusions. Missing fields return explicit 422 errors; omission retains full-document behavior. Same single fetch, parser limits and price.
+- Check excerpts retain bounded surrounding context and complete Unicode characters. Its MCP schema expresses the existing exactly-one URL/watch requirement.
+- Smart Diff pairs unique HTML block IDs directly, retaining duplicate-ID fallback, work bounds and the 200-change output cap.
+- OpenAPI validation accepts legal examples and property names that resemble schema keywords; existing structural classifications and reference limits remain.
+- Existing prices, five MCP identities, wallets, customer balances and payment/recovery behavior are unchanged. No new mainnet payment validation is claimed.
+
 ## 2.5.1 - October 18, 2026
 
 - Native MPP EVM charge can coexist with the existing x402 and prepaid contracts on Base native USDC, gated by live discovery flags. Same four paid tools, prices, resource budgets and ledger.

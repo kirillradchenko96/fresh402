@@ -1,4 +1,42 @@
 {
+  "x-machine-trial": {
+    "enabled": false,
+    "model": "one-time bounded machine trial; wallet control is not unique-agent identity",
+    "allowances": {
+      "check": 2,
+      "extract": 1,
+      "smart_diff": 1,
+      "openapi_diff": 1,
+      "contract_watch": 1,
+      "wallet_watch": 1,
+      "token_facts": 1
+    },
+    "challenge_endpoint": "/v3/agent-trial/challenge",
+    "claim_endpoint": "/v3/agent-trial/claim",
+    "quota_endpoint": "/v3/agent-trial/quota",
+    "credential_header": "X-Fresh402-Trial-Key",
+    "idempotency_header": "Idempotency-Key",
+    "credential_max_lifetime_seconds": 604800,
+    "captcha_required": false,
+    "wallet_signature": "EIP-191 personal_sign of the exact returned challenge",
+    "payments_automatic": false,
+    "shared_limits": {
+      "work_units_day": 32,
+      "work_units_month": 64,
+      "work_units_network_day": 8,
+      "web_runtime_reservation_ms_day": 360000,
+      "web_runtime_reservation_ms_month": 1200000,
+      "blockchain_rpc_reservation_day": 18,
+      "blockchain_units_month": 18000
+    },
+    "warning": "Allowances are maximum entitlements, not reserved capacity. Shared admission may return 429 before an allowance is exhausted. No payment fallback."
+  },
+  "x-all-service-prepaid": {
+    "enabled": false,
+    "terms_endpoint": "/v3/prepaid/all-services",
+    "acceptance_field": "all_services_terms_digest",
+    "requires_finalized_purchase": true
+  },
   "x-circle-gateway": {
     "enabled": false,
     "protocol": "x402",
@@ -497,11 +535,18 @@
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
+                  "all_services_terms_digest": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$",
+                    "description": "Conditionally required for all-services-v4 packages: exact explicit accepted digest from /v3/prepaid/all-services. Legacy purchases retain original terms."
+                  },
                   "package_id": {
                     "type": "string",
                     "enum": [
                       "candidate-starter-v3",
-                      "candidate-developer-v3"
+                      "candidate-developer-v3",
+                      "starter-all-services-v4",
+                      "developer-all-services-v4"
                     ]
                   },
                   "payment_protocol": {
@@ -3604,7 +3649,7 @@
       "post": {
         "operationId": "fresh402_contract_watch",
         "summary": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.010000 USDC on Base per call; use an approved compatible payment client. Prepaid uses an explicit service-specific tariff4 grant and authenticated /v3/prepaid/quote/contract_watch. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Independent provider authorization and per-service approved tariff grants are required.",
-        "description": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown.",
+        "description": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. Optional separate machine trial: inspect /v3/agent-trial; send only X-Fresh402-Trial-Key and persisted Idempotency-Key. Finite allowance/admission; no payment fallback.",
         "tags": [
           "contract_watch"
         ],
@@ -3665,6 +3710,16 @@
               "pattern": "^[A-Za-z0-9_-]+$"
             },
             "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Required with a trial key: unique persisted key per logical operation. Reuse exact input/key for recovery; do not combine trial and payment credentials."
           }
         ],
         "requestBody": {
@@ -4355,7 +4410,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Requires an enabled matching account/service grant. Use returned credits as the exact minimum maximum authorization; legacy account web tariff is unchanged.",
+            "description": "Requires enabled explicitly accepted all-service package provenance or original matching account/service grant. Use returned credits as the exact minimum maximum authorization; legacy account web tariff is unchanged.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4556,7 +4611,7 @@
       "post": {
         "operationId": "fresh402_wallet_watch",
         "summary": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.020000 USDC on Base per call; use an approved compatible payment client. Prepaid uses an explicit service-specific tariff4 grant and authenticated /v3/prepaid/quote/wallet_watch. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Independent provider authorization and per-service approved tariff grants are required.",
-        "description": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness.",
+        "description": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. Optional separate machine trial: inspect /v3/agent-trial; send only X-Fresh402-Trial-Key and persisted Idempotency-Key. Finite allowance/admission; no payment fallback.",
         "tags": [
           "wallet_watch"
         ],
@@ -4617,6 +4672,16 @@
               "pattern": "^[A-Za-z0-9_-]+$"
             },
             "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Required with a trial key: unique persisted key per logical operation. Reuse exact input/key for recovery; do not combine trial and payment credentials."
           }
         ],
         "requestBody": {
@@ -5207,7 +5272,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Requires an enabled matching account/service grant. Use returned credits as the exact minimum maximum authorization; legacy account web tariff is unchanged.",
+            "description": "Requires enabled explicitly accepted all-service package provenance or original matching account/service grant. Use returned credits as the exact minimum maximum authorization; legacy account web tariff is unchanged.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5408,7 +5473,7 @@
       "post": {
         "operationId": "fresh402_token_facts",
         "summary": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.010000 USDC on Base per call; use an approved compatible payment client. Prepaid uses an explicit service-specific tariff4 grant and authenticated /v3/prepaid/quote/token_facts. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Independent provider authorization and per-service approved tariff grants are required.",
-        "description": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed.",
+        "description": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. Optional separate machine trial: inspect /v3/agent-trial; send only X-Fresh402-Trial-Key and persisted Idempotency-Key. Finite allowance/admission; no payment fallback.",
         "tags": [
           "token_facts"
         ],
@@ -5469,6 +5534,16 @@
               "pattern": "^[A-Za-z0-9_-]+$"
             },
             "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Required with a trial key: unique persisted key per logical operation. Reuse exact input/key for recovery; do not combine trial and payment credentials."
           }
         ],
         "requestBody": {
@@ -6009,7 +6084,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Requires an enabled matching account/service grant. Use returned credits as the exact minimum maximum authorization; legacy account web tariff is unchanged.",
+            "description": "Requires enabled explicitly accepted all-service package provenance or original matching account/service grant. Use returned credits as the exact minimum maximum authorization; legacy account web tariff is unchanged.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6072,6 +6147,760 @@
           },
           "401": {
             "description": "Prepaid HTTP credential required"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/agent-trial": {
+      "get": {
+        "operationId": "fresh402_machine_trial_discovery",
+        "summary": "Actual bounded machine-trial availability and economic caps; no CAPTCHA or payment",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Wallet control is not proof of a unique agent. Allowances are maxima, admission may deny earlier. No payment fallback.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "allowances": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "shared_limits": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "captcha_required": {
+                      "const": false
+                    },
+                    "payments_automatic": {
+                      "const": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/agent-trial/quota": {
+      "get": {
+        "operationId": "fresh402_machine_trial_quota",
+        "summary": "Inspect the separately issued fm_ credential, original expiry and remaining entitlements",
+        "security": [
+          {
+            "trialKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No quota renewal, target fetch or payment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/agent-trial/challenge": {
+      "post": {
+        "operationId": "fresh402_machine_trial_challenge",
+        "summary": "Request the exact five-minute EIP-191 wallet-control message",
+        "description": "No CAPTCHA, funding, approval or merchant-side manual activation. Challenges bind wallet, canonical origin and network. Rotation preserves original quotas and expiry (at most 7 days, clipped to existing runtime authorization). Persist keys privately. Do not mix payment/prepaid credentials.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "wallet": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "Nonzero EOA address; does not need USDC or ETH for this message."
+                  }
+                },
+                "required": [
+                  "wallet"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "challenge_id, exact message, expires_at, signature_method=personal_sign, no_payment=true",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/agent-trial/claim": {
+      "post": {
+        "operationId": "fresh402_machine_trial_claim",
+        "summary": "Verify the exact EOA message, consume the challenge and issue or rotate fm_ credentials",
+        "description": "No CAPTCHA, funding, approval or merchant-side manual activation. Challenges bind wallet, canonical origin and network. Rotation preserves original quotas and expiry (at most 7 days, clipped to existing runtime authorization). Persist keys privately. Do not mix payment/prepaid credentials.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "wallet": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "challenge_id": {
+                    "type": "string",
+                    "pattern": "^ma_[a-f0-9]{64}$"
+                  },
+                  "signature": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{130}$",
+                    "description": "65-byte personal_sign signature of the exact returned message; never sign a transfer."
+                  }
+                },
+                "required": [
+                  "wallet",
+                  "challenge_id",
+                  "signature"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "trial_key (only plaintext copy), expires_at, allowances, one_time=true, payments_automatic=false; rotation invalidates the previous key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/prepaid/all-services": {
+      "get": {
+        "operationId": "fresh402_all_service_package_terms",
+        "summary": "Versioned future all-service package terms and actual purchasing availability",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "When disabled no purchase is offered. When enabled, accept the exact terms_digest explicitly when creating a new all-services-v4 purchase. One-time native Base USDC; no subscription. Existing balances retain original rights. Only finalized eligible credits fund blockchain calls; finite provider/runtime budgets apply.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "terms_endpoint": {
+                      "type": "string"
+                    },
+                    "payment_authorized": {
+                      "const": false
+                    },
+                    "terms_digest": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "terms": {
+                      "type": "object",
+                      "properties": {}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "403": {
             "description": "MCP Origin or staging access rejected",
@@ -7924,6 +8753,36 @@
                         "type": "string"
                       }
                     },
+                    "machine_trial": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "allowances": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "model": {
+                          "type": "string"
+                        },
+                        "challenge_endpoint": {
+                          "type": "string"
+                        },
+                        "claim_endpoint": {
+                          "type": "string"
+                        },
+                        "quota_endpoint": {
+                          "type": "string"
+                        },
+                        "captcha_required": {
+                          "const": false
+                        },
+                        "payments_automatic": {
+                          "const": false
+                        }
+                      }
+                    },
                     "prepaid_packages": {
                       "type": "object",
                       "properties": {
@@ -8365,7 +9224,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "X-Fresh402-Trial-Key",
-        "description": "Separate one-time free entitlement, only while /v2/trial reports enabled. Idempotency-Key required; never combine with paid credentials. No automatic purchase."
+        "description": "Separate one-time free entitlement, human ft_ only while /v2/trial reports enabled; separate machine fm_ only while /v3/agent-trial reports enabled. Idempotency-Key required; never combine with paid credentials. No automatic purchase."
       },
       "mppPayment": {
         "type": "apiKey",
@@ -9360,7 +10219,10 @@
               },
               "persistence": {
                 "type": "string",
-                "const": "atomic_with_financial_delivery"
+                "enum": [
+                  "atomic_with_financial_delivery",
+                  "atomic_with_entitlement_delivery"
+                ]
               },
               "accounting": {
                 "type": "object",
@@ -9570,7 +10432,10 @@
               },
               "persistence": {
                 "type": "string",
-                "const": "atomic_with_financial_delivery"
+                "enum": [
+                  "atomic_with_financial_delivery",
+                  "atomic_with_entitlement_delivery"
+                ]
               },
               "accounting": {
                 "type": "object",
@@ -9796,7 +10661,10 @@
               },
               "persistence": {
                 "type": "string",
-                "const": "atomic_with_financial_delivery"
+                "enum": [
+                  "atomic_with_financial_delivery",
+                  "atomic_with_entitlement_delivery"
+                ]
               },
               "accounting": {
                 "type": "object",
@@ -10009,7 +10877,10 @@
               },
               "persistence": {
                 "type": "string",
-                "const": "atomic_with_financial_delivery"
+                "enum": [
+                  "atomic_with_financial_delivery",
+                  "atomic_with_entitlement_delivery"
+                ]
               },
               "accounting": {
                 "type": "object",
@@ -10233,7 +11104,10 @@
               },
               "persistence": {
                 "type": "string",
-                "const": "atomic_with_financial_delivery"
+                "enum": [
+                  "atomic_with_financial_delivery",
+                  "atomic_with_entitlement_delivery"
+                ]
               },
               "accounting": {
                 "type": "object",
@@ -10459,7 +11333,10 @@
               },
               "persistence": {
                 "type": "string",
-                "const": "atomic_with_financial_delivery"
+                "enum": [
+                  "atomic_with_financial_delivery",
+                  "atomic_with_entitlement_delivery"
+                ]
               },
               "accounting": {
                 "type": "object",
@@ -10706,6 +11583,15 @@
             "minimum": 0,
             "description": "Finalized available plus currently usable early credits; kill switch and freshness applied."
           },
+          "all_service_available": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Provenance subset of finalized available from new explicitly accepted all-service packages; never additional credits."
+          },
+          "all_service_reserved": {
+            "type": "integer",
+            "minimum": 0
+          },
           "finalized_available": {
             "type": "integer",
             "minimum": 0
@@ -10858,6 +11744,21 @@
           },
           "pay_to": {
             "type": "string"
+          },
+          "recipient_version": {
+            "type": "string",
+            "enum": [
+              "eoa-v1",
+              "safe-v1"
+            ],
+            "description": "Immutable original merchant policy. Recover using this intent recipient, regardless of current new-purchase quotes."
+          },
+          "all_services_terms_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "all_services": {
+            "type": "boolean"
           },
           "payer": {
             "type": "string"

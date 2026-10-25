@@ -146,3 +146,9 @@ For example, Contract Watch and Token Facts accept `{"chain_id":8453,"address":"
 Before authorizing x402/MPP, persist a random32-byte private recovery token with the original proof and input. REST sends `X-Fresh402-Recovery-Token`; MCP uses `params._meta["fresh402/recovery-token"]`. Replay original evidence after uncertainty; never authorize a replacement. Use snapshot/cursor IDs only when their saved flags are true. Records retain30days; private financial recovery retains seven days. Foreign snapshots/cursors are not readable; provider failure or partial scans do not become paid successes.
 
 Prepaid charges4 /8 /4 require a separately accepted service-specific tariff4 grant and authenticated `/v3/prepaid/quote/{service_id}`. Existing Web package/account terms and aggregate Web tariff remain unchanged. This release does not create grants or silently make old package credits eligible. Blockchain products have no free-trial allowance. Shared finite daily/monthly admission can return429 before a customer exhausts their balance.
+
+## Separately gated agent access and all-service packages
+
+Root `machine_trial` and `GET /v3/agent-trial` describe the separate browserless, CAPTCHA-free trial. `enabled` is authoritative. This does not change human trial quotas or add MCP tools. Read [exact allowances and economic caps](MACHINE_TRIAL.md).
+
+`GET /v3/prepaid/all-services` describes the new explicitly accepted package cohort when enabled. Legacy packages, balances and accepted tariffs remain unchanged. New eligible finalized credits can automatically authorize all seven services without an operator grant, at the approved 2/3/4/5/4/8/4 costs. Do not infer live availability from this guide. The optional [customer-controlled replenishment client](AUTO_REPLENISH.md) requires explicit independent wallet policy; no merchant charge permission or automatic paid fallback is implied.

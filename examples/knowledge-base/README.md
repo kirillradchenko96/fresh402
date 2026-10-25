@@ -42,15 +42,21 @@ Use the [agent purchasing guide](../../docs/AGENT_PREPAID.md) for the current br
 
 ## Current product availability
 
-See [current availability](../../docs/RELEASE_AVAILABILITY.md): production 2.5 exposes all four paid products and one-time prepaid purchasing, subject to live feature flags.
+See [current availability](../../docs/RELEASE_AVAILABILITY.md): production 3.0 exposes seven paid products, including the bounded Base observation pilot and one-time prepaid purchasing, subject to live feature flags.
 
 [Tariff-v3 workflow economics](PREPAID.md) and [OpenAPI Contract Diff](OPENAPI.md) describe the deployed prepaid and specialized product contracts. Original x402 prices remain unchanged. Read deployed discovery/quotes before using a tool; the client cannot auto-fund or fall back from prepaid to x402. The new example uses public REST/MCP contracts only.
 
 
 ## Wallet-owned customer onboarding
 
-[CustomerClient](onboarding.ts) manages ownership challenges, original funding intents, account history and replacement API keys. [Complete examples](onboarding-example.ts) cover Starter plus Check, Developer tools and intentional top-ups. Wallet connection and each exact payment confirmation are externally supplied explicit actions. No example automatically pays. Read [availability, finality and recovery rules](../../docs/SELF_SERVICE.md); read the independent live signup, purchasing and early-credit flags before signing.
+[CustomerClient](onboarding.ts) manages ownership challenges, original funding intents, account history and replacement API keys. [Complete examples](onboarding-example.ts) cover Starter plus Check, Developer tools and intentional top-ups. Wallet connection and each exact payment confirmation are externally supplied explicit actions. Manual onboarding examples do not pay without caller-supplied wallet confirmation; the optional replenishment integration below requires separate explicit opt-in. Read [availability, finality and recovery rules](../../docs/SELF_SERVICE.md); read the independent live signup, purchasing and early-credit flags before signing.
 
 ## Official MPP client fragment
 
 [mpp.ts](mpp.ts) uses `mppx@0.13.5` / `viem@2.57.1` for native Base USDC EVM charge. Supply an already authorized signer and encrypted private persistence with a cumulative budget. `authorizeMppRequest` saves the original proof before submission; `resumeMppRequest` cannot sign or replace it. See [MPP](../../docs/MPP.md) for REST, MCP and one-time package use. No automatic real payment entry point is included.
+
+## Optional agent access and controlled replenishment
+
+Use [machine-trial.ts](machine-trial.ts) for the separate browserless ownership challenge, only when `/v3/agent-trial` reports enabled. It does not connect or sign automatically; keys and operation identities must be stored privately. Human trial quotas remain separate. See [economic limits](../../docs/MACHINE_TRIAL.md).
+
+[auto-replenish.ts](auto-replenish.ts) provides an explicitly opted-in customer-side workflow with a private SQLite policy, persistent ceilings, one outstanding purchase and fail-closed recovery. It is not active on import or enabled by an API quote. Supply your own independently constrained wallet signer and encrypted proof store. Existing clients never fall back to it automatically. See [setup and recovery](../../docs/AUTO_REPLENISH.md). All-service package availability comes from `/v3/prepaid/all-services`; new documentation is not proof of activation or real-money acceptance.

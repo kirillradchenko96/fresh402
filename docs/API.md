@@ -1,8 +1,8 @@
-# Fresh402 2.5.1 public API
+# Fresh402 2.8.0 public API
 
 Base URL: https://fresh402.kirilllabs.workers.dev
 
-The hosted service reports version **2.5.1**. [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
+The hosted service reports version **2.8.0**. [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
 
 | Operation | Method and path | MCP tool | Price |
 |---|---|---|---:|
@@ -20,6 +20,8 @@ The hosted service reports version **2.5.1**. [Live OpenAPI](https://fresh402.ki
 
 Creates a baseline for a new watch, returning `watch_id`, `hash`, `content_kind`, `created` and `baseline_created`. Existing identical registrations return the stored baseline without refetching. Optional `selector`, `ignore_selectors` and `ignore_json_paths` establish its normalization scope. JSON Pointer ignore rules support wildcard segments. Re-registering is not a free refresh.
 
+For a separate opt-in HTML watch, add `html_attributes:["href","title"]` (also supports `alt` and `aria-label`). These immutable sorted rules detect same-text link destination and selected attribute changes. Omitted/empty rules preserve existing text-only watch IDs, hashes and normalizer2. A nonempty rule creates a new version1 baseline; existing watches never acquire it implicitly. Saved CSS scope/noise exclusions apply; links are inert evidence and never crawled. Unsafe link values become bounded hashes. Evidence is limited to200 elements,2048 characters/value and32KiB; a complete snapshot must fit200000 UTF-8 bytes. Over-budget input fails instead of silently clipping evidence. With `watch_id`, omit `html_attributes` entirely, including[].
+
 ## Check
 
 ```json
@@ -27,6 +29,8 @@ Creates a baseline for a new watch, returning `watch_id`, `hash`, `content_kind`
 ```
 
 Provide exactly one of `watch_id` or `url`. The example watch ID is illustrative; use the ID returned by Register. Optional `previous_hash`, selector and ignore rules let a client specify the comparison and scope. The result includes the current hash, `changed`, cache and fetch indicators, and an optional compact deterministic text diff. `max_age_seconds` permits reuse of sufficiently fresh shared state; the call remains paid.
+
+Content rules are accepted only with `url`; when using `watch_id`, omit all selector and ignore fields, including empty arrays. The saved rules are reused. Changed excerpts include bounded surrounding context so a price or version edit remains readable; they are not a complete patch.
 
 ## Web Extract
 
@@ -36,6 +40,16 @@ Provide exactly one of `watch_id` or `url`. The example watch ID is illustrative
 
 Extract text, title, description, canonical URL, headings, links and JSON-LD where present. HTML, JSON and text are supported. Optional CSS scoping and ignore rules apply. `max_chars` ranges from 100 to 50000; truncation and warnings are explicit. No page JavaScript or browser rendering is used.
 
+For one JSON field, add an exact RFC 6901 `json_pointer` (maximum 256 characters):
+
+```json
+{"url":"https://petstore3.swagger.io/api/v3/openapi.json","json_pointer":"/info/title"}
+```
+
+The returned `json_pointer`, `text`, `data`, `text_length` and `hash` describe the selected value after `ignore_json_paths`. Omit the parameter for existing full-document behavior; `""` selects the root. Array indices are zero-based canonical integers; `~0`/`~1` escape `~`/`/`. There is no wildcard expansion. Missing or excluded fields return 422 `json_pointer_not_found`; other media return 422 `json_pointer_requires_json`. Selection uses the same single bounded fetch and parser limits. If selected JSON text is truncated, `data` is null and `data_omitted` is true; the hash still covers the full selected value. Null, false and zero are valid values, not missing fields.
+
+Use `json_pointers:["/product/price","/product/stock"]` to extract1-8 ordered unique exact pointers in one fetch/JSON parse. It is mutually exclusive with `json_pointer`; exclusions run first and any missing target fails the whole operation. Returned `data` is an ordered array of `{pointer,value}`; text/hash cover the full combined projection. `max_chars` clips the aggregate, with `data:null,data_omitted:true` when clipped. Projection limits:200000 UTF-8 bytes and20000 aggregate nodes, including repeated overlapping subtrees. Pointers allow at most256 characters/64 segments; no executable expressions or wildcard expansion.
+
 ## Smart Diff
 
 ```json
@@ -43,6 +57,10 @@ Extract text, title, description, canonical URL, headings, links and JSON-LD whe
 ```
 
 Requires a registered watch. `compare_to` is `previous` (default) or `baseline`; an optional `previous_hash` selects a retained comparison. Results expose structured added, removed and modified changes, counts, truncation, comparison quality and significance with score, level, reasons and rules version. The algorithm uses deterministic structural and significance rules, with no LLM inference. Legacy comparisons can have lower fidelity; inspect `comparison_quality` and warnings.
+
+Unique nonempty HTML block IDs can pair modified blocks directly. Duplicate or absent IDs retain bounded similarity matching; large ambiguous documents can still return `content_too_complex`. The existing 1,000-block and 200-returned-change limits remain.
+
+For explicit JSON array identities, use `json_array_keys:[{"path":"/items","key":"/id"}]`. The1-4 array paths must be exact and nonoverlapping on both documents. Each object item requires a unique nonempty string (up to256 characters) or safe-integer key; numeric1 differs from string"1". Missing, duplicate, invalid or nonarray identities return422 with no index fallback. Up to2000 combined items and20000 comparison work units. A pure reorder reports `changed:false`, with bounded `array_moves` and full `array_move_count`, while source hashes remain order-sensitive. Modified items include actual `before_path`, `after_path` and `array_key` evidence. Omit the option to retain index semantics. Saved nonempty HTML attribute rules are compared separately from text, so equal visible text cannot hide a selected href change.
 
 ## Free reads and discovery
 
@@ -67,6 +85,8 @@ Register an external supported JSON OpenAPI document without content rules, for 
 Fresh402's own `/openapi.json` describes this service for discovery; it cannot be registered as a target. Use the real returned watch ID in `{"watch_id":"YOUR_RETURNED_WATCH_ID","compare_to":"baseline"}` at `/v2/openapi-contract-diff`. The result reports bounded contract changes, classifications, warnings and source provenance. Classifications are descriptive; remote `$ref` documents are not fetched. Inspect live limits and schemas before paying.
 
 For wallet-owned prepaid accounts and automatic finalized-funding recovery, see [self-service](SELF_SERVICE.md). Check live `/v2/prepaid/plans` availability before signing any payment.
+
+OpenAPI analysis uses `rules_version:2` / `openapi-directional-v2`. Supported local scalar type/enum/null domains distinguish request acceptance from response guarantees: narrowing accepted requests or widening possible responses can be breaking. Requiredness and effective security inheritance/anonymous overrides/OR alternatives/AND schemes/scopes are bounded and directional. Equivalent supported edits use the existing `additive` category. Complex composition, interacting assertions, custom dialects, ambiguous3.1 visibility, changed/unknown credential definitions and unexpanded references retain review findings, even beside an additive endpoint.3.0 readOnly/writeOnly requiredness is not imposed on3.1. Contracts are assumed satisfiable and enforced as documented; this is not a full JSON Schema interpreter or proof of deployed behavior.
 
 ## Payment and recovery
 
@@ -98,3 +118,12 @@ For browserless EOA enrollment, exact package purchase, bounded early credits, f
 Read root `mpp_payments` for current enablement. The four existing per-call routes additionally offer `WWW-Authenticate: Payment`, accept native Base USDC EVM `Authorization: Payment` credentials and return `Payment-Receipt`. Existing x402 and prepaid schemas/prices are preserved. Never combine credentials. See [MPP](MPP.md) for exact body/resource binding, SDK examples, package opt-in and recovery.
 
 Circle Gateway is a separate optional x402 rail, not an MPP method. It is disabled pending acceptance; consult root `circle_gateway.enabled` and the [Circle Gateway guide](CIRCLE_GATEWAY.md). A Gateway transfer UUID is not a direct onchain receipt.
+
+
+## Authenticated free-trial pilot
+
+Inspect `GET /v2/trial` or root `free_trial.enabled` before assuming free execution is active. The pilot is gated until real human-verification and runtime acceptance pass. The [trial page](https://fresh402.kirilllabs.workers.dev/trial) uses an unfunded EOA ownership message plus Cloudflare Turnstile; no payment, token approval or funded wallet is required.
+
+When enabled, one-time entitlements are Check20, Extract10, Smart Diff5 and OpenAPI Diff3, subject to finite shared capacity. Send only `X-Fresh402-Trial-Key` and a unique privately persisted `Idempotency-Key` to the normal REST endpoint or MCP HTTP transport. A key identifies one logical tool/input; replay the exact original input/key for seven-day recovery without another quota debit or fetch. MCP clients must set a distinct operation header for each new call. Never mix trial and payment/prepaid credentials. Quota exhaustion cannot initiate a purchase. Inspect remaining allowances at `GET /v2/trial/quota`. Rotation requires a fresh ownership challenge and human verification, preserves used quota and invalidates the old credential. Failed work refunds its tool allowance once; infrastructure cost reservations remain consumed. Retained-result expiry returns410 and never reruns work.
+
+On-chain products remain commercially disabled and have no active free calls. Existing prices, nonexpiring purchased credits, customer terms and recovery remain unchanged. [Dedicated developer quickstart](https://fresh402.com/docs), [tool reference](https://fresh402.com/docs/tools), [prices](https://fresh402.com/pricing) and [limits](https://fresh402.com/security).

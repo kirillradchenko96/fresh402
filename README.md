@@ -1,90 +1,62 @@
-# Fresh402 v2.5 — Web Intelligence API for AI Agents
+# Fresh402 — Web Intelligence for agents
 
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
-**Check whether a source changed, extract usable content, and compare structured snapshots. Pay per call with x402 or enabled native MPP USDC on Base, or use prepaid credits.**
+Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **2.8.0**.
 
-The hosted production API reports **2.5.1**. Connect at [fresh402.kirilllabs.workers.dev](https://fresh402.kirilllabs.workers.dev/) or its [MCP endpoint](https://fresh402.kirilllabs.workers.dev/mcp). This documentation describes the hosted service; the repository's legacy implementation and backend release PR are maintained separately. A documentation release does not deploy the service.
+- [Developer quickstart](https://fresh402.com/docs) · [Tool reference](https://fresh402.com/docs/tools) · [Pricing](https://fresh402.com/pricing) · [Security and limits](https://fresh402.com/security)
+- API: https://fresh402.kirilllabs.workers.dev/
+- MCP: https://fresh402.kirilllabs.workers.dev/mcp
+- [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) · [Account and billing](https://fresh402.kirilllabs.workers.dev/account)
 
-| Product | MCP tool | REST endpoint | Price per call |
-|---|---|---|---:|
-| Persistent baseline | `fresh402_register` | `POST /v1/register` | Free |
-| Freshness Check | `fresh402_check` | `POST /v1/check` | $0.005 USDC |
-| Web Extract | `fresh402_extract` | `POST /v2/extract` | $0.01 USDC |
-| Smart Diff | `fresh402_smart_diff` | `POST /v2/smart-diff` | $0.015 USDC |
-| OpenAPI Contract Diff | `fresh402_openapi_contract_diff` | `POST /v2/openapi-contract-diff` | $0.020 USDC |
+| Product | MCP tool | REST endpoint | x402 / MPP USDC | Current prepaid credits |
+|---|---|---|---:|---:|
+| Register baseline | `fresh402_register` | POST /v1/register | Free | Free |
+| Check | `fresh402_check` | POST /v1/check | $0.005 | 2 |
+| Extract | `fresh402_extract` | POST /v2/extract | $0.010 | 3 |
+| Smart Diff | `fresh402_smart_diff` | POST /v2/smart-diff | $0.015 | 4 |
+| OpenAPI Contract Diff | `fresh402_openapi_contract_diff` | POST /v2/openapi-contract-diff | $0.020 | 5 |
 
-## Choose the operation
-
-- **Register** once to establish a persistent baseline and receive a `watch_id`. Re-registering the same watch returns its existing baseline without loading the target again.
-- **Check** before reusing a web source or spending on downstream browsing and reasoning. Get a change signal, noise filtering, conditional HTTP revalidation and an optional compact deterministic text diff. A cached Check is still a paid operation.
-- **Extract** when an agent needs content for retrieval: text, titles, metadata, headings, links and JSON-LD from public HTML, JSON or text, with optional CSS scoping.
-- **Smart Diff** when the change itself matters: compare a watch with its previous Smart Diff snapshot or fixed baseline, get structured additions/removals/modifications, and inspect significance scores with explainable deterministic rules.
-
-- **OpenAPI Contract Diff** compares a registered public JSON OpenAPI 3.0/3.1 contract with a baseline or previous snapshot, returning conservative compatibility evidence. It does not resolve remote references or parse YAML.
-
-Requests fetch eligible **public HTTPS** sources on demand. Fresh402 does not execute page JavaScript, render a browser, access authenticated sites, perform LLM-powered semantic analysis, continuously poll watches, or send push alerts. Security checks and rate, size, concurrency and operation limits apply; capacity failures may require a later retry.
-
-## Start with discovery
-
-- [Live OpenAPI 3.1 reference](https://fresh402.kirilllabs.workers.dev/openapi.json): current request schemas, examples, response formats and payment headers.
-- [Native MPP, SDK examples and recovery](docs/MPP.md): inspect live enablement flags first. Base USDC EVM charge only; no newly real-money-validated MPP settlement is claimed.
-- [API guide](docs/API.md), [MCP integration](docs/MCP.md), [pricing](docs/PRICING.md), [request examples](examples/README.md).
-- [x402 resource manifest](https://fresh402.kirilllabs.workers.dev/.well-known/x402), [agent guide](https://fresh402.kirilllabs.workers.dev/llms.txt), [release notes](CHANGELOG.md).
-- [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.kirillradchenko96%2Ffresh402/versions/latest): the existing identity is `io.github.kirillradchenko96/fresh402`.
-- [Discovery audit](docs/DISCOVERY_AUDIT.md): externally verified catalog status and outstanding reindexing or authorization requirements.
-
-Free service metadata and MCP `initialize` / `tools/list` let a new agent learn all five tools without paying or fetching a target.
-
-## REST quick start
-
-Register a baseline for free:
+## Start with a free baseline
 
 ```sh
-curl https://fresh402.kirilllabs.workers.dev/v1/register \
-  -H 'Content-Type: application/json' \
+curl https://fresh402.kirilllabs.workers.dev/v1/register \\
+  -H 'Content-Type: application/json' \\
   -d '{"url":"https://example.com/"}'
 ```
 
-Use the returned `watch_id` in a Check or Smart Diff. The following unsigned request retrieves payment requirements, not a paid result:
+Save the actual returned `watch_id` and `hash`. Repeating the same canonical URL and rules returns existing state without fetching or refreshing it. Check can also accept a URL directly; Smart Diff and OpenAPI Diff require a real saved watch. Registration is bounded by network, source, rate and capacity limits.
 
-```sh
-curl -i https://fresh402.kirilllabs.workers.dev/v2/extract \
-  -H 'Content-Type: application/json' \
-  -d '{"url":"https://example.com/","max_chars":20000}'
-```
+The [website demo](https://fresh402.com/#demo) is explicitly illustrative and runs locally in the browser without an API call or payment.
 
-Expect **HTTP 402** and a `PAYMENT-REQUIRED` header describing the exact amount, USDC asset, Base network and recipient. Use an x402 v2 compatible client and a payer-controlled wallet to authorize the exact amount, then retry the same request with `PAYMENT-SIGNATURE`. Never share a wallet seed phrase or private key. No unlimited token approval is required by the exact authorization flow.
+## Free-trial pilot status
 
-Persist a client-generated recovery token before paying; [the API guide](docs/API.md#payment-and-recovery) explains the public client contract. A confirmed paid result carries a `PAYMENT-RESPONSE` settlement receipt. An HTTP 402 challenge is not a successful payment; a pending settlement must not trigger a replacement authorization.
+2.8.0 includes a **gated** authenticated trial implementation. Inspect root `free_trial.enabled` or [GET /v2/trial](https://fresh402.kirilllabs.workers.dev/v2/trial) before assuming free execution is available. At this publication the execution pilot is **disabled**, pending real CAPTCHA and bounded runtime acceptance. Prepared one-time allowances are Check 20, Extract 10, Smart Diff 5 and OpenAPI Diff 3; these are not a promise of active access while disabled.
 
-## MCP quick start
+When enabled, an unfunded EOA ownership message plus human verification obtains a separate trial key. No funding, token approval or transaction is needed. Trial REST/MCP requests use `X-Fresh402-Trial-Key` and a persisted per-operation `Idempotency-Key`. Quota exhaustion never initiates payment. [Trial guide](docs/FREE_TRIAL.md).
 
-Add this URL as a **remote Streamable HTTP MCP server** in a compatible client:
+## Choose payment deliberately
 
-```text
-https://fresh402.kirilllabs.workers.dev/mcp
-```
+Native USDC on **Base mainnet, chain ID 8453**. Choose x402 v2 exact pay-per-call, enabled native MPP EVM charge, or prepaid. Adding the MCP endpoint alone does not authorize payments.
 
-The client performs `initialize` and `tools/list`; all five tools use the names and prices above. Free discovery does not require a Fresh402 API key. Paid tool calls require an x402-capable client; an ordinary MCP client can list tools and register a baseline but cannot automatically complete payment unless it implements x402.
+- Starter: **$2.50 / 1,000 credits**, canonical ID `candidate-starter-v3`.
+- Developer: **$15 / 10,000 credits**, canonical ID `candidate-developer-v3`.
+- Packages are one-time purchases, not subscriptions. Purchased credits do not expire. Legacy accounts retain their accepted terms.
+- Inspect live [plans and purchasing availability](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans) and your authenticated prepaid quote.
+- Preserve original input, proof/funding intent and private recovery token or idempotency key. After uncertainty, recover the original operation; never authorize a replacement payment just because a response was delayed.
 
-MCP payment challenges are tool results with `isError: true` and requirements in `structuredContent`. **HTTP 200 alone is not success.** The payment belongs in `params._meta["x402/payment"]`, and the settlement receipt is in `result._meta["x402/payment-response"]`. See [MCP examples](docs/MCP.md).
+An unsigned HTTP 402 challenge is metadata, **not a charge, customer or revenue**. Use an appropriate payment client and explicit limits. Never disclose seed phrases or private keys. No unlimited token approval is required by Fresh402's exact flow.
 
-## Public data and operational boundaries
+## Protocols and boundaries
 
-Watch identifiers and legacy snapshot history are shared public service data. Do not use Fresh402 for private pages or submit secrets in target URLs. Free `GET /v1/history` and `GET /v1/diff` read retained legacy data without fetching a target; they do not expose paid Smart Diff results. Recovery tokens are private client credentials and must not appear in URLs, public repositories or logs.
+[MCP guide](docs/MCP.md), [API guide](docs/API.md), [agent prepaid](docs/AGENT_PREPAID.md), [MPP](docs/MPP.md), [examples](examples/README.md), [release notes](CHANGELOG.md).
 
-The live API is the authority for the deployed contract. Catalog descriptions and cached schemas can lag it; [the audit](docs/DISCOVERY_AUDIT.md) records that distinction. There is no claim that an unsigned 402 response proves Coinbase Bazaar indexing.
+The existing Official MCP Registry identity remains **io.github.kirillradchenko96/fresh402**. Existing production API/MCP URLs and Glama ownership verification remain intact. Public documentation does not deploy infrastructure or merge the backend release PR.
 
-Built and maintained by **Kirill Radchenko**. [Report an integration issue](https://github.com/kirillradchenko96/fresh402/issues).
+Public HTTPS documents only. No browser JavaScript execution, authenticated crawling, continuous watch polling, universal semantic compatibility proof or token safety guarantees. Watch IDs and legacy history are shared public service data; never put secrets in target URLs. The [security page](https://fresh402.com/security) explains supported protections and limitations.
 
+**Contract Watch, Wallet Watch and Token Facts remain commercially disabled. Circle Gateway remains disabled.** Their implementation/testing is not a claim of public availability or newly verified real-money settlement.
 
-## Self-service prepaid onboarding
+This repository provides public client documentation and retains its existing legacy files/history. Current hosted backend source, credentials, customer financial data and operational reports remain private.
 
-Fresh402 2.4 provides wallet-authenticated account recovery and automatic finalized-payment reconciliation. Starter remains $2.50 / 1,000 credits and Developer $15 / 10,000 credits. Discover one-time packages and current credit costs in `GET /` → `prepaid_packages`; purchased credits do not expire. Check live purchasing availability before signing. See the [account page](https://fresh402.kirilllabs.workers.dev/account), [live availability](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans), and [customer API](docs/SELF_SERVICE.md). Existing x402 and prepaid access operate independently; metadata never initiates a payment.
-
-[Browserless agent purchasing, bounded early credits and REST/MCP prepaid execution](docs/AGENT_PREPAID.md): exact quotes, local signer integration, spending caps and original-payment recovery. Read live availability before signing; early inclusion is not finality.
-
-## Optional Circle Gateway payments
-
-[Circle Gateway integration guide](docs/CIRCLE_GATEWAY.md): optional Base USDC x402 batching for the four paid REST/MCP products. Acceptance is disabled pending real-money verification; inspect root `circle_gateway.enabled`. Existing Coinbase x402, native MPP and prepaid remain unchanged. Circle prepaid funding is unsupported.
+Support and billing: [fresh402@proton.me](mailto:fresh402@proton.me). [Terms](https://fresh402.kirilllabs.workers.dev/terms) · [Privacy](https://fresh402.kirilllabs.workers.dev/privacy).

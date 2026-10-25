@@ -1,4 +1,4 @@
-# Fresh402 2.5 MCP integration
+# Fresh402 2.8 MCP integration
 
 Canonical endpoint: **https://fresh402.kirilllabs.workers.dev/mcp**.
 Transport: **Streamable HTTP**. Official Registry identity: **io.github.kirillradchenko96/fresh402**.
@@ -71,3 +71,12 @@ When root `mpp_payments.enabled` is true, the same four paid tools accept offici
 ## Optional prepaid customer accounts
 
 The existing five MCP tools and MCP URL are unchanged. Standalone x402 needs no customer signup. Wallet ownership, package funding, API-key claim/recovery and credit execution use the [REST self-service contract](SELF_SERVICE.md) and [CustomerClient](../examples/knowledge-base/onboarding.ts). Public signup and one-time purchasing are available when enabled in the live `/v2/prepaid/plans` response. For prepaid MCP calls, pass X-Fresh402-API-Key in HTTP and params._meta["fresh402/prepaid"] containing idempotency_key, tariff_version and max_credits. Use the same 2/3/4/5 credit tariff and durable operation identity as REST. Never combine prepaid and x402 or automatically fall back to a new payment. See [the complete agent guide](AGENT_PREPAID.md) for signing, early-credit limits, key recovery and exact examples.
+
+
+## 2.8 compatibility and gated trials
+
+The live service supports modern protocol discovery and legacy Streamable HTTP clients. Tools are static: `tools.listChanged=false`. An honored empty subscription subset acknowledges `notifications:{}` and completes; it does not retain an open subscription. Unsupported filters and real capacity errors remain errors.
+
+A normal client can list all five released tools and register a baseline. Paid execution requires x402, enabled native MPP or authenticated prepaid metadata. HTTP200 alone is not a successful paid result: inspect `isError` and structured content.
+
+A separate free-trial pilot is implemented but disabled at this publication. Read root `free_trial.enabled` or `GET /v2/trial` before use. When enabled, send `X-Fresh402-Trial-Key` and a persisted per-call `Idempotency-Key` in HTTP transport headers. Exact input/key replay shares the REST result and quota; there is no automatic payment fallback. Do not mix trial and financial credentials. [Trial guide](FREE_TRIAL.md).

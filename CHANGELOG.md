@@ -2,6 +2,14 @@
 
 These notes describe the deployed API, independently of the legacy source package version in this repository. Documentation publication does not deploy infrastructure or merge the backend release PR.
 
+## 2.8.0 - October 24, 2026
+
+- New developer website with dedicated quickstart, tool reference, pricing, security pages and explicitly illustrative local demonstrations.
+- Prepared isolated, one-time authenticated free trials with quotas, durable replay and anti-abuse controls. Execution remains disabled pending real CAPTCHA and bounded runtime acceptance; inspect live discovery.
+- Preserved five released MCP tools, existing x402/MPP/prepaid prices and recovery. Modern static subscription completion remains fixed.
+- Contract Watch, Wallet Watch and Token Facts remain commercially disabled; Circle Gateway stays disabled. No new real-money validation is claimed.
+- Documentation-only publication; current backend source and operational evidence remain private. Existing repository history and catalog identities are preserved.
+
 ## 2.5.1 - October 18, 2026
 
 - Native MPP EVM charge can coexist with the existing x402 and prepaid contracts on Base native USDC, gated by live discovery flags. Same four paid tools, prices, resource budgets and ledger.

@@ -69,8 +69,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Fresh402 Web Intelligence API",
-    "version": "2.5.1",
-    "description": "Fresh402 2.5.1: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
+    "version": "2.8.0",
+    "description": "Fresh402 2.8.0: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
     "contact": {
       "name": "Fresh402 support",
       "email": "fresh402@proton.me",
@@ -1022,8 +1022,8 @@
     "/v1/check": {
       "post": {
         "operationId": "fresh402_check",
-        "summary": "Check whether public HTML, JSON or text changed; use for on-demand freshness checks and a compact deterministic text diff, not background monitoring. Supply exactly one of url or watch_id. A URL-based paid Check can create a watch; an ID reuses its saved URL/rules, so omit all content-rule fields. Reuse returned watch_id/hash for later checks; first URL check without prior state reports changed:null. Optional cache reuse still costs $0.005 USDC per call on Base mainnet (eip155:8453). Requires an x402-capable MCP payment client and funded native-USDC payer; an ordinary MCP client receives a payment challenge, not a paid result. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. No JavaScript execution. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
-        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits.",
+        "summary": "Check whether public HTML, JSON or text changed; optional html_attributes on a new URL watch detects same-text link and selected attribute changes without altering older watches; use for on-demand freshness checks and a compact deterministic text diff, not background monitoring. Supply exactly one of url or watch_id. A URL-based paid Check can create a watch; an ID reuses its saved URL/rules, so omit all content-rule fields. Reuse returned watch_id/hash for later checks; first URL check without prior state reports changed:null. Optional cache reuse still costs $0.005 USDC per call on Base mainnet (eip155:8453). Requires an x402-capable MCP payment client and funded native-USDC payer; an ordinary MCP client receives a payment challenge, not a paid result. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. No JavaScript execution. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
+        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits. Optional authenticated free-trial pilot: inspect GET /v2/trial before use. Send only X-Fresh402-Trial-Key and a persisted Idempotency-Key to this normal route or MCP HTTP transport. One-time quotas and finite capacity apply; replay the exact same input/key for seven days. Exhaustion never initiates a payment. Disabled trials reject execution.",
         "tags": [
           "check"
         ],
@@ -1086,6 +1086,16 @@
               "pattern": "^[A-Za-z0-9_-]+$"
             },
             "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Required with a trial key: unique persisted key per logical operation. Reuse exact input/key for recovery; do not combine trial and payment credentials."
           }
         ],
         "requestBody": {
@@ -1137,6 +1147,21 @@
                       "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
                     }
                   },
+                  "html_attributes": {
+                    "description": "Optional HTML-only watch rule: up to4 of href,title,alt,aria-label; default[] retains existing text-only normalization. Distinct names are sorted; nonempty rules create a separate version1 watch/baseline. Records bounded meaningful attributes within the saved selector or filtered page, including same-text link destination changes. Cannot be supplied with watch_id, even[]. Unsafe hrefs are hashed, never fetched. Limits:200 elements,2048 characters/value,32768 evidence bytes; excess fails, never clips silently.",
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "alt",
+                        "aria-label",
+                        "href",
+                        "title"
+                      ],
+                      "description": "One explicitly observed HTML attribute: href (a/area only),title,alt or aria-label. No class/style/event attributes; links are inert evidence and never fetched."
+                    }
+                  },
                   "previous_hash": {
                     "description": "Optional previous Fresh402 content hash: exactly 64 hexadecimal characters, case-insensitive. Overrides comparison with the watch's current stored hash. Omit to use that stored hash; a new URL watch without a prior hash returns changed:null. Hash comparison does not require retained old text, but a text diff does; a hash cannot reconstruct missing content.",
                     "type": "string",
@@ -1154,14 +1179,6 @@
                   }
                 },
                 "description": "Paid Check input: exactly one of url or watch_id is required. Content rules are allowed only on the url path; watch_id always reuses saved rules. Optional previous_hash overrides the reference hash; max_age_seconds controls cache reuse and include_diff controls text-diff output.",
-                "examples": [
-                  {
-                    "url": "https://example.com/docs",
-                    "selector": "main",
-                    "max_age_seconds": 0,
-                    "include_diff": true
-                  }
-                ],
                 "oneOf": [
                   {
                     "required": [
@@ -1172,6 +1189,14 @@
                     "required": [
                       "watch_id"
                     ]
+                  }
+                ],
+                "examples": [
+                  {
+                    "url": "https://example.com/docs",
+                    "selector": "main",
+                    "max_age_seconds": 0,
+                    "include_diff": true
                   }
                 ]
               },
@@ -1468,6 +1493,21 @@
                       "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
                     }
                   },
+                  "html_attributes": {
+                    "description": "Optional HTML-only watch rule: up to4 of href,title,alt,aria-label; default[] retains existing text-only normalization. Distinct names are sorted; nonempty rules create a separate version1 watch/baseline. Records bounded meaningful attributes within the saved selector or filtered page, including same-text link destination changes. Cannot be supplied with watch_id, even[]. Unsafe hrefs are hashed, never fetched. Limits:200 elements,2048 characters/value,32768 evidence bytes; excess fails, never clips silently.",
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "alt",
+                        "aria-label",
+                        "href",
+                        "title"
+                      ],
+                      "description": "One explicitly observed HTML attribute: href (a/area only),title,alt or aria-label. No class/style/event attributes; links are inert evidence and never fetched."
+                    }
+                  },
                   "previous_hash": {
                     "description": "Optional previous Fresh402 content hash: exactly 64 hexadecimal characters, case-insensitive. Overrides comparison with the watch's current stored hash. Omit to use that stored hash; a new URL watch without a prior hash returns changed:null. Hash comparison does not require retained old text, but a text diff does; a hash cannot reconstruct missing content.",
                     "type": "string",
@@ -1485,14 +1525,6 @@
                   }
                 },
                 "description": "Paid Check input: exactly one of url or watch_id is required. Content rules are allowed only on the url path; watch_id always reuses saved rules. Optional previous_hash overrides the reference hash; max_age_seconds controls cache reuse and include_diff controls text-diff output.",
-                "examples": [
-                  {
-                    "url": "https://example.com/docs",
-                    "selector": "main",
-                    "max_age_seconds": 0,
-                    "include_diff": true
-                  }
-                ],
                 "oneOf": [
                   {
                     "required": [
@@ -1503,6 +1535,14 @@
                     "required": [
                       "watch_id"
                     ]
+                  }
+                ],
+                "examples": [
+                  {
+                    "url": "https://example.com/docs",
+                    "selector": "main",
+                    "max_age_seconds": 0,
+                    "include_diff": true
                   }
                 ]
               },
@@ -1676,8 +1716,8 @@
     "/v2/extract": {
       "post": {
         "operationId": "fresh402_extract",
-        "summary": "Extract readable text, metadata, headings, public links and embedded JSON-LD from one public HTTPS document. Use to read static HTML, JSON or plain text; no watch or prior registration is needed. Optional CSS scope and noise exclusions; max_chars defaults to 20000 and limits returned text, not fetch size. Does not render JavaScript, crawl links or compare versions. $0.010 USDC per call on Base mainnet (eip155:8453), requiring an x402-capable MCP payment client and funded native-USDC payer. An ordinary MCP client receives a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
-        "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base.",
+        "summary": "Extract readable text, metadata, headings, public links and embedded JSON-LD from one public HTTPS document. Use to read static HTML, JSON or plain text; no watch or prior registration is needed. Optional CSS scope, noise exclusions and exact JSON Pointer selection via json_pointer, or an ordered projection of up to8 fields via json_pointers (mutually exclusive; JSON only, any missing field returns422). One fetch/JSON parse with aggregate work/output limits. Omit json_pointer to retain full-document extraction. max_chars defaults to 20000 and limits returned text, not fetch size. Does not render JavaScript, crawl links or compare versions. $0.010 USDC per call on Base mainnet (eip155:8453), requiring an x402-capable MCP payment client and funded native-USDC payer. An ordinary MCP client receives a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
+        "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base. Optional authenticated free-trial pilot: inspect GET /v2/trial before use. Send only X-Fresh402-Trial-Key and a persisted Idempotency-Key to this normal route or MCP HTTP transport. One-time quotas and finite capacity apply; replay the exact same input/key for seven days. Exhaustion never initiates a payment. Disabled trials reject execution.",
         "tags": [
           "extract"
         ],
@@ -1740,6 +1780,16 @@
               "pattern": "^[A-Za-z0-9_-]+$"
             },
             "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Required with a trial key: unique persisted key per logical operation. Reuse exact input/key for recovery; do not combine trial and payment credentials."
           }
         ],
         "requestBody": {
@@ -1786,6 +1836,25 @@
                       "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
                     }
                   },
+                  "json_pointer": {
+                    "description": "Optional exact RFC 6901 JSON Pointer, at most 256 characters, e.g. '/product/price' or '/items/0/name'. JSON documents only; '~0' means '~' and '~1' means '/'. Empty string selects the whole document. Omit to extract the entire normalized document. Selection runs after ignore_json_paths; a missing or excluded target returns 422. Array indices are zero-based canonical integers; '*' is a literal key, not a wildcard. Returned text/data/hash cover the selected value; max_chars and data_omitted still apply.",
+                    "type": "string",
+                    "maxLength": 256,
+                    "pattern": "^(?:\\/(?:[^~]|~[01])*)?$"
+                  },
+                  "json_pointers": {
+                    "description": "Optional ordered1-8 unique exact JSON Pointers; mutually exclusive with json_pointer, JSON only. One fetch and JSON parse; exclusions run first. Any missing/excluded field fails the whole operation with422; null is a valid value. Returns data:[{pointer,value},...] and canonical aggregate text/hash. max_chars clips the aggregate; clipped data is omitted. Combined projection limited to200000 UTF-8 bytes and20000 nodes. Example:['/product/price','/product/stock'].",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 256,
+                      "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                      "description": "One exact RFC6901 pointer: up to256 characters/64 segments; '' selects root, '/' the empty key, '~0'/'~1' escape '~'/'/'. Example:'/product/price'; '*' is literal."
+                    },
+                    "uniqueItems": true
+                  },
                   "max_chars": {
                     "default": 20000,
                     "description": "Optional integer limit on returned normalized text: 100-50000 characters, default 20000. Does not raise fetch/parser limits; the hash covers full normalized text before truncation. If JSON text is truncated, parsed data is omitted (data:null, data_omitted:true).",
@@ -1809,6 +1878,12 @@
                 ],
                 "additionalProperties": false,
                 "description": "Extract a required public URL without creating or requiring a watch. Optional content rules scope/remove noise; max_chars limits returned text and the two include flags control supplementary HTML data. Unknown fields are rejected.",
+                "not": {
+                  "required": [
+                    "json_pointer",
+                    "json_pointers"
+                  ]
+                },
                 "examples": [
                   {
                     "url": "https://example.com/docs",
@@ -2107,6 +2182,25 @@
                       "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
                     }
                   },
+                  "json_pointer": {
+                    "description": "Optional exact RFC 6901 JSON Pointer, at most 256 characters, e.g. '/product/price' or '/items/0/name'. JSON documents only; '~0' means '~' and '~1' means '/'. Empty string selects the whole document. Omit to extract the entire normalized document. Selection runs after ignore_json_paths; a missing or excluded target returns 422. Array indices are zero-based canonical integers; '*' is a literal key, not a wildcard. Returned text/data/hash cover the selected value; max_chars and data_omitted still apply.",
+                    "type": "string",
+                    "maxLength": 256,
+                    "pattern": "^(?:\\/(?:[^~]|~[01])*)?$"
+                  },
+                  "json_pointers": {
+                    "description": "Optional ordered1-8 unique exact JSON Pointers; mutually exclusive with json_pointer, JSON only. One fetch and JSON parse; exclusions run first. Any missing/excluded field fails the whole operation with422; null is a valid value. Returns data:[{pointer,value},...] and canonical aggregate text/hash. max_chars clips the aggregate; clipped data is omitted. Combined projection limited to200000 UTF-8 bytes and20000 nodes. Example:['/product/price','/product/stock'].",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 256,
+                      "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                      "description": "One exact RFC6901 pointer: up to256 characters/64 segments; '' selects root, '/' the empty key, '~0'/'~1' escape '~'/'/'. Example:'/product/price'; '*' is literal."
+                    },
+                    "uniqueItems": true
+                  },
                   "max_chars": {
                     "default": 20000,
                     "description": "Optional integer limit on returned normalized text: 100-50000 characters, default 20000. Does not raise fetch/parser limits; the hash covers full normalized text before truncation. If JSON text is truncated, parsed data is omitted (data:null, data_omitted:true).",
@@ -2130,6 +2224,12 @@
                 ],
                 "additionalProperties": false,
                 "description": "Extract a required public URL without creating or requiring a watch. Optional content rules scope/remove noise; max_chars limits returned text and the two include flags control supplementary HTML data. Unknown fields are rejected.",
+                "not": {
+                  "required": [
+                    "json_pointer",
+                    "json_pointers"
+                  ]
+                },
                 "examples": [
                   {
                     "url": "https://example.com/docs",
@@ -2310,8 +2410,8 @@
     "/v2/smart-diff": {
       "post": {
         "operationId": "fresh402_smart_diff",
-        "summary": "Explain structured changes in a registered public document: JSON Pointer changes, HTML block changes and deterministic significance hints. Use instead of Check when a changed/unchanged flag or short text diff is insufficient. First obtain watch_id with free fresh402_register; saved URL/rules are reused. compare_to is previous (default) or baseline; previous_hash overrides it when the same-watch snapshot is retained. Up to 200 changes; legacy HTML may have text-only fidelity. No LLM, JavaScript rendering or complete API compatibility guarantee. $0.015 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
-        "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base.",
+        "summary": "Explain structured changes in a registered public document: JSON Pointer changes, HTML block changes and deterministic significance hints. Use instead of Check when a changed/unchanged flag or short text diff is insufficient. First obtain watch_id with free fresh402_register; saved URL/rules are reused. compare_to is previous (default) or baseline; previous_hash overrides it when the same-watch snapshot is retained. Up to200 content changes; explicit json_array_keys match unique typed item identities and report moves separately, with pure reorder unchanged and source hashes still order-sensitive. Saved html_attributes rules compare selected links/attributes independently of visible text. Omit new options for existing index/text behavior. Legacy HTML may have text-only fidelity. No LLM, JavaScript rendering or complete API compatibility guarantee. $0.015 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
+        "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base. Optional authenticated free-trial pilot: inspect GET /v2/trial before use. Send only X-Fresh402-Trial-Key and a persisted Idempotency-Key to this normal route or MCP HTTP transport. One-time quotas and finite capacity apply; replay the exact same input/key for seven days. Exhaustion never initiates a payment. Disabled trials reject execution.",
         "tags": [
           "smart_diff"
         ],
@@ -2374,6 +2474,16 @@
               "pattern": "^[A-Za-z0-9_-]+$"
             },
             "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Required with a trial key: unique persisted key per logical operation. Reuse exact input/key for recovery; do not combine trial and payment credentials."
           }
         ],
         "requestBody": {
@@ -2402,6 +2512,36 @@
                     "description": "Optional explicit reference hash: 64 hexadecimal characters, case-insensitive, from this same watch's retained Smart Diff snapshot, fixed baseline or retained registration/Check snapshot. Overrides compare_to. Unknown or pruned hashes return 404; recent snapshot history is limited to 20 per store, with the fixed Smart Diff baseline retained separately. Omit for the selected mode.",
                     "type": "string",
                     "pattern": "^[a-fA-F0-9]{64}$"
+                  },
+                  "json_array_keys": {
+                    "description": "Optional1-4 explicit nonoverlapping JSON array identity rules, JSON only. Omit for existing index comparison. Matches unique typed scalar keys, reports moves separately from content changes; pure reorder is changed:false while source hashes remain order-sensitive. At most2000 combined array items/20000 comparison work units, no fallback for ambiguity. Rules affect this comparison only, not the watch/hash; persist identical input for payment recovery. Example:[{path:'/items',key:'/id'}].",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Exact RFC6901 pointer to an array on both compared JSON documents, up to256 characters/64 segments. Empty string selects a root array. Example:'/items'; no wildcards or automatic ID guessing."
+                        },
+                        "key": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Nonempty exact RFC6901 pointer within each object item, up to256 characters/64 segments; e.g.'/id' or '/product/sku'. Every key must exist and be a unique nonempty string<=256 characters or safe integer; number1 differs from string'1'."
+                        }
+                      },
+                      "required": [
+                        "path",
+                        "key"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Explicit JSON array identity rule. Both paths must resolve; missing/duplicate/invalid identities fail422 without index fallback. Source snapshot ordering/hash is retained."
+                    }
                   }
                 },
                 "required": [
@@ -2680,6 +2820,36 @@
                     "description": "Optional explicit reference hash: 64 hexadecimal characters, case-insensitive, from this same watch's retained Smart Diff snapshot, fixed baseline or retained registration/Check snapshot. Overrides compare_to. Unknown or pruned hashes return 404; recent snapshot history is limited to 20 per store, with the fixed Smart Diff baseline retained separately. Omit for the selected mode.",
                     "type": "string",
                     "pattern": "^[a-fA-F0-9]{64}$"
+                  },
+                  "json_array_keys": {
+                    "description": "Optional1-4 explicit nonoverlapping JSON array identity rules, JSON only. Omit for existing index comparison. Matches unique typed scalar keys, reports moves separately from content changes; pure reorder is changed:false while source hashes remain order-sensitive. At most2000 combined array items/20000 comparison work units, no fallback for ambiguity. Rules affect this comparison only, not the watch/hash; persist identical input for payment recovery. Example:[{path:'/items',key:'/id'}].",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Exact RFC6901 pointer to an array on both compared JSON documents, up to256 characters/64 segments. Empty string selects a root array. Example:'/items'; no wildcards or automatic ID guessing."
+                        },
+                        "key": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Nonempty exact RFC6901 pointer within each object item, up to256 characters/64 segments; e.g.'/id' or '/product/sku'. Every key must exist and be a unique nonempty string<=256 characters or safe integer; number1 differs from string'1'."
+                        }
+                      },
+                      "required": [
+                        "path",
+                        "key"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Explicit JSON array identity rule. Both paths must resolve; missing/duplicate/invalid identities fail422 without index fallback. Source snapshot ordering/hash is retained."
+                    }
                   }
                 },
                 "required": [
@@ -2858,8 +3028,8 @@
     "/v2/openapi-contract-diff": {
       "post": {
         "operationId": "fresh402_openapi_contract_diff",
-        "summary": "Detect structural compatibility changes in a public JSON OpenAPI 3.0/3.1 contract: paths, methods, parameters, request requirements and response schemas. Use for API contract review; Smart Diff is for general documents. First register the contract URL with free fresh402_register, without selectors or ignore rules, then reuse watch_id. compare_to accepts previous (default) or baseline; an available same-watch previous_hash overrides it. Limits include 256000 decoded document bytes, 100 paths and 500 operations. No YAML, external reference fetching, API-operation execution, LLM or complete compatibility guarantee. $0.020 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
-        "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence after unfiltered free registration. Compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base.",
+        "summary": "Detect bounded directional compatibility evidence in a public JSON OpenAPI3.0/3.1 contract: paths/methods, required fields, supported scalar type/enum/null domains, and effective authentication alternatives/scopes. Request acceptance and response guarantees have opposite compatibility directions. Complex schema composition, custom dialects, ambiguous visibility and unexpanded references remain review/unknown; no general satisfiability or compatibility proof. Use for API contract review; Smart Diff is for general documents. First register the contract URL with free fresh402_register, without selectors or ignore rules, then reuse watch_id. compare_to accepts previous (default) or baseline; an available same-watch previous_hash overrides it. Limits include 256000 decoded document bytes, 100 paths and 500 operations. No YAML, external reference fetching, API-operation execution, LLM or complete compatibility guarantee. $0.020 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
+        "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence after unfiltered free registration. Compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base. Optional authenticated free-trial pilot: inspect GET /v2/trial before use. Send only X-Fresh402-Trial-Key and a persisted Idempotency-Key to this normal route or MCP HTTP transport. One-time quotas and finite capacity apply; replay the exact same input/key for seven days. Exhaustion never initiates a payment. Disabled trials reject execution.",
         "tags": [
           "openapi_diff"
         ],
@@ -2927,6 +3097,16 @@
               "pattern": "^[A-Za-z0-9_-]+$"
             },
             "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Required with a trial key: unique persisted key per logical operation. Reuse exact input/key for recovery; do not combine trial and payment credentials."
           }
         ],
         "requestBody": {
@@ -3274,6 +3454,573 @@
           },
           "402": {
             "description": "Insufficient spendable credits or missing tariff/maximum; no x402 submission"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/trial": {
+      "get": {
+        "operationId": "fresh402_trial_discovery",
+        "summary": "Actual gated free-trial availability; no execution or payment",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Enabled only with configured verification and unexpired pilot authorization.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "allowances": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "payments_automatic": {
+                      "const": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/trial/quota": {
+      "get": {
+        "operationId": "fresh402_trial_quota",
+        "summary": "Remaining one-time free entitlements, separate from purchased credits",
+        "security": [
+          {
+            "trialKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Per-tool remaining quota and product enablement; finite global capacity can deny work earlier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/trial/challenge": {
+      "post": {
+        "operationId": "fresh402_trial_challenge",
+        "summary": "Create a five-minute unfunded EOA trial ownership challenge",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "wallet": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  }
+                },
+                "required": [
+                  "wallet"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Exact EIP-191 message, expiry and public CAPTCHA configuration. Sign only this ownership message; no funding or approval required.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/trial/claim": {
+      "post": {
+        "operationId": "fresh402_trial_claim",
+        "summary": "Verify ownership plus a fresh Turnstile token and issue or rotate one trial key",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "wallet": {
+                    "type": "string"
+                  },
+                  "challenge_id": {
+                    "type": "string"
+                  },
+                  "signature": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{130}$"
+                  },
+                  "turnstile_token": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  }
+                },
+                "required": [
+                  "wallet",
+                  "challenge_id",
+                  "signature",
+                  "turnstile_token"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "One-time plaintext trial key; store privately. Repeated ownership proof rotates the key without resetting entitlements. No payment or purchased-account mutation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "403": {
             "description": "MCP Origin or staging access rejected",
@@ -3955,6 +4702,21 @@
                       "pattern": "^\\/",
                       "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
                     }
+                  },
+                  "html_attributes": {
+                    "description": "Optional HTML-only watch rule: up to4 of href,title,alt,aria-label; default[] retains existing text-only normalization. Distinct names are sorted; nonempty rules create a separate version1 watch/baseline. Records bounded meaningful attributes within the saved selector or filtered page, including same-text link destination changes. Cannot be supplied with watch_id, even[]. Unsafe hrefs are hashed, never fetched. Limits:200 elements,2048 characters/value,32768 evidence bytes; excess fails, never clips silently.",
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "alt",
+                        "aria-label",
+                        "href",
+                        "title"
+                      ],
+                      "description": "One explicitly observed HTML attribute: href (a/area only),title,alt or aria-label. No class/style/event attributes; links are inert evidence and never fetched."
+                    }
                   }
                 },
                 "required": [
@@ -4609,6 +5371,36 @@
                           "type": "string"
                         }
                       }
+                    },
+                    "free_trial": {
+                      "type": "object",
+                      "properties": {
+                        "enabled": {
+                          "type": "boolean"
+                        },
+                        "model": {
+                          "type": "string"
+                        },
+                        "credential_header": {
+                          "type": "string"
+                        },
+                        "idempotency_header": {
+                          "type": "string"
+                        },
+                        "allowances": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "account_url": {
+                          "type": "string"
+                        },
+                        "quota_endpoint": {
+                          "type": "string"
+                        },
+                        "payments_automatic": {
+                          "const": false
+                        }
+                      }
                     }
                   }
                 }
@@ -4951,6 +5743,12 @@
   },
   "components": {
     "securitySchemes": {
+      "trialKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Fresh402-Trial-Key",
+        "description": "Separate one-time free entitlement, only while /v2/trial reports enabled. Idempotency-Key required; never combine with paid credentials. No automatic purchase."
+      },
       "mppPayment": {
         "type": "apiKey",
         "in": "header",
@@ -5172,6 +5970,20 @@
       "RegisterResult": {
         "type": "object",
         "properties": {
+          "html_attributes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "href",
+                "title",
+                "alt",
+                "aria-label"
+              ]
+            }
+          },
+          "html_attribute_rules_version": {
+            "const": 1
+          },
           "watch_id": {
             "type": "string"
           },
@@ -5224,6 +6036,20 @@
       "CheckResult": {
         "type": "object",
         "properties": {
+          "html_attributes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "href",
+                "title",
+                "alt",
+                "aria-label"
+              ]
+            }
+          },
+          "html_attribute_rules_version": {
+            "const": 1
+          },
           "watch_id": {
             "type": "string"
           },
@@ -5319,6 +6145,10 @@
           "content_truncated": {
             "type": "boolean"
           },
+          "excerpt_truncated": {
+            "type": "boolean",
+            "description": "True when bounded contextual added/removed excerpts were clipped; independent of retained snapshot completeness."
+          },
           "reason": {
             "type": "string"
           }
@@ -5370,6 +6200,17 @@
           "data": {},
           "data_omitted": {
             "type": "boolean"
+          },
+          "json_pointers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Ordered exact RFC6901 selection metadata; data/text/hash describe the full aggregate projection before clipping."
+            }
+          },
+          "json_pointer": {
+            "type": "string",
+            "description": "Present only for an explicitly selected exact JSON Pointer; text, data and hash describe that selected value after exclusions."
           },
           "headings": {
             "type": "array",
@@ -5431,6 +6272,81 @@
       "SmartDiffResult": {
         "type": "object",
         "properties": {
+          "html_attributes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "href",
+                "title",
+                "alt",
+                "aria-label"
+              ]
+            }
+          },
+          "html_attribute_rules_version": {
+            "const": 1
+          },
+          "json_array_keys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "key": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "key"
+              ]
+            }
+          },
+          "array_moves": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "before_path": {
+                  "type": "string"
+                },
+                "after_path": {
+                  "type": "string"
+                },
+                "array_key": {
+                  "type": "object",
+                  "properties": {
+                    "pointer": {
+                      "type": "string"
+                    },
+                    "value": {
+                      "type": [
+                        "string",
+                        "integer"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "pointer",
+                    "value"
+                  ]
+                }
+              },
+              "required": [
+                "before_path",
+                "after_path",
+                "array_key"
+              ]
+            }
+          },
+          "array_move_count": {
+            "type": "integer"
+          },
+          "array_moves_truncated": {
+            "type": "boolean"
+          },
           "watch_id": {
             "type": "string"
           },
@@ -5480,7 +6396,31 @@
                       "type": "string"
                     },
                     "before": {},
-                    "after": {}
+                    "after": {},
+                    "before_path": {
+                      "type": "string"
+                    },
+                    "after_path": {
+                      "type": "string"
+                    },
+                    "array_key": {
+                      "type": "object",
+                      "properties": {
+                        "pointer": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": [
+                            "string",
+                            "integer"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "pointer",
+                        "value"
+                      ]
+                    }
                   },
                   "required": [
                     "path"
@@ -5496,7 +6436,31 @@
                       "type": "string"
                     },
                     "before": {},
-                    "after": {}
+                    "after": {},
+                    "before_path": {
+                      "type": "string"
+                    },
+                    "after_path": {
+                      "type": "string"
+                    },
+                    "array_key": {
+                      "type": "object",
+                      "properties": {
+                        "pointer": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": [
+                            "string",
+                            "integer"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "pointer",
+                        "value"
+                      ]
+                    }
                   },
                   "required": [
                     "path"
@@ -5512,7 +6476,31 @@
                       "type": "string"
                     },
                     "before": {},
-                    "after": {}
+                    "after": {},
+                    "before_path": {
+                      "type": "string"
+                    },
+                    "after_path": {
+                      "type": "string"
+                    },
+                    "array_key": {
+                      "type": "object",
+                      "properties": {
+                        "pointer": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": [
+                            "string",
+                            "integer"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "pointer",
+                        "value"
+                      ]
+                    }
                   },
                   "required": [
                     "path"

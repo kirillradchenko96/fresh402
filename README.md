@@ -2,7 +2,7 @@
 
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
-Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **2.8.0**.
+Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **3.0.0**.
 
 - [Developer quickstart](https://fresh402.com/docs) · [Tool reference](https://fresh402.com/docs/tools) · [Pricing](https://fresh402.com/pricing) · [Security and limits](https://fresh402.com/security)
 - API: https://fresh402.kirilllabs.workers.dev/
@@ -16,6 +16,9 @@ Check whether a source changed, extract useful content, and compare structured s
 | Extract | `fresh402_extract` | POST /v2/extract | $0.010 | 3 |
 | Smart Diff | `fresh402_smart_diff` | POST /v2/smart-diff | $0.015 | 4 |
 | OpenAPI Contract Diff | `fresh402_openapi_contract_diff` | POST /v2/openapi-contract-diff | $0.020 | 5 |
+| Contract Watch | `fresh402_contract_watch` | POST /v3/contract-watch | $0.010 | 4, separate grant |
+| Wallet Watch | `fresh402_wallet_watch` | POST /v3/wallet-watch | $0.020 | 8, separate grant |
+| Token Facts | `fresh402_token_facts` | POST /v3/token-facts | $0.010 | 4, separate grant |
 
 ## Start with a free baseline
 
@@ -31,9 +34,9 @@ The [website demo](https://fresh402.com/#demo) is explicitly illustrative and ru
 
 ## Free-trial pilot status
 
-2.8.0 includes a **gated** authenticated trial implementation. Inspect root `free_trial.enabled` or [GET /v2/trial](https://fresh402.kirilllabs.workers.dev/v2/trial) before assuming free execution is available. At this publication the execution pilot is **disabled**, pending real CAPTCHA and bounded runtime acceptance. Prepared one-time allowances are Check 20, Extract 10, Smart Diff 5 and OpenAPI Diff 3; these are not a promise of active access while disabled.
+Authenticated Web free trials are enabled in 3.0.0 within finite shared capacity. Inspect root `free_trial.enabled` or [GET /v2/trial](https://fresh402.kirilllabs.workers.dev/v2/trial) for live availability. One-time allowances are Check 20, Extract 10, Smart Diff 5 and OpenAPI Diff 3. Shared network, daily and runtime limits can reject work before these allowances are exhausted.
 
-When enabled, an unfunded EOA ownership message plus human verification obtains a separate trial key. No funding, token approval or transaction is needed. Trial REST/MCP requests use `X-Fresh402-Trial-Key` and a persisted per-operation `Idempotency-Key`. Quota exhaustion never initiates payment. [Trial guide](docs/FREE_TRIAL.md).
+An unfunded EOA ownership message plus human verification obtains a separate trial key. No funding, token approval or transaction is needed. Trial REST/MCP requests use `X-Fresh402-Trial-Key` and a persisted per-operation `Idempotency-Key`. Quota exhaustion never initiates payment. [Trial guide](docs/FREE_TRIAL.md).
 
 ## Choose payment deliberately
 
@@ -55,7 +58,7 @@ The existing Official MCP Registry identity remains **io.github.kirillradchenko9
 
 Public HTTPS documents only. No browser JavaScript execution, authenticated crawling, continuous watch polling, universal semantic compatibility proof or token safety guarantees. Watch IDs and legacy history are shared public service data; never put secrets in target URLs. The [security page](https://fresh402.com/security) explains supported protections and limitations.
 
-**Contract Watch, Wallet Watch and Token Facts remain commercially disabled. Circle Gateway remains disabled.** Their implementation/testing is not a claim of public availability or newly verified real-money settlement.
+**Contract Watch ($0.010), Wallet Watch ($0.020) and Token Facts ($0.010) are available in a bounded finalized Base observation pilot. Circle Gateway remains disabled.** Use x402/MPP per call. Prepaid requires a separate service-specific4/8/4-credit grant; existing Web packages do not include it automatically. No blockchain free trial or newly verified real-money blockchain settlement is claimed. [Inputs, limits and recovery](docs/API.md#finalized-base-observation-pilot).
 
 This repository provides public client documentation and retains its existing legacy files/history. Current hosted backend source, credentials, customer financial data and operational reports remain private.
 

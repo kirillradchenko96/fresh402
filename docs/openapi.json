@@ -68,9 +68,9 @@
   },
   "openapi": "3.1.0",
   "info": {
-    "title": "Fresh402 Web Intelligence API",
-    "version": "2.8.0",
-    "description": "Fresh402 2.8.0: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
+    "title": "Fresh402 Web and Blockchain Intelligence API",
+    "version": "3.0.0",
+    "description": "Fresh402 3.0.0: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
     "contact": {
       "name": "Fresh402 support",
       "email": "fresh402@proton.me",
@@ -1033,6 +1033,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -1727,6 +1730,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -2421,6 +2427,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -3039,6 +3048,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -3454,6 +3466,2612 @@
           },
           "402": {
             "description": "Insufficient spendable credits or missing tariff/maximum; no x402 submission"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/contract-watch": {
+      "post": {
+        "operationId": "fresh402_contract_watch",
+        "summary": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.010000 USDC on Base per call; use an approved compatible payment client. Prepaid uses an explicit service-specific tariff4 grant and authenticated /v3/prepaid/quote/contract_watch. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Independent provider authorization and per-service approved tariff grants are required.",
+        "description": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown.",
+        "tags": [
+          "contract_watch"
+        ],
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "mppPayment": []
+          }
+        ],
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            },
+            {
+              "mpp": {
+                "method": "evm",
+                "intent": "charge"
+              }
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.010000"
+          }
+        },
+        "x-mcp-tool": "fresh402_contract_watch",
+        "x-fresh402-tool": {
+          "id": "contract_watch",
+          "category": "blockchain-observation",
+          "limits": {
+            "transfer_bytes": 1048576,
+            "decoded_bytes": 4194304,
+            "output_bytes": 524288,
+            "parser_characters": 1048576,
+            "gateway_timeout_ms": 20000
+          },
+          "prepaid_credits": {
+            "4": 4
+          },
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "auth": "x402-or-mpp-or-prepaid",
+          "since": "2.7.1"
+        },
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453,
+                    "description": "Base mainnet only; returned provider chain must match."
+                  },
+                  "address": {
+                    "description": "20-byte Ethereum address; lowercase/uppercase accepted, mixed case must have a valid EIP-55 checksum. Normalized to checksummed form.",
+                    "type": "string",
+                    "minLength": 42,
+                    "maxLength": 42,
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "block": {
+                    "default": "finalized",
+                    "description": "Finalized only. Every state read pins the selected block hash with requireCanonical:true; no latest/number fallback.",
+                    "type": "string",
+                    "const": "finalized"
+                  },
+                  "previous_snapshot": {
+                    "description": "Optional owned snapshot_id from a successful saved contract_watch result, retained for30days. Same payer or prepaid account, chain, address and provider required. Foreign/missing IDs return404; expired IDs return410 without silently starting a new baseline.",
+                    "type": "string",
+                    "pattern": "^s_[a-f0-9]{64}$"
+                  },
+                  "slots": {
+                    "default": [],
+                    "description": "At most one exact bytes32 storage slot; no inferred layout.",
+                    "maxItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^0x[a-fA-F0-9]{64}$"
+                    }
+                  },
+                  "reads": {
+                    "default": [],
+                    "description": "At most one unverified zero-argument view/pure ABI read with one supported static output.",
+                    "maxItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "function"
+                        },
+                        "name": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]{0,63}$"
+                        },
+                        "stateMutability": {
+                          "type": "string",
+                          "enum": [
+                            "view",
+                            "pure"
+                          ]
+                        },
+                        "inputs": {
+                          "minItems": 0,
+                          "maxItems": 0,
+                          "type": "array",
+                          "items": {
+                            "not": {}
+                          }
+                        },
+                        "outputs": {
+                          "minItems": 1,
+                          "maxItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "uint256",
+                                  "uint8",
+                                  "address",
+                                  "bool",
+                                  "bytes32"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "name",
+                        "stateMutability",
+                        "inputs",
+                        "outputs"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "event_topics": {
+                    "default": [],
+                    "description": "At most one exact topic0 at this contract, bounded to the existing lookback/call limit. Dense or excessive work fails the whole paid operation; no partial success.",
+                    "maxItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^0x[a-fA-F0-9]{64}$"
+                    }
+                  },
+                  "events_from_block": {
+                    "description": "Optional first event block; otherwise previous snapshot block+1, or current block initially. Older than 32 blocks returns lookback_gap, without skipping to recent history.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "chain_id",
+                  "address"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "chain_id": 8453,
+                "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "block": "finalized"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paid result after confirmed settlement",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Payment-Receipt": {
+                "description": "Base64url native MPP EVM receipt; inspect status and reference. Not proof of prepaid finality.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractObservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required or rejected; never a sale. No paid data returned.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 x402 v2 requirements",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Native MPP challenge for the original exact Base USDC EIP-3009 authorization. Persist the challenge and private recovery token before signing; never mix payment methods.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/prepaid/contract-watch": {
+      "post": {
+        "operationId": "fresh402_prepaid_contract_watch",
+        "summary": "Execute fresh402_contract_watch using the existing account credit balance",
+        "description": "Same input/output and durable debit as prepaid MCP. Credentials stay in HTTP. Failed reserved execution releases credits; no x402 fallback. Reuse the original tool, input, key, tariff and maximum for seven-day durable recovery through either transport.",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "tags": [
+          "prepaid-execution"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Privately persisted operation identity, shared with fresh402/prepaid MCP metadata."
+          },
+          {
+            "name": "X-Fresh402-Tariff-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                4
+              ]
+            },
+            "description": "Required explicit service-specific version4 from its authenticated quote; historical account web version remains unchanged."
+          },
+          {
+            "name": "X-Fresh402-Max-Credits",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            },
+            "description": "Required integer maximum at least the exact service-specific version4 quote; bound immutably to the operation key."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453,
+                    "description": "Base mainnet only; returned provider chain must match."
+                  },
+                  "address": {
+                    "description": "20-byte Ethereum address; lowercase/uppercase accepted, mixed case must have a valid EIP-55 checksum. Normalized to checksummed form.",
+                    "type": "string",
+                    "minLength": 42,
+                    "maxLength": 42,
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "block": {
+                    "default": "finalized",
+                    "description": "Finalized only. Every state read pins the selected block hash with requireCanonical:true; no latest/number fallback.",
+                    "type": "string",
+                    "const": "finalized"
+                  },
+                  "previous_snapshot": {
+                    "description": "Optional owned snapshot_id from a successful saved contract_watch result, retained for30days. Same payer or prepaid account, chain, address and provider required. Foreign/missing IDs return404; expired IDs return410 without silently starting a new baseline.",
+                    "type": "string",
+                    "pattern": "^s_[a-f0-9]{64}$"
+                  },
+                  "slots": {
+                    "default": [],
+                    "description": "At most one exact bytes32 storage slot; no inferred layout.",
+                    "maxItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^0x[a-fA-F0-9]{64}$"
+                    }
+                  },
+                  "reads": {
+                    "default": [],
+                    "description": "At most one unverified zero-argument view/pure ABI read with one supported static output.",
+                    "maxItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "const": "function"
+                        },
+                        "name": {
+                          "type": "string",
+                          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]{0,63}$"
+                        },
+                        "stateMutability": {
+                          "type": "string",
+                          "enum": [
+                            "view",
+                            "pure"
+                          ]
+                        },
+                        "inputs": {
+                          "minItems": 0,
+                          "maxItems": 0,
+                          "type": "array",
+                          "items": {
+                            "not": {}
+                          }
+                        },
+                        "outputs": {
+                          "minItems": 1,
+                          "maxItems": 1,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "uint256",
+                                  "uint8",
+                                  "address",
+                                  "bool",
+                                  "bytes32"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "type"
+                            ],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "name",
+                        "stateMutability",
+                        "inputs",
+                        "outputs"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "event_topics": {
+                    "default": [],
+                    "description": "At most one exact topic0 at this contract, bounded to the existing lookback/call limit. Dense or excessive work fails the whole paid operation; no partial success.",
+                    "maxItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^0x[a-fA-F0-9]{64}$"
+                    }
+                  },
+                  "events_from_block": {
+                    "description": "Optional first event block; otherwise previous snapshot block+1, or current block initially. Older than 32 blocks returns lookback_gap, without skipping to recent history.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "chain_id",
+                  "address"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "chain_id": 8453,
+                "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "block": "finalized"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Durable credit-paid result. X-Fresh402-Access=prepaid and X-Fresh402-Credits report the charged amount; replay never charges again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractObservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Prepaid HTTP credential required"
+          },
+          "402": {
+            "description": "Insufficient spendable credits or missing tariff/maximum; no x402 submission"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/prepaid/quote/contract_watch": {
+      "get": {
+        "operationId": "fresh402_prepaid_quote_contract_watch",
+        "summary": "Exact accepted service-specific prepaid version4 terms; no execution or debit",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Requires an enabled matching account/service grant. Use returned credits as the exact minimum maximum authorization; legacy account web tariff is unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "const": "contract_watch"
+                    },
+                    "tariff_version": {
+                      "const": 4
+                    },
+                    "resource_class": {
+                      "const": "fixed"
+                    },
+                    "credits": {
+                      "type": "integer"
+                    },
+                    "terms_digest": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "failure_credits": {
+                      "const": 0
+                    },
+                    "provisional_credits": {
+                      "const": false
+                    },
+                    "account_web_tariff_version": {
+                      "type": "integer",
+                      "enum": [
+                        1,
+                        2,
+                        3
+                      ]
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "tariff_version",
+                    "resource_class",
+                    "credits",
+                    "terms_digest",
+                    "failure_credits",
+                    "provisional_credits",
+                    "account_web_tariff_version"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Prepaid HTTP credential required"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/wallet-watch": {
+      "post": {
+        "operationId": "fresh402_wallet_watch",
+        "summary": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.020000 USDC on Base per call; use an approved compatible payment client. Prepaid uses an explicit service-specific tariff4 grant and authenticated /v3/prepaid/quote/wallet_watch. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Independent provider authorization and per-service approved tariff grants are required.",
+        "description": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness.",
+        "tags": [
+          "wallet_watch"
+        ],
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "mppPayment": []
+          }
+        ],
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            },
+            {
+              "mpp": {
+                "method": "evm",
+                "intent": "charge"
+              }
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.020000"
+          }
+        },
+        "x-mcp-tool": "fresh402_wallet_watch",
+        "x-fresh402-tool": {
+          "id": "wallet_watch",
+          "category": "blockchain-observation",
+          "limits": {
+            "transfer_bytes": 1048576,
+            "decoded_bytes": 4194304,
+            "output_bytes": 524288,
+            "parser_characters": 1048576,
+            "gateway_timeout_ms": 20000
+          },
+          "prepaid_credits": {
+            "4": 8
+          },
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "auth": "x402-or-mpp-or-prepaid",
+          "since": "2.7.1"
+        },
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453,
+                    "description": "Base mainnet only; returned provider chain must match."
+                  },
+                  "block": {
+                    "default": "finalized",
+                    "description": "Finalized only. Every state read pins the selected block hash with requireCanonical:true; no latest/number fallback.",
+                    "type": "string",
+                    "const": "finalized"
+                  },
+                  "address": {
+                    "description": "20-byte Ethereum address; lowercase/uppercase accepted, mixed case must have a valid EIP-55 checksum. Normalized to checksummed form.",
+                    "type": "string",
+                    "minLength": 42,
+                    "maxLength": 42,
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "tokens": {
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "description": "20-byte Ethereum address; lowercase/uppercase accepted, mixed case must have a valid EIP-55 checksum. Normalized to checksummed form.",
+                      "type": "string",
+                      "minLength": 42,
+                      "maxLength": 42,
+                      "pattern": "^0x[a-fA-F0-9]{40}$"
+                    },
+                    "description": "One to four selected ERC-20 contracts; no full wallet transaction history."
+                  },
+                  "cursor": {
+                    "description": "Owned opaque cursor from a prior successful wallet_watch. Scope, wallet, tokens, provider and policy must match.",
+                    "type": "string",
+                    "pattern": "^c_[a-f0-9]{64}$"
+                  },
+                  "from_block": {
+                    "description": "Initial first block; cannot be supplied with cursor. Default last four finalized blocks; a gap beyond32 fails without skipping history.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "max_blocks": {
+                    "default": 4,
+                    "description": "At most four blocks in this paid page; default4. has_more describes a completed bounded page, not permission to charge a failed partial scan.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 4
+                  },
+                  "chunk_size": {
+                    "default": 4,
+                    "description": "Single bounded chunk; four-block maximum and no automatic retry.",
+                    "type": "number",
+                    "const": 4
+                  }
+                },
+                "required": [
+                  "chain_id",
+                  "address",
+                  "tokens"
+                ],
+                "additionalProperties": false,
+                "not": {
+                  "required": [
+                    "cursor",
+                    "from_block"
+                  ]
+                }
+              },
+              "example": {
+                "chain_id": 8453,
+                "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "tokens": [
+                  "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+                ],
+                "block": "finalized"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paid result after confirmed settlement",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Payment-Receipt": {
+                "description": "Base64url native MPP EVM receipt; inspect status and reference. Not proof of prepaid finality.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletObservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required or rejected; never a sale. No paid data returned.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 x402 v2 requirements",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Native MPP challenge for the original exact Base USDC EIP-3009 authorization. Persist the challenge and private recovery token before signing; never mix payment methods.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/prepaid/wallet-watch": {
+      "post": {
+        "operationId": "fresh402_prepaid_wallet_watch",
+        "summary": "Execute fresh402_wallet_watch using the existing account credit balance",
+        "description": "Same input/output and durable debit as prepaid MCP. Credentials stay in HTTP. Failed reserved execution releases credits; no x402 fallback. Reuse the original tool, input, key, tariff and maximum for seven-day durable recovery through either transport.",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "tags": [
+          "prepaid-execution"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Privately persisted operation identity, shared with fresh402/prepaid MCP metadata."
+          },
+          {
+            "name": "X-Fresh402-Tariff-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                4
+              ]
+            },
+            "description": "Required explicit service-specific version4 from its authenticated quote; historical account web version remains unchanged."
+          },
+          {
+            "name": "X-Fresh402-Max-Credits",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            },
+            "description": "Required integer maximum at least the exact service-specific version4 quote; bound immutably to the operation key."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453,
+                    "description": "Base mainnet only; returned provider chain must match."
+                  },
+                  "block": {
+                    "default": "finalized",
+                    "description": "Finalized only. Every state read pins the selected block hash with requireCanonical:true; no latest/number fallback.",
+                    "type": "string",
+                    "const": "finalized"
+                  },
+                  "address": {
+                    "description": "20-byte Ethereum address; lowercase/uppercase accepted, mixed case must have a valid EIP-55 checksum. Normalized to checksummed form.",
+                    "type": "string",
+                    "minLength": 42,
+                    "maxLength": 42,
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "tokens": {
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "description": "20-byte Ethereum address; lowercase/uppercase accepted, mixed case must have a valid EIP-55 checksum. Normalized to checksummed form.",
+                      "type": "string",
+                      "minLength": 42,
+                      "maxLength": 42,
+                      "pattern": "^0x[a-fA-F0-9]{40}$"
+                    },
+                    "description": "One to four selected ERC-20 contracts; no full wallet transaction history."
+                  },
+                  "cursor": {
+                    "description": "Owned opaque cursor from a prior successful wallet_watch. Scope, wallet, tokens, provider and policy must match.",
+                    "type": "string",
+                    "pattern": "^c_[a-f0-9]{64}$"
+                  },
+                  "from_block": {
+                    "description": "Initial first block; cannot be supplied with cursor. Default last four finalized blocks; a gap beyond32 fails without skipping history.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 9007199254740991
+                  },
+                  "max_blocks": {
+                    "default": 4,
+                    "description": "At most four blocks in this paid page; default4. has_more describes a completed bounded page, not permission to charge a failed partial scan.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 4
+                  },
+                  "chunk_size": {
+                    "default": 4,
+                    "description": "Single bounded chunk; four-block maximum and no automatic retry.",
+                    "type": "number",
+                    "const": 4
+                  }
+                },
+                "required": [
+                  "chain_id",
+                  "address",
+                  "tokens"
+                ],
+                "additionalProperties": false,
+                "not": {
+                  "required": [
+                    "cursor",
+                    "from_block"
+                  ]
+                }
+              },
+              "example": {
+                "chain_id": 8453,
+                "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "tokens": [
+                  "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+                ],
+                "block": "finalized"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Durable credit-paid result. X-Fresh402-Access=prepaid and X-Fresh402-Credits report the charged amount; replay never charges again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletObservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Prepaid HTTP credential required"
+          },
+          "402": {
+            "description": "Insufficient spendable credits or missing tariff/maximum; no x402 submission"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/prepaid/quote/wallet_watch": {
+      "get": {
+        "operationId": "fresh402_prepaid_quote_wallet_watch",
+        "summary": "Exact accepted service-specific prepaid version4 terms; no execution or debit",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Requires an enabled matching account/service grant. Use returned credits as the exact minimum maximum authorization; legacy account web tariff is unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "const": "wallet_watch"
+                    },
+                    "tariff_version": {
+                      "const": 4
+                    },
+                    "resource_class": {
+                      "const": "fixed"
+                    },
+                    "credits": {
+                      "type": "integer"
+                    },
+                    "terms_digest": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "failure_credits": {
+                      "const": 0
+                    },
+                    "provisional_credits": {
+                      "const": false
+                    },
+                    "account_web_tariff_version": {
+                      "type": "integer",
+                      "enum": [
+                        1,
+                        2,
+                        3
+                      ]
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "tariff_version",
+                    "resource_class",
+                    "credits",
+                    "terms_digest",
+                    "failure_credits",
+                    "provisional_credits",
+                    "account_web_tariff_version"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Prepaid HTTP credential required"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/token-facts": {
+      "post": {
+        "operationId": "fresh402_token_facts",
+        "summary": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.010000 USDC on Base per call; use an approved compatible payment client. Prepaid uses an explicit service-specific tariff4 grant and authenticated /v3/prepaid/quote/token_facts. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Independent provider authorization and per-service approved tariff grants are required.",
+        "description": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed.",
+        "tags": [
+          "token_facts"
+        ],
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "mppPayment": []
+          }
+        ],
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            },
+            {
+              "mpp": {
+                "method": "evm",
+                "intent": "charge"
+              }
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.010000"
+          }
+        },
+        "x-mcp-tool": "fresh402_token_facts",
+        "x-fresh402-tool": {
+          "id": "token_facts",
+          "category": "blockchain-observation",
+          "limits": {
+            "transfer_bytes": 1048576,
+            "decoded_bytes": 4194304,
+            "output_bytes": 524288,
+            "parser_characters": 1048576,
+            "gateway_timeout_ms": 20000
+          },
+          "prepaid_credits": {
+            "4": 4
+          },
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "auth": "x402-or-mpp-or-prepaid",
+          "since": "2.7.1"
+        },
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453,
+                    "description": "Base mainnet only; returned provider chain must match."
+                  },
+                  "address": {
+                    "description": "20-byte Ethereum address; lowercase/uppercase accepted, mixed case must have a valid EIP-55 checksum. Normalized to checksummed form.",
+                    "type": "string",
+                    "minLength": 42,
+                    "maxLength": 42,
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "block": {
+                    "default": "finalized",
+                    "description": "Finalized only. Every state read pins the selected block hash with requireCanonical:true; no latest/number fallback.",
+                    "type": "string",
+                    "const": "finalized"
+                  },
+                  "categories": {
+                    "default": [
+                      "identity",
+                      "controls",
+                      "supply"
+                    ],
+                    "description": "Requested categories, default all. Unsupported evidence remains unknown/not_assessed; never a safety score.",
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "identity",
+                        "controls",
+                        "supply"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "chain_id",
+                  "address"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "chain_id": 8453,
+                "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "categories": [
+                  "controls"
+                ],
+                "block": "finalized"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paid result after confirmed settlement",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Payment-Receipt": {
+                "description": "Base64url native MPP EVM receipt; inspect status and reference. Not proof of prepaid finality.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenFactsObservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required or rejected; never a sale. No paid data returned.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 x402 v2 requirements",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Native MPP challenge for the original exact Base USDC EIP-3009 authorization. Persist the challenge and private recovery token before signing; never mix payment methods.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/prepaid/token-facts": {
+      "post": {
+        "operationId": "fresh402_prepaid_token_facts",
+        "summary": "Execute fresh402_token_facts using the existing account credit balance",
+        "description": "Same input/output and durable debit as prepaid MCP. Credentials stay in HTTP. Failed reserved execution releases credits; no x402 fallback. Reuse the original tool, input, key, tariff and maximum for seven-day durable recovery through either transport.",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "tags": [
+          "prepaid-execution"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Privately persisted operation identity, shared with fresh402/prepaid MCP metadata."
+          },
+          {
+            "name": "X-Fresh402-Tariff-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                4
+              ]
+            },
+            "description": "Required explicit service-specific version4 from its authenticated quote; historical account web version remains unchanged."
+          },
+          {
+            "name": "X-Fresh402-Max-Credits",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            },
+            "description": "Required integer maximum at least the exact service-specific version4 quote; bound immutably to the operation key."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453,
+                    "description": "Base mainnet only; returned provider chain must match."
+                  },
+                  "address": {
+                    "description": "20-byte Ethereum address; lowercase/uppercase accepted, mixed case must have a valid EIP-55 checksum. Normalized to checksummed form.",
+                    "type": "string",
+                    "minLength": 42,
+                    "maxLength": 42,
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "block": {
+                    "default": "finalized",
+                    "description": "Finalized only. Every state read pins the selected block hash with requireCanonical:true; no latest/number fallback.",
+                    "type": "string",
+                    "const": "finalized"
+                  },
+                  "categories": {
+                    "default": [
+                      "identity",
+                      "controls",
+                      "supply"
+                    ],
+                    "description": "Requested categories, default all. Unsupported evidence remains unknown/not_assessed; never a safety score.",
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "identity",
+                        "controls",
+                        "supply"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "chain_id",
+                  "address"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "chain_id": 8453,
+                "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "categories": [
+                  "controls"
+                ],
+                "block": "finalized"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Durable credit-paid result. X-Fresh402-Access=prepaid and X-Fresh402-Credits report the charged amount; replay never charges again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenFactsObservation"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Prepaid HTTP credential required"
+          },
+          "402": {
+            "description": "Insufficient spendable credits or missing tariff/maximum; no x402 submission"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v3/prepaid/quote/token_facts": {
+      "get": {
+        "operationId": "fresh402_prepaid_quote_token_facts",
+        "summary": "Exact accepted service-specific prepaid version4 terms; no execution or debit",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Requires an enabled matching account/service grant. Use returned credits as the exact minimum maximum authorization; legacy account web tariff is unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "const": "token_facts"
+                    },
+                    "tariff_version": {
+                      "const": 4
+                    },
+                    "resource_class": {
+                      "const": "fixed"
+                    },
+                    "credits": {
+                      "type": "integer"
+                    },
+                    "terms_digest": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    },
+                    "failure_credits": {
+                      "const": 0
+                    },
+                    "provisional_credits": {
+                      "const": false
+                    },
+                    "account_web_tariff_version": {
+                      "type": "integer",
+                      "enum": [
+                        1,
+                        2,
+                        3
+                      ]
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "tariff_version",
+                    "resource_class",
+                    "credits",
+                    "terms_digest",
+                    "failure_credits",
+                    "provisional_credits",
+                    "account_web_tariff_version"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Prepaid HTTP credential required"
           },
           "403": {
             "description": "MCP Origin or staging access rejected",
@@ -5530,7 +8148,7 @@
         "operationId": "fresh402_mcp",
         "summary": "MCP Streamable HTTP (2026-07-28 plus stateless 2025 compatibility)",
         "security": [],
-        "description": "Five tools. Payment challenge is an isError tool result with structuredContent = PaymentRequired; payment goes in params._meta['x402/payment']; receipt in result._meta['x402/payment-response']. HTTP 200 alone is not success. Alternatively use X-Fresh402-API-Key in HTTP with params._meta['fresh402/prepaid'] containing idempotency_key, tariff_version and max_credits. Never combine billing methods. When x-mpp-payments.enabled, official MPP clients may use params._meta['org.paymentauth/credential']; receipt is result._meta['org.paymentauth/receipt']. Legacy x402 errors also carry standard org.paymentauth/payment-required metadata. See docs/MPP.md, AGENT_PREPAID.md and MCP.md.",
+        "description": "8 tools, including configured finalized Base observations. Payment challenge is an isError tool result with structuredContent = PaymentRequired; payment goes in params._meta['x402/payment']; receipt in result._meta['x402/payment-response']. HTTP 200 alone is not success. Alternatively use X-Fresh402-API-Key in HTTP with params._meta['fresh402/prepaid'] containing idempotency_key, tariff_version and max_credits. Never combine billing methods. When x-mpp-payments.enabled, official MPP clients may use params._meta['org.paymentauth/credential']; receipt is result._meta['org.paymentauth/receipt']. Legacy x402 errors also carry standard org.paymentauth/payment-required metadata. See docs/MPP.md, AGENT_PREPAID.md and MCP.md.",
         "requestBody": {
           "required": true,
           "content": {
@@ -6725,6 +9343,1347 @@
             ]
           }
         }
+      },
+      "ContractObservation": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "observation_saved": {
+                "type": "boolean",
+                "const": true
+              },
+              "snapshot_saved": {
+                "type": "boolean",
+                "const": true
+              },
+              "persistence": {
+                "type": "string",
+                "const": "atomic_with_financial_delivery"
+              },
+              "accounting": {
+                "type": "object",
+                "properties": {
+                  "rpc_requests": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 18
+                  },
+                  "response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "wire_response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "scope": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "rpc_requests",
+                  "response_bytes",
+                  "wire_response_bytes",
+                  "scope"
+                ],
+                "additionalProperties": {}
+              },
+              "limitations": {
+                "minItems": 1,
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "tool": {
+                "type": "string",
+                "const": "fresh402_contract_watch"
+              },
+              "snapshot_id": {
+                "type": "string",
+                "pattern": "^s_[a-f0-9]{64}$"
+              },
+              "snapshot": {
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "block": {
+                    "type": "object",
+                    "properties": {
+                      "number": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "hash": {
+                        "type": "string",
+                        "pattern": "^0x[a-f0-9]{64}$"
+                      },
+                      "parent_hash": {
+                        "type": "string",
+                        "pattern": "^0x[a-f0-9]{64}$"
+                      },
+                      "timestamp": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "chain_id": {
+                        "type": "number",
+                        "const": 8453
+                      },
+                      "policy": {
+                        "type": "string",
+                        "const": "finalized"
+                      },
+                      "finalized": {
+                        "type": "boolean",
+                        "const": true
+                      },
+                      "source": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9_-]{3,64}$"
+                      },
+                      "observed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                      },
+                      "trust": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
+                    },
+                    "required": [
+                      "number",
+                      "hash",
+                      "parent_hash",
+                      "timestamp",
+                      "chain_id",
+                      "policy",
+                      "finalized",
+                      "source",
+                      "observed_at",
+                      "trust"
+                    ],
+                    "additionalProperties": {}
+                  },
+                  "fields": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "warnings": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "address",
+                  "block",
+                  "fields",
+                  "warnings"
+                ],
+                "additionalProperties": {}
+              },
+              "comparison": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "unknown",
+                      "changed",
+                      "unchanged"
+                    ]
+                  },
+                  "changes": {
+                    "maxItems": 32,
+                    "type": "array",
+                    "items": {}
+                  }
+                },
+                "required": [
+                  "status",
+                  "changes"
+                ],
+                "additionalProperties": {}
+              },
+              "events": {
+                "maxItems": 100,
+                "type": "array",
+                "items": {}
+              },
+              "event_coverage": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status"
+                ],
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "observation_saved",
+              "snapshot_saved",
+              "persistence",
+              "accounting",
+              "limitations",
+              "tool",
+              "snapshot_id",
+              "snapshot",
+              "comparison",
+              "events",
+              "event_coverage"
+            ],
+            "additionalProperties": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "observation_saved": {
+                "type": "boolean",
+                "const": false
+              },
+              "snapshot_saved": {
+                "type": "boolean",
+                "const": false
+              },
+              "persistence": {
+                "type": "string",
+                "const": "atomic_with_financial_delivery"
+              },
+              "accounting": {
+                "type": "object",
+                "properties": {
+                  "rpc_requests": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 18
+                  },
+                  "response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "wire_response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "scope": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "rpc_requests",
+                  "response_bytes",
+                  "wire_response_bytes",
+                  "scope"
+                ],
+                "additionalProperties": {}
+              },
+              "limitations": {
+                "minItems": 1,
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "tool": {
+                "type": "string",
+                "const": "fresh402_contract_watch"
+              },
+              "snapshot_id": {
+                "type": "string",
+                "pattern": "^s_[a-f0-9]{64}$"
+              },
+              "snapshot": {
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "block": {
+                    "type": "object",
+                    "properties": {
+                      "number": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "hash": {
+                        "type": "string",
+                        "pattern": "^0x[a-f0-9]{64}$"
+                      },
+                      "parent_hash": {
+                        "type": "string",
+                        "pattern": "^0x[a-f0-9]{64}$"
+                      },
+                      "timestamp": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "chain_id": {
+                        "type": "number",
+                        "const": 8453
+                      },
+                      "policy": {
+                        "type": "string",
+                        "const": "finalized"
+                      },
+                      "finalized": {
+                        "type": "boolean",
+                        "const": true
+                      },
+                      "source": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9_-]{3,64}$"
+                      },
+                      "observed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                      },
+                      "trust": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
+                    },
+                    "required": [
+                      "number",
+                      "hash",
+                      "parent_hash",
+                      "timestamp",
+                      "chain_id",
+                      "policy",
+                      "finalized",
+                      "source",
+                      "observed_at",
+                      "trust"
+                    ],
+                    "additionalProperties": {}
+                  },
+                  "fields": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "warnings": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "address",
+                  "block",
+                  "fields",
+                  "warnings"
+                ],
+                "additionalProperties": {}
+              },
+              "comparison": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "unknown",
+                      "changed",
+                      "unchanged"
+                    ]
+                  },
+                  "changes": {
+                    "maxItems": 32,
+                    "type": "array",
+                    "items": {}
+                  }
+                },
+                "required": [
+                  "status",
+                  "changes"
+                ],
+                "additionalProperties": {}
+              },
+              "events": {
+                "maxItems": 100,
+                "type": "array",
+                "items": {}
+              },
+              "event_coverage": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "status"
+                ],
+                "additionalProperties": {}
+              },
+              "cursor_saved": {
+                "type": "boolean",
+                "const": false
+              },
+              "persistence_error": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              }
+            },
+            "required": [
+              "observation_saved",
+              "snapshot_saved",
+              "persistence",
+              "accounting",
+              "limitations",
+              "tool",
+              "snapshot_id",
+              "snapshot",
+              "comparison",
+              "events",
+              "event_coverage",
+              "cursor_saved",
+              "persistence_error"
+            ],
+            "additionalProperties": {}
+          }
+        ]
+      },
+      "WalletObservation": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "observation_saved": {
+                "type": "boolean",
+                "const": true
+              },
+              "snapshot_saved": {
+                "type": "boolean",
+                "const": false
+              },
+              "persistence": {
+                "type": "string",
+                "const": "atomic_with_financial_delivery"
+              },
+              "accounting": {
+                "type": "object",
+                "properties": {
+                  "rpc_requests": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 18
+                  },
+                  "response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "wire_response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "scope": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "rpc_requests",
+                  "response_bytes",
+                  "wire_response_bytes",
+                  "scope"
+                ],
+                "additionalProperties": {}
+              },
+              "limitations": {
+                "minItems": 1,
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "tool": {
+                "type": "string",
+                "const": "fresh402_wallet_watch"
+              },
+              "cursor_saved": {
+                "type": "boolean",
+                "const": true
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "page",
+                  "complete"
+                ]
+              },
+              "block": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^0x[a-f0-9]{64}$"
+                  },
+                  "parent_hash": {
+                    "type": "string",
+                    "pattern": "^0x[a-f0-9]{64}$"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453
+                  },
+                  "policy": {
+                    "type": "string",
+                    "const": "finalized"
+                  },
+                  "finalized": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "source": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9_-]{3,64}$"
+                  },
+                  "observed_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  },
+                  "trust": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "number",
+                  "hash",
+                  "parent_hash",
+                  "timestamp",
+                  "chain_id",
+                  "policy",
+                  "finalized",
+                  "source",
+                  "observed_at",
+                  "trust"
+                ],
+                "additionalProperties": {}
+              },
+              "next_cursor": {
+                "type": "string",
+                "pattern": "^c_[a-f0-9]{64}$"
+              },
+              "events": {
+                "maxItems": 100,
+                "type": "array",
+                "items": {}
+              },
+              "has_more": {
+                "type": "boolean"
+              },
+              "interruption": {
+                "type": "null"
+              },
+              "native_balance": {
+                "type": "object",
+                "properties": {
+                  "asset": {
+                    "type": "string",
+                    "const": "ETH"
+                  },
+                  "raw": {
+                    "type": "string",
+                    "pattern": "^\\d+$"
+                  },
+                  "meaning": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "asset",
+                  "raw",
+                  "meaning"
+                ],
+                "additionalProperties": {}
+              },
+              "coverage": {
+                "type": "object",
+                "properties": {
+                  "selected_tokens": {
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^0x[a-fA-F0-9]{40}$"
+                    }
+                  },
+                  "requested_to_block": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "selected_tokens",
+                  "requested_to_block"
+                ],
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "observation_saved",
+              "snapshot_saved",
+              "persistence",
+              "accounting",
+              "limitations",
+              "tool",
+              "cursor_saved",
+              "state",
+              "block",
+              "next_cursor",
+              "events",
+              "has_more",
+              "interruption",
+              "native_balance",
+              "coverage"
+            ],
+            "additionalProperties": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "observation_saved": {
+                "type": "boolean",
+                "const": false
+              },
+              "snapshot_saved": {
+                "type": "boolean",
+                "const": false
+              },
+              "persistence": {
+                "type": "string",
+                "const": "atomic_with_financial_delivery"
+              },
+              "accounting": {
+                "type": "object",
+                "properties": {
+                  "rpc_requests": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 18
+                  },
+                  "response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "wire_response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "scope": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "rpc_requests",
+                  "response_bytes",
+                  "wire_response_bytes",
+                  "scope"
+                ],
+                "additionalProperties": {}
+              },
+              "limitations": {
+                "minItems": 1,
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "tool": {
+                "type": "string",
+                "const": "fresh402_wallet_watch"
+              },
+              "cursor_saved": {
+                "type": "boolean",
+                "const": false
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "page",
+                  "complete"
+                ]
+              },
+              "block": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^0x[a-f0-9]{64}$"
+                  },
+                  "parent_hash": {
+                    "type": "string",
+                    "pattern": "^0x[a-f0-9]{64}$"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453
+                  },
+                  "policy": {
+                    "type": "string",
+                    "const": "finalized"
+                  },
+                  "finalized": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "source": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9_-]{3,64}$"
+                  },
+                  "observed_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  },
+                  "trust": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "number",
+                  "hash",
+                  "parent_hash",
+                  "timestamp",
+                  "chain_id",
+                  "policy",
+                  "finalized",
+                  "source",
+                  "observed_at",
+                  "trust"
+                ],
+                "additionalProperties": {}
+              },
+              "next_cursor": {
+                "type": "string",
+                "pattern": "^c_[a-f0-9]{64}$"
+              },
+              "events": {
+                "maxItems": 100,
+                "type": "array",
+                "items": {}
+              },
+              "has_more": {
+                "type": "boolean"
+              },
+              "interruption": {
+                "type": "null"
+              },
+              "native_balance": {
+                "type": "object",
+                "properties": {
+                  "asset": {
+                    "type": "string",
+                    "const": "ETH"
+                  },
+                  "raw": {
+                    "type": "string",
+                    "pattern": "^\\d+$"
+                  },
+                  "meaning": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "asset",
+                  "raw",
+                  "meaning"
+                ],
+                "additionalProperties": {}
+              },
+              "coverage": {
+                "type": "object",
+                "properties": {
+                  "selected_tokens": {
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^0x[a-fA-F0-9]{40}$"
+                    }
+                  },
+                  "requested_to_block": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "selected_tokens",
+                  "requested_to_block"
+                ],
+                "additionalProperties": {}
+              },
+              "persistence_error": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              }
+            },
+            "required": [
+              "observation_saved",
+              "snapshot_saved",
+              "persistence",
+              "accounting",
+              "limitations",
+              "tool",
+              "cursor_saved",
+              "state",
+              "block",
+              "next_cursor",
+              "events",
+              "has_more",
+              "interruption",
+              "native_balance",
+              "coverage",
+              "persistence_error"
+            ],
+            "additionalProperties": {}
+          }
+        ]
+      },
+      "TokenFactsObservation": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "observation_saved": {
+                "type": "boolean",
+                "const": true
+              },
+              "snapshot_saved": {
+                "type": "boolean",
+                "const": true
+              },
+              "persistence": {
+                "type": "string",
+                "const": "atomic_with_financial_delivery"
+              },
+              "accounting": {
+                "type": "object",
+                "properties": {
+                  "rpc_requests": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 18
+                  },
+                  "response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "wire_response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "scope": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "rpc_requests",
+                  "response_bytes",
+                  "wire_response_bytes",
+                  "scope"
+                ],
+                "additionalProperties": {}
+              },
+              "limitations": {
+                "minItems": 1,
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "tool": {
+                "type": "string",
+                "const": "fresh402_token_facts"
+              },
+              "snapshot_id": {
+                "type": "string",
+                "pattern": "^s_[a-f0-9]{64}$"
+              },
+              "address": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{40}$"
+              },
+              "block": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^0x[a-f0-9]{64}$"
+                  },
+                  "parent_hash": {
+                    "type": "string",
+                    "pattern": "^0x[a-f0-9]{64}$"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453
+                  },
+                  "policy": {
+                    "type": "string",
+                    "const": "finalized"
+                  },
+                  "finalized": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "source": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9_-]{3,64}$"
+                  },
+                  "observed_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  },
+                  "trust": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "number",
+                  "hash",
+                  "parent_hash",
+                  "timestamp",
+                  "chain_id",
+                  "policy",
+                  "finalized",
+                  "source",
+                  "observed_at",
+                  "trust"
+                ],
+                "additionalProperties": {}
+              },
+              "assessment_status": {
+                "type": "string",
+                "const": "facts_only"
+              },
+              "facts": {
+                "maxItems": 32,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "category": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "detected",
+                        "not_detected_with_sufficient_coverage",
+                        "unknown",
+                        "not_assessed"
+                      ]
+                    },
+                    "observation_confidence": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "low",
+                        "medium",
+                        "high"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "category",
+                    "status",
+                    "observation_confidence"
+                  ],
+                  "additionalProperties": {}
+                }
+              },
+              "metadata": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "coverage": {
+                "type": "object",
+                "properties": {
+                  "verified_source": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "trading_simulation": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "categories": {
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "identity",
+                        "controls",
+                        "supply"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "verified_source",
+                  "trading_simulation",
+                  "categories"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "observation_saved",
+              "snapshot_saved",
+              "persistence",
+              "accounting",
+              "limitations",
+              "tool",
+              "snapshot_id",
+              "address",
+              "block",
+              "assessment_status",
+              "facts",
+              "metadata",
+              "coverage"
+            ],
+            "additionalProperties": {}
+          },
+          {
+            "type": "object",
+            "properties": {
+              "observation_saved": {
+                "type": "boolean",
+                "const": false
+              },
+              "snapshot_saved": {
+                "type": "boolean",
+                "const": false
+              },
+              "persistence": {
+                "type": "string",
+                "const": "atomic_with_financial_delivery"
+              },
+              "accounting": {
+                "type": "object",
+                "properties": {
+                  "rpc_requests": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 18
+                  },
+                  "response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "wire_response_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 4194304
+                  },
+                  "scope": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "rpc_requests",
+                  "response_bytes",
+                  "wire_response_bytes",
+                  "scope"
+                ],
+                "additionalProperties": {}
+              },
+              "limitations": {
+                "minItems": 1,
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 1024
+                }
+              },
+              "tool": {
+                "type": "string",
+                "const": "fresh402_token_facts"
+              },
+              "snapshot_id": {
+                "type": "string",
+                "pattern": "^s_[a-f0-9]{64}$"
+              },
+              "address": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{40}$"
+              },
+              "block": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^0x[a-f0-9]{64}$"
+                  },
+                  "parent_hash": {
+                    "type": "string",
+                    "pattern": "^0x[a-f0-9]{64}$"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453
+                  },
+                  "policy": {
+                    "type": "string",
+                    "const": "finalized"
+                  },
+                  "finalized": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "source": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9_-]{3,64}$"
+                  },
+                  "observed_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                  },
+                  "trust": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
+                },
+                "required": [
+                  "number",
+                  "hash",
+                  "parent_hash",
+                  "timestamp",
+                  "chain_id",
+                  "policy",
+                  "finalized",
+                  "source",
+                  "observed_at",
+                  "trust"
+                ],
+                "additionalProperties": {}
+              },
+              "assessment_status": {
+                "type": "string",
+                "const": "facts_only"
+              },
+              "facts": {
+                "maxItems": 32,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "category": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "detected",
+                        "not_detected_with_sufficient_coverage",
+                        "unknown",
+                        "not_assessed"
+                      ]
+                    },
+                    "observation_confidence": {
+                      "type": "string",
+                      "enum": [
+                        "none",
+                        "low",
+                        "medium",
+                        "high"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "category",
+                    "status",
+                    "observation_confidence"
+                  ],
+                  "additionalProperties": {}
+                }
+              },
+              "metadata": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "coverage": {
+                "type": "object",
+                "properties": {
+                  "verified_source": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "trading_simulation": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "categories": {
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "identity",
+                        "controls",
+                        "supply"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "verified_source",
+                  "trading_simulation",
+                  "categories"
+                ],
+                "additionalProperties": false
+              },
+              "cursor_saved": {
+                "type": "boolean",
+                "const": false
+              },
+              "persistence_error": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              }
+            },
+            "required": [
+              "observation_saved",
+              "snapshot_saved",
+              "persistence",
+              "accounting",
+              "limitations",
+              "tool",
+              "snapshot_id",
+              "address",
+              "block",
+              "assessment_status",
+              "facts",
+              "metadata",
+              "coverage",
+              "cursor_saved",
+              "persistence_error"
+            ],
+            "additionalProperties": {}
+          }
+        ]
       },
       "PrepaidBalance": {
         "type": "object",

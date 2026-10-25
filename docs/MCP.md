@@ -1,4 +1,4 @@
-# Fresh402 2.8 MCP integration
+# Fresh402 3.0 MCP integration
 
 Canonical endpoint: **https://fresh402.kirilllabs.workers.dev/mcp**.
 Transport: **Streamable HTTP**. Official Registry identity: **io.github.kirillradchenko96/fresh402**.
@@ -66,7 +66,7 @@ The API processes public HTTPS HTML, JSON and text on demand. Extraction does no
 
 ## Native MPP
 
-When root `mpp_payments.enabled` is true, the same four paid tools accept official MPP EVM charge on Base native USDC at the same prices. Use `mppx/mcp/client`, `org.paymentauth/credential` and `org.paymentauth/receipt`; the existing x402 challenge envelope remains compatible. Explicit MPP selection uses standard JSON-RPC payment errors. Persist the original credential, input and private recovery token before submission; never mix billing credentials or sign another payment after uncertainty. See [MPP setup, tested SDKs and recovery](MPP.md).
+When root `mpp_payments.enabled` is true, the seven enabled paid tools accept official MPP EVM charge on Base native USDC at the same prices. Use `mppx/mcp/client`, `org.paymentauth/credential` and `org.paymentauth/receipt`; the existing x402 challenge envelope remains compatible. Explicit MPP selection uses standard JSON-RPC payment errors. Persist the original credential, input and private recovery token before submission; never mix billing credentials or sign another payment after uncertainty. See [MPP setup, tested SDKs and recovery](MPP.md).
 
 ## Optional prepaid customer accounts
 
@@ -77,6 +77,12 @@ The existing five MCP tools and MCP URL are unchanged. Standalone x402 needs no 
 
 The live service supports modern protocol discovery and legacy Streamable HTTP clients. Tools are static: `tools.listChanged=false`. An honored empty subscription subset acknowledges `notifications:{}` and completes; it does not retain an open subscription. Unsupported filters and real capacity errors remain errors.
 
-A normal client can list all five released tools and register a baseline. Paid execution requires x402, enabled native MPP or authenticated prepaid metadata. HTTP200 alone is not a successful paid result: inspect `isError` and structured content.
+A normal client can list all eight released tools and register a baseline. Paid execution requires x402, enabled native MPP or authenticated prepaid metadata. HTTP200 alone is not a successful paid result: inspect `isError` and structured content.
 
-A separate free-trial pilot is implemented but disabled at this publication. Read root `free_trial.enabled` or `GET /v2/trial` before use. When enabled, send `X-Fresh402-Trial-Key` and a persisted per-call `Idempotency-Key` in HTTP transport headers. Exact input/key replay shares the REST result and quota; there is no automatic payment fallback. Do not mix trial and financial credentials. [Trial guide](FREE_TRIAL.md).
+The separate Web free-trial pilot is enabled in 3.0.0 within finite shared capacity. Read root `free_trial.enabled` or `GET /v2/trial` before use. Send `X-Fresh402-Trial-Key` and a persisted per-call `Idempotency-Key` in HTTP transport headers. Exact input/key replay shares the REST result and quota; there is no automatic payment fallback. Do not mix trial and financial credentials. [Trial guide](FREE_TRIAL.md).
+
+## Finalized Base observation pilot
+
+`fresh402_contract_watch`, `fresh402_wallet_watch` and `fresh402_token_facts` add three paid tools, for eight total including free Register. Prices are $0.010 / $0.020 / $0.010 USDC. Read their live schemas and the [API pilot reference](API.md#finalized-base-observation-pilot). They use finalized, hash-pinned single-provider observations with bounded scope; no safety score, trading or full-history guarantee. Native-provider application acceptance and mocked official-SDK financial tests are separate evidence; no fresh mainnet blockchain settlement is claimed.
+
+Use the original x402/MPP proof, exact input and REQUIRED privately persisted random32-byte `fresh402/recovery-token` metadata for recovery. Provider failure/partial scans are not paid successes. Existing prepaid packages do not automatically grant these services: separate accepted tariff4 grants cost4/8/4. No blockchain free trial. Existing Web tool names, paths, prices and credits are unchanged.

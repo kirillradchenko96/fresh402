@@ -1,8 +1,8 @@
-# Fresh402 2.8.0 public API
+# Fresh402 3.0.0 public API
 
 Base URL: https://fresh402.kirilllabs.workers.dev
 
-The hosted service reports version **2.8.0**. [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
+The hosted service reports version **3.0.0**. [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
 
 | Operation | Method and path | MCP tool | Price |
 |---|---|---|---:|
@@ -11,6 +11,9 @@ The hosted service reports version **2.8.0**. [Live OpenAPI](https://fresh402.ki
 | Extract | POST /v2/extract | fresh402_extract | $0.01 USDC |
 | Smart Diff | POST /v2/smart-diff | fresh402_smart_diff | $0.015 USDC |
 | OpenAPI Contract Diff | POST /v2/openapi-contract-diff | fresh402_openapi_contract_diff | $0.020 USDC |
+| Contract Watch | POST /v3/contract-watch | fresh402_contract_watch | $0.010000 USDC |
+| Wallet Watch | POST /v3/wallet-watch | fresh402_wallet_watch | $0.020000 USDC |
+| Token Facts | POST /v3/token-facts | fresh402_token_facts | $0.010000 USDC |
 
 ## Register
 
@@ -66,11 +69,11 @@ For explicit JSON array identities, use `json_array_keys:[{"path":"/items","key"
 
 - `GET /`: version, health, endpoint and standalone x402 prices, plus additive `prepaid_packages` discovery. Package IDs and integer credit amounts match `/v2/prepaid/plans`; `enabled` reflects public purchasing availability. Packages are one-time purchases with non-expiring credits, not subscriptions. Existing root fields and values are unchanged.
 - `GET /openapi.json`: OpenAPI 3.1 reference.
-- `GET /.well-known/x402`: all four paid REST resource URLs.
+- `GET /.well-known/x402`: all seven paid REST resource URLs.
 - `GET /v1/history?watch_id=...`: retained legacy snapshot metadata.
 - `GET /v1/diff?watch_id=...`: a legacy deterministic diff of retained v1 snapshots, without a target fetch.
 - `GET /v1/stats`: public confirmed-settlement statistics.
-- `POST /mcp`: free protocol and tool discovery, free Register, and the four paid tools.
+- `POST /mcp`: free protocol and tool discovery, free Register, and seven paid tools.
 
 Legacy public history/diff is separate from paid Smart Diff results. MCP uses POST; GET /mcp returns 405.
 
@@ -122,8 +125,24 @@ Circle Gateway is a separate optional x402 rail, not an MPP method. It is disabl
 
 ## Authenticated free-trial pilot
 
-Inspect `GET /v2/trial` or root `free_trial.enabled` before assuming free execution is active. The pilot is gated until real human-verification and runtime acceptance pass. The [trial page](https://fresh402.kirilllabs.workers.dev/trial) uses an unfunded EOA ownership message plus Cloudflare Turnstile; no payment, token approval or funded wallet is required.
+Inspect `GET /v2/trial` or root `free_trial.enabled` before assuming free execution is active. The authenticated pilot is enabled in 3.0.0 within finite shared capacity. The [trial page](https://fresh402.kirilllabs.workers.dev/trial) uses an unfunded EOA ownership message plus Cloudflare Turnstile; no payment, token approval or funded wallet is required.
 
-When enabled, one-time entitlements are Check20, Extract10, Smart Diff5 and OpenAPI Diff3, subject to finite shared capacity. Send only `X-Fresh402-Trial-Key` and a unique privately persisted `Idempotency-Key` to the normal REST endpoint or MCP HTTP transport. A key identifies one logical tool/input; replay the exact original input/key for seven-day recovery without another quota debit or fetch. MCP clients must set a distinct operation header for each new call. Never mix trial and payment/prepaid credentials. Quota exhaustion cannot initiate a purchase. Inspect remaining allowances at `GET /v2/trial/quota`. Rotation requires a fresh ownership challenge and human verification, preserves used quota and invalidates the old credential. Failed work refunds its tool allowance once; infrastructure cost reservations remain consumed. Retained-result expiry returns410 and never reruns work.
+One-time entitlements are Check20, Extract10, Smart Diff5 and OpenAPI Diff3, subject to finite shared capacity. Send only `X-Fresh402-Trial-Key` and a unique privately persisted `Idempotency-Key` to the normal REST endpoint or MCP HTTP transport. A key identifies one logical tool/input; replay the exact original input/key for seven-day recovery without another quota debit or fetch. MCP clients must set a distinct operation header for each new call. Never mix trial and payment/prepaid credentials. Quota exhaustion cannot initiate a purchase. Inspect remaining allowances at `GET /v2/trial/quota`. Rotation requires a fresh ownership challenge and human verification, preserves used quota and invalidates the old credential. Failed work refunds its tool allowance once; infrastructure cost reservations remain consumed. Retained-result expiry returns410 and never reruns work.
 
-On-chain products remain commercially disabled and have no active free calls. Existing prices, nonexpiring purchased credits, customer terms and recovery remain unchanged. [Dedicated developer quickstart](https://fresh402.com/docs), [tool reference](https://fresh402.com/docs/tools), [prices](https://fresh402.com/pricing) and [limits](https://fresh402.com/security).
+On-chain products are available in the bounded commercial pilot described below, without a free-trial allowance. Existing prices, nonexpiring purchased credits, customer terms and recovery remain unchanged. [Dedicated developer quickstart](https://fresh402.com/docs), [tool reference](https://fresh402.com/docs/tools), [prices](https://fresh402.com/pricing) and [limits](https://fresh402.com/security).
+
+## Finalized Base observation pilot
+
+Contract Watch, Wallet Watch and Token Facts accept per-call x402 and native MPP on the existing Base native-USDC rail. The seven service quotes advertise exact atomic amount (5000 / 10000 / 15000 / 20000 / 10000 / 20000 / 10000), in the table order above. Validate the live quote, asset, recipient and resource before signing. No new real-money blockchain settlement test is claimed by this release; official-SDK composed payment tests use a mock facilitator, separately from actual Coinbase provider application acceptance.
+
+All three require `chain_id:8453` and a valid checksummed `address`; `block` defaults to `finalized`. State reads pin the selected canonical block hash. This is bounded single-provider evidence, not independent consensus, token safety, trading advice or complete history. Use live input/output schemas for the complete fields.
+
+- Contract Watch: optionally compare an owned `previous_snapshot`. At most one selected storage slot, one supported zero-argument view/pure ABI read and one topic0. No inferred layout or verified-source guarantee.
+- Wallet Watch: require one to four ERC-20 addresses in `tokens`. Default last four finalized blocks; `max_blocks` is1–4. An owned cursor resumes a saved page and cannot accompany `from_block`. Gaps beyond32 blocks fail instead of silently skipping history. No full native/internal/NFT history.
+- Token Facts: bounded contract-reported identity, metadata, supply and selected controls. Missing or deceptive evidence remains unknown/not_assessed. No honeypot or trading simulation.
+
+For example, Contract Watch and Token Facts accept `{"chain_id":8453,"address":"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913","block":"finalized"}`; Wallet Watch additionally requires `tokens`. Do not supply a client `request_id`.
+
+Before authorizing x402/MPP, persist a random32-byte private recovery token with the original proof and input. REST sends `X-Fresh402-Recovery-Token`; MCP uses `params._meta["fresh402/recovery-token"]`. Replay original evidence after uncertainty; never authorize a replacement. Use snapshot/cursor IDs only when their saved flags are true. Records retain30days; private financial recovery retains seven days. Foreign snapshots/cursors are not readable; provider failure or partial scans do not become paid successes.
+
+Prepaid charges4 /8 /4 require a separately accepted service-specific tariff4 grant and authenticated `/v3/prepaid/quote/{service_id}`. Existing Web package/account terms and aggregate Web tariff remain unchanged. This release does not create grants or silently make old package credits eligible. Blockchain products have no free-trial allowance. Shared finite daily/monthly admission can return429 before a customer exhausts their balance.

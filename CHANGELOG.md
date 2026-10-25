@@ -2,6 +2,21 @@
 
 These notes describe the deployed API, independently of the legacy source package version in this repository. Documentation publication does not deploy infrastructure or merge the backend release PR.
 
+## 3.0.0 - October 25, 2026
+
+- Enable the authenticated Web free-trial pilot after real wallet/Turnstile issuance and rotation, native Web execution, concurrency, durable replay and automatic idle-shutdown acceptance. One-time allowances: Check 20 / Extract 10 / Smart Diff 5 / OpenAPI Diff 3, within unchanged finite budgets.
+- Preserve the bounded three-tool Base commercial pilot, existing prices, payment rails and purchased balances. Circle Gateway remains disabled.
+- Use a Workers-compatible redirect mode for fail-closed Turnstile verification.
+- Keep blockchain payment challenges compatible with ordinary HTTP header limits without changing validation schemas or MCP parameter documentation.
+
+## 2.9.0 - October 25, 2026
+
+- Bounded commercial pilot for Contract Watch, Wallet Watch and Token Facts at the separately approved tariffs, reusing existing x402/MPP accounting and recovery. Old Web prepaid terms are preserved; blockchain credits need a separate accepted service grant.
+- Avoid redundant OpenAPI normalization within the unchanged comparison work budget; preserve complex-schema review warnings.
+- Diagnostic health reads no longer postpone the Container idle alarm.
+- Free Trial stays disabled pending real ownership/CAPTCHA onboarding and native idle-shutdown acceptance. Circle Gateway stays disabled.
+- Provider-backed application tests and mocked official-SDK payment tests are explicitly distinguished; no new real USDC payment is claimed.
+
 ## 2.8.0 - October 24, 2026
 
 - New developer website with dedicated quickstart, tool reference, pricing, security pages and explicitly illustrative local demonstrations.

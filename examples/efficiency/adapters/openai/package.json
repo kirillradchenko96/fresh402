@@ -1,0 +1,10 @@
+{
+  "name": "fresh402-openai-agents-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=24"},
+  "peerDependencies": {"@openai/agents": "^0.21.0"},
+  "devDependencies": {"@openai/agents": "0.21.0"},
+  "scripts": {"test": "node --test tools.test.ts"}
+}

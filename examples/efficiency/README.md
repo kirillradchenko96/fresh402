@@ -40,3 +40,7 @@ The existing `syncDocumentation` example demonstrates Check-before-Extract with 
 For live contracts and recovery: [API](../../docs/API.md), [agent purchasing](../../docs/AGENT_PREPAID.md), [MCP](../../docs/MCP.md), [availability](../../docs/RELEASE_AVAILABILITY.md). Ordinary MCP installation or a discoverable quote grants no wallet authority.
 
 The optional read-only acceptance harness tags every request as technical traffic and verifies agreement between the root, OpenAPI and actual MCP initialization versions, all eight tool identities, native Base USDC and the current merchant. An optional absolute expiry stops new probe requests after the caller's operating period. It has no wallet, purchase, product-execution or customer-balance path.
+
+## Optional agent bindings
+
+`createAgentBindings(client, {allowedTools})` discovers an explicit subset of the eight existing tools and preserves the live schemas. Its default paid behavior is quote-only, regardless of any client signer. Free Register is called only when explicitly selected and invoked. The optional [OpenAI Agents SDK adapter](adapters/openai/README.md) wraps these bindings with the supported `tool()` API and a runtime-owned call ID. Paid opt-in requires a customer-owned, independently budgeted, durable executor; the adapter never supplies wallet authority or retries an uncertain payment. Local fixture tests and real public discovery are separate from financial acceptance. No framework endorsement is implied.

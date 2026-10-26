@@ -25,3 +25,6 @@ jobs:
       - run: node --test examples/efficiency/*.test.ts
       - run: npx tsc --noEmit -p examples/efficiency/tsconfig.json
       - run: node --test scripts/public-interface-monitor.test.mjs
+      - run: npm ci --ignore-scripts --no-audit --no-fund --prefix examples/efficiency/adapters/openai
+      - run: node --test examples/efficiency/adapters/openai/tools.test.ts
+      - run: npx tsc --noEmit -p examples/efficiency/adapters/openai/tsconfig.json

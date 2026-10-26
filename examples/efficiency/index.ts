@@ -3,6 +3,8 @@ export {BudgetGuard} from './budget.ts';
 export type {BudgetPolicy,Spend} from './budget.ts';
 export {EvidenceCache,recommendRefresh} from './cache.ts';
 export type {CacheIdentity,CachedEvidence} from './cache.ts';
+export {createAgentBindings} from './agent-tools.ts';
+export type {AgentToolOptions,AgentBinding,AgentInvocation} from './agent-tools.ts';
 export {Fresh402Client,ApiError,PaymentRequired,PendingPayment,signerFromX402Client,syncDocumentation} from '../knowledge-base/client.ts';
 export type {Operation,Signer} from '../knowledge-base/client.ts';
 export {PrepaidClient,PendingPrepaid} from '../knowledge-base/prepaid.ts';

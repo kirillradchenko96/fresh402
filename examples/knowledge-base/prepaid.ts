@@ -41,6 +41,9 @@ export class PrepaidClient {
   const version=op.tariffVersion??1;if(![1,2,3].includes(version)||!Object.hasOwn(paths,op.service)||op.cost!==charge(version,op.service)||!/^[A-Za-z0-9_-]{16,128}$/.test(op.key))throw new Error('Invalid persisted prepaid operation');
   let r;try{r=await this.request(paths[op.service],op.input,op.key,{version,maximum:op.cost});}catch{throw new PendingPrepaid(op);}
   const durable=r.response.headers.get('x-fresh402-access')==='prepaid',charged=r.response.headers.get('x-fresh402-credits');
+  // Retention expiry is terminal, not an uncertain settlement or a refund.
+  // Preserve the original operation and conservative local budget unchanged.
+  if(r.response.status===410&&r.json.error==='prepaid_result_expired')throw new ApiError(r.json.error,410);
   if(r.response.ok){if(!durable||charged!==String(op.cost))throw new PendingPrepaid(op);op.state='completed';op.result=r.json;await this.persist(op);return r.json;}
   if(durable&&charged==='0'||r.response.status<500&&![409,410].includes(r.response.status)){if(op.state==='pending')this.reserved=Math.max(0,this.reserved-op.cost);op.state='released';await this.persist(op);throw new ApiError(r.json.error??'prepaid_error',r.response.status);}
   throw new PendingPrepaid(op);

@@ -25,6 +25,8 @@ Use the exact live input schemas and prices. `Fresh402Client` already routes dis
 
 Keep original proofs, inputs, recovery tokens and request IDs encrypted outside Git. The budget DB stores reservations, not signatures or API keys. Apply owner-only OS ACLs on Windows; POSIX file modes alone do not prove Windows confidentiality. A signing/storage failure requires reconciliation of that original attempt. There is no replacement-signature retry loop or automatic purchase fallback. Use the existing `recover(originalOperation)` path after uncertainty, which does not call the signer. Durable results have the live service's retention; a cache does not extend server-side recovery.
 
+The prepaid client treats the explicit `410 prepaid_result_expired` response as a terminal `ApiError`, not a pending retry. It preserves the original operation and local reservation: retention expiry does not prove a refund, authorize another debit or rerun the expired result.
+
 The new guard is locally tested, including real parallel processes. No new real-USDC acceptance or wallet interoperability is claimed by these SDK tests. Existing service acceptance remains separate evidence.
 
 ## Exact-scope cache and honest economics

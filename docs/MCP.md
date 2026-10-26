@@ -88,3 +88,10 @@ The separate Web free-trial pilot is enabled in 3.0.0 within finite shared capac
 Use the original x402/MPP proof, exact input and REQUIRED privately persisted random32-byte `fresh402/recovery-token` metadata for recovery. Provider failure/partial scans are not paid successes. Existing prepaid packages do not automatically grant these services: separate accepted tariff4 grants cost4/8/4. No blockchain free trial. Existing Web tool names, paths, prices and credits are unchanged.
 
 Separate machine-agent trial access is advertised by root `machine_trial.enabled` and `/v3/agent-trial`. When enabled, use its privately stored `fm_` credential in the existing trial HTTP header and one persisted `Idempotency-Key` per logical operation; the same eight tool names remain. See [machine trial](MACHINE_TRIAL.md). [All-service packages and controlled replenishment](AUTO_REPLENISH.md) are independently gated; existing package rights and payment safeguards remain unchanged.
+
+
+## Direct connection and current listing metadata
+
+Use the existing direct endpoint `https://fresh402.kirilllabs.workers.dev/mcp`. [Smithery announced](https://smithery.ai/future) that its `run.tools` / `server.smithery.ai` proxy URLs and managed connections stop on October31,2026; its public directory remains. Fresh402's direct MCP endpoint is independent of that retiring proxy. See the [verified discovery snapshot](DISCOVERY_AUDIT.md) for current listing state.
+
+The customer prepaid client now treats explicit `410 prepaid_result_expired` as terminal in REST and MCP. The original operation and reserved local budget remain intact; retention expiry is not a refund or permission to authorize replacement work. Unknown410 responses remain uncertain.

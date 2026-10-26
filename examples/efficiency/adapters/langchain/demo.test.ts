@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {runLocalDemo} from './demo.ts';
+for(const transport of ['rest','mcp'] as const)test('real LangGraph + encrypted CreditSession '+transport+' workflow, lost delivery, restart, unchanged reuse and bounded spend',async()=>{const result=await runLocalDemo(transport);assert.equal(result.fixture_credit_units,10);assert.equal(result.real_payments,0);assert.equal(result.paid_fixture_operations,4);assert.equal(result.submissions,5);assert.equal(result.recovery_extra_debits,0);});

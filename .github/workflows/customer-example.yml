@@ -28,3 +28,9 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund --prefix examples/efficiency/adapters/openai
       - run: node --test examples/efficiency/adapters/openai/tools.test.ts
       - run: npx tsc --noEmit -p examples/efficiency/adapters/openai/tsconfig.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund --omit=optional --prefix examples/efficiency/adapters/agentkit
+      - run: node --test examples/efficiency/adapters/agentkit/provider.test.ts
+      - run: npx tsc --noEmit -p examples/efficiency/adapters/agentkit/tsconfig.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund --omit=optional --prefix examples/efficiency/adapters/langchain
+      - run: node --test examples/efficiency/adapters/langchain/tools.test.ts examples/efficiency/adapters/langchain/demo.test.ts
+      - run: npx tsc --noEmit -p examples/efficiency/adapters/langchain/tsconfig.json

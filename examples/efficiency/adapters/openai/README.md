@@ -34,6 +34,8 @@ For paid execution, explicitly choose `mode: 'authorized'` and provide `executeP
 
 The existing [budget guard](../../README.md) and private `persist`/`recover` clients provide the building blocks. A new model tool call ID is not proof that a prior uncertain operation failed. The adapter has no automatic payment retry, package purchase, refund or replacement-signature path. Missing runtime call IDs deny paid execution. Pending/error results contain safe status fields and instructions to reconcile the original operation; private operation objects and exception messages are excluded.
 
+For the supported prepaid Web subset, the SDK now supplies `CreditSession`: set `executePaid: invocation => session.execute(invocation)` to reuse its encrypted original-operation store, pinned account/transport, and credit ceilings. This keeps the existing adapter and approval behavior intact, while removing the need to build a separate prepaid state manager. Configure it from the [shared SDK example](../../README.md).
+
 Actual framework construction/invocation, schema preservation, call-ID propagation, approval metadata and redaction are tested offline. Live public metadata has been checked separately. **No real payment or paid OpenAI model run was performed for this adapter.**
 
 Official API context: [OpenAI tools](https://developers.openai.com/api/docs/guides/tools), [Agents SDK](https://developers.openai.com/api/docs/guides/agents/sdk).

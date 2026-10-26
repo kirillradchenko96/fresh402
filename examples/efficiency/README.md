@@ -7,8 +7,8 @@ node --test examples/efficiency/efficiency.test.ts
 ```
 
 ```ts
-import {Fresh402Client, EvidenceCache, recommendRefresh} from './examples/efficiency/index.ts';
-const client = new Fresh402Client('https://fresh402.kirilllabs.workers.dev');
+import {createProductionClient, EvidenceCache, recommendRefresh} from './examples/efficiency/index.ts';
+const client = createProductionClient();
 const capabilities = await client.discover(); // Public OpenAPI/MCP, no target fetch/payment.
 // Default budget is zero and there is no signer. Construction does not call discover().
 ```
@@ -41,6 +41,35 @@ For live contracts and recovery: [API](../../docs/API.md), [agent purchasing](..
 
 The optional read-only acceptance harness tags every request as technical traffic and verifies agreement between the root, OpenAPI and actual MCP initialization versions, all eight tool identities, native Base USDC and the current merchant. An optional absolute expiry stops new probe requests after the caller's operating period. It has no wallet, purchase, product-execution or customer-balance path.
 
+## Production defaults and persistent prepaid execution (0.3.0)
+
+`createProductionClient()` pins the established public origin and current Safe recipient, with zero payment budget and no signer. Explicit `expectedRecipient` settings take precedence. The original `Fresh402Client` constructor retains its historical recipient default for compatibility; its original-operation recovery remains unchanged. Merchant changes require deliberate caller approval. This factory does not authorize a purchase or silently retarget an old payment.
+
+`CreditSession` supplies the durable executor for all supported agent adapters. It composes the existing Web `PrepaidClient` for Check, Extract, Smart Diff and OpenAPI Contract Diff. Supply the pinned customer account ID, explicit REST/MCP transport, an allowed-service subset, and positive per-call/day/month/lifetime credit ceilings. It verifies the authenticated account and tariff3 contract before paid submission. Current Web charges remain2/3/4/5; blockchain prepaid is outside this session's supported subset. Day and month are UTC; lifetime reservations never reset automatically.
+
+```ts
+import {CreditSession, createProductionClient} from './examples/efficiency/index.ts';
+// Load these values from your own private configuration/OS keystore.
+// storageKey is a separate random32-byte storage-encryption key, never a wallet key.
+const session = new CreditSession(privateAbsoluteDatabasePath, {
+  origin: 'https://fresh402.kirilllabs.workers.dev',
+  accountId: approvedCustomerAccountId,
+  transport: 'mcp',
+  allowedServices: ['check', 'extract'],
+  perCallCredits: 3, dailyCredits: 30, monthlyCredits: 100, lifetimeCredits: 100,
+}, {credential: customerApiKey, encryptionKey: storageKey});
+const client = createProductionClient({transport: 'mcp'});
+// Pass executePaid: invocation => session.execute(invocation) to an authorized
+// adapter. The runtime supplies a stable original call ID; model args do not.
+// session.disable() persistently stops execution; session.close() releases the DB.
+```
+
+The private SQLite file must remain outside Git. Requests and results use AES-256-GCM with random IVs and policy-bound authenticated data. API credentials are held in private memory and are not written to this store. Keep the encryption key separately in an OS keystore; apply owner-only Windows ACLs to the directory (POSIX modes do not establish Windows ACLs). Every process sharing one budget must use this same DB, policy and storage key. Keep private backups of both state and key. Deleting or duplicating stores bypasses this cooperative client guard and cannot prove a refund.
+
+A stable call ID maps to the immutable original input and server idempotency key **before submission**. Lost responses recover that key after restart. Concurrent owners cannot submit the same active ID; the local lease is120seconds. Completed replay retains original provenance, without a new paid submission. Released and explicit expired results stop locally. Conservative reservations stay consumed even after failure/expiry: they bound maximum possible spend, rather than mirror the server's refund ledger. Backwards clocks, changed policies, wrong-account credentials and damaged encrypted evidence fail closed. A replacement credential can be used only for the pinned account. No wallet, funding, purchase, automatic replenishment or timed retry is provided by this session.
+
 ## Optional agent bindings
 
 `createAgentBindings(client, {allowedTools})` discovers an explicit subset of the eight existing tools and preserves the live schemas. Its default paid behavior is quote-only, regardless of any client signer. Free Register is called only when explicitly selected and invoked. The optional [OpenAI Agents SDK adapter](adapters/openai/README.md) wraps these bindings with the supported `tool()` API and a runtime-owned call ID. Paid opt-in requires a customer-owned, independently budgeted, durable executor; the adapter never supplies wallet authority or retries an uncertain payment. Local fixture tests and real public discovery are separate from financial acceptance. No framework endorsement is implied.
+
+Optional integrations also include [Coinbase AgentKit](adapters/agentkit/README.md) and [LangChain/LangGraph](adapters/langchain/README.md). Their framework packages install separately and are absent from the base SDK/backend dependencies. The LangGraph example runs the real framework and encrypted session against a local fixture, including a lost response, process-state reopen, unchanged-evidence reuse and budget denial. Its credits are synthetic. Existing real payment acceptance is separate; these integrations do not establish new wallet or payment-rail acceptance.

@@ -1,1 +1,1 @@
-{"name":"fresh402-efficiency-example","version":"0.3.0","private":true,"type":"module","engines":{"node":">=24"},"scripts":{"test":"node --test efficiency.test.ts agent-tools.test.ts credit-session.test.ts production.test.ts"}}
+{"name":"fresh402-efficiency-example","version":"0.3.1","private":true,"type":"module","engines":{"node":">=24"},"scripts":{"test":"node --test efficiency.test.ts agent-tools.test.ts credit-session.test.ts production.test.ts feeds.test.ts"}}

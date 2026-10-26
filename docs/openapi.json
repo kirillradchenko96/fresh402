@@ -1,6 +1,6 @@
 {
   "x-machine-trial": {
-    "enabled": false,
+    "enabled": true,
     "model": "one-time bounded machine trial; wallet control is not unique-agent identity",
     "allowances": {
       "check": 2,
@@ -32,7 +32,7 @@
     "warning": "Allowances are maximum entitlements, not reserved capacity. Shared admission may return 429 before an allowance is exhausted. No payment fallback."
   },
   "x-all-service-prepaid": {
-    "enabled": false,
+    "enabled": true,
     "terms_endpoint": "/v3/prepaid/all-services",
     "acceptance_field": "all_services_terms_digest",
     "requires_finalized_purchase": true
@@ -107,8 +107,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Fresh402 Web and Blockchain Intelligence API",
-    "version": "3.0.0",
-    "description": "Fresh402 3.0.0: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
+    "version": "3.0.1",
+    "description": "Fresh402 3.0.1: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
     "contact": {
       "name": "Fresh402 support",
       "email": "fresh402@proton.me",
@@ -1764,8 +1764,8 @@
     "/v2/extract": {
       "post": {
         "operationId": "fresh402_extract",
-        "summary": "Extract readable text, metadata, headings, public links and embedded JSON-LD from one public HTTPS document. Use to read static HTML, JSON or plain text; no watch or prior registration is needed. Optional CSS scope, noise exclusions and exact JSON Pointer selection via json_pointer, or an ordered projection of up to8 fields via json_pointers (mutually exclusive; JSON only, any missing field returns422). One fetch/JSON parse with aggregate work/output limits. Omit json_pointer to retain full-document extraction. max_chars defaults to 20000 and limits returned text, not fetch size. Does not render JavaScript, crawl links or compare versions. $0.010 USDC per call on Base mainnet (eip155:8453), requiring an x402-capable MCP payment client and funded native-USDC payer. An ordinary MCP client receives a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
-        "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base. Optional authenticated free-trial pilot: inspect GET /v2/trial before use. Send only X-Fresh402-Trial-Key and a persisted Idempotency-Key to this normal route or MCP HTTP transport. One-time quotas and finite capacity apply; replay the exact same input/key for seven days. Exhaustion never initiates a payment. Disabled trials reject execution.",
+        "summary": "Extract readable text, metadata, headings, public links and embedded JSON-LD from one public HTTPS document. Use to read static HTML, JSON or plain text; no watch or prior registration is needed. Optional feed_mode:entries projects bounded RSS2/Atom IDs, declared links, timestamps, content fingerprints and indexed source evidence; omit for original XML-as-text behavior. No feed crawling or background subscription. Optional CSS scope, noise exclusions and exact JSON Pointer selection via json_pointer, or an ordered projection of up to8 fields via json_pointers (mutually exclusive; JSON only, any missing field returns422). One fetch/JSON parse with aggregate work/output limits. Omit json_pointer to retain full-document extraction. max_chars defaults to 20000 and limits returned text, not fetch size. Does not render JavaScript, crawl links or compare versions. $0.010 USDC per call on Base mainnet (eip155:8453), requiring an x402-capable MCP payment client and funded native-USDC payer. An ordinary MCP client receives a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
+        "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch; opt-in feed_mode:entries projects RSS2/Atom. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base. Optional authenticated free-trial pilot: inspect GET /v2/trial before use. Send only X-Fresh402-Trial-Key and a persisted Idempotency-Key to this normal route or MCP HTTP transport. One-time quotas and finite capacity apply; replay the exact same input/key for seven days. Exhaustion never initiates a payment. Disabled trials reject execution.",
         "tags": [
           "extract"
         ],
@@ -1887,6 +1887,11 @@
                       "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
                     }
                   },
+                  "feed_mode": {
+                    "description": "Optional RSS2/Atom projection: 'entries'. Omit for unchanged XML-as-text extraction and existing hashes. Accepts XML/+xml/text/plain with an RSS2 root or namespaced Atom feed; no RSS1/RDF, HTML repair, DTD or external entity/content fetching. Cannot combine with CSS/JSON selection or exclusions. Limits:262144 UTF-8 source bytes,4096 XML elements,depth32,100 entries,16384 characters/field,131072 projected bytes; excess fails explicitly. Returns feed identity, inert declared links, entry IDs/timestamps/content fingerprints and indexed source evidence. Identical duplicate entries deduplicate; conflicting IDs fail422. Feed text/hash cover the canonical projection; max_chars clips text and omits structured feed when clipped. Existing registration/watch semantics remain unchanged.",
+                    "type": "string",
+                    "const": "entries"
+                  },
                   "json_pointer": {
                     "description": "Optional exact RFC 6901 JSON Pointer, at most 256 characters, e.g. '/product/price' or '/items/0/name'. JSON documents only; '~0' means '~' and '~1' means '/'. Empty string selects the whole document. Omit to extract the entire normalized document. Selection runs after ignore_json_paths; a missing or excluded target returns 422. Array indices are zero-based canonical integers; '*' is a literal key, not a wildcard. Returned text/data/hash cover the selected value; max_chars and data_omitted still apply.",
                     "type": "string",
@@ -1928,13 +1933,49 @@
                   "url"
                 ],
                 "additionalProperties": false,
-                "description": "Extract a required public URL without creating or requiring a watch. Optional content rules scope/remove noise; max_chars limits returned text and the two include flags control supplementary HTML data. Unknown fields are rejected.",
+                "description": "Extract a required public URL without creating or requiring a watch. Optional content rules scope/remove noise; max_chars limits returned text and the two include flags control supplementary HTML data. Opt-in feed_mode:'entries' projects bounded RSS2/Atom; omit to preserve original extraction. Unknown fields are rejected.",
                 "not": {
                   "required": [
                     "json_pointer",
                     "json_pointers"
                   ]
                 },
+                "allOf": [
+                  {
+                    "not": {
+                      "required": [
+                        "feed_mode"
+                      ],
+                      "anyOf": [
+                        {
+                          "required": [
+                            "selector"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "ignore_selectors"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "ignore_json_paths"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "json_pointer"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "json_pointers"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
                 "examples": [
                   {
                     "url": "https://example.com/docs",
@@ -2233,6 +2274,11 @@
                       "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
                     }
                   },
+                  "feed_mode": {
+                    "description": "Optional RSS2/Atom projection: 'entries'. Omit for unchanged XML-as-text extraction and existing hashes. Accepts XML/+xml/text/plain with an RSS2 root or namespaced Atom feed; no RSS1/RDF, HTML repair, DTD or external entity/content fetching. Cannot combine with CSS/JSON selection or exclusions. Limits:262144 UTF-8 source bytes,4096 XML elements,depth32,100 entries,16384 characters/field,131072 projected bytes; excess fails explicitly. Returns feed identity, inert declared links, entry IDs/timestamps/content fingerprints and indexed source evidence. Identical duplicate entries deduplicate; conflicting IDs fail422. Feed text/hash cover the canonical projection; max_chars clips text and omits structured feed when clipped. Existing registration/watch semantics remain unchanged.",
+                    "type": "string",
+                    "const": "entries"
+                  },
                   "json_pointer": {
                     "description": "Optional exact RFC 6901 JSON Pointer, at most 256 characters, e.g. '/product/price' or '/items/0/name'. JSON documents only; '~0' means '~' and '~1' means '/'. Empty string selects the whole document. Omit to extract the entire normalized document. Selection runs after ignore_json_paths; a missing or excluded target returns 422. Array indices are zero-based canonical integers; '*' is a literal key, not a wildcard. Returned text/data/hash cover the selected value; max_chars and data_omitted still apply.",
                     "type": "string",
@@ -2274,13 +2320,49 @@
                   "url"
                 ],
                 "additionalProperties": false,
-                "description": "Extract a required public URL without creating or requiring a watch. Optional content rules scope/remove noise; max_chars limits returned text and the two include flags control supplementary HTML data. Unknown fields are rejected.",
+                "description": "Extract a required public URL without creating or requiring a watch. Optional content rules scope/remove noise; max_chars limits returned text and the two include flags control supplementary HTML data. Opt-in feed_mode:'entries' projects bounded RSS2/Atom; omit to preserve original extraction. Unknown fields are rejected.",
                 "not": {
                   "required": [
                     "json_pointer",
                     "json_pointers"
                   ]
                 },
+                "allOf": [
+                  {
+                    "not": {
+                      "required": [
+                        "feed_mode"
+                      ],
+                      "anyOf": [
+                        {
+                          "required": [
+                            "selector"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "ignore_selectors"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "ignore_json_paths"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "json_pointer"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "json_pointers"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
                 "examples": [
                   {
                     "url": "https://example.com/docs",
@@ -3659,6 +3741,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -4621,6 +4706,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -5483,6 +5571,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -9676,6 +9767,189 @@
           },
           "data": {},
           "data_omitted": {
+            "type": "boolean"
+          },
+          "representation": {
+            "const": "feed_entries_v1",
+            "description": "Present only for explicit feed_mode:entries. Existing content_kind remains text; existing watch/hash normalization is untouched."
+          },
+          "feed": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "format": {
+                    "enum": [
+                      "rss2",
+                      "atom"
+                    ]
+                  },
+                  "parser_version": {
+                    "const": 1
+                  },
+                  "source_url": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "identity_source": {
+                    "enum": [
+                      "declared",
+                      "link",
+                      "source_url"
+                    ]
+                  },
+                  "title": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "link": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "updated_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "updated_raw": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "entries": {
+                    "type": "array",
+                    "maxItems": 100,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "identity_source": {
+                          "enum": [
+                            "declared",
+                            "link",
+                            "content_hash"
+                          ]
+                        },
+                        "title": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "link": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "published_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "updated_at": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "published_raw": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "updated_raw": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "summary": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "content": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "content_hash": {
+                          "type": "string",
+                          "description": "SHA256 of title,link,normalized publication time,summary and content; excludes poll/update timestamps and source position. Compare the same ID across retained client projections; does not prove semantic importance."
+                        },
+                        "evidence": {
+                          "type": "object",
+                          "properties": {
+                            "entry_index": {
+                              "type": "integer"
+                            },
+                            "path": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "entry_index",
+                            "path"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "identity_source",
+                        "content_hash",
+                        "evidence"
+                      ]
+                    }
+                  },
+                  "entries_deduplicated": {
+                    "type": "integer"
+                  },
+                  "warnings": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "format",
+                  "parser_version",
+                  "source_url",
+                  "id",
+                  "identity_source",
+                  "entries",
+                  "entries_deduplicated",
+                  "warnings"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only for feed_mode:entries; null when canonical projected text was clipped. Inert source-declared URLs are never crawled; raw timestamp evidence can be unrecognized. Feed/entry identity fallbacks are explicit."
+          },
+          "feed_omitted": {
             "type": "boolean"
           },
           "json_pointers": {

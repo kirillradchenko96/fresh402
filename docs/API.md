@@ -1,8 +1,8 @@
-# Fresh402 3.0.0 public API
+# Fresh402 3.0.1 public API
 
 Base URL: https://fresh402.kirilllabs.workers.dev
 
-The hosted service reports version **3.0.0**. [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
+The hosted service reports version **3.0.1**. [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
 
 | Operation | Method and path | MCP tool | Price |
 |---|---|---|---:|
@@ -53,6 +53,18 @@ The returned `json_pointer`, `text`, `data`, `text_length` and `hash` describe t
 
 Use `json_pointers:["/product/price","/product/stock"]` to extract1-8 ordered unique exact pointers in one fetch/JSON parse. It is mutually exclusive with `json_pointer`; exclusions run first and any missing target fails the whole operation. Returned `data` is an ordered array of `{pointer,value}`; text/hash cover the full combined projection. `max_chars` clips the aggregate, with `data:null,data_omitted:true` when clipped. Projection limits:200000 UTF-8 bytes and20000 aggregate nodes, including repeated overlapping subtrees. Pointers allow at most256 characters/64 segments; no executable expressions or wildcard expansion.
 
+### Opt-in RSS2 / Atom projection
+
+Send `{"url":"https://example.com/feed.xml","feed_mode":"entries","max_chars":50000}` to Extract (REST or MCP, with the existing payment/access method). Omit `feed_mode` to keep the original XML-as-text behavior and hash. No registration, extra paid call, watch-rule migration or background subscription is introduced. The approved Extract price and credit charge are unchanged.
+
+The response adds `representation:"feed_entries_v1"`, `feed` and `feed_omitted`. `content_kind` remains `text`; `text` is the canonical JSON projection and `hash` covers that full projection. Clipping by `max_chars` retains the full hash but sets `feed:null,feed_omitted:true`. No partial structured entry is invented. CSS/JSON selectors or exclusions cannot be combined with feed mode, including empty exclusion arrays.
+
+`feed` includes format, declared/fallback identity, title, source URL, inert source-declared links, timestamps, entries and warnings. Each entry includes ID and identity source, title/link, raw and recognized UTC timestamps, summary/content text, content fingerprint and indexed XML evidence. Link URLs are resolved against `xml:base`/final URL and never crawled or independently verified as canonical. External Atom content is not fetched. Unknown dates remain null with raw evidence; normalization recognizes explicit UTC/numeric zones, without inventing a local zone. RSS1/RDF, XML1.1/non-UTF8 declarations, DTD/custom entities, malformed XML and ambiguous conflicting entry IDs are rejected. This is a bounded projection, not complete RSS/Atom conformance validation or HTML repair.
+
+Limits are262144 UTF-8 source bytes,4096 elements,depth32,32 attributes/element,100 entries,16384 characters/field and131072 projected bytes. Excess fails explicitly. Identical duplicate entries deduplicate; distinct IDs remain distinct. Entry `content_hash` covers title,link,normalized publication time,summary and content; it excludes update/poll timestamps and entry position. Compare retained same-source IDs/hashes with the SDK's `compareFeedEntries` to identify new/edited/absent entries. An absent ID can mean an aged-out feed window; it does not prove deletion. Content-derived IDs can represent an edit as addition/removal. Existing Check/Smart Diff watches retain their previous XML normalization.
+
+The structured response can be larger than raw XML for very small feeds because it includes explicit provenance and duplicates structured data in text, as existing JSON extraction does. Use it for structured selection and stable fingerprints; do not assume universal byte, token or service-fee savings over a competent local feed parser.
+
 ## Smart Diff
 
 ```json
@@ -93,7 +105,7 @@ OpenAPI analysis uses `rules_version:2` / `openapi-directional-v2`. Supported lo
 
 ## Payment and recovery
 
-Payment is **x402 v2**, scheme **exact**, native **USDC on Base mainnet** (`eip155:8453`, chain ID 8453). The asset is `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`; the receiving address currently advertised is `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Always validate the current challenge before signing.
+Payment is **x402 v2**, scheme **exact**, native **USDC on Base mainnet** (`eip155:8453`, chain ID 8453). The asset is `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`; the current receiving Safe is `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Always validate the current challenge before signing. Historical EOA-bound operations retain their original recipient, resource, proof and recovery identity; this documentation does not retarget an old authorization.
 
 An empty unsigned POST to any of the four paid REST resources returns a discovery challenge without executing the operation. The challenge's schema still requires the actual application input. Supplied malformed or unsafe input can be rejected before payment. A signed request requires valid input and existing watch/comparison prerequisites before settlement; completed private recovery retains its original result semantics. Smart Diff clients must register first and use the returned watch ID.
 
@@ -152,10 +164,3 @@ Prepaid charges4 /8 /4 require a separately accepted service-specific tariff4 gr
 Root `machine_trial` and `GET /v3/agent-trial` describe the separate browserless, CAPTCHA-free trial. `enabled` is authoritative. This does not change human trial quotas or add MCP tools. Read [exact allowances and economic caps](MACHINE_TRIAL.md).
 
 `GET /v3/prepaid/all-services` describes the new explicitly accepted package cohort when enabled. Legacy packages, balances and accepted tariffs remain unchanged. New eligible finalized credits can automatically authorize all seven services without an operator grant, at the approved 2/3/4/5/4/8/4 costs. Do not infer live availability from this guide. The optional [customer-controlled replenishment client](AUTO_REPLENISH.md) requires explicit independent wallet policy; no merchant charge permission or automatic paid fallback is implied.
-
-
-## Current recipient and original-payment recovery
-
-The current merchant recipient is Safe Treasury `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3` on Base Mainnet (8453), using native USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`. It is currently a 1-of-1 Safe, not independent multisignature protection, escrow or buyer insurance. Verify the live quote against your explicitly approved recipient before signing; stop if it differs. Existing client fragments that default to the historical recipient must receive `expectedRecipient: "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"` for a **new** purchase or service authorization. An older pending operation keeps its original intent, recipient, signature and recovery token: do not rewrite or replace it after a timeout.
-
-The enabled all-service offers are `starter-all-services-v4` ($2.50 / 1,000 credits) and `developer-all-services-v4` ($15 / 10,000 credits), subject to live purchasing flags and explicit acceptance of the current `/v3/prepaid/all-services` terms digest. Their finalized credits cover Check 2, Extract 3, Smart Diff 4, OpenAPI Contract Diff 5, Contract Watch 4, Wallet Watch 8 and Token Facts 4 credits. Legacy `candidate-*-v3` Web packages retain their original rights. These are one-time purchases with non-expiring credits, not subscriptions. A quote or discovery response never authorizes payment.

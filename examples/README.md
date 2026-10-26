@@ -65,3 +65,6 @@ curl https://fresh402.kirilllabs.workers.dev/v2/openapi-contract-diff \
 ```
 
 For browserless EOA enrollment, exact package purchase, bounded early credits, finalized recovery and shared REST/MCP credit execution, use the [agent purchasing guide](../docs/AGENT_PREPAID.md). Follow live availability; early inclusion is not finality.
+
+
+[Efficiency SDK foundation](efficiency/README.md): existing public clients plus opt-in persistent customer budgets, exact-scope cache, cost planning and a read-only REST/MCP acceptance harness. No wallet or payment action on import; no npm registry release is claimed.

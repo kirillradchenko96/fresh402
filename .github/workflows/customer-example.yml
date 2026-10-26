@@ -1,10 +1,10 @@
 name: Customer example
 on:
   pull_request:
-    paths: ['examples/knowledge-base/**', '.github/workflows/customer-example.yml']
+    paths: ['examples/knowledge-base/**', 'examples/efficiency/**', '.github/workflows/customer-example.yml']
   push:
     branches: [main]
-    paths: ['examples/knowledge-base/**', '.github/workflows/customer-example.yml']
+    paths: ['examples/knowledge-base/**', 'examples/efficiency/**', '.github/workflows/customer-example.yml']
 permissions:
   contents: read
 jobs:
@@ -22,3 +22,5 @@ jobs:
       - run: node --test examples/knowledge-base/*.test.ts
       - run: node examples/knowledge-base/run.ts --demo
       - run: node examples/knowledge-base/run.ts --demo --mcp
+      - run: node --test examples/efficiency/*.test.ts
+      - run: npx tsc --noEmit -p examples/efficiency/tsconfig.json

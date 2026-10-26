@@ -1,8 +1,8 @@
 # Self-service prepaid customer API
 
-Fresh402 2.5 provides wallet-authenticated customer onboarding alongside the independent x402 pay-per-call API. Discover one-time, non-expiring credit packages through `GET /` → `prepaid_packages`. Read `GET /v2/prepaid/plans` and OpenAPI `x-customer-onboarding` for current public signup and purchasing availability before proceeding. A deployed endpoint, an HTTP 402, and a simulated settlement are not proof of a customer purchase.
+Fresh402 3.0 provides wallet-authenticated customer onboarding alongside the independent x402 pay-per-call API. Discover one-time, non-expiring credit packages through `GET /` → `prepaid_packages`. Read `GET /v2/prepaid/plans` and OpenAPI `x-customer-onboarding` for current public signup and purchasing availability before proceeding. A deployed endpoint, an HTTP 402, and a simulated settlement are not proof of a customer purchase.
 
-The five established MCP tool names and `/mcp` URL are unchanged. MCP supports standalone x402 operations without signup. Customer management uses REST; prepaid execution works through REST and the same four paid MCP tools. MCP discovery alone does not grant credentials or payment authority. See the complete [browserless agent purchasing guide](AGENT_PREPAID.md).
+The established MCP tool names and `/mcp` URL are unchanged; current discovery lists eight tools including free Register. MCP supports standalone x402 operations without signup. Customer management uses REST; Web prepaid execution works through REST and the four Web MCP tools. New finalized all-service package credits can additionally fund the three Base tools under their service-specific quote and explicit accepted terms. MCP discovery alone does not grant credentials or payment authority. See the complete [browserless agent purchasing guide](AGENT_PREPAID.md).
 
 | Product | x402 USDC | Prepaid credits, tariff 3 |
 |---|---:|---:|

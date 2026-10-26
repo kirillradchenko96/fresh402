@@ -1,0 +1,63 @@
+name: Fresh402 independent public observer
+run-name: Fresh402 public observer — ${{ inputs.acceptance_case || 'scheduled' }}
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+    inputs:
+      acceptance_case:
+        description: Live read-only observation or clearly labeled notification-channel acceptance
+        type: choice
+        options: [live, controlled_failure, controlled_recovery]
+        default: live
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: fresh402-independent-public-observer
+  cancel-in-progress: false
+jobs:
+  observe:
+    if: github.repository == 'kirillradchenko96/fresh402' && github.ref == 'refs/heads/main' && github.event.repository.private == false && vars.FRESH402_PUBLIC_PROBE_EXPIRES_MS != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      FRESH402_PUBLIC_PROBE_EXPIRES_MS: ${{ vars.FRESH402_PUBLIC_PROBE_EXPIRES_MS }}
+    steps:
+      - id: admission
+        name: Existing operating-period admission
+        run: |
+          node -e 'const n=Number(process.env.FRESH402_PUBLIC_PROBE_EXPIRES_MS);require("node:fs").appendFileSync(process.env.GITHUB_OUTPUT,"enabled="+(Number.isSafeInteger(n)&&Date.now()<n)+"\n");'
+      - if: steps.admission.outputs.enabled == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - if: steps.admission.outputs.enabled == 'true'
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - if: steps.admission.outputs.enabled == 'true'
+        name: Bounded observer regression tests, no network
+        run: node --test scripts/public-interface-monitor.test.mjs
+      - if: steps.admission.outputs.enabled == 'true'
+        id: probe
+        name: Public contract observation
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          FRESH402_OBSERVER_ACCEPTANCE_CASE: ${{ inputs.acceptance_case || 'live' }}
+        run: node scripts/public-interface-monitor.mjs
+      - if: always() && steps.probe.outputs.label != ''
+        name: ${{ steps.probe.outputs.label }}
+        run: echo 'Bounded public observation state retained in this run. No payment or product invocation.'
+      - if: always() && steps.probe.outputs.classification != ''
+        name: Observation summary
+        env:
+          CLASSIFICATION: ${{ steps.probe.outputs.classification }}
+          RECOVERY: ${{ steps.probe.outputs.recovery }}
+          CASE: ${{ inputs.acceptance_case || 'scheduled' }}
+        run: |
+          echo "Fresh402 observer: $CLASSIFICATION; recovery=$RECOVERY; case=$CASE." >> "$GITHUB_STEP_SUMMARY"
+          echo 'Controlled acceptance is synthetic, not an actual service outage. No wallet, USDC or customer credits are used.' >> "$GITHUB_STEP_SUMMARY"
+      - if: steps.probe.outputs.alert == 'true'
+        name: Signal the classified observation through existing Actions notifications
+        run: exit 1

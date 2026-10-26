@@ -93,7 +93,7 @@ OpenAPI analysis uses `rules_version:2` / `openapi-directional-v2`. Supported lo
 
 ## Payment and recovery
 
-Payment is **x402 v2**, scheme **exact**, native **USDC on Base mainnet** (`eip155:8453`, chain ID 8453). The asset is `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`; the receiving address currently advertised is `0x58B4b483fBE31860335eCeB12CCCF4338b251085`. Always validate the current challenge before signing.
+Payment is **x402 v2**, scheme **exact**, native **USDC on Base mainnet** (`eip155:8453`, chain ID 8453). The asset is `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`; the receiving address currently advertised is `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Always validate the current challenge before signing.
 
 An empty unsigned POST to any of the four paid REST resources returns a discovery challenge without executing the operation. The challenge's schema still requires the actual application input. Supplied malformed or unsafe input can be rejected before payment. A signed request requires valid input and existing watch/comparison prerequisites before settlement; completed private recovery retains its original result semantics. Smart Diff clients must register first and use the returned watch ID.
 
@@ -152,3 +152,10 @@ Prepaid charges4 /8 /4 require a separately accepted service-specific tariff4 gr
 Root `machine_trial` and `GET /v3/agent-trial` describe the separate browserless, CAPTCHA-free trial. `enabled` is authoritative. This does not change human trial quotas or add MCP tools. Read [exact allowances and economic caps](MACHINE_TRIAL.md).
 
 `GET /v3/prepaid/all-services` describes the new explicitly accepted package cohort when enabled. Legacy packages, balances and accepted tariffs remain unchanged. New eligible finalized credits can automatically authorize all seven services without an operator grant, at the approved 2/3/4/5/4/8/4 costs. Do not infer live availability from this guide. The optional [customer-controlled replenishment client](AUTO_REPLENISH.md) requires explicit independent wallet policy; no merchant charge permission or automatic paid fallback is implied.
+
+
+## Current recipient and original-payment recovery
+
+The current merchant recipient is Safe Treasury `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3` on Base Mainnet (8453), using native USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`. It is currently a 1-of-1 Safe, not independent multisignature protection, escrow or buyer insurance. Verify the live quote against your explicitly approved recipient before signing; stop if it differs. Existing client fragments that default to the historical recipient must receive `expectedRecipient: "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"` for a **new** purchase or service authorization. An older pending operation keeps its original intent, recipient, signature and recovery token: do not rewrite or replace it after a timeout.
+
+The enabled all-service offers are `starter-all-services-v4` ($2.50 / 1,000 credits) and `developer-all-services-v4` ($15 / 10,000 credits), subject to live purchasing flags and explicit acceptance of the current `/v3/prepaid/all-services` terms digest. Their finalized credits cover Check 2, Extract 3, Smart Diff 4, OpenAPI Contract Diff 5, Contract Watch 4, Wallet Watch 8 and Token Facts 4 credits. Legacy `candidate-*-v3` Web packages retain their original rights. These are one-time purchases with non-expiring credits, not subscriptions. A quote or discovery response never authorizes payment.

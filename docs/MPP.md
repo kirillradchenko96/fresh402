@@ -2,7 +2,7 @@
 
 Read `GET https://fresh402.kirilllabs.workers.dev/` first. `mpp_payments.enabled` controls new per-call MPP payments. Package purchases additionally require `mpp_payments.prepaid_purchases`, `prepaid_packages.enabled` and the availability in `/v2/prepaid/plans`. A disabled method is not an invitation to sign. The existing x402 and prepaid contracts remain available under their own flags.
 
-Fresh402 accepts only **MPP `evm/charge`, Base Mainnet (8453), native USDC** `0x833589fcd6edb6e08f4c7c32d4f71b54bda02913`, recipient `0x58B4b483fBE31860335eCeB12CCCF4338b251085`. Use an authorized EOA/external EIP-712 signer with sufficient USDC and explicit spending permission. Contract wallets are unsupported. The existing facilitator submits the exact EIP-3009 authorization. No unlimited allowance, token approval, browser checkout or payer private key sent to Fresh402 is required. Use a payer distinct from the recipient for package funding.
+Fresh402 accepts only **MPP `evm/charge`, Base Mainnet (8453), native USDC** `0x833589fcd6edb6e08f4c7c32d4f71b54bda02913`, recipient `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Use an authorized EOA/external EIP-712 signer with sufficient USDC and explicit spending permission. Contract wallets are unsupported. The existing facilitator submits the exact EIP-3009 authorization. No unlimited allowance, token approval, browser checkout or payer private key sent to Fresh402 is required. Use a payer distinct from the recipient for package funding.
 
 | Product | x402 or MPP per call, USDC | Prepaid tariff 3 credits | REST per-call route |
 |---|---:|---:|---|
@@ -121,3 +121,10 @@ Tempo, Stripe SPT, other chains/assets, swaps, subscriptions and payment session
 Official references: [EVM charge](https://mpp.dev/payment-methods/evm/charge), [x402 coexistence](https://mpp.dev/guides/use-mpp-with-x402), [MCP transport](https://mpp.dev/protocol/transports/mcp), [mppx](https://github.com/wevm/mppx).
 
 Circle Gateway is a separate optional x402 rail, not an MPP method. It is disabled pending acceptance; consult root `circle_gateway.enabled` and the [Circle Gateway guide](CIRCLE_GATEWAY.md). A Gateway transfer UUID is not a direct onchain receipt.
+
+
+## Current recipient and original-payment recovery
+
+The current merchant recipient is Safe Treasury `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3` on Base Mainnet (8453), using native USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`. It is currently a 1-of-1 Safe, not independent multisignature protection, escrow or buyer insurance. Verify the live quote against your explicitly approved recipient before signing; stop if it differs. Existing client fragments that default to the historical recipient must receive `expectedRecipient: "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"` for a **new** purchase or service authorization. An older pending operation keeps its original intent, recipient, signature and recovery token: do not rewrite or replace it after a timeout.
+
+The enabled all-service offers are `starter-all-services-v4` ($2.50 / 1,000 credits) and `developer-all-services-v4` ($15 / 10,000 credits), subject to live purchasing flags and explicit acceptance of the current `/v3/prepaid/all-services` terms digest. Their finalized credits cover Check 2, Extract 3, Smart Diff 4, OpenAPI Contract Diff 5, Contract Watch 4, Wallet Watch 8 and Token Facts 4 credits. Legacy `candidate-*-v3` Web packages retain their original rights. These are one-time purchases with non-expiring credits, not subscriptions. A quote or discovery response never authorizes payment.

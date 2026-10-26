@@ -2,7 +2,7 @@
 
 Fresh402 fetches public static HTTPS documents and provides Check, Extract, Smart Diff and OpenAPI Contract Diff through REST and the same five MCP tools. It does not render JavaScript, execute described API operations, crawl linked pages or run LLM inference. Fetching and parsing remain bounded by the live schemas, quotas and security policy.
 
-Base Mainnet only: chain `8453` / `eip155:8453`; native USDC `0x833589fcd6edb6e08f4c7c32d4f71b54bda02913`; merchant `0x58B4b483fBE31860335eCeB12CCCF4338b251085`. Use a distinct payer EOA. Contract wallets / ERC-1271 are unsupported. Bring your own compatible EIP-712 signer with explicit owner-approved spending limits and enough native USDC. An ordinary MCP installation or wallet connection grants no payment authority. The facilitator submits the exact authorization; this client does not broadcast a transaction. ETH is required only if your separate wallet integration performs gas-paying transactions. No unlimited approval is requested.
+Base Mainnet only: chain `8453` / `eip155:8453`; native USDC `0x833589fcd6edb6e08f4c7c32d4f71b54bda02913`; merchant `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Use a distinct payer EOA. Contract wallets / ERC-1271 are unsupported. Bring your own compatible EIP-712 signer with explicit owner-approved spending limits and enough native USDC. An ordinary MCP installation or wallet connection grants no payment authority. The facilitator submits the exact authorization; this client does not broadcast a transaction. ETH is required only if your separate wallet integration performs gas-paying transactions. No unlimited approval is requested.
 
 | Product | One x402 call, USDC | Tariff 3 credits | Prepaid REST route |
 |---|---:|---:|---|
@@ -129,3 +129,10 @@ Common errors: 401/403 authenticate or recover/revoke the correct key; 402 insuf
 ## Optional native MPP purchases
 
 When root `mpp_payments.prepaid_purchases` and public purchasing availability are true, select `payment_protocol: "mpp"` when creating a new intent. The official MPP SDK signs its immutable challenge-derived nonce; this intent cannot switch to x402. Prices, 50/100 early-credit ceilings, three-confirmation corroboration, finality, ledger and prepaid REST/MCP spending remain the same. Follow the [MPP package exchange and original-credential recovery](MPP.md#starter-and-developer-through-mpp). The existing tutorial above and omitted protocol continue to use x402.
+
+
+## Current recipient and original-payment recovery
+
+The current merchant recipient is Safe Treasury `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3` on Base Mainnet (8453), using native USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`. It is currently a 1-of-1 Safe, not independent multisignature protection, escrow or buyer insurance. Verify the live quote against your explicitly approved recipient before signing; stop if it differs. Existing client fragments that default to the historical recipient must receive `expectedRecipient: "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"` for a **new** purchase or service authorization. An older pending operation keeps its original intent, recipient, signature and recovery token: do not rewrite or replace it after a timeout.
+
+The enabled all-service offers are `starter-all-services-v4` ($2.50 / 1,000 credits) and `developer-all-services-v4` ($15 / 10,000 credits), subject to live purchasing flags and explicit acceptance of the current `/v3/prepaid/all-services` terms digest. Their finalized credits cover Check 2, Extract 3, Smart Diff 4, OpenAPI Contract Diff 5, Contract Watch 4, Wallet Watch 8 and Token Facts 4 credits. Legacy `candidate-*-v3` Web packages retain their original rights. These are one-time purchases with non-expiring credits, not subscriptions. A quote or discovery response never authorizes payment.

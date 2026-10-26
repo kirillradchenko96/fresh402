@@ -1,10 +1,10 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.kirillradchenko96/fresh402",
-  "title": "Fresh402 Web Intelligence API",
-  "description": "Web intelligence: free baseline, Check, Extract, Smart Diff and OpenAPI Diff. x402 USDC on Base.",
-  "version": "2.4.0",
-  "websiteUrl": "https://fresh402.kirilllabs.workers.dev",
+  "title": "Fresh402 Agent Intelligence",
+  "description": "Web/API change intelligence; bounded Base facts. Free Register, seven paid tools; x402/MPP/prepaid.",
+  "version": "3.0.0",
+  "websiteUrl": "https://fresh402.com",
   "repository": {
     "url": "https://github.com/kirillradchenko96/fresh402",
     "source": "github"

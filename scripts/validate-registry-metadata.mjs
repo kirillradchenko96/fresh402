@@ -1,0 +1,11 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const server=JSON.parse(fs.readFileSync(new URL('../server.json',import.meta.url)));
+assert.equal(server.name,'io.github.kirillradchenko96/fresh402');
+assert.equal(server.repository.url,'https://github.com/kirillradchenko96/fresh402');
+assert.equal(server.repository.source,'github');
+assert.deepEqual(server.remotes,[{type:'streamable-http',url:'https://fresh402.kirilllabs.workers.dev/mcp'}]);
+assert.equal(server.websiteUrl,'https://fresh402.com');
+assert.ok(server.description.length<=100&&server.description.length>=10);
+assert.equal(server.version,'3.0.0');
+assert.equal(Object.hasOwn(server,'packages'),false,'Hosted service, not the historical repository package');
+console.log('Existing MCP namespace, repository, endpoint and production metadata validated.');

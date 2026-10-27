@@ -1,8 +1,10 @@
 # Fresh402 — Web Intelligence for agents
 
+Start with the [agent workflow quickstart](docs/AGENT_WORKFLOWS.md): retain API contract observations, review changes affecting your integration, or track new release-feed entries. The source SDK defaults to quotes and explicit cache reuse; independent HTTP/oasdiff can be cheaper when you already operate durable state.
+
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
-Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **3.0.0**.
+Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **3.0.1**.
 
 - [Developer quickstart](https://fresh402.com/docs) · [Tool reference](https://fresh402.com/docs/tools) · [Pricing](https://fresh402.com/pricing) · [Security and limits](https://fresh402.com/security)
 - API: https://fresh402.kirilllabs.workers.dev/

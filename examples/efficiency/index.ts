@@ -10,6 +10,8 @@ export type {CreditSessionPolicy,CreditService} from './credit-session.ts';
 export {createProductionClient,PRODUCTION_ORIGIN,PRODUCTION_RECIPIENT} from './production.ts';
 export {compareFeedEntries} from './feeds.ts';
 export type {FeedSnapshot} from './feeds.ts';
+export {summarizeContractImpact} from './contracts.ts';
+export type {UsedOperation} from './contracts.ts';
 export {Fresh402Client,ApiError,PaymentRequired,PendingPayment,signerFromX402Client,syncDocumentation} from '../knowledge-base/client.ts';
 export type {Operation,Signer} from '../knowledge-base/client.ts';
 export {PrepaidClient,PendingPrepaid} from '../knowledge-base/prepaid.ts';

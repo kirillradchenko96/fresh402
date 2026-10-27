@@ -9,7 +9,7 @@ If you already operate HTTP/ETag caching, a feed reader or oasdiff with durable 
 Use Node.js24 or newer and the versioned first-party source. This is a source release, not an npm/PyPI package. The repository's historical root package is unrelated; do not install it to run this native-only first step.
 
 ```sh
-git clone --depth 1 --branch efficiency-sdk-v0.3.2 https://github.com/kirillradchenko96/fresh402.git fresh402-client
+git clone --depth 1 --branch efficiency-sdk-v0.3.3 https://github.com/kirillradchenko96/fresh402.git fresh402-client
 cd fresh402-client
 git rev-parse HEAD
 node examples/efficiency/quickstart.ts
@@ -49,6 +49,24 @@ Use exact OpenAPI path templates and lowercase methods, not a concrete URL with 
 In authorized execution, `summarizeContractImpact` reduces the saved result to relevant operation evidence with original change indexes, provenance and a SHA256 binding to the full result. Unrelated operation changes are counted separately. Shared/unknown pointers, warnings or truncated evidence preserve review requirements. `no_breaking_change_observed` is a limited static observation, not a deployment compatibility guarantee. Keep the original result/assumptions privately. Local tests measured11,780→1,034 bytes for a fixture with60 unrelated removals; this is a client projection, not a reduction in backend work or proof of superiority to scoped oasdiff.
 
 For explicit cache reuse, pass the saved original as `cached` with `allowCached:true`. The result says `fresh_observation:false`; the application, not a model or hidden timer, decides its acceptable age. Never present replayed evidence as a new fetch.
+
+### Receive only relevant change evidence (source SDK 0.3.3)
+
+For direct REST/MCP Contract Diff calls, the optional service-side view removes unrelated operation changes before they reach your client. Default responses remain full. This is separate from the LangGraph job's existing full-result client projection:
+
+```ts
+const scoped = createProductionClient({transport:'mcp',
+  contractScope:[{path:'/items/{id}',method:'get'}]});
+await scoped.discover();
+const quote = await scoped.quote('fresh402_openapi_contract_diff',
+  {watch_id:privatelySavedWatchId,compare_to:'baseline'});
+// Quote only: no signer, payment, target fetch or credit consumption.
+// An independently authorized execute()/recover() uses the same view option.
+```
+
+The client sends `X-Fresh402-Contract-Scope` only for Contract Diff execution/quotes, not other tools or MCP discovery. The header is a bounded JSON array of exact path templates and lowercase methods. It never enters the payment input/idempotency digest. A successful view retains all document metadata, source hashes, assumptions, warnings and truncation, plus selected/shared changes with original `evidence_index`. `counts` remains document-wide; use `contract_view.status` for the scoped observation. Shared uncertainty still requires review, and no result certifies deployed compatibility. Do not pass an already projected result to `summarizeContractImpact`, which expects full original counts.
+
+Store the original input, proof/key, token, budget reservation and result privately. To obtain the full original evidence after a lost response or after the origin changes, use a client without `contractScope`, discover the same service, and call `recover(originalOperation)` with the ORIGINAL payment/input/token. For prepaid, omit the scope header and reuse the ORIGINAL account, input, idempotency key, tariff and maximum. Never call `execute()` or choose a new operation key just to retrieve full evidence. The server does not fetch or charge again during a valid retained replay. Retention remains seven days, not indefinite. `original_result_sha256` binds the full JSON serialization, separate from the source-document hash; independently hash recovered full evidence before treating that binding as verified. If projection is unsafe or unavailable, the server returns the full result without `contract_view`; clients must accept this fallback.
 
 ## Job2: which release entries are new or changed?
 

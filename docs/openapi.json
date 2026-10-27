@@ -3238,6 +3238,16 @@
             "description": "Client-generated random 32-byte secret, encoded as hex/base64url. Persist before paying; retry identical input/payment/token for seven-day private recovery without another settlement. A public signature or transaction hash alone grants no recovery."
           },
           {
+            "name": "X-Fresh402-Contract-Scope",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 4096
+            },
+            "description": "Optional contract-impact-v1 response view. JSON array of 1–64 exact OpenAPI path templates and lowercase HTTP methods (get, put, post, delete, options, head, patch, trace); header ≤4096 ASCII characters, each path ≤512 characters. Example: [{\"path\":\"/items/{id}\",\"method\":\"get\"}]. Only affects this response, never payment identity or saved evidence. Full document counts/provenance/assumptions remain; changes contains selected and shared/unknown evidence with original indexes. Omit on ORIGINAL proof/key recovery to retrieve the full durable result without a new operation. Warnings/truncation still require review. Also supported on MCP tools/call for fresh402_openapi_contract_diff via the HTTP transport header."
+          },
+          {
             "name": "Idempotency-Key",
             "in": "header",
             "required": false,
@@ -3524,6 +3534,16 @@
               "maximum": 1000000000
             },
             "description": "Required for tariff 2/3 accounts. Explicit maximum at least the quoted fixed tool cost; bound immutably to the operation key."
+          },
+          {
+            "name": "X-Fresh402-Contract-Scope",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 4096
+            },
+            "description": "Optional contract-impact-v1 response view. JSON array of 1–64 exact OpenAPI path templates and lowercase HTTP methods (get, put, post, delete, options, head, patch, trace); header ≤4096 ASCII characters, each path ≤512 characters. Example: [{\"path\":\"/items/{id}\",\"method\":\"get\"}]. Only affects this response, never payment identity or saved evidence. Full document counts/provenance/assumptions remain; changes contains selected and shared/unknown evidence with original indexes. Omit on ORIGINAL proof/key recovery to retrieve the full durable result without a new operation. Warnings/truncation still require review. Also supported on MCP tools/call for fresh402_openapi_contract_diff via the HTTP transport header."
           }
         ],
         "requestBody": {
@@ -9391,6 +9411,17 @@
                 },
                 "after": {
                   "type": "string"
+                },
+                "evidence_index": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Opt-in contract view only: index in the full original durable changes list."
+                },
+                "scope": {
+                  "enum": [
+                    "selected_operation",
+                    "shared_or_unknown"
+                  ]
                 }
               },
               "required": [
@@ -9493,6 +9524,63 @@
           },
           "fetched_at": {
             "type": "string"
+          },
+          "contract_view": {
+            "type": "object",
+            "properties": {
+              "representation": {
+                "const": "contract-impact-v1"
+              },
+              "status": {
+                "enum": [
+                  "breaking",
+                  "review_required",
+                  "no_breaking_change_observed"
+                ]
+              },
+              "used_operations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "method": {
+                      "enum": [
+                        "get",
+                        "put",
+                        "post",
+                        "delete",
+                        "options",
+                        "head",
+                        "patch",
+                        "trace"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "path",
+                    "method"
+                  ]
+                }
+              },
+              "excluded_operation_changes": {
+                "type": "integer"
+              },
+              "original_result_sha256": {
+                "type": "string"
+              },
+              "hash_scope": {
+                "type": "string"
+              },
+              "counts_scope": {
+                "const": "full_document"
+              },
+              "limitation": {
+                "type": "string"
+              }
+            }
           }
         },
         "required": [

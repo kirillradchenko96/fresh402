@@ -1,6 +1,6 @@
 # Fresh402 Efficiency SDK foundation
 
-Start with the [tested source quickstart and two agent jobs](../../docs/AGENT_WORKFLOWS.md): scoped API contract review and release-feed entry monitoring. Source SDK0.3.2 adds a pure compact contract-evidence view; existing payment, watch and server contracts are unchanged.
+Start with the [tested source quickstart and two agent jobs](../../docs/AGENT_WORKFLOWS.md): scoped API contract review and release-feed entry monitoring. Source SDK0.3.3 adds opt-in service-side contract evidence scoping alongside the existing pure client projection; default payment, watch and response contracts are unchanged.
 
 Node.js 24+. Customer code only: no backend imports, wallet access, registration, payment, provider call or timer on import. This small module composes the existing public REST/MCP, prepaid, customer-recovery and machine-trial clients instead of replacing their payment behavior. Start with source from this repository; no npm publication or package ownership is claimed.
 

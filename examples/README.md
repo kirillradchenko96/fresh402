@@ -7,10 +7,10 @@ For a runnable TypeScript client and a local no-money documentation workflow, se
 ## Discover
 
 ```sh
-curl https://fresh402.kirilllabs.workers.dev/
-curl https://fresh402.kirilllabs.workers.dev/openapi.json
-curl https://fresh402.kirilllabs.workers.dev/.well-known/x402
-curl https://fresh402.kirilllabs.workers.dev/mcp \
+curl https://api.fresh402.com/
+curl https://api.fresh402.com/openapi.json
+curl https://api.fresh402.com/.well-known/x402
+curl https://api.fresh402.com/mcp \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
@@ -21,7 +21,7 @@ An MCP client should normally initialize first; see [MCP integration](../docs/MC
 ## Register: free (fresh402_register)
 
 ```sh
-curl https://fresh402.kirilllabs.workers.dev/v1/register \
+curl https://api.fresh402.com/v1/register \
   -H 'Content-Type: application/json' \
   -d '{"url":"https://example.com/"}'
 ```
@@ -31,7 +31,7 @@ Save its real `watch_id`. Repeating the same registration does not fetch the tar
 ## Check: $0.005 USDC (fresh402_check)
 
 ```sh
-curl -i https://fresh402.kirilllabs.workers.dev/v1/check \
+curl -i https://api.fresh402.com/v1/check \
   -H 'Content-Type: application/json' \
   -d '{"url":"https://example.com/","include_diff":true}'
 ```
@@ -39,7 +39,7 @@ curl -i https://fresh402.kirilllabs.workers.dev/v1/check \
 ## Web Extract: $0.01 USDC (fresh402_extract)
 
 ```sh
-curl -i https://fresh402.kirilllabs.workers.dev/v2/extract \
+curl -i https://api.fresh402.com/v2/extract \
   -H 'Content-Type: application/json' \
   -d '{"url":"https://example.com/","max_chars":20000,"include_links":true,"include_structured_data":true}'
 ```
@@ -47,7 +47,7 @@ curl -i https://fresh402.kirilllabs.workers.dev/v2/extract \
 ## Smart Diff: $0.015 USDC (fresh402_smart_diff)
 
 ```sh
-curl -i https://fresh402.kirilllabs.workers.dev/v2/smart-diff \
+curl -i https://api.fresh402.com/v2/smart-diff \
   -H 'Content-Type: application/json' \
   -d '{"watch_id":"w_0123456789abcdef0123456789abcdef","compare_to":"baseline"}'
 ```
@@ -59,12 +59,9 @@ The Smart Diff ID above is illustrative. Replace it with a returned watch ID bef
 Register a supported public JSON OpenAPI document first, then use its returned watch ID. This unsigned request obtains a $0.020 USDC quote only.
 
 ```sh
-curl https://fresh402.kirilllabs.workers.dev/v2/openapi-contract-diff \
+curl https://api.fresh402.com/v2/openapi-contract-diff \
   -H 'Content-Type: application/json' \
   -d '{"watch_id":"YOUR_RETURNED_WATCH_ID","compare_to":"baseline"}'
 ```
 
 For browserless EOA enrollment, exact package purchase, bounded early credits, finalized recovery and shared REST/MCP credit execution, use the [agent purchasing guide](../docs/AGENT_PREPAID.md). Follow live availability; early inclusion is not finality.
-
-
-[Efficiency SDK foundation](efficiency/README.md): existing public clients plus opt-in persistent customer budgets, exact-scope cache, cost planning and a read-only REST/MCP acceptance harness. No wallet or payment action on import; no npm registry release is claimed.

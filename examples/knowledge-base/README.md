@@ -35,7 +35,7 @@ Persistent shared watches, explicit noise rules, compact changes and paid-result
 
 The five-poll contract demo uses two Extracts and four Checks: $0.040 in **simulated service amounts**, compared with $0.050 for five Extracts. Three full document outputs are avoided. These are reproducible workflow mechanics, not real customer savings, profit or commercial traction.
 
-Public contract: [OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json), [API usage](../../docs/API.md), [MCP usage](../../docs/MCP.md), [pricing](../../docs/PRICING.md).
+Public contract: [OpenAPI](https://api.fresh402.com/openapi.json), [API usage](../../docs/API.md), [MCP usage](../../docs/MCP.md), [pricing](../../docs/PRICING.md).
 
 Use the [agent purchasing guide](../../docs/AGENT_PREPAID.md) for the current browserless enrollment, explicit local signing and REST/MCP credit contract. PREPAID_PREVIEW.md is historical background, not the current contract.
 

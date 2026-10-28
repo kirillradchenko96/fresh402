@@ -3,7 +3,7 @@
   "name": "io.github.kirillradchenko96/fresh402",
   "title": "Fresh402 Agent Intelligence",
   "description": "Web/API change intelligence; bounded Base facts. Free Register, seven paid tools; x402/MPP/prepaid.",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "websiteUrl": "https://fresh402.com",
   "repository": {
     "url": "https://github.com/kirillradchenko96/fresh402",
@@ -12,7 +12,7 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://fresh402.kirilllabs.workers.dev/mcp"
+      "url": "https://api.fresh402.com/mcp"
     }
   ]
 }

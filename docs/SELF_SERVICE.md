@@ -1,6 +1,6 @@
 # Self-service prepaid customer API
 
-Fresh402 3.0.1 provides wallet-authenticated customer onboarding alongside the independent x402 pay-per-call API. Discover one-time, non-expiring credit packages through `GET /` → `prepaid_packages`. Read `GET /v2/prepaid/plans` and OpenAPI `x-customer-onboarding` for current public signup and purchasing availability before proceeding. A deployed endpoint, an HTTP 402, and a simulated settlement are not proof of a customer purchase.
+Fresh402 3.0.2 provides wallet-authenticated customer onboarding alongside the independent x402 pay-per-call API. Discover one-time, non-expiring credit packages through `GET /` → `prepaid_packages`. Read `GET /v2/prepaid/plans` and OpenAPI `x-customer-onboarding` for current public signup and purchasing availability before proceeding. A deployed endpoint, an HTTP 402, and a simulated settlement are not proof of a customer purchase.
 
 The canonical `/mcp` URL exposes eight tools: free Register and seven paid products. MCP supports standalone x402 operations without signup. Customer management uses REST; prepaid execution works through REST and the same seven paid MCP tools (blockchain execution requires eligible all-service credits or the account's original explicit service grant). MCP discovery alone does not grant credentials or payment authority. See the complete [browserless agent purchasing guide](AGENT_PREPAID.md).
 
@@ -35,13 +35,13 @@ Use HTTPS and persist idempotency keys and pending operations confidentially. Ne
 
 ## Client examples and failure handling
 
-The [same-origin account page](https://fresh402.kirilllabs.workers.dev/account) supports EOA wallet browsers, explicit ownership/payment confirmations, encrypted local evidence and key download. Check live availability before signing. Never clear saved evidence during an uncertain payment.
+The [same-origin account page](https://api.fresh402.com/account) supports EOA wallet browsers, explicit ownership/payment confirmations, encrypted local evidence and key download. Check live availability before signing. Never clear saved evidence during an uncertain payment.
 
 Use [CustomerClient](../examples/knowledge-base/onboarding.ts), [complete purchase/Check/Developer/top-up examples](../examples/knowledge-base/onboarding-example.ts) and [PrepaidClient](../examples/knowledge-base/prepaid.ts). Examples have no executable payment entry point. Wallet connection, identity signing and each exact purchase confirmation are explicit caller-supplied actions. Persist confidential state outside Git. For protected staging, obtain owner-provided access separately; public documentation contains no staging access material.
 
 Unauthenticated requests are denied; ownership proofs, sessions, account status, credential revocation and global prepaid controls are checked independently. Challenges, empty identities, pending intents, sessions, claims and operations have bounded quotas. Account state is isolated; credentials never authorize another customer's history. Failed target execution releases reserved credits. Pending payment recovery never falls back to a new charge. Product fetching remains subject to all existing SSRF, TLS, pinned-peer and capacity guards.
 
-Purchased balances use integer credits and do not expire under the [published terms](https://fresh402.kirilllabs.workers.dev/terms). API keys expire independently after one year and can be replaced through wallet ownership. Durable tool results are retained for seven days; financial tombstones remain. Refunds and account closure follow the published terms and applicable mandatory rights.
+Purchased balances use integer credits and do not expire under the [published terms](https://api.fresh402.com/terms). API keys expire independently after one year and can be replaced through wallet ownership. Durable tool results are retained for seven days; financial tombstones remain. Refunds and account closure follow the published terms and applicable mandatory rights.
 
 Early inclusion is not finality. Limits, frozen/revoked status, precise machine-readable balance fields and prepaid MCP metadata are specified in [AGENT_PREPAID.md](AGENT_PREPAID.md). Use `spendable`, not legacy `available`, to exclude frozen early credits. No credits arise from a signature, broadcast or client transaction hash alone.
 

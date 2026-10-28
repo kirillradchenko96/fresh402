@@ -3,7 +3,7 @@ const server=JSON.parse(fs.readFileSync(new URL('../server.json',import.meta.url
 assert.equal(server.name,'io.github.kirillradchenko96/fresh402');
 assert.equal(server.repository.url,'https://github.com/kirillradchenko96/fresh402');
 assert.equal(server.repository.source,'github');
-assert.deepEqual(server.remotes,[{type:'streamable-http',url:'https://fresh402.kirilllabs.workers.dev/mcp'}]);
+assert.deepEqual(server.remotes,[{type:'streamable-http',url:'https://api.fresh402.com/mcp'}]);
 assert.equal(server.websiteUrl,'https://fresh402.com');
 assert.ok(server.description.length<=100&&server.description.length>=10);
 assert.match(server.version,/^\d+\.\d+\.\d+$/,'Registry metadata must use a stable release version');

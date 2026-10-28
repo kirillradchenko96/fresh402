@@ -1,6 +1,6 @@
 # Browserless agent purchasing and prepaid execution
 
-Fresh402 3.0.1 exposes eight MCP tools: free Register and seven paid products. Its four Web Intelligence products (Check, Extract, Smart Diff and OpenAPI Contract Diff) fetch public static HTTPS documents. Contract Watch, Wallet Watch and Token Facts provide bounded Base observations. All seven paid products support REST and MCP. It does not render JavaScript, execute described API operations, crawl linked pages or run LLM inference. Fetching and parsing remain bounded by the live schemas, quotas and security policy.
+Fresh402 3.0.2 exposes eight MCP tools: free Register and seven paid products. Its four Web Intelligence products (Check, Extract, Smart Diff and OpenAPI Contract Diff) fetch public static HTTPS documents. Contract Watch, Wallet Watch and Token Facts provide bounded Base observations. All seven paid products support REST and MCP. It does not render JavaScript, execute described API operations, crawl linked pages or run LLM inference. Fetching and parsing remain bounded by the live schemas, quotas and security policy.
 
 Base Mainnet only: chain `8453` / `eip155:8453`; native USDC `0x833589fcd6edb6e08f4c7c32d4f71b54bda02913`; merchant `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Use a distinct payer EOA. Contract wallets / ERC-1271 are unsupported. Bring your own compatible EIP-712 signer with explicit owner-approved spending limits and enough native USDC. An ordinary MCP installation or wallet connection grants no payment authority. The facilitator submits the exact authorization; this client does not broadcast a transaction. ETH is required only if your separate wallet integration performs gas-paying transactions. No unlimited approval is requested.
 
@@ -21,20 +21,20 @@ The exported `PrepaidClient` and `purchaseAgentPackage` tutorial below cover the
 | `candidate-starter-v3` | 2.50 (2500000 atomic) | 1000 | 50 |
 | `candidate-developer-v3` | 15.00 (15000000 atomic) | 10000 | 100 |
 
-These are one-time purchases, not subscriptions. Purchased credits do not expire under the [terms](https://fresh402.kirilllabs.workers.dev/terms); keys and durable result retention have separate lifetimes. Starter buys up to 500 Checks at $0.005 each; Developer up to 5000 at $0.003 each if entirely spent on Check. Use x402 for occasional use without a prepaid account. Prepaid suits repeated usage and uses different authentication. Existing account tariffs retain their original terms.
+These are one-time purchases, not subscriptions. Purchased credits do not expire under the [terms](https://api.fresh402.com/terms); keys and durable result retention have separate lifetimes. Starter buys up to 500 Checks at $0.005 each; Developer up to 5000 at $0.003 each if entirely spent on Check. Use x402 for occasional use without a prepaid account. Prepaid suits repeated usage and uses different authentication. Existing account tariffs retain their original terms.
 
 ## 1. Discover; authenticate the agent's EOA
 
-The service origin below is `https://fresh402.kirilllabs.workers.dev`. Never send keys/signatures in URLs or logs. Keep all private state outside Git and encrypted at rest. No private key or seed phrase ever goes to Fresh402.
+The service origin below is `https://api.fresh402.com`. Never send keys/signatures in URLs or logs. Keep all private state outside Git and encrypted at rest. No private key or seed phrase ever goes to Fresh402.
 
 ```sh
-curl -sS https://fresh402.kirilllabs.workers.dev/
-curl -sS https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans
-curl -sS https://fresh402.kirilllabs.workers.dev/openapi.json
-curl -sS https://fresh402.kirilllabs.workers.dev/mcp \
+curl -sS https://api.fresh402.com/
+curl -sS https://api.fresh402.com/v2/prepaid/plans
+curl -sS https://api.fresh402.com/openapi.json
+curl -sS https://api.fresh402.com/mcp \
   -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
   --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"prepaid-agent","version":"1.0"}}}'
-curl -sS https://fresh402.kirilllabs.workers.dev/mcp \
+curl -sS https://api.fresh402.com/mcp \
   -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
   --data '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
 ```
@@ -129,7 +129,7 @@ const balance = await customer.balance(); // use balance.spendable
 
 The example is an integration fragment: `origin`, signer/session/key and encrypted persistence are caller-provided. [Executable exported functions](../examples/knowledge-base/agent-prepaid.ts) require those dependencies and have no top-level signing/payment action. Persist cumulative client spending across restarts (`restoredCredits`), reserve a purchase budget before invoking a signer, and never refund that local payment budget after an uncertain signature or response. The server's quoted costs remain authoritative.
 
-Common errors: 401/403 authenticate or recover/revoke the correct key; 402 insufficient spendable credits or missing explicit tariff/maximum, with no x402 fallback; 409 original operation still pending or mismatched; 410 expired challenge/unsubmitted intent/result retention, not permission to replace a submitted payment; 429 back off for quota/capacity; 503 provider/finality/recovery pending, preserve evidence and poll. Fetch/security/parse failures follow the existing zero-credit release policy. Support and billing: fresh402@proton.me. See [self-service](SELF_SERVICE.md), [MCP](MCP.md), [API](API.md) and the [account page](https://fresh402.kirilllabs.workers.dev/account).
+Common errors: 401/403 authenticate or recover/revoke the correct key; 402 insufficient spendable credits or missing explicit tariff/maximum, with no x402 fallback; 409 original operation still pending or mismatched; 410 expired challenge/unsubmitted intent/result retention, not permission to replace a submitted payment; 429 back off for quota/capacity; 503 provider/finality/recovery pending, preserve evidence and poll. Fetch/security/parse failures follow the existing zero-credit release policy. Support and billing: fresh402@proton.me. See [self-service](SELF_SERVICE.md), [MCP](MCP.md), [API](API.md) and the [account page](https://api.fresh402.com/account).
 
 ## Optional native MPP purchases
 

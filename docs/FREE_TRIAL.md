@@ -1,8 +1,8 @@
 # Authenticated free-trial pilot
 
-Check [live availability](https://fresh402.kirilllabs.workers.dev/v2/trial). **Authenticated Web trials are enabled in 3.0.0 within finite shared capacity.** Disabled trials return an explicit unavailable error; no purchase is initiated.
+Check [live availability](https://api.fresh402.com/v2/trial). **Authenticated Web trials are enabled in 3.0.0 within finite shared capacity.** Disabled trials return an explicit unavailable error; no purchase is initiated.
 
-The [trial page](https://fresh402.kirilllabs.workers.dev/trial) requests an EOA wallet connection, an exact EIP-191 ownership-message signature and Cloudflare Turnstile verification. An unfunded wallet is sufficient. No seed phrase, private key, transaction or token approval is requested. Contract-wallet signatures are unsupported.
+The [trial page](https://api.fresh402.com/trial) requests an EOA wallet connection, an exact EIP-191 ownership-message signature and Cloudflare Turnstile verification. An unfunded wallet is sufficient. No seed phrase, private key, transaction or token approval is requested. Contract-wallet signatures are unsupported.
 
 One-time allowances: Check 20, Extract 10, Smart Diff 5, OpenAPI Diff 3. Disabled products have no active allowance. Eligibility follows the same wallet across credential rotation; wallet ownership is not proof of a unique person. Human verification, network and finite global limits also apply.
 
@@ -10,7 +10,7 @@ Send only `X-Fresh402-Trial-Key` plus a privately persisted `Idempotency-Key` (1
 
 Reuse exactly the original tool, parsed input and key for recovery. Completed results replay without another fetch or allowance debit for seven days. Changed input/key binding returns409; expired retained results return410 and never execute again. Failed execution releases its tool allowance once while cost reservations remain consumed. A fresh ownership proof rotates the key without resetting quotas and revokes the old key.
 
-Inspect `GET /v2/trial/quota` with the trial header for remaining entitlements. Capacity may be exhausted before identity quota. A429 is not an instruction to pay automatically. Upgrade explicitly through [the canonical account page](https://fresh402.kirilllabs.workers.dev/account).
+Inspect `GET /v2/trial/quota` with the trial header for remaining entitlements. Capacity may be exhausted before identity quota. A429 is not an instruction to pay automatically. Upgrade explicitly through [the canonical account page](https://api.fresh402.com/account).
 
 Never combine trial keys with prepaid keys, customer sessions, x402 signatures, MPP credentials or private payment recovery tokens. Trial execution cannot mutate purchased balances or create a settlement. Keep keys out of URLs, source control and logs.
 

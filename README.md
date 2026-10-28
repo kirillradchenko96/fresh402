@@ -2,12 +2,12 @@
 
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
-Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **3.0.1**.
+Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **3.0.2**.
 
 - [Developer quickstart](https://fresh402.com/docs) · [Tool reference](https://fresh402.com/docs/tools) · [Pricing](https://fresh402.com/pricing) · [Security and limits](https://fresh402.com/security)
-- API: https://fresh402.kirilllabs.workers.dev/
-- MCP: https://fresh402.kirilllabs.workers.dev/mcp
-- [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) · [Account and billing](https://fresh402.kirilllabs.workers.dev/account)
+- API: https://api.fresh402.com/
+- MCP: https://api.fresh402.com/mcp
+- [Live OpenAPI](https://api.fresh402.com/openapi.json) · [Account and billing](https://api.fresh402.com/account)
 
 | Product | MCP tool | REST endpoint | x402 / MPP USDC | Current prepaid credits |
 |---|---|---|---:|---:|
@@ -23,7 +23,7 @@ Check whether a source changed, extract useful content, and compare structured s
 ## Start with a free baseline
 
 ```sh
-curl https://fresh402.kirilllabs.workers.dev/v1/register \\
+curl https://api.fresh402.com/v1/register \\
   -H 'Content-Type: application/json' \\
   -d '{"url":"https://example.com/"}'
 ```
@@ -34,7 +34,7 @@ The [website demo](https://fresh402.com/#demo) is explicitly illustrative and ru
 
 ## Free-trial pilot status
 
-Authenticated Web free trials are enabled in 3.0.1 within finite shared capacity. Inspect root `free_trial.enabled` or [GET /v2/trial](https://fresh402.kirilllabs.workers.dev/v2/trial) for live availability. One-time allowances are Check 20, Extract 10, Smart Diff 5 and OpenAPI Diff 3. Shared network, daily and runtime limits can reject work before these allowances are exhausted.
+Authenticated Web free trials are enabled in 3.0.2 within finite shared capacity. Inspect root `free_trial.enabled` or [GET /v2/trial](https://api.fresh402.com/v2/trial) for live availability. One-time allowances are Check 20, Extract 10, Smart Diff 5 and OpenAPI Diff 3. Shared network, daily and runtime limits can reject work before these allowances are exhausted.
 
 An unfunded EOA ownership message plus human verification obtains a separate trial key. No funding, token approval or transaction is needed. Trial REST/MCP requests use `X-Fresh402-Trial-Key` and a persisted per-operation `Idempotency-Key`. Quota exhaustion never initiates payment. [Trial guide](docs/FREE_TRIAL.md).
 
@@ -47,7 +47,7 @@ Native USDC on **Base mainnet, chain ID 8453**. Choose x402 v2 exact pay-per-cal
 - Starter: **$2.50 / 1,000 credits**, canonical ID `candidate-starter-v3`.
 - Developer: **$15 / 10,000 credits**, canonical ID `candidate-developer-v3`.
 - Packages are one-time purchases, not subscriptions. Purchased credits do not expire. Legacy accounts retain their accepted terms.
-- Inspect live [plans and purchasing availability](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans) and your authenticated prepaid quote.
+- Inspect live [plans and purchasing availability](https://api.fresh402.com/v2/prepaid/plans) and your authenticated prepaid quote.
 - Preserve original input, proof/funding intent and private recovery token or idempotency key. After uncertainty, recover the original operation; never authorize a replacement payment just because a response was delayed.
 
 An unsigned HTTP 402 challenge is metadata, **not a charge, customer or revenue**. Use an appropriate payment client and explicit limits. Never disclose seed phrases or private keys. No unlimited token approval is required by Fresh402's exact flow.
@@ -64,6 +64,7 @@ Public HTTPS documents only. No browser JavaScript execution, authenticated craw
 
 This repository provides public client documentation and retains its existing legacy files/history. Current hosted backend source, credentials, customer financial data and operational reports remain private.
 
-Support and billing: [fresh402@proton.me](mailto:fresh402@proton.me). [Terms](https://fresh402.kirilllabs.workers.dev/terms) · [Privacy](https://fresh402.kirilllabs.workers.dev/privacy).
+Support and billing: [fresh402@proton.me](mailto:fresh402@proton.me). [Terms](https://api.fresh402.com/terms) · [Privacy](https://api.fresh402.com/privacy).
 
-Current customer source is in `examples/efficiency` and `examples/knowledge-base`; [the versioned agent quickstart](docs/AGENT_WORKFLOWS.md) is the supported entry point. The root application source in this public repository is historical, not the private hosted3.0.1 backend. Do not deploy it over the service. New HTTPS client defaults pin the current Safe; archived/loopback legacy fixtures and original-operation recovery remain distinct.
+Current customer source is in `examples/efficiency` and `examples/knowledge-base`; [the versioned agent quickstart](docs/AGENT_WORKFLOWS.md) is the supported entry point. The root application source in this public repository is historical, not the private hosted3.0.2 backend. Do not deploy it over the service. New HTTPS client defaults pin the current Safe; archived/loopback legacy fixtures and original-operation recovery remain distinct.
+Canonical API: **https://api.fresh402.com** · MCP: **https://api.fresh402.com/mcp**. The original `https://fresh402.kirilllabs.workers.dev` remains supported without payment redirects. Existing prepaid keys share the same account and balance on both production hosts; preserve the original origin for signed payments and recovery. See [origin compatibility](docs/API.md#production-origins).

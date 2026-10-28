@@ -54,7 +54,7 @@ import {CreditSession, createProductionClient} from './examples/efficiency/index
 // Load these values from your own private configuration/OS keystore.
 // storageKey is a separate random32-byte storage-encryption key, never a wallet key.
 const session = new CreditSession(privateAbsoluteDatabasePath, {
-  origin: 'https://fresh402.kirilllabs.workers.dev',
+  origin: 'https://api.fresh402.com',
   accountId: approvedCustomerAccountId,
   transport: 'mcp',
   allowedServices: ['check', 'extract'],

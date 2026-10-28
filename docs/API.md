@@ -1,8 +1,8 @@
-# Fresh402 3.0.1 public API
+# Fresh402 3.0.2 public API
 
-Base URL: https://fresh402.kirilllabs.workers.dev
+Base URL: https://api.fresh402.com
 
-The hosted service reports version **3.0.1**. [Live OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
+The hosted service reports version **3.0.2**. [Live OpenAPI](https://api.fresh402.com/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
 
 | Operation | Method and path | MCP tool | Price |
 |---|---|---|---:|
@@ -137,7 +137,7 @@ Circle Gateway is a separate optional x402 rail, not an MPP method. It is disabl
 
 ## Authenticated free-trial pilot
 
-Inspect `GET /v2/trial` or root `free_trial.enabled` before assuming free execution is active. The authenticated pilot is enabled in 3.0.0 within finite shared capacity. The [trial page](https://fresh402.kirilllabs.workers.dev/trial) uses an unfunded EOA ownership message plus Cloudflare Turnstile; no payment, token approval or funded wallet is required.
+Inspect `GET /v2/trial` or root `free_trial.enabled` before assuming free execution is active. The authenticated pilot is enabled in 3.0.0 within finite shared capacity. The [trial page](https://api.fresh402.com/trial) uses an unfunded EOA ownership message plus Cloudflare Turnstile; no payment, token approval or funded wallet is required.
 
 One-time entitlements are Check20, Extract10, Smart Diff5 and OpenAPI Diff3, subject to finite shared capacity. Send only `X-Fresh402-Trial-Key` and a unique privately persisted `Idempotency-Key` to the normal REST endpoint or MCP HTTP transport. A key identifies one logical tool/input; replay the exact original input/key for seven-day recovery without another quota debit or fetch. MCP clients must set a distinct operation header for each new call. Never mix trial and payment/prepaid credentials. Quota exhaustion cannot initiate a purchase. Inspect remaining allowances at `GET /v2/trial/quota`. Rotation requires a fresh ownership challenge and human verification, preserves used quota and invalidates the old credential. Failed work refunds its tool allowance once; infrastructure cost reservations remain consumed. Retained-result expiry returns410 and never reruns work.
 
@@ -171,3 +171,12 @@ Send `X-Fresh402-Contract-Scope: [{"path":"/items/{id}","method":"get"}]` on POS
 Default responses are unchanged. With opt-in, `changes` contains only selected operation and shared/unknown evidence, carrying original `evidence_index` and `scope`. All original metadata, source hashes/provenance, assumptions, warnings and truncation remain. `counts` is still for the full document, explicitly labeled by `contract_view.counts_scope`. `contract_view.status` is `breaking`, `review_required`, or `no_breaking_change_observed`; the last is a bounded static observation, never a compatibility guarantee. Warnings, shared uncertainty and truncated evidence prevent false assurance. The service can fall back to the full original response without `contract_view`.
 
 The view changes neither financial input nor the saved full result. Omit the header on a valid ORIGINAL proof/token or prepaid key/input/tariff/maximum replay to recover full evidence without another fetch, settlement or debit, within the existing seven-day retention. Preserve original evidence privately; a new key is a new operation. `original_result_sha256` hashes UTF-8 `JSON.stringify` of the full original result (not the OpenAPI source); verify it against full recovered evidence. REST payment receipt headers and MCP payment metadata are preserved. Existing prices and payment requirements are unchanged. See [the zero-spend scoped workflow](AGENT_WORKFLOWS.md#receive-only-relevant-change-evidence-source-sdk-033).
+# Production origins
+
+The canonical API origin is `https://api.fresh402.com`, with MCP at `https://api.fresh402.com/mcp`. `https://fresh402.kirilllabs.workers.dev` remains a supported legacy origin. Neither origin redirects paid POST requests or recovery.
+
+Both production hosts use the same Worker, customer accounts, balances, prepaid API keys, customer-management sessions and trial identity/quota. This alias policy does not include staging or arbitrary hostnames. Wallet ownership challenges and their signatures remain bound to the exact host that issued them; complete authentication on that host.
+
+New x402 resource URLs and MPP realms/scopes use the request host. Native USDC's EIP-712 domain remains USDC on Base 8453; account-ownership domain separation still includes the issuing origin. A payment or MPP credential is not permission to rewrite a stored resource URL. Preserve the original request body, proof, recovery token, transport and origin, and recover there without a replacement signature.
+
+Customer funding idempotency keys share one production account namespace across the two hosts. Retrying the same purchase key returns the original intent, nonce, recipient and resource, including its original host. Read-only purchase status can be obtained through either host; submit/recover the original funding intent through its stored resource origin. Existing credit balances and purchased terms are not migrated or duplicated.

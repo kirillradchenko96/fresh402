@@ -4,7 +4,7 @@ import {Fresh402Client} from './index.ts';
 /** Optional live PUBLIC acceptance. Reads metadata only; never registers, signs,
  * buys, invokes a product, uses a customer key, or wakes a Container.
  */
-export async function readOnlyAcceptance(base='https://fresh402.kirilllabs.workers.dev',options:{expiresMs?:number}={}){
+export async function readOnlyAcceptance(base='https://api.fresh402.com',options:{expiresMs?:number}={}){
  const admitted=()=>{if(options.expiresMs!==undefined&&(!Number.isSafeInteger(options.expiresMs)||Date.now()>=options.expiresMs))throw Error('Read-only probe authorization expired');};
  class ProbeClient extends Fresh402Client {
   observedMcpVersion?:string;

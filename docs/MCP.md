@@ -1,12 +1,12 @@
 # Fresh402 3.0 MCP integration
 
-Canonical endpoint: **https://fresh402.kirilllabs.workers.dev/mcp**.
+Canonical endpoint: **https://api.fresh402.com/mcp**.
 Transport: **Streamable HTTP**. Official Registry identity: **io.github.kirillradchenko96/fresh402**.
 
 Add the canonical URL through your client's remote HTTP MCP connector. A client configuration that supports URL-based remote servers can use:
 
 ```json
-{"mcpServers":{"fresh402":{"url":"https://fresh402.kirilllabs.workers.dev/mcp"}}}
+{"mcpServers":{"fresh402":{"url":"https://api.fresh402.com/mcp"}}}
 ```
 
 Clients that accept only local stdio commands need a compatible HTTP connector. Discovery and Register are free; paid calls require a configured x402 payment client, a native MPP client when enabled, or an existing prepaid API key with per-call metadata. MCP support alone does not provide a wallet or spending permission.

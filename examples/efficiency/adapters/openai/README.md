@@ -15,7 +15,7 @@ import {Agent} from '@openai/agents';
 import {Fresh402Client} from '../../index.ts';
 import {createOpenAITools} from './tools.ts';
 
-const client = new Fresh402Client('https://fresh402.kirilllabs.workers.dev', {
+const client = new Fresh402Client('https://api.fresh402.com', {
   transport: 'mcp',
   expectedRecipient: '0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3',
 });

@@ -107,8 +107,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Fresh402 Web and Blockchain Intelligence API",
-    "version": "3.0.1",
-    "description": "Fresh402 3.0.1: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
+    "version": "3.0.2",
+    "description": "Fresh402 3.0.2: bounded OpenAPI contract comparison; durable payment results, private recovery, public web extraction, structural comparison and backward-compatible freshness. On-demand requests; no browser rendering or LLM inference.",
     "contact": {
       "name": "Fresh402 support",
       "email": "fresh402@proton.me",
@@ -117,7 +117,7 @@
   },
   "servers": [
     {
-      "url": "https://fresh402.kirilllabs.workers.dev"
+      "url": "https://api.fresh402.com"
     }
   ],
   "paths": {

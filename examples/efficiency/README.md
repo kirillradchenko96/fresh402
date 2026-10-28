@@ -1,6 +1,6 @@
 # Fresh402 Efficiency SDK foundation
 
-Start with the [tested source quickstart and two agent jobs](../../docs/AGENT_WORKFLOWS.md): scoped API contract review and release-feed entry monitoring. Source SDK0.3.3 adds opt-in service-side contract evidence scoping alongside the existing pure client projection; default payment, watch and response contracts are unchanged.
+Start with the [tested source quickstart and two agent jobs](../../docs/AGENT_WORKFLOWS.md): scoped API contract review and release-feed entry monitoring. Source SDK0.3.4 corrects current-Safe defaults in the shared HTTPS client, MPP and new package preparation. Source0.3.3 contract evidence scoping remains unchanged. Original-operation recovery retains historical recipients without creating a replacement payment.
 
 Node.js 24+. Customer code only: no backend imports, wallet access, registration, payment, provider call or timer on import. This small module composes the existing public REST/MCP, prepaid, customer-recovery and machine-trial clients instead of replacing their payment behavior. Start with source from this repository; no npm publication or package ownership is claimed.
 
@@ -45,7 +45,7 @@ The optional read-only acceptance harness tags every request as technical traffi
 
 ## Production defaults and persistent prepaid execution (0.3.0)
 
-`createProductionClient()` pins the established public origin and current Safe recipient, with zero payment budget and no signer. Explicit `expectedRecipient` settings take precedence. The original `Fresh402Client` constructor retains its historical recipient default for compatibility; its original-operation recovery remains unchanged. Merchant changes require deliberate caller approval. This factory does not authorize a purchase or silently retarget an old payment.
+`createProductionClient()` pins the established public origin and current Safe recipient, with zero payment budget and no signer. Explicit `expectedRecipient` settings take precedence. The direct HTTPS `Fresh402Client` constructor also defaults to the current Safe. Only the HTTP loopback simulator retains its explicit historical fixture default; original legacy-operation recovery remains unchanged. Merchant changes require deliberate caller approval. This factory does not authorize a purchase or silently retarget an old payment.
 
 `CreditSession` supplies the durable executor for all supported agent adapters. It composes the existing Web `PrepaidClient` for Check, Extract, Smart Diff and OpenAPI Contract Diff. Supply the pinned customer account ID, explicit REST/MCP transport, an allowed-service subset, and positive per-call/day/month/lifetime credit ceilings. It verifies the authenticated account and tariff3 contract before paid submission. Current Web charges remain2/3/4/5; blockchain prepaid is outside this session's supported subset. Day and month are UTC; lifetime reservations never reset automatically.
 

@@ -34,6 +34,11 @@ The service is sessionless. GET/HEAD `/mcp` return HTTP 405; this server does no
 | fresh402_extract | Text, metadata, headings, links and JSON-LD extraction | $0.01 USDC |
 | fresh402_smart_diff | Structural changes and explained deterministic significance | $0.015 USDC |
 | fresh402_openapi_contract_diff | Bounded JSON OpenAPI changes, classifications and provenance | $0.020 USDC |
+| fresh402_contract_watch | Selected finalized Base contract/proxy/storage/event observations | $0.010 USDC |
+| fresh402_wallet_watch | Bounded finalized Base balance/selected ERC-20 transfer pages | $0.020 USDC |
+| fresh402_token_facts | Contract-reported token identity, supply and selected controls | $0.010 USDC |
+
+There are eight tools: free Register and seven paid products. The current new-payment merchant is Safe `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`, Base8453/native USDC. Validate this pinned policy against the challenge; do not silently accept another recipient. A separate [machine trial](MACHINE_TRIAL.md) is enabled under finite quotas and expiry, with an EOA ownership message and no CAPTCHA; it is not the human Turnstile trial.
 
 ## Calls
 
@@ -70,7 +75,7 @@ When root `mpp_payments.enabled` is true, the seven enabled paid tools accept of
 
 ## Optional prepaid customer accounts
 
-The existing five MCP tools and MCP URL are unchanged. Standalone x402 needs no customer signup. Wallet ownership, package funding, API-key claim/recovery and credit execution use the [REST self-service contract](SELF_SERVICE.md) and [CustomerClient](../examples/knowledge-base/onboarding.ts). Public signup and one-time purchasing are available when enabled in the live `/v2/prepaid/plans` response. For prepaid MCP calls, pass X-Fresh402-API-Key in HTTP and params._meta["fresh402/prepaid"] containing idempotency_key, tariff_version and max_credits. Use the same 2/3/4/5 credit tariff and durable operation identity as REST. Never combine prepaid and x402 or automatically fall back to a new payment. See [the complete agent guide](AGENT_PREPAID.md) for signing, early-credit limits, key recovery and exact examples.
+The canonical MCP URL exposes eight tools; the five established Web tool identities remain unchanged. Standalone x402 needs no customer signup. Wallet ownership, package funding, API-key claim/recovery and credit execution use the [REST self-service contract](SELF_SERVICE.md) and [CustomerClient](../examples/knowledge-base/onboarding.ts). Public signup and one-time purchasing are available when enabled in the live `/v2/prepaid/plans` response. For prepaid MCP calls, pass X-Fresh402-API-Key in HTTP and params._meta["fresh402/prepaid"] containing idempotency_key, tariff_version and max_credits. Use the same 2/3/4/5 Web tariff and durable operation identity as REST. Blockchain products cost4/8/4 under explicit tariff4 metadata and eligible all-service credits or original grants. Never combine prepaid and x402 or automatically fall back to a new payment. See [the complete agent guide](AGENT_PREPAID.md) for signing, early-credit limits, key recovery and exact examples.
 
 
 ## 2.8 compatibility and gated trials
@@ -85,13 +90,6 @@ The separate Web free-trial pilot is enabled in 3.0.0 within finite shared capac
 
 `fresh402_contract_watch`, `fresh402_wallet_watch` and `fresh402_token_facts` add three paid tools, for eight total including free Register. Prices are $0.010 / $0.020 / $0.010 USDC. Read their live schemas and the [API pilot reference](API.md#finalized-base-observation-pilot). They use finalized, hash-pinned single-provider observations with bounded scope; no safety score, trading or full-history guarantee. Native-provider application acceptance and mocked official-SDK financial tests are separate evidence; no fresh mainnet blockchain settlement is claimed.
 
-Use the original x402/MPP proof, exact input and REQUIRED privately persisted random32-byte `fresh402/recovery-token` metadata for recovery. Provider failure/partial scans are not paid successes. Existing prepaid packages do not automatically grant these services: separate accepted tariff4 grants cost4/8/4. No blockchain free trial. Existing Web tool names, paths, prices and credits are unchanged.
+Use the original x402/MPP proof, exact input and REQUIRED privately persisted random32-byte `fresh402/recovery-token` metadata for recovery. Provider failure/partial scans are not paid successes. Existing prepaid packages do not automatically grant these services: eligible all-service credits or separate original tariff4 grants cost4/8/4. The separate machine trial can admit bounded blockchain work; the human Web trial does not. Existing Web tool names, paths, prices and credits are unchanged.
 
 Separate machine-agent trial access is advertised by root `machine_trial.enabled` and `/v3/agent-trial`. When enabled, use its privately stored `fm_` credential in the existing trial HTTP header and one persisted `Idempotency-Key` per logical operation; the same eight tool names remain. See [machine trial](MACHINE_TRIAL.md). [All-service packages and controlled replenishment](AUTO_REPLENISH.md) are independently gated; existing package rights and payment safeguards remain unchanged.
-
-
-## Direct connection and current listing metadata
-
-Use the existing direct endpoint `https://fresh402.kirilllabs.workers.dev/mcp`. [Smithery announced](https://smithery.ai/future) that its `run.tools` / `server.smithery.ai` proxy URLs and managed connections stop on October31,2026; its public directory remains. Fresh402's direct MCP endpoint is independent of that retiring proxy. See the [verified discovery snapshot](DISCOVERY_AUDIT.md) for current listing state.
-
-The customer prepaid client now treats explicit `410 prepaid_result_expired` as terminal in REST and MCP. The original operation and reserved local budget remain intact; retention expiry is not a refund or permission to authorize replacement work. Unknown410 responses remain uncertain.

@@ -11,7 +11,7 @@ Circle Gateway is an optional, separately gated x402 v2 payment rail. **Read `GE
 | Smart Diff | `POST /v2/smart-diff` | `fresh402_smart_diff` | 0.015 |
 | OpenAPI Contract Diff | `POST /v2/openapi-contract-diff` | `fresh402_openapi_contract_diff` | 0.020 |
 
-The implemented Gateway adapter supports Base mainnet only (`eip155:8453`), native USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, and the existing merchant `0x58B4b483fBE31860335eCeB12CCCF4338b251085`. Register remains free. Get and reuse watch IDs exactly as described in [MCP](MCP.md). Input/output contracts and tariffs are unchanged.
+The implemented Gateway adapter supports Base mainnet only (`eip155:8453`), native USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`, and the historical prototype merchant `0x58B4b483fBE31860335eCeB12CCCF4338b251085`. This inactive adapter has no accepted current-Safe mainnet flow; do not use this archived address for a new purchase. Current direct x402/MPP/prepaid quotes use Safe `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Register remains free. Get and reuse watch IDs exactly as described in [MCP](MCP.md). Input/output contracts and tariffs are unchanged.
 
 Starter and Developer purchases do **not** accept Gateway. Their finalized-only funding, credit activation and recovery remain on the existing x402/MPP paths. Existing prepaid execution still costs 2/3/4/5 credits, independently of Gateway.
 

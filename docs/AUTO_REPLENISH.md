@@ -1,6 +1,6 @@
 # Customer-controlled replenishment
 
-At this publication, new all-service purchasing and the merchant Safe cutover remain disabled pending authorized real-settlement and wallet-security acceptance. The optional client is a reference integration, with no automatic execution or signing enabled by publication. Existing packages continue under their original terms.
+Production 3.0.1 uses the Safe merchant and offers all-service purchasing under the live flags and accepted package terms. This optional reference client has no automatic execution or signing enabled by publication. Its owner must explicitly select a package, pin the current merchant policy and approve a bounded spending policy. Existing packages and original-operation recovery retain their original terms.
 
 The optional [Node.js 24 reference client](../examples/knowledge-base/auto-replenish.ts) performs one bounded pass when the customer invokes `tick()`. Fresh402 cannot charge a wallet arbitrarily. There is no subscription, unlimited approval, background timer or payment on import. Live feature flags and exact quotes remain authoritative. This integration does not authorize the Fresh402 owner's funds.
 

@@ -1,7 +1,7 @@
 /** Pure wallet adapter preparation. Does not connect, sign, broadcast or submit a payment. */
-const USDC='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',RECEIVER='0x58b4b483fbe31860335eceb12cccf4338b251085';
+const USDC='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',RECEIVER='0xfac492a8d7843c9afcca6a1691bccb5425ab14f3',LEGACY_RECEIVER='0x58b4b483fbe31860335eceb12cccf4338b251085';
 export function prepareFundingAuthorization(intent:any,challenge:any,owner:{chainId:number;payer:string;authorizedAtomicUSDC:bigint;expectedRecipient?:string;authorizationDeadline?:number;authorizationValidAfter?:number}){
- const receiver=(owner.expectedRecipient??RECEIVER).toLowerCase();if(![RECEIVER,'0xfac492a8d7843c9afcca6a1691bccb5425ab14f3'].includes(receiver))throw Error('Unexpected merchant policy');
+ const receiver=(owner.expectedRecipient??RECEIVER).toLowerCase();if(![RECEIVER,LEGACY_RECEIVER].includes(receiver))throw Error('Unexpected merchant policy');
  if(intent.pay_to!==undefined&&intent.pay_to.toLowerCase()!==receiver)throw Error('Original intent recipient does not match the owner policy');
  const r=challenge?.accepts?.[0];if(owner.chainId!==8453||!/^0x[a-f0-9]{40}$/i.test(owner.payer)||owner.payer.toLowerCase()===receiver)throw new Error('Use the designated distinct payer on Base mainnet');
  if(challenge.x402Version!==2||challenge.accepts.length!==1||r.scheme!=='exact'||r.network!=='eip155:8453'||r.asset.toLowerCase()!==USDC||r.payTo.toLowerCase()!==receiver||r.amount!==String(intent.amount_atomic)||!Number.isSafeInteger(intent.amount_atomic)||intent.amount_atomic<1||BigInt(r.amount)>owner.authorizedAtomicUSDC||challenge.resource?.url!==intent.resource||!/^0x[a-f0-9]{64}$/i.test(intent.nonce)||r.extra?.fresh402FundingNonce!==intent.nonce)throw new Error('Funding challenge does not match the explicit authorized purchase');

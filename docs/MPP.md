@@ -2,7 +2,7 @@
 
 Read `GET https://fresh402.kirilllabs.workers.dev/` first. `mpp_payments.enabled` controls new per-call MPP payments. Package purchases additionally require `mpp_payments.prepaid_purchases`, `prepaid_packages.enabled` and the availability in `/v2/prepaid/plans`. A disabled method is not an invitation to sign. The existing x402 and prepaid contracts remain available under their own flags.
 
-Fresh402 accepts only **MPP `evm/charge`, Base Mainnet (8453), native USDC** `0x833589fcd6edb6e08f4c7c32d4f71b54bda02913`, recipient `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Use an authorized EOA/external EIP-712 signer with sufficient USDC and explicit spending permission. Contract wallets are unsupported. The existing facilitator submits the exact EIP-3009 authorization. No unlimited allowance, token approval, browser checkout or payer private key sent to Fresh402 is required. Use a payer distinct from the recipient for package funding.
+Fresh402 accepts only **MPP `evm/charge`, Base Mainnet (8453), native USDC** `0x833589fcd6edb6e08f4c7c32d4f71b54bda02913`, recipient `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Use an authorized EOA/external EIP-712 signer with sufficient USDC and explicit spending permission. ERC-1271 contract-wallet verification is not supported. Ownership and payments require compatible 65-byte ECDSA/EIP-712 signatures; an EIP-7702 delegated EOA is not automatically a contract-wallet signing mode. Historical delegated-EOA acceptance does not establish every smart-wallet implementation. The existing facilitator submits the exact EIP-3009 authorization. No unlimited allowance, token approval, browser checkout or payer private key sent to Fresh402 is required. Use a payer distinct from the recipient for package funding.
 
 | Product | x402 or MPP per call, USDC | Prepaid tariff 3 credits | REST per-call route |
 |---|---:|---:|---|
@@ -10,6 +10,9 @@ Fresh402 accepts only **MPP `evm/charge`, Base Mainnet (8453), native USDC** `0x
 | Extract | 0.010 | 3 | `/v2/extract` |
 | Smart Diff | 0.015 | 4 | `/v2/smart-diff` |
 | OpenAPI Contract Diff | 0.020 | 5 | `/v2/openapi-contract-diff` |
+| Contract Watch | 0.010 | 4 (separate tariff4 grant) | `/v3/contract-watch` |
+| Wallet Watch | 0.020 | 8 (separate tariff4 grant) | `/v3/wallet-watch` |
+| Token Facts | 0.010 | 4 (separate tariff4 grant) | `/v3/token-facts` |
 
 Register and discovery remain free. Generic MCP clients without a wallet or prepaid credential can discover tools and register baselines, but cannot pay. x402 suits existing x402 clients; MPP suits native Payment-auth clients; prepaid suits repeated use and shares the existing REST/MCP execution balance. Choose one billing method per operation. Never combine their credentials or fall back to a new payment after an uncertain response.
 
@@ -54,7 +57,7 @@ For recovery call `resumeMppRequest(originalSavedOperation)`. It has no signer a
 
 ## MCP
 
-The endpoint and all five tool names remain unchanged. Use the official MCP SDK (tested `@modelcontextprotocol/sdk@1.31.0`) and `mppx/mcp/client`. Install the MCP SDK in addition to the two packages above: `npm install @modelcontextprotocol/sdk@1.31.0`.
+The canonical endpoint exposes eight tools: free Register and seven paid products. Use the official MCP SDK (tested `@modelcontextprotocol/sdk@1.31.0`) and `mppx/mcp/client`. Install the MCP SDK in addition to the two packages above: `npm install @modelcontextprotocol/sdk@1.31.0`.
 
 ```ts
 import {Client} from '@modelcontextprotocol/sdk/client/index.js';
@@ -78,9 +81,14 @@ const trackedMethod = {...method, createCredential: async parameters => {
 McpClient.wrap(client, {
   methods: [trackedMethod],
   onPaymentRequired: async challenge => {
-    if (challenge.request.amount !== '10000' ||
+    if (challenge.method !== 'evm' || challenge.intent !== 'charge' ||
+        challenge.realm !== new URL(origin).host ||
+        challenge.request.methodDetails?.chainId !== 8453 ||
+        String(challenge.request.currency).toLowerCase() !==
+          '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913' ||
+        challenge.request.amount !== '10000' ||
         String(challenge.request.recipient).toLowerCase() !==
-          '0x58b4b483fbe31860335eceb12cccf4338b251085') return false;
+          '0xfac492a8d7843c9afcca6a1691bccb5425ab14f3') return false;
     await privateStore.reserveAtomicBudgetAndSave({amount: '10000', signing_requested: true});
     return true;
   }
@@ -114,6 +122,8 @@ The MPP and x402 paths share durable nonce claims, payment preparation, settleme
 
 ## Validation and supported scope
 
+The public HTTPS adapters default to the current Safe and reject a substituted recipient. Original saved legacy authorizations remain recoverable without changing their recipient or creating a new signature. Explicit legacy fixture/recovery policy is not a new-production-purchase recommendation.
+
 This integration is tested with official `mppx` and x402 SDKs, local workerd/D1 and isolated Cloudflare staging fixtures. Synthetic acceptance is **not a new real-money mainnet settlement validation**. No owner wallet signature or new USDC payment was made for this release.
 
 Tempo, Stripe SPT, other chains/assets, swaps, subscriptions and payment sessions are not accepted. Future Tempo support would require an explicitly approved chain/asset/merchant and equally strong transaction/finality/replay verification. Stripe would require an approved merchant account, applicable activation/KYC, credentials and a separate proof/accounting review. None is activated or provisioned here.
@@ -121,10 +131,3 @@ Tempo, Stripe SPT, other chains/assets, swaps, subscriptions and payment session
 Official references: [EVM charge](https://mpp.dev/payment-methods/evm/charge), [x402 coexistence](https://mpp.dev/guides/use-mpp-with-x402), [MCP transport](https://mpp.dev/protocol/transports/mcp), [mppx](https://github.com/wevm/mppx).
 
 Circle Gateway is a separate optional x402 rail, not an MPP method. It is disabled pending acceptance; consult root `circle_gateway.enabled` and the [Circle Gateway guide](CIRCLE_GATEWAY.md). A Gateway transfer UUID is not a direct onchain receipt.
-
-
-## Current recipient and original-payment recovery
-
-The current merchant recipient is Safe Treasury `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3` on Base Mainnet (8453), using native USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`. It is currently a 1-of-1 Safe, not independent multisignature protection, escrow or buyer insurance. Verify the live quote against your explicitly approved recipient before signing; stop if it differs. Existing client fragments that default to the historical recipient must receive `expectedRecipient: "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"` for a **new** purchase or service authorization. An older pending operation keeps its original intent, recipient, signature and recovery token: do not rewrite or replace it after a timeout.
-
-The enabled all-service offers are `starter-all-services-v4` ($2.50 / 1,000 credits) and `developer-all-services-v4` ($15 / 10,000 credits), subject to live purchasing flags and explicit acceptance of the current `/v3/prepaid/all-services` terms digest. Their finalized credits cover Check 2, Extract 3, Smart Diff 4, OpenAPI Contract Diff 5, Contract Watch 4, Wallet Watch 8 and Token Facts 4 credits. Legacy `candidate-*-v3` Web packages retain their original rights. These are one-time purchases with non-expiring credits, not subscriptions. A quote or discovery response never authorizes payment.

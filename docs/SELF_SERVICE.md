@@ -1,8 +1,8 @@
 # Self-service prepaid customer API
 
-Fresh402 3.0 provides wallet-authenticated customer onboarding alongside the independent x402 pay-per-call API. Discover one-time, non-expiring credit packages through `GET /` → `prepaid_packages`. Read `GET /v2/prepaid/plans` and OpenAPI `x-customer-onboarding` for current public signup and purchasing availability before proceeding. A deployed endpoint, an HTTP 402, and a simulated settlement are not proof of a customer purchase.
+Fresh402 3.0.1 provides wallet-authenticated customer onboarding alongside the independent x402 pay-per-call API. Discover one-time, non-expiring credit packages through `GET /` → `prepaid_packages`. Read `GET /v2/prepaid/plans` and OpenAPI `x-customer-onboarding` for current public signup and purchasing availability before proceeding. A deployed endpoint, an HTTP 402, and a simulated settlement are not proof of a customer purchase.
 
-The established MCP tool names and `/mcp` URL are unchanged; current discovery lists eight tools including free Register. MCP supports standalone x402 operations without signup. Customer management uses REST; Web prepaid execution works through REST and the four Web MCP tools. New finalized all-service package credits can additionally fund the three Base tools under their service-specific quote and explicit accepted terms. MCP discovery alone does not grant credentials or payment authority. See the complete [browserless agent purchasing guide](AGENT_PREPAID.md).
+The canonical `/mcp` URL exposes eight tools: free Register and seven paid products. MCP supports standalone x402 operations without signup. Customer management uses REST; prepaid execution works through REST and the same seven paid MCP tools (blockchain execution requires eligible all-service credits or the account's original explicit service grant). MCP discovery alone does not grant credentials or payment authority. See the complete [browserless agent purchasing guide](AGENT_PREPAID.md).
 
 | Product | x402 USDC | Prepaid credits, tariff 3 |
 |---|---:|---:|
@@ -46,10 +46,3 @@ Purchased balances use integer credits and do not expire under the [published te
 Early inclusion is not finality. Limits, frozen/revoked status, precise machine-readable balance fields and prepaid MCP metadata are specified in [AGENT_PREPAID.md](AGENT_PREPAID.md). Use `spendable`, not legacy `available`, to exclude frozen early credits. No credits arise from a signature, broadcast or client transaction hash alone.
 
 MPP-capable agents may opt a **new** purchase into `payment_protocol: "mpp"` when live flags allow it. Omission defaults to x402. Persist the immutable protocol and original credential; use the same account, funding journal and unsigned recovery, not a second purchase. See [native MPP packages](MPP.md#starter-and-developer-through-mpp).
-
-
-## Current recipient and original-payment recovery
-
-The current merchant recipient is Safe Treasury `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3` on Base Mainnet (8453), using native USDC `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`. It is currently a 1-of-1 Safe, not independent multisignature protection, escrow or buyer insurance. Verify the live quote against your explicitly approved recipient before signing; stop if it differs. Existing client fragments that default to the historical recipient must receive `expectedRecipient: "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"` for a **new** purchase or service authorization. An older pending operation keeps its original intent, recipient, signature and recovery token: do not rewrite or replace it after a timeout.
-
-The enabled all-service offers are `starter-all-services-v4` ($2.50 / 1,000 credits) and `developer-all-services-v4` ($15 / 10,000 credits), subject to live purchasing flags and explicit acceptance of the current `/v3/prepaid/all-services` terms digest. Their finalized credits cover Check 2, Extract 3, Smart Diff 4, OpenAPI Contract Diff 5, Contract Watch 4, Wallet Watch 8 and Token Facts 4 credits. Legacy `candidate-*-v3` Web packages retain their original rights. These are one-time purchases with non-expiring credits, not subscriptions. A quote or discovery response never authorizes payment.

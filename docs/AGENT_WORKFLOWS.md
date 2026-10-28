@@ -9,7 +9,7 @@ If you already operate HTTP/ETag caching, a feed reader or oasdiff with durable 
 Use Node.js24 or newer and the versioned first-party source. This is a source release, not an npm/PyPI package. The repository's historical root package is unrelated; do not install it to run this native-only first step.
 
 ```sh
-git clone --depth 1 --branch efficiency-sdk-v0.3.3 https://github.com/kirillradchenko96/fresh402.git fresh402-client
+git clone --depth 1 --branch efficiency-sdk-v0.3.4 https://github.com/kirillradchenko96/fresh402.git fresh402-client
 cd fresh402-client
 git rev-parse HEAD
 node examples/efficiency/quickstart.ts

@@ -1,7 +1,5 @@
 # Fresh402 — Web Intelligence for agents
 
-Start with the [agent workflow quickstart](docs/AGENT_WORKFLOWS.md): retain API contract observations, review changes affecting your integration, or track new release-feed entries. The source SDK defaults to quotes and explicit cache reuse; independent HTTP/oasdiff can be cheaper when you already operate durable state.
-
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
 Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **3.0.1**.
@@ -18,9 +16,9 @@ Check whether a source changed, extract useful content, and compare structured s
 | Extract | `fresh402_extract` | POST /v2/extract | $0.010 | 3 |
 | Smart Diff | `fresh402_smart_diff` | POST /v2/smart-diff | $0.015 | 4 |
 | OpenAPI Contract Diff | `fresh402_openapi_contract_diff` | POST /v2/openapi-contract-diff | $0.020 | 5 |
-| Contract Watch | `fresh402_contract_watch` | POST /v3/contract-watch | $0.010 | 4, separate grant |
-| Wallet Watch | `fresh402_wallet_watch` | POST /v3/wallet-watch | $0.020 | 8, separate grant |
-| Token Facts | `fresh402_token_facts` | POST /v3/token-facts | $0.010 | 4, separate grant |
+| Contract Watch | `fresh402_contract_watch` | POST /v3/contract-watch | $0.010 | 4, eligible all-service credits or original grant |
+| Wallet Watch | `fresh402_wallet_watch` | POST /v3/wallet-watch | $0.020 | 8, eligible all-service credits or original grant |
+| Token Facts | `fresh402_token_facts` | POST /v3/token-facts | $0.010 | 4, eligible all-service credits or original grant |
 
 ## Start with a free baseline
 
@@ -36,9 +34,11 @@ The [website demo](https://fresh402.com/#demo) is explicitly illustrative and ru
 
 ## Free-trial pilot status
 
-Authenticated Web free trials are enabled in 3.0.0 within finite shared capacity. Inspect root `free_trial.enabled` or [GET /v2/trial](https://fresh402.kirilllabs.workers.dev/v2/trial) for live availability. One-time allowances are Check 20, Extract 10, Smart Diff 5 and OpenAPI Diff 3. Shared network, daily and runtime limits can reject work before these allowances are exhausted.
+Authenticated Web free trials are enabled in 3.0.1 within finite shared capacity. Inspect root `free_trial.enabled` or [GET /v2/trial](https://fresh402.kirilllabs.workers.dev/v2/trial) for live availability. One-time allowances are Check 20, Extract 10, Smart Diff 5 and OpenAPI Diff 3. Shared network, daily and runtime limits can reject work before these allowances are exhausted.
 
 An unfunded EOA ownership message plus human verification obtains a separate trial key. No funding, token approval or transaction is needed. Trial REST/MCP requests use `X-Fresh402-Trial-Key` and a persisted per-operation `Idempotency-Key`. Quota exhaustion never initiates payment. [Trial guide](docs/FREE_TRIAL.md).
+
+For autonomous agents, the separate [machine trial](docs/MACHINE_TRIAL.md) is currently enabled: an unfunded EOA signs the exact ownership message, with no human CAPTCHA or automatic payment. Network/global admission and shared quotas apply. Standalone x402/MPP need neither signup nor a trial.
 
 ## Choose payment deliberately
 
@@ -60,8 +60,10 @@ The existing Official MCP Registry identity remains **io.github.kirillradchenko9
 
 Public HTTPS documents only. No browser JavaScript execution, authenticated crawling, continuous watch polling, universal semantic compatibility proof or token safety guarantees. Watch IDs and legacy history are shared public service data; never put secrets in target URLs. The [security page](https://fresh402.com/security) explains supported protections and limitations.
 
-**Contract Watch ($0.010), Wallet Watch ($0.020) and Token Facts ($0.010) are available in a bounded finalized Base observation pilot. Circle Gateway remains disabled.** Use x402/MPP per call. Prepaid requires a separate service-specific4/8/4-credit grant; existing Web packages do not include it automatically. No blockchain free trial or newly verified real-money blockchain settlement is claimed. [Inputs, limits and recovery](docs/API.md#finalized-base-observation-pilot).
+**Contract Watch ($0.010), Wallet Watch ($0.020) and Token Facts ($0.010) are available in a bounded finalized Base observation pilot. Circle Gateway remains disabled.** Use x402/MPP per call. Prepaid costs4/8/4 credits with eligible finalized all-service purchases or original explicit grants; old Web packages are not silently upgraded. The separate machine trial may admit one bounded blockchain observation within its shared18RPC/day cap; human Web trials do not cover these tools. Historical owner-controlled financial acceptance is distinct from new independent customer acceptance. [Inputs, limits and recovery](docs/API.md#finalized-base-observation-pilot).
 
 This repository provides public client documentation and retains its existing legacy files/history. Current hosted backend source, credentials, customer financial data and operational reports remain private.
 
 Support and billing: [fresh402@proton.me](mailto:fresh402@proton.me). [Terms](https://fresh402.kirilllabs.workers.dev/terms) · [Privacy](https://fresh402.kirilllabs.workers.dev/privacy).
+
+Current customer source is in `examples/efficiency` and `examples/knowledge-base`; [the versioned agent quickstart](docs/AGENT_WORKFLOWS.md) is the supported entry point. The root application source in this public repository is historical, not the private hosted3.0.1 backend. Do not deploy it over the service. New HTTPS client defaults pin the current Safe; archived/loopback legacy fixtures and original-operation recovery remain distinct.

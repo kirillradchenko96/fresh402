@@ -1,11 +1,23 @@
 # Current service availability
 
-The hosted service reports **2.5.0** at [the established endpoint](https://fresh402.kirilllabs.workers.dev/). All five MCP tool identities remain unchanged: free Register and paid Check ($0.005 USDC), Extract ($0.010), Smart Diff ($0.015), OpenAPI Contract Diff ($0.020). The same four paid products accept prepaid credits over REST and MCP.
+Production reports **3.0.1** at [the established API origin](https://fresh402.kirilllabs.workers.dev/). The unchanged /mcp endpoint exposes eight tools: free Register plus seven paid products.
 
-Public EOA signup and one-time Starter ($2.50/1000 credits) and Developer ($15/10000) purchasing are enabled. Current tariff costs are 2/3/4/5. Read live [plans and availability](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans), [OpenAPI](https://fresh402.kirilllabs.workers.dev/openapi.json) and exact quotes before signing. Purchased finalized credits do not expire under the published terms.
+| Paid product | Standalone x402/MPP USDC | Prepaid credits |
+|---|---:|---:|
+| Check | 0.005 | 2 |
+| Extract | 0.010 | 3 |
+| Smart Diff | 0.015 | 4 |
+| OpenAPI Contract Diff | 0.020 | 5 |
+| Contract Watch | 0.010 | 4 |
+| Wallet Watch | 0.020 | 8 |
+| Token Facts | 0.010 | 4 |
 
-When enabled, independently corroborated successful recent Base L2 inclusion may release up to 50 Starter or 100 Developer early credits; the full package still requires canonical finality. Evidence freshness and account/payer/project caps apply. Early inclusion is not finality and unused early access may freeze or be revoked. See [the complete agent purchasing and recovery contract](AGENT_PREPAID.md).
+New payments use Base Mainnet (8453), native USDC, and Safe merchant 0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3. A compatible externally authorized ECDSA/EIP-712 signer is required; ERC-1271 contract-wallet signatures are unsupported. A delegated EIP-7702 EOA is not automatically a contract-wallet signing mode. Standalone x402/MPP require neither signup nor a trial. Circle Gateway remains disabled and has no real-money acceptance.
 
-Examples have no automatic payment entry point. A compatible EOA/external signer, explicit caller cap, native Base USDC and private durable state are required for a real purchase. MCP installation alone does not provide signing authority. Prepaid never falls back to x402. The release was verified with synthetic staging receipts; no new real USDC transaction was initiated for this release.
+Public wallet ownership signup and one-time Starter ($2.50/1000 credits) and Developer ($15/10000) purchasing are enabled. These are not subscriptions; finalized purchased credits do not expire under the approved terms. Use [live plans](https://fresh402.kirilllabs.workers.dev/v2/prepaid/plans) for canonical package IDs, current flags, accepted terms and eligible products. New all-service purchases require explicit terms acceptance; old Web-only balances are not automatically blockchain entitlements. The Web client example supports four Web products; the blockchain guide documents the additional routes and tariff4 metadata. [Agent purchasing and recovery](AGENT_PREPAID.md) explains both cohorts.
 
-Private backend source and operational/payment evidence are not included in these public changes. Historical repository code is not the current deployment source; do not deploy it over the hosted service. Existing MCP URLs, registry identity and ownership verification remain unchanged.
+The separate [machine trial](MACHINE_TRIAL.md) is enabled and requires a bounded wallet-control signature, not a funded wallet, purchase or human CAPTCHA. Admission, per-tool quotas, network/global budgets and credential expiry apply; availability is not a promise of capacity. Root discovery and /v3/agent-trial are authoritative. Current operating authorization expires November14,2026 at09:00UTC; this publication does not extend it or activate a90-day experiment.
+
+Historical owner-controlled staging acceptance verified a finalized Starter purchase and all seven paid products (x402 for six products, official MPP for Extract), durable delivery and original-operation replay. This is not organic demand or new financial acceptance. Developer purchasing and all protocol/tool combinations have not each received independent real-money acceptance. Current unpaid production challenges and local synthetic SDK/D1 tests must be distinguished from settlement on Base. No new payment is authorized by these examples.
+
+JavaScript/browser rendering remains unavailable. Public static HTTPS fetching, provider/resource budgets and other documented security limits remain enforced. Private backend, credentials and operational/payment evidence are not published. Historical repository application source is not the current hosted backend: do not deploy it over the service. Existing MCP URLs, Registry identity and ownership verification remain unchanged.

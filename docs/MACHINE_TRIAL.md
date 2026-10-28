@@ -1,6 +1,8 @@
 # Bounded machine trial
 
-At this publication, the separate machine trial remains disabled pending bounded live acceptance. The existing human trial remains available under its own live flag.
+Current production API3.0.1 advertises the separate machine trial as enabled, verified through root, GET /v3/agent-trial and an unpaid challenge. Earlier disabled-pending-acceptance notes are historical. This is not a new allowance or activation. Existing authorization ends November14,2026 at09:00UTC (00:00AKST); read live availability each time. The human trial has its own flag and Turnstile requirement.
+
+A machine can obtain the exact personal_sign ownership challenge without CAPTCHA or funding. Its owner must separately authorize the wallet-signing policy; this is an unavoidable ownership step, not a human checkout. Standalone x402/MPP requires no trial or customer account. No new live claim or execution is implied by an available challenge.
 
 Inspect `GET /v3/agent-trial` on the canonical API before requesting a challenge. `enabled` is authoritative; a disabled response offers no free execution. This is a separate credential class from the human wallet + Turnstile trial. Human allowances remain unchanged.
 

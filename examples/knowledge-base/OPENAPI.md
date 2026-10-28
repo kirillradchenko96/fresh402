@@ -1,6 +1,6 @@
 # OpenAPI Contract Diff
 
-Production 2.5 advertises all four paid products. Execute this product only when the service explicitly advertises `fresh402_openapi_contract_diff`. The example uses public APIs and the existing client; it contains no backend imports or payment signer.
+Production 3.0.1 advertises seven paid products; this example covers the OpenAPI member of the four Web Intelligence products. Execute this product only when the service explicitly advertises `fresh402_openapi_contract_diff`. The example uses public APIs and the existing client; it contains no backend imports or payment signer.
 
 ```ts
 import { inspectContractProduct, compareOpenApi } from './openapi-example.ts';

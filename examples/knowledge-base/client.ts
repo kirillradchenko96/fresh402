@@ -8,7 +8,7 @@ export const signerFromX402Client=(client:{createPaymentPayload(challenge:any):P
 export class PaymentRequired extends Error {challenge:Json;constructor(challenge:Json){super('Payment required; no signer/budget enabled');this.challenge=challenge;}}
 export class PendingPayment extends Error {declare operation:Operation;constructor(operation:Operation,cause?:unknown){super('Outcome uncertain. Retry the ORIGINAL stored operation; do not sign again.',{cause});Object.defineProperty(this,'operation',{value:operation,enumerable:false});}}
 export class ApiError extends Error {code:string;status:number;constructor(code:string,status:number){super(code);this.code=code;this.status=status;}}
-const USDC='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',RECIPIENT='0x58b4b483fbe31860335eceb12cccf4338b251085';
+const USDC='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',RECIPIENT='0xfac492a8d7843c9afcca6a1691bccb5425ab14f3';
 const atomic=(value:string)=>{if(!/^\d+(\.\d{1,6})?$/.test(value))throw new Error('Unsupported advertised price');const [whole,fraction='']=value.split('.');return BigInt(whole)*1000000n+BigInt(fraction.padEnd(6,'0'));};
 const canonical=(value:any):string=>JSON.stringify(value,(_key,item)=>item&&typeof item==='object'&&!Array.isArray(item)?Object.fromEntries(Object.keys(item).sort().map(k=>[k,item[k]])):item);
 function parseRpc(text:string){if(text.trimStart().startsWith('{'))return JSON.parse(text);const data=text.split(/\r?\n/).filter(line=>line.startsWith('data:')).map(line=>line.slice(5).trim()).join('\n');return JSON.parse(data);}
@@ -19,7 +19,9 @@ export class Fresh402Client {
  base:string;transport:'rest'|'mcp';signer?:Signer;budget:bigint;reserved=0n;operations=new Map<string,Json>();timeoutMs:number;sequence=0;persist?:(operation:Operation)=>Promise<void>;expectedRecipient:string;contractScopeHeader?:string;
  constructor(base:string,options:{transport?:'rest'|'mcp',signer?:Signer,maxAtomicUSDC?:bigint,timeoutMs?:number,persist?:(operation:Operation)=>Promise<void>,expectedRecipient?:string,contractScope?:Array<{path:string;method:string}>}={}){
   const url=new URL(base);if(url.username||url.password||url.search||url.hash||url.pathname!=='/'||!(url.protocol==='https:'||url.protocol==='http:'&&['127.0.0.1','localhost'].includes(url.hostname)))throw new Error('Use an HTTPS service origin, or a loopback local demo origin');
-  this.base=url.origin;this.transport=options.transport??'rest';this.signer=options.signer;this.budget=options.maxAtomicUSDC??0n;this.timeoutMs=options.timeoutMs??15000;this.persist=options.persist;this.expectedRecipient=(options.expectedRecipient??RECIPIENT).toLowerCase();
+  // Only the existing HTTP loopback simulator retains its historical fixture
+  // recipient. Every HTTPS client defaults to the current production Safe.
+  this.base=url.origin;this.transport=options.transport??'rest';this.signer=options.signer;this.budget=options.maxAtomicUSDC??0n;this.timeoutMs=options.timeoutMs??15000;this.persist=options.persist;this.expectedRecipient=(options.expectedRecipient??(url.protocol==='http:'?'0x58b4b483fbe31860335eceb12cccf4338b251085':RECIPIENT)).toLowerCase();
   if(options.contractScope!==undefined){const scope=options.contractScope;if(!Array.isArray(scope)||!scope.length||scope.length>64||scope.some(o=>!o||Object.keys(o).length!==2||typeof o.path!=='string'||!o.path.startsWith('/')||o.path.length>512||!['get','put','post','delete','options','head','patch','trace'].includes(o.method)))throw Error('Invalid contractScope');this.contractScopeHeader=JSON.stringify(scope).replace(/[\u007f-\uffff]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));if(this.contractScopeHeader.length>4096)throw Error('contractScope exceeds 4096 header characters');}
  }
  async request(path:string,body?:Json,headers:Record<string,string>={}){

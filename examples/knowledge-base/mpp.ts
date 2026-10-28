@@ -10,11 +10,11 @@ export interface MppPrivateStore {
  reserve:(intent:{amount:string;resource:string;signing_requested:true})=>Promise<void>;
  save:(operation:MppOperation)=>Promise<void>;
 }
-const merchant='0x58b4b483fbe31860335eceb12cccf4338b251085',asset='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
+const merchant='0xfac492a8d7843c9afcca6a1691bccb5425ab14f3',legacyMerchant='0x58b4b483fbe31860335eceb12cccf4338b251085',asset='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
 /** Integration fragment, no entry point. The caller supplies its authorized
  * external signer, exact quote, private persistence and cumulative budget. */
 export async function authorizeMppRequest(quote:Response,options:{url:string;body:string;resource:string;account:Account;maximumAtomicUSDC:bigint;store:MppPrivateStore;expectedRecipient?:string;headers?:Record<string,string>}){
- const recipient=(options.expectedRecipient??merchant).toLowerCase();if(![merchant,'0xfac492a8d7843c9afcca6a1691bccb5425ab14f3'].includes(recipient))throw Error('Unknown explicit merchant policy');
+ const recipient=(options.expectedRecipient??merchant).toLowerCase();if(![merchant,legacyMerchant].includes(recipient))throw Error('Unknown explicit merchant policy');
  const url=new URL(options.url),resource=new URL(options.resource);
  if(url.origin!==resource.origin||!(url.protocol==='https:'||url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname)))throw Error('Use the trusted service origin');
  if(options.maximumAtomicUSDC<=0n)throw Error('Explicit payment authorization required');

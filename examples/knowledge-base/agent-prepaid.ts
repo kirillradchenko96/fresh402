@@ -22,7 +22,7 @@ export async function purchaseAgentPackage(client:CustomerClient,signer:Authoriz
  const plans=await client.plans();if(!plans.availability.package_purchasing)throw Error('Purchasing is disabled');
  const key=randomUUID();await store.save('purchase-start',{key,package_id:approval.packageId,signing_requested:false});
  const intent=await client.preparePurchase(approval.packageId,key);await store.save('purchase-intent',intent);
- if(intent.payer?.toLowerCase()!==signer.address.toLowerCase()||intent.network!=='eip155:8453'||intent.asset?.toLowerCase()!=='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'||intent.pay_to?.toLowerCase()!=='0x58b4b483fbe31860335eceb12cccf4338b251085')throw Error('Intent does not match the authorized payer/chain/asset/merchant');
+ if(intent.payer?.toLowerCase()!==signer.address.toLowerCase()||intent.network!=='eip155:8453'||intent.asset?.toLowerCase()!=='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'||intent.pay_to?.toLowerCase()!=='0xfac492a8d7843c9afcca6a1691bccb5425ab14f3')throw Error('Intent does not match the authorized payer/chain/asset/merchant');
  const quote=await client.paymentChallenge(intent),prepared=client.preparePayment(intent,quote,{chainId:signer.chainId,payer:signer.address,authorizedAtomicUSDC:approval.maximumAtomicUSDC});
  // Persist before requesting a signature. A signer timeout is ambiguous too.
  await store.save('signing-requested',{intent,quote,signing_requested:true});

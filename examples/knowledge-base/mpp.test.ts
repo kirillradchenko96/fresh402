@@ -3,7 +3,7 @@ import {Mppx} from 'mppx/server/core';import * as evm from 'mppx/evm/server';
 import {Challenge,Receipt} from 'mppx';import {generatePrivateKey,privateKeyToAccount} from 'viem/accounts';
 import {authorizeMppRequest,resumeMppRequest} from './mpp.ts';
 const url='https://service.example/v1/check';
-async function quote(recipient='0x58B4b483fBE31860335eCeB12CCCF4338b251085'){
+async function quote(recipient='0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3'){
  const server=Mppx.create({realm:'service.example',secretKey:'synthetic-official-sdk-fixture-with-32-bytes',methods:[evm.charge({currency:evm.assets.base.USDC,recipient:recipient as `0x${string}`,settle:async()=>{throw Error('No real settlement');}})]});
  const c=await server.challenge.evm.charge({amount:'0.005'});return new Response(null,{status:402,headers:{'www-authenticate':Challenge.serialize(c)}});
 }

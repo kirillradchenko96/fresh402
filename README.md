@@ -4,6 +4,8 @@
 
 Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **3.0.2**.
 
+Fresh402 keeps a hosted observation workflow across agent sessions: reusable watch IDs and content rules, conditional revalidation, scoped change evidence and recovery of original results. A fetch-and-hash script is easy; if you already manage that state—or need a one-off read—direct HTTP and local libraries can be simpler and cheaper. No automatic monitoring or browser rendering is implied. [Practical workflows and separate call fees](https://fresh402.com/docs#workflows).
+
 - [Start free as an agent](https://fresh402.com/docs#machine-trial) · [Source SDK 0.3.5 (Node24+, not npm)](https://fresh402.com/docs#sdk). Machine enrollment requires an unfunded EOA ownership signature; an ordinary MCP connection cannot sign for you. Current allowance: 2 Checks plus bounded samples, subject to shared capacity. A 100-Check/30-day expansion is not live.
 - [Developer quickstart](https://fresh402.com/docs) · [Tool reference](https://fresh402.com/docs/tools) · [Pricing](https://fresh402.com/pricing) · [Security and limits](https://fresh402.com/security)
 - API: https://api.fresh402.com/
@@ -45,8 +47,8 @@ For autonomous agents, the separate [machine trial](docs/MACHINE_TRIAL.md) is cu
 
 Native USDC on **Base mainnet, chain ID 8453**. Choose x402 v2 exact pay-per-call, enabled native MPP EVM charge, or prepaid. Adding the MCP endpoint alone does not authorize payments.
 
-- Starter: **$2.50 / 1,000 credits**, canonical ID `candidate-starter-v3`.
-- Developer: **$15 / 10,000 credits**, canonical ID `candidate-developer-v3`.
+- Starter: **$2.50 / 1,000 credits**; Developer: **$15 / 10,000 credits**. Both have Web-only and all-service variants.
+- The [wallet checkout](https://api.fresh402.com/account) offers Web-only packages. All-service packages cover the seven paid tools and are purchased through the [agent API flow](https://fresh402.com/docs#all-service-purchase), with explicit terms acceptance. Inspect the live quote for canonical IDs and eligibility.
 - Packages are one-time purchases, not subscriptions. Purchased credits do not expire. Legacy accounts retain their accepted terms.
 - Inspect live [plans and purchasing availability](https://api.fresh402.com/v2/prepaid/plans) and your authenticated prepaid quote.
 - Preserve original input, proof/funding intent and private recovery token or idempotency key. After uncertainty, recover the original operation; never authorize a replacement payment just because a response was delayed.

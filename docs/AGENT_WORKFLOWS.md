@@ -101,3 +101,11 @@ On `pending_recovery`, preserve the job ID and stop new work. In the same runner
 Local workerd/D1 acceptance recovered the original contractB after the mutable source becameC, with zero extra source fetches or credits. A competent ordinary HTTP client with only local snapshots could fetch currentC but could not reconstruct a lostB. A separately operated archival service can offer the same property. These are local synthetic financial tests, not a claim of new real-USDC acceptance or independent customer demand.
 
 Free Register and public discovery require no payment. Human/machine trial issuance has its existing ownership/verification requirements and finite entitlements; do not automate signatures or claim a trial exists because metadata is discoverable. See [API](API.md), [MCP](MCP.md), [agent prepaid access](AGENT_PREPAID.md) and [availability/limitations](RELEASE_AVAILABILITY.md). No recurring job, browser renderer, AI semantic interpretation or new wallet mode is activated by these examples.
+
+## Choosing the hosted observation workflow
+
+A ten-line fetch/hash script may be all you need. Fresh402 adds saved URL/rules/watch identity, conditional revalidation, bounded comparison evidence and original-result recovery across sessions. A returning agent restores a watch ID and its private recovery material, rather than using a fictional session catch-up API. Prefer local tools when you already hold the state, need unsupported YAML/external references or JavaScript rendering.
+
+For documentation, Register is free; Check is $0.005 and Extract is a separately authorized $0.010 call with its own fetch. Check→Extract costs $0.015 when both are paid (current Web credits2+3); there is no bundled endpoint/discount or automatic payment. A simple fee model favors conditional extraction only below50% changing calls (belowone-third for those credit tariffs), without guaranteeing token, latency or total-cost savings. Trial calls consume their own eligible allowances and shared admission; exhaustion never authorizes payment.
+
+For API updates, register a real unfiltered JSON OpenAPI watch, then use Contract Diff ($0.020/5 current Web credits) and review supported changes/ambiguities. A local oasdiff workflow may be more appropriate. These examples describe verified capabilities and illustrative orchestration, not measured customer success.

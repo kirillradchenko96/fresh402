@@ -134,3 +134,7 @@ Common errors: 401/403 authenticate or recover/revoke the correct key; 402 insuf
 ## Optional native MPP purchases
 
 When root `mpp_payments.prepaid_purchases` and public purchasing availability are true, select `payment_protocol: "mpp"` when creating a new intent. The official MPP SDK signs its immutable challenge-derived nonce; this intent cannot switch to x402. Prices, 50/100 early-credit ceilings, three-confirmation corroboration, finality, ledger and prepaid REST/MCP spending remain the same. Follow the [MPP package exchange and original-credential recovery](MPP.md#starter-and-developer-through-mpp). The existing tutorial above and omitted protocol continue to use x402.
+
+## Selecting all-service scope explicitly
+
+The wallet account page purchases Web-only Starter/Developer packages. For all seven paid products, use the existing agent API: inspect GET /v3/prepaid/all-services and its enabled flag, review exact terms/terms_digest, then explicitly select starter-all-services-v4 or developer-all-services-v4 and send the accepted digest as all_services_terms_digest when creating the single funding intent. Prices remain $2.50/1,000 or $15/10,000; no existing Web credit is upgraded. This does not authorize signing or funding. All existing nonce/amount/asset/recipient checks, original-proof recovery and finalized blockchain eligibility remain mandatory. [First-party purchase-path guide](https://fresh402.com/docs#all-service-purchase).

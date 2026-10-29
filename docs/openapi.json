@@ -1067,8 +1067,8 @@
     "/v1/check": {
       "post": {
         "operationId": "fresh402_check",
-        "summary": "Check whether public HTML, JSON or text changed; optional html_attributes on a new URL watch detects same-text link and selected attribute changes without altering older watches; use for on-demand freshness checks and a compact deterministic text diff, not background monitoring. Supply exactly one of url or watch_id. A URL-based paid Check can create a watch; an ID reuses its saved URL/rules, so omit all content-rule fields. Reuse returned watch_id/hash for later checks; first URL check without prior state reports changed:null. Optional cache reuse still costs $0.005 USDC per call on Base mainnet (eip155:8453). Requires an x402-capable MCP payment client and funded native-USDC payer; an ordinary MCP client receives a payment challenge, not a paid result. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. No JavaScript execution. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
-        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits. Optional authenticated free-trial pilot: inspect GET /v2/trial before use. Send only X-Fresh402-Trial-Key and a persisted Idempotency-Key to this normal route or MCP HTTP transport. One-time quotas and finite capacity apply; replay the exact same input/key for seven days. Exhaustion never initiates a payment. Disabled trials reject execution.",
+        "summary": "Check whether public HTML, JSON or text changed; optional html_attributes on a new URL watch detects same-text link and selected attribute changes without altering older watches; use for on-demand freshness checks and a compact deterministic text diff, not background monitoring. Supply exactly one of url or watch_id. A URL-based paid Check can create a watch; an ID reuses its saved URL/rules, so omit all content-rule fields. Reuse returned watch_id/hash for later checks; first URL check without prior state reports changed:null. Optional cache reuse still costs $0.005 USDC per call on Base mainnet (eip155:8453). Requires an x402-capable MCP payment client and funded native-USDC payer; an ordinary MCP client receives a payment challenge, not a paid result. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. No JavaScript execution. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
+        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
         "tags": [
           "check"
         ],
@@ -1764,8 +1764,8 @@
     "/v2/extract": {
       "post": {
         "operationId": "fresh402_extract",
-        "summary": "Extract readable text, metadata, headings, public links and embedded JSON-LD from one public HTTPS document. Use to read static HTML, JSON or plain text; no watch or prior registration is needed. Optional feed_mode:entries projects bounded RSS2/Atom IDs, declared links, timestamps, content fingerprints and indexed source evidence; omit for original XML-as-text behavior. No feed crawling or background subscription. Optional CSS scope, noise exclusions and exact JSON Pointer selection via json_pointer, or an ordered projection of up to8 fields via json_pointers (mutually exclusive; JSON only, any missing field returns422). One fetch/JSON parse with aggregate work/output limits. Omit json_pointer to retain full-document extraction. max_chars defaults to 20000 and limits returned text, not fetch size. Does not render JavaScript, crawl links or compare versions. $0.010 USDC per call on Base mainnet (eip155:8453), requiring an x402-capable MCP payment client and funded native-USDC payer. An ordinary MCP client receives a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
-        "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch; opt-in feed_mode:entries projects RSS2/Atom. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base. Optional authenticated free-trial pilot: inspect GET /v2/trial before use. Send only X-Fresh402-Trial-Key and a persisted Idempotency-Key to this normal route or MCP HTTP transport. One-time quotas and finite capacity apply; replay the exact same input/key for seven days. Exhaustion never initiates a payment. Disabled trials reject execution.",
+        "summary": "Extract readable text, metadata, headings, public links and embedded JSON-LD from one public HTTPS document. Use to read static HTML, JSON or plain text; no watch or prior registration is needed. Optional feed_mode:entries projects bounded RSS2/Atom IDs, declared links, timestamps, content fingerprints and indexed source evidence; omit for original XML-as-text behavior. No feed crawling or background subscription. Optional CSS scope, noise exclusions and exact JSON Pointer selection via json_pointer, or an ordered projection of up to8 fields via json_pointers (mutually exclusive; JSON only, any missing field returns422). One fetch/JSON parse with aggregate work/output limits. Omit json_pointer to retain full-document extraction. max_chars defaults to 20000 and limits returned text, not fetch size. Does not render JavaScript, crawl links or compare versions. $0.010 USDC per call on Base mainnet (eip155:8453), requiring an x402-capable MCP payment client and funded native-USDC payer. An ordinary MCP client receives a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
+        "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch; opt-in feed_mode:entries projects RSS2/Atom. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
         "tags": [
           "extract"
         ],
@@ -2543,8 +2543,8 @@
     "/v2/smart-diff": {
       "post": {
         "operationId": "fresh402_smart_diff",
-        "summary": "Explain structured changes in a registered public document: JSON Pointer changes, HTML block changes and deterministic significance hints. Use instead of Check when a changed/unchanged flag or short text diff is insufficient. First obtain watch_id with free fresh402_register; saved URL/rules are reused. compare_to is previous (default) or baseline; previous_hash overrides it when the same-watch snapshot is retained. Up to200 content changes; explicit json_array_keys match unique typed item identities and report moves separately, with pure reorder unchanged and source hashes still order-sensitive. Saved html_attributes rules compare selected links/attributes independently of visible text. Omit new options for existing index/text behavior. Legacy HTML may have text-only fidelity. No LLM, JavaScript rendering or complete API compatibility guarantee. $0.015 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
-        "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base. Optional authenticated free-trial pilot: inspect GET /v2/trial before use. Send only X-Fresh402-Trial-Key and a persisted Idempotency-Key to this normal route or MCP HTTP transport. One-time quotas and finite capacity apply; replay the exact same input/key for seven days. Exhaustion never initiates a payment. Disabled trials reject execution.",
+        "summary": "Explain structured changes in a registered public document: JSON Pointer changes, HTML block changes and deterministic significance hints. Use instead of Check when a changed/unchanged flag or short text diff is insufficient. First obtain watch_id with free fresh402_register; saved URL/rules are reused. compare_to is previous (default) or baseline; previous_hash overrides it when the same-watch snapshot is retained. Up to200 content changes; explicit json_array_keys match unique typed item identities and report moves separately, with pure reorder unchanged and source hashes still order-sensitive. Saved html_attributes rules compare selected links/attributes independently of visible text. Omit new options for existing index/text behavior. Legacy HTML may have text-only fidelity. No LLM, JavaScript rendering or complete API compatibility guarantee. $0.015 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
+        "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
         "tags": [
           "smart_diff"
         ],
@@ -3164,8 +3164,8 @@
     "/v2/openapi-contract-diff": {
       "post": {
         "operationId": "fresh402_openapi_contract_diff",
-        "summary": "Detect bounded directional compatibility evidence in a public JSON OpenAPI3.0/3.1 contract: paths/methods, required fields, supported scalar type/enum/null domains, and effective authentication alternatives/scopes. Request acceptance and response guarantees have opposite compatibility directions. Complex schema composition, custom dialects, ambiguous visibility and unexpanded references remain review/unknown; no general satisfiability or compatibility proof. Use for API contract review; Smart Diff is for general documents. First register the contract URL with free fresh402_register, without selectors or ignore rules, then reuse watch_id. compare_to accepts previous (default) or baseline; an available same-watch previous_hash overrides it. Limits include 256000 decoded document bytes, 100 paths and 500 operations. No YAML, external reference fetching, API-operation execution, LLM or complete compatibility guarantee. $0.020 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md.",
-        "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence after unfiltered free registration. Compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base. Optional authenticated free-trial pilot: inspect GET /v2/trial before use. Send only X-Fresh402-Trial-Key and a persisted Idempotency-Key to this normal route or MCP HTTP transport. One-time quotas and finite capacity apply; replay the exact same input/key for seven days. Exhaustion never initiates a payment. Disabled trials reject execution.",
+        "summary": "Detect bounded directional compatibility evidence in a public JSON OpenAPI3.0/3.1 contract: paths/methods, required fields, supported scalar type/enum/null domains, and effective authentication alternatives/scopes. Request acceptance and response guarantees have opposite compatibility directions. Complex schema composition, custom dialects, ambiguous visibility and unexpanded references remain review/unknown; no general satisfiability or compatibility proof. Use for API contract review; Smart Diff is for general documents. First register the contract URL with free fresh402_register, without selectors or ignore rules, then reuse watch_id. compare_to accepts previous (default) or baseline; an available same-watch previous_hash overrides it. Limits include 256000 decoded document bytes, 100 paths and 500 operations. No YAML, external reference fetching, API-operation execution, LLM or complete compatibility guarantee. $0.020 USDC per call on Base mainnet (eip155:8453); requires an x402-capable MCP payment client and funded native-USDC payer, otherwise returns a payment challenge. Alternatively use prepaid credits through REST or this MCP tool: X-Fresh402-API-Key in HTTP, with params._meta[\"fresh402/prepaid\"] containing idempotency_key, tariff_version and max_credits. When root mpp_payments.enabled is true, native MPP EVM charge is another option at the same USDC price: use an authorized Base EIP-712 signer and official mppx client, org.paymentauth/credential metadata and a persisted private recovery token. MPP receipt: org.paymentauth/receipt; see docs/MPP.md. Never combine MPP, prepaid and x402. Discover packages at /v2/prepaid/plans; see docs/AGENT_PREPAID.md for browserless wallet enrollment, bounded early credits and recovery. Optional Circle Gateway x402 is available only when root circle_gateway.enabled is true. Use the GatewayWalletBatched quote, a funded Base Gateway EOA and a persisted private recovery token. Pending batches return 409; replay the original proof/input/token after 60 seconds. Results require Gateway confirmed/completed evidence; never mix providers. No Circle prepaid funding. See docs/CIRCLE_GATEWAY.md. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
+        "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence after unfiltered free registration. Compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
         "tags": [
           "openapi_diff"
         ],
@@ -3750,8 +3750,8 @@
     "/v3/contract-watch": {
       "post": {
         "operationId": "fresh402_contract_watch",
-        "summary": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.010000 USDC on Base per call; use an approved compatible payment client. Prepaid requires eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect authenticated /v3/prepaid/quote/contract_watch. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Server-side provider approval and published tariff gates apply; paying agents do not need their own RPC credentials or an operator-created grant when eligible all-service credits are available. Read /v3/prepaid/all-services and accept its exact terms before a new all-service purchase.",
-        "description": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. Optional separate machine trial: inspect /v3/agent-trial; send only X-Fresh402-Trial-Key and persisted Idempotency-Key. Finite allowance/admission; no payment fallback.",
+        "summary": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.010000 USDC on Base per call; use an approved compatible payment client. Prepaid requires eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect authenticated /v3/prepaid/quote/contract_watch. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Server-side provider approval and published tariff gates apply; paying agents do not need their own RPC credentials or an operator-created grant when eligible all-service credits are available. Read /v3/prepaid/all-services and accept its exact terms before a new all-service purchase. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
+        "description": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
         "tags": [
           "contract_watch"
         ],
@@ -4715,8 +4715,8 @@
     "/v3/wallet-watch": {
       "post": {
         "operationId": "fresh402_wallet_watch",
-        "summary": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.020000 USDC on Base per call; use an approved compatible payment client. Prepaid requires eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect authenticated /v3/prepaid/quote/wallet_watch. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Server-side provider approval and published tariff gates apply; paying agents do not need their own RPC credentials or an operator-created grant when eligible all-service credits are available. Read /v3/prepaid/all-services and accept its exact terms before a new all-service purchase.",
-        "description": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. Optional separate machine trial: inspect /v3/agent-trial; send only X-Fresh402-Trial-Key and persisted Idempotency-Key. Finite allowance/admission; no payment fallback.",
+        "summary": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.020000 USDC on Base per call; use an approved compatible payment client. Prepaid requires eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect authenticated /v3/prepaid/quote/wallet_watch. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Server-side provider approval and published tariff gates apply; paying agents do not need their own RPC credentials or an operator-created grant when eligible all-service credits are available. Read /v3/prepaid/all-services and accept its exact terms before a new all-service purchase. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
+        "description": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
         "tags": [
           "wallet_watch"
         ],
@@ -5580,8 +5580,8 @@
     "/v3/token-facts": {
       "post": {
         "operationId": "fresh402_token_facts",
-        "summary": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.010000 USDC on Base per call; use an approved compatible payment client. Prepaid requires eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect authenticated /v3/prepaid/quote/token_facts. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Server-side provider approval and published tariff gates apply; paying agents do not need their own RPC credentials or an operator-created grant when eligible all-service credits are available. Read /v3/prepaid/all-services and accept its exact terms before a new all-service purchase.",
-        "description": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. Optional separate machine trial: inspect /v3/agent-trial; send only X-Fresh402-Trial-Key and persisted Idempotency-Key. Finite allowance/admission; no payment fallback.",
+        "summary": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. Commercial input binds to the original x402/MPP/prepaid request and REQUIRED random32-byte private recovery token for x402/MPP. REST sends X-Fresh402-Recovery-Token; MCP sends params._meta['fresh402/recovery-token']. Persist the secret with the original proof/input before authorizing. No client request_id; recovery reuses the original result with no new RPC or debit. Provider failure/partial scan never becomes a paid success. A confirmed paid response with observation_saved=false and persistence_error is pending domain finalization: keep original proof/input/token, retry recovery only, and do not use returned snapshot/cursor IDs until saved flags become true. $0.010000 USDC on Base per call; use an approved compatible payment client. Prepaid requires eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect authenticated /v3/prepaid/quote/token_facts. Historical web package terms remain unchanged. Records retain30days; original private financial recovery retains7days. Server-side provider approval and published tariff gates apply; paying agents do not need their own RPC credentials or an operator-created grant when eligible all-service credits are available. Read /v3/prepaid/all-services and accept its exact terms before a new all-service purchase. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
+        "description": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. Optional free evaluation: inspect GET /v3/agent-trial for the CAPTCHA-free machine trial (unfunded EOA ownership signing required). Web tools may also use the separate human trial at /v2/trial. Only enabled, eligible allowances authorize free execution; shared capacity can return 429 earlier. Send X-Fresh402-Trial-Key and a distinct persisted Idempotency-Key per logical REST or MCP call. Reuse the same tool/input/key for retained recovery. Never mix trial and payment/prepaid credentials. Exhaustion never authorizes a charge; ordinary requests without trial credentials retain the paid challenge.",
         "tags": [
           "token_facts"
         ],
@@ -6399,7 +6399,7 @@
         "security": [],
         "responses": {
           "200": {
-            "description": "Wallet control is not proof of a unique agent. Allowances are maxima, admission may deny earlier. No payment fallback.",
+            "description": "Wallet control is not proof of a unique agent. Allowances are maxima, admission may deny earlier. Each web attempt reserves120000ms; the shared pool permits at most3web attempts/day and10/month across ALL identities before other limits. No payment fallback.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6408,21 +6408,122 @@
                     "enabled": {
                       "type": "boolean"
                     },
+                    "model": {
+                      "type": "string"
+                    },
                     "allowances": {
                       "type": "object",
-                      "properties": {}
+                      "properties": {
+                        "check": {
+                          "type": "integer",
+                          "const": 2,
+                          "description": "One-time maximum successful check executions; shared capacity can deny earlier."
+                        },
+                        "extract": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful extract executions; shared capacity can deny earlier."
+                        },
+                        "smart_diff": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful smart_diff executions; shared capacity can deny earlier."
+                        },
+                        "openapi_diff": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful openapi_diff executions; shared capacity can deny earlier."
+                        },
+                        "contract_watch": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful contract_watch executions; shared capacity can deny earlier."
+                        },
+                        "wallet_watch": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful wallet_watch executions; shared capacity can deny earlier."
+                        },
+                        "token_facts": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful token_facts executions; shared capacity can deny earlier."
+                        }
+                      }
                     },
                     "shared_limits": {
                       "type": "object",
-                      "properties": {}
+                      "properties": {
+                        "work_units_day": {
+                          "type": "integer",
+                          "const": 32
+                        },
+                        "work_units_month": {
+                          "type": "integer",
+                          "const": 64
+                        },
+                        "work_units_network_day": {
+                          "type": "integer",
+                          "const": 8
+                        },
+                        "web_runtime_reservation_ms_day": {
+                          "type": "integer",
+                          "const": 360000
+                        },
+                        "web_runtime_reservation_ms_month": {
+                          "type": "integer",
+                          "const": 1200000
+                        },
+                        "blockchain_rpc_reservation_day": {
+                          "type": "integer",
+                          "const": 18
+                        },
+                        "blockchain_units_month": {
+                          "type": "integer",
+                          "const": 18000
+                        }
+                      }
+                    },
+                    "challenge_endpoint": {
+                      "const": "/v3/agent-trial/challenge"
+                    },
+                    "claim_endpoint": {
+                      "const": "/v3/agent-trial/claim"
+                    },
+                    "quota_endpoint": {
+                      "const": "/v3/agent-trial/quota"
+                    },
+                    "credential_header": {
+                      "const": "X-Fresh402-Trial-Key"
+                    },
+                    "idempotency_header": {
+                      "const": "Idempotency-Key"
+                    },
+                    "credential_max_lifetime_seconds": {
+                      "type": "integer",
+                      "const": 604800,
+                      "description": "Maximum lifetime, further clipped by the existing operating expiry. Rotation never extends it."
                     },
                     "captcha_required": {
                       "const": false
                     },
+                    "wallet_signature": {
+                      "type": "string"
+                    },
                     "payments_automatic": {
                       "const": false
+                    },
+                    "warning": {
+                      "type": "string"
                     }
-                  }
+                  },
+                  "required": [
+                    "enabled",
+                    "allowances",
+                    "shared_limits",
+                    "captcha_required",
+                    "payments_automatic"
+                  ]
                 }
               }
             }
@@ -6446,7 +6547,184 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {}
+                  "properties": {
+                    "access_method": {
+                      "const": "free_trial"
+                    },
+                    "one_time": {
+                      "const": true
+                    },
+                    "credential_type": {
+                      "const": "machine"
+                    },
+                    "expires_at": {
+                      "type": "integer",
+                      "description": "Original credential expiry, Unix milliseconds; rotation never extends it."
+                    },
+                    "tools": {
+                      "type": "object",
+                      "properties": {
+                        "check": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "remaining": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "enabled": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "limit",
+                            "remaining",
+                            "enabled"
+                          ]
+                        },
+                        "extract": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "remaining": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "enabled": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "limit",
+                            "remaining",
+                            "enabled"
+                          ]
+                        },
+                        "smart_diff": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "remaining": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "enabled": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "limit",
+                            "remaining",
+                            "enabled"
+                          ]
+                        },
+                        "openapi_diff": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "remaining": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "enabled": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "limit",
+                            "remaining",
+                            "enabled"
+                          ]
+                        },
+                        "contract_watch": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "remaining": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "enabled": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "limit",
+                            "remaining",
+                            "enabled"
+                          ]
+                        },
+                        "wallet_watch": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "remaining": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "enabled": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "limit",
+                            "remaining",
+                            "enabled"
+                          ]
+                        },
+                        "token_facts": {
+                          "type": "object",
+                          "properties": {
+                            "limit": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "remaining": {
+                              "type": "integer",
+                              "minimum": 0
+                            },
+                            "enabled": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "limit",
+                            "remaining",
+                            "enabled"
+                          ]
+                        }
+                      }
+                    },
+                    "upgrade_url": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "access_method",
+                    "one_time",
+                    "credential_type",
+                    "expires_at",
+                    "tools",
+                    "upgrade_url"
+                  ]
                 }
               }
             }
@@ -6628,7 +6906,33 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {}
+                  "properties": {
+                    "challenge_id": {
+                      "type": "string",
+                      "pattern": "^ma_[a-f0-9]{64}$"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Sign exactly this EIP-191 message; do not reconstruct or replace it."
+                    },
+                    "expires_at": {
+                      "type": "integer",
+                      "description": "Unix milliseconds, at most five minutes after issue."
+                    },
+                    "signature_method": {
+                      "const": "personal_sign"
+                    },
+                    "no_payment": {
+                      "const": true
+                    }
+                  },
+                  "required": [
+                    "challenge_id",
+                    "message",
+                    "expires_at",
+                    "signature_method",
+                    "no_payment"
+                  ]
                 }
               }
             }
@@ -6792,11 +7096,13 @@
                 "properties": {
                   "wallet": {
                     "type": "string",
-                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                    "pattern": "^0x[a-fA-F0-9]{40}$",
+                    "description": "The same nonzero EOA address used for this challenge; no funding required."
                   },
                   "challenge_id": {
                     "type": "string",
-                    "pattern": "^ma_[a-f0-9]{64}$"
+                    "pattern": "^ma_[a-f0-9]{64}$",
+                    "description": "Exact original unexpired challenge_id returned for this wallet, host and network; usable once."
                   },
                   "signature": {
                     "type": "string",
@@ -6820,7 +7126,78 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {}
+                  "properties": {
+                    "trial_key": {
+                      "type": "string",
+                      "pattern": "^fm_[a-f0-9]{64}$",
+                      "description": "Only plaintext copy; persist privately, never in a URL or log. Rotation invalidates the old key."
+                    },
+                    "expires_at": {
+                      "type": "integer",
+                      "description": "Original expiry, Unix milliseconds; at most7days and clipped by operating authorization."
+                    },
+                    "allowances": {
+                      "type": "object",
+                      "properties": {
+                        "check": {
+                          "type": "integer",
+                          "const": 2,
+                          "description": "One-time maximum successful check executions; shared capacity can deny earlier."
+                        },
+                        "extract": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful extract executions; shared capacity can deny earlier."
+                        },
+                        "smart_diff": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful smart_diff executions; shared capacity can deny earlier."
+                        },
+                        "openapi_diff": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful openapi_diff executions; shared capacity can deny earlier."
+                        },
+                        "contract_watch": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful contract_watch executions; shared capacity can deny earlier."
+                        },
+                        "wallet_watch": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful wallet_watch executions; shared capacity can deny earlier."
+                        },
+                        "token_facts": {
+                          "type": "integer",
+                          "const": 1,
+                          "description": "One-time maximum successful token_facts executions; shared capacity can deny earlier."
+                        }
+                      }
+                    },
+                    "one_time": {
+                      "const": true
+                    },
+                    "quota_endpoint": {
+                      "const": "/v3/agent-trial/quota"
+                    },
+                    "payments_automatic": {
+                      "const": false
+                    },
+                    "warning": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "trial_key",
+                    "expires_at",
+                    "allowances",
+                    "one_time",
+                    "quota_endpoint",
+                    "payments_automatic",
+                    "warning"
+                  ]
                 }
               }
             }

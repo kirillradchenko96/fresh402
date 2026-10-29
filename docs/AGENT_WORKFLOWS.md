@@ -4,7 +4,7 @@ Fresh402 retains normalized watches and bounded comparison evidence behind REST/
 
 If you already operate HTTP/ETag caching, a feed reader or oasdiff with durable local state, that can be cheaper. Fresh402 does not promise more complete OpenAPI analysis than oasdiff, universal token savings or lower fees than direct HTTP. It supports bounded JSON OpenAPI3.0/3.1, with explicit uncertainty for unsupported semantics; it does not fetch remote references or accept YAML contracts.
 
-## First result: no wallet and no spending
+## First connection: metadata and a quote, no wallet or spending
 
 Use Node.js24 or newer and the versioned first-party source. This is a source release, not an npm/PyPI package. The repository's historical root package is unrelated; do not install it to run this native-only first step.
 

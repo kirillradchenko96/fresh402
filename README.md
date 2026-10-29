@@ -4,6 +4,7 @@
 
 Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **3.0.2**.
 
+- [Start free as an agent](https://fresh402.com/docs#machine-trial) · [Source SDK 0.3.5 (Node24+, not npm)](https://fresh402.com/docs#sdk). Machine enrollment requires an unfunded EOA ownership signature; an ordinary MCP connection cannot sign for you. Current allowance: 2 Checks plus bounded samples, subject to shared capacity. A 100-Check/30-day expansion is not live.
 - [Developer quickstart](https://fresh402.com/docs) · [Tool reference](https://fresh402.com/docs/tools) · [Pricing](https://fresh402.com/pricing) · [Security and limits](https://fresh402.com/security)
 - API: https://api.fresh402.com/
 - MCP: https://api.fresh402.com/mcp

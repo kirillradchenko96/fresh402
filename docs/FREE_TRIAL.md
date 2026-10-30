@@ -8,7 +8,7 @@ One-time allowances: Check 20, Extract 10, Smart Diff 5, OpenAPI Diff 3. Disable
 
 Send only `X-Fresh402-Trial-Key` plus a privately persisted `Idempotency-Key` (16–128 letters, digits, underscore or hyphen) to the **normal** REST tool route. Prepaid routes require paid account credentials instead. MCP uses the same trial key and operation key in its HTTP transport, without custom trial metadata. Set the operation header per new logical call, not one constant header for all tool invocations.
 
-Reuse exactly the original tool, parsed input and key for recovery. Completed results replay without another fetch or allowance debit for seven days. Changed input/key binding returns409; expired retained results return410 and never execute again. Failed execution releases its tool allowance once while cost reservations remain consumed. A fresh ownership proof rotates the key without resetting quotas and revokes the old key.
+Reuse exactly the original tool, parsed input and key for recovery. Completed results replay without another fetch or allowance debit for seven days. Changed input/key binding returns 409; expired retained results return 410 and never execute again. Failed execution releases its tool allowance once while cost reservations remain consumed. A fresh ownership proof rotates the key without resetting quotas and revokes the old key.
 
 Inspect `GET /v2/trial/quota` with the trial header for remaining entitlements. Capacity may be exhausted before identity quota. A429 is not an instruction to pay automatically. Upgrade explicitly through [the canonical account page](https://api.fresh402.com/account).
 

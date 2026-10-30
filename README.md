@@ -4,9 +4,9 @@
 
 Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **3.0.2**.
 
-Fresh402 keeps a hosted observation workflow across agent sessions: reusable watch IDs and content rules, conditional revalidation, scoped change evidence and recovery of original results. A fetch-and-hash script is easy; if you already manage that state—or need a one-off read—direct HTTP and local libraries can be simpler and cheaper. No automatic monitoring or browser rendering is implied. [Practical workflows and separate call fees](https://fresh402.com/docs#workflows).
+Fresh402 keeps a hosted observation workflow across agent sessions: reusable watch IDs and content rules, conditional revalidation, scoped change evidence and recovery of original results. A fetch-and-hash script is easy; if you already manage that state—or need a one-off read—direct HTTP and local libraries can be simpler and cheaper. No automatic monitoring or browser rendering is implied. [Documentation Guardian and separate call fees](https://fresh402.com/docs#workflows).
 
-- [Start free as an agent](https://fresh402.com/docs#machine-trial) · [Source SDK 0.3.6 (Node24+, not npm)](https://fresh402.com/docs#sdk). Machine enrollment requires an unfunded EOA ownership signature; an ordinary MCP connection cannot sign for you. Eligible new identities: up to100 Checks (20/day) plus bounded samples, subject to shared capacity and the October30–November29,2026 UTC operating window. Credentials last at most30days and are clipped to November29; late joins get fewer days. Existing identities retain original quotas and expiry. Read live availability before enrollment.
+- [Start free as an agent](https://fresh402.com/docs#machine-trial) · [Source SDK 0.3.6 (Node 24+, not npm)](https://fresh402.com/docs#sdk). Machine enrollment requires an unfunded EOA ownership signature; an ordinary MCP connection cannot sign for you. Eligible new identities: up to 100 Checks (20/day) plus bounded samples, subject to shared capacity and the October 30–November 29, 2026 UTC operating window. Credentials last at most 30 days and are clipped to November 29; late joins get fewer days. Existing identities retain original quotas and expiry. Read live availability before enrollment.
 - [Developer quickstart](https://fresh402.com/docs) · [Tool reference](https://fresh402.com/docs/tools) · [Pricing](https://fresh402.com/pricing) · [Security and limits](https://fresh402.com/security)
 - API: https://api.fresh402.com/
 - MCP: https://api.fresh402.com/mcp
@@ -26,12 +26,14 @@ Fresh402 keeps a hosted observation workflow across agent sessions: reusable wat
 ## Start with a free baseline
 
 ```sh
-curl https://api.fresh402.com/v1/register \\
-  -H 'Content-Type: application/json' \\
+curl https://api.fresh402.com/v1/register \
+  -H 'Content-Type: application/json' \
   -d '{"url":"https://example.com/"}'
 ```
 
 Save the actual returned `watch_id` and `hash`. Repeating the same canonical URL and rules returns existing state without fetching or refreshing it. Check can also accept a URL directly; Smart Diff and OpenAPI Diff require a real saved watch. Registration is bounded by network, source, rate and capacity limits.
+
+**Documentation Guardian:** Register → Check → optional Smart Diff / Extract → act on evidence. Keep the same watch across sessions. Register is free; a paid Check is $0.005 / 2 Web credits, optional Smart Diff $0.015 / 4 credits and optional Extract $0.010 / 3 credits, with separate authorizations. Extract fetches independently. Use compatible retained comparison evidence and inspect fidelity warnings; this is not a bundled endpoint or scheduler. [Workflow, reference selection and recovery](docs/AGENT_WORKFLOWS.md#documentation-guardian--persistent-documentation-and-api-change-intelligence).
 
 The [website demo](https://fresh402.com/#demo) is explicitly illustrative and runs locally in the browser without an API call or payment.
 
@@ -63,11 +65,11 @@ The existing Official MCP Registry identity remains **io.github.kirillradchenko9
 
 Public HTTPS documents only. No browser JavaScript execution, authenticated crawling, continuous watch polling, universal semantic compatibility proof or token safety guarantees. Watch IDs and legacy history are shared public service data; never put secrets in target URLs. The [security page](https://fresh402.com/security) explains supported protections and limitations.
 
-**Contract Watch ($0.010), Wallet Watch ($0.020) and Token Facts ($0.010) are available in a bounded finalized Base observation pilot. Circle Gateway remains disabled.** Use x402/MPP per call. Prepaid costs4/8/4 credits with eligible finalized all-service purchases or original explicit grants; old Web packages are not silently upgraded. The separate machine trial may admit one bounded blockchain observation within its shared18RPC/day cap; human Web trials do not cover these tools. Historical owner-controlled financial acceptance is distinct from new independent customer acceptance. [Inputs, limits and recovery](docs/API.md#finalized-base-observation-pilot).
+**Contract Watch ($0.010), Wallet Watch ($0.020) and Token Facts ($0.010) are available in a bounded finalized Base observation pilot. Circle Gateway remains disabled.** Use x402/MPP per call. Prepaid costs 4/8/4 credits with eligible finalized all-service purchases or original explicit grants; old Web packages are not silently upgraded. The separate machine trial may admit one bounded blockchain observation within its shared 18 RPC/day cap; human Web trials do not cover these tools. Historical owner-controlled financial acceptance is distinct from new independent customer acceptance. [Inputs, limits and recovery](docs/API.md#finalized-base-observation-pilot).
 
 This repository provides public client documentation and retains its existing legacy files/history. Current hosted backend source, credentials, customer financial data and operational reports remain private.
 
 Support and billing: [fresh402@proton.me](mailto:fresh402@proton.me). [Terms](https://api.fresh402.com/terms) · [Privacy](https://api.fresh402.com/privacy).
 
-Current customer source is in `examples/efficiency` and `examples/knowledge-base`; [the versioned agent quickstart](docs/AGENT_WORKFLOWS.md) is the supported entry point. The root application source in this public repository is historical, not the private hosted3.0.2 backend. Do not deploy it over the service. New HTTPS client defaults pin the current Safe; archived/loopback legacy fixtures and original-operation recovery remain distinct.
+Current customer source is in `examples/efficiency` and `examples/knowledge-base`; [the versioned agent quickstart](docs/AGENT_WORKFLOWS.md) is the supported entry point. The root application source in this public repository is historical, not the private hosted 3.0.2 backend. Do not deploy it over the service. New HTTPS client defaults pin the current Safe; archived/loopback legacy fixtures and original-operation recovery remain distinct.
 Canonical API: **https://api.fresh402.com** · MCP: **https://api.fresh402.com/mcp**. The original `https://fresh402.kirilllabs.workers.dev` remains supported without payment redirects. Existing prepaid keys share the same account and balance on both production hosts; preserve the original origin for signed payments and recovery. See [origin compatibility](docs/API.md#production-origins).

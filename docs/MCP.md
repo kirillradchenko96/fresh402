@@ -40,6 +40,10 @@ The service is sessionless. GET/HEAD `/mcp` return HTTP 405; this server does no
 
 There are eight tools: free Register and seven paid products. The current new-payment merchant is Safe `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`, Base 8453/native USDC. Validate this pinned policy against the challenge; do not silently accept another recipient. A separate [machine trial](MACHINE_TRIAL.md) is enabled under finite quotas and expiry, with an EOA ownership message and no CAPTCHA; it is not the human Turnstile trial.
 
+## Walletless first Check
+
+Read root `instant_evaluation.enabled`. When true, call `fresh402_check` with `{"url":"https://example.com/","evaluation":true}` through an ordinary MCP client. No wallet, API key, custom header or Fresh402 SDK is required. This is one attempted Check per verified network prefix per approved period, not per unique agent; shared admission may deny earlier. Identical input from that network replays its retained result for at most seven days. Default Check remains paid, and free exhaustion never initiates payment. [Official-client examples and recovery limits](STANDARD_CLIENTS.md).
+
 ## Calls
 
 Free registration:
@@ -60,7 +64,7 @@ All tool names, input schemas and descriptions are returned by `tools/list`. Use
 
 An unpaid call returns a tool error: `result.isError` is true and `result.structuredContent` contains x402 PaymentRequired. **HTTP 200 does not prove payment or success.**
 
-Validate exact USDC amounts, Base mainnet, recipient and resource before a payer-controlled wallet signs. The client retries the same `tools/call` with the PaymentPayload in `params._meta["x402/payment"]`, preserving advertised resource and extensions. Put the pre-persisted private recovery token in `params._meta["fresh402/recovery-token"]`.
+Validate exact USDC amounts, Base mainnet, recipient and resource before a payer-controlled wallet signs. The client retries the same `tools/call` with the PaymentPayload in `params._meta["x402/payment"]`, preserving advertised resource and extensions. No Fresh402-specific token is required for first execution. Optional recovery protection is described below.
 
 Successful settlement exposes `result._meta["x402/payment-response"]`; inspect the structured result and receipt. Retrying identical input/payment/token recovers a retained result without a second settlement. If settlement is pending, retain those same values and do not sign a replacement. Never log the token or authorization signature.
 
@@ -90,6 +94,10 @@ The separate Web free-trial pilot is enabled in 3.0.0 within finite shared capac
 
 `fresh402_contract_watch`, `fresh402_wallet_watch` and `fresh402_token_facts` add three paid tools, for eight total including free Register. Prices are $0.010 / $0.020 / $0.010 USDC. Read their live schemas and the [API pilot reference](API.md#finalized-base-observation-pilot). They use finalized, hash-pinned single-provider observations with bounded scope; no safety score, trading or full-history guarantee. Native-provider application acceptance and mocked official-SDK financial tests are separate evidence; no fresh mainnet blockchain settlement is claimed.
 
-Use the original x402/MPP proof, exact input and REQUIRED privately persisted random 32-byte `fresh402/recovery-token` metadata for recovery. Provider failure/partial scans are not paid successes. Existing prepaid packages do not automatically grant these services: eligible all-service credits or separate original tariff 4 grants cost 4/8/4. The separate machine trial can admit bounded blockchain work; the human Web trial does not. Existing Web tool names, paths, prices and credits are unchanged.
+Standard first purchases need no Fresh402 recovery header or preflight. On success, save the optional private capability from `X-Fresh402-Recovery-Token` (REST) or `result._meta["fresh402/recovery-token"]` (raw MCP). For protection if the **entire response is lost**, generate and privately persist a random 32-byte hex/base64url token before submission and send it as that header/metadata. Recover using the exact original input, proof, transport, origin and private token for at most seven days. A public signature/nonce/transaction hash is not recovery authorization. Proof-only replay of the same recorded operation returns 409 without another settlement or private result. If both the response and the private capability are lost, automatic private-result recovery is unavailable; preserve the evidence and contact support rather than signing a replacement. This is not a universal exactly-once guarantee across new authorizations. Provider failure/partial scans are not paid successes. Existing prepaid packages do not automatically grant these services: eligible all-service credits or separate original tariff 4 grants cost 4/8/4. The separate machine trial can admit bounded blockchain work; the human Web trial does not. Existing Web tool names, paths, prices and credits are unchanged.
 
 Separate machine-agent trial access is advertised by root `machine_trial.enabled` and `/v3/agent-trial`. When enabled, use its privately stored `fm_` credential in the existing trial HTTP header and one persisted `Idempotency-Key` per logical operation; the same eight tool names remain. See [machine trial](MACHINE_TRIAL.md). [All-service packages and controlled replenishment](AUTO_REPLENISH.md) are independently gated; existing package rights and payment safeguards remain unchanged.
+
+## Maintained third-party clients
+
+Verified in an isolated synthetic server: `@x402/mcp@2.29.0`, `agents@0.32.0` `withX402Client`, `@x402/fetch@2.29.0`, `mppx@0.17.0`, and MCP SDK `1.32.2`, across all seven services. This is not fresh mainnet settlement evidence. The standard object PaymentPayload remains accepted; the Agents encoded envelope and `_meta["x402/error"]` quote alias are additionally supported. The official x402 wrapper uses `callTool(name, arguments)` and returns its payment receipt separately; its `onAfterPayment` callback exposes the raw result metadata for optional recovery storage. Generic MCP clients can use free evaluation but need a payment-capable wallet/client and spending authorization to pay.

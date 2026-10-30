@@ -14,7 +14,7 @@ Fresh402 accepts only **MPP `evm/charge`, Base Mainnet (8453), native USDC** `0x
 | Wallet Watch | 0.020 | 8 (separate tariff4 grant) | `/v3/wallet-watch` |
 | Token Facts | 0.010 | 4 (separate tariff4 grant) | `/v3/token-facts` |
 
-Register and discovery remain free. Generic MCP clients without a wallet or prepaid credential can discover tools and register baselines, but cannot pay. x402 suits existing x402 clients; MPP suits native Payment-auth clients; prepaid suits repeated use and shares the existing REST/MCP execution balance. Choose one billing method per operation. Never combine their credentials or fall back to a new payment after an uncertain response.
+Register and discovery remain free. A walletless Check is also available when root `instant_evaluation.enabled` is true; select `evaluation:true` without any payment credential. Generic MCP clients without a wallet or prepaid credential can discover tools and register baselines, but cannot pay. x402 suits existing x402 clients; MPP suits native Payment-auth clients; prepaid suits repeated use and shares the existing REST/MCP execution balance. Choose one billing method per operation. Never combine their credentials or fall back to a new payment after an uncertain response.
 
 ## HTTP exchange and durable recovery
 
@@ -131,3 +131,9 @@ Tempo, Stripe SPT, other chains/assets, swaps, subscriptions and payment session
 Official references: [EVM charge](https://mpp.dev/payment-methods/evm/charge), [x402 coexistence](https://mpp.dev/guides/use-mpp-with-x402), [MCP transport](https://mpp.dev/protocol/transports/mcp), [mppx](https://github.com/wevm/mppx).
 
 Circle Gateway is a separate optional x402 rail, not an MPP method. It is disabled pending acceptance; consult root `circle_gateway.enabled` and the [Circle Gateway guide](CIRCLE_GATEWAY.md). A Gateway transfer UUID is not a direct onchain receipt.
+
+## Optional recovery and current client acceptance
+
+Standard first purchases need no Fresh402 recovery header or preflight. On success, save the optional private capability from `X-Fresh402-Recovery-Token` (REST) or `result._meta["fresh402/recovery-token"]` (raw MCP). For protection if the **entire response is lost**, generate and privately persist a random 32-byte hex/base64url token before submission and send it as that header/metadata. Recover using the exact original input, proof, transport, origin and private token for at most seven days. A public signature/nonce/transaction hash is not recovery authorization. Proof-only replay of the same recorded operation returns 409 without another settlement or private result. If both the response and the private capability are lost, automatic private-result recovery is unavailable; preserve the evidence and contact support rather than signing a replacement. This is not a universal exactly-once guarantee across new authorizations.
+
+Unmodified `mppx@0.17.0` REST and MCP clients were also accepted for all seven products against an isolated synthetic server. No real USDC transaction was made by those tests. Existing tracked examples remain available for stronger pre-submission recovery storage. See [standard client examples](STANDARD_CLIENTS.md).

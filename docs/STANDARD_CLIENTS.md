@@ -4,7 +4,7 @@ Connect → try free → explicitly authorize a payment → inspect the result a
 
 ## Walletless Check
 
-Read root `instant_evaluation.enabled` first. When enabled, this ordinary REST request performs one actual Check:
+Read root `instant_evaluation.enabled` first. When enabled, this ordinary REST request asks for an eligible Check. An identical original input can replay retained evidence; a previously used network or shared capacity can return 429 instead of new work:
 
 ```sh
 curl https://api.fresh402.com/v1/check \
@@ -30,6 +30,12 @@ try {
 ```
 
 One attempted Check per verified IPv4 /24 or IPv6 /64 per approved B1 period; networks do not identify unique agents. Shared admission can deny earlier. This uses the existing finite pool, paid-priority capacity and operating expiry, not a new allocation. Exact input replay from the same network returns its retained original result for at most seven days. It does not perform a new check. Changed input after use is 429 `evaluation_exhausted`; unavailable access is 503, exhausted shared capacity is 429. A failed admitted attempt cannot be rerun as new work. No automatic payment occurs. Omit `evaluation` to obtain the existing paid Check challenge. Free Register remains separate; expanded [machine trials](MACHINE_TRIAL.md) retain their signed EOA enrollment and original quotas.
+
+## Inspect an unsigned quote first
+
+An ordinary MCP client can call `fresh402_extract` with `{"url":"https://example.com/"}` without payment credentials. The expected unpaid result has `isError:true` and an x402 v2 requirement in `structuredContent` (also available as JSON text). This is a payment challenge, not an execution failure or a settled purchase. Inspect `accepts` and `resource` before configuring any signer: network, native USDC asset, exact atomic amount, recipient and original resource URL must match the intended operation. Extract is 10000 atomic USDC ($0.010), Check 5000, Smart Diff 15000 and OpenAPI Diff 20000. Never rewrite a signed resource between canonical and legacy hosts.
+
+The equivalent unsigned REST POST returns HTTP 402 with `PAYMENT-REQUIRED`. A client may inspect it without approving payment. Native MPP requirements are a separate enabled protocol; use its documented challenge/credential flow, not x402 headers. No quote, MCP connection or depleted free allowance authorizes a signature or automatic paid retry. See the [task guide](https://fresh402.com/use-cases) for when hosted observations justify a paid call.
 
 ## Payment-capable clients
 

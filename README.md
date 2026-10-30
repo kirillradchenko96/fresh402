@@ -1,10 +1,10 @@
-# Fresh402 — Web Intelligence for agents
+# Fresh402 — website change detection and extraction API for agents
 
 [![Smithery](https://smithery.ai/badge/kirillradchenko96/fresh402)](https://smithery.ai/servers/kirillradchenko96/fresh402)
 
 Check whether a source changed, extract useful content, and compare structured snapshots through **MCP or REST**. The hosted production API is **3.0.2**.
 
-Fresh402 keeps a hosted observation workflow across agent sessions: reusable watch IDs and content rules, conditional revalidation, scoped change evidence and recovery of original results. A fetch-and-hash script is easy; if you already manage that state—or need a one-off read—direct HTTP and local libraries can be simpler and cheaper. No automatic monitoring or browser rendering is implied. [Documentation Guardian and separate call fees](https://fresh402.com/docs#workflows).
+Fresh402 keeps a hosted observation workflow across agent sessions: reusable watch IDs and content rules, conditional revalidation, scoped change evidence and recovery of original results. A fetch-and-hash script is easy; if you already manage that state—or need a one-off read—direct HTTP and local libraries can be simpler and cheaper. No automatic monitoring or browser rendering is implied. [Documentation Guardian and separate call fees](https://fresh402.com/docs#workflows). [Task guide: persistent documentation observations, remote OpenAPI comparison, extraction and Base state](https://fresh402.com/use-cases).
 
 - [Try one walletless Check](docs/STANDARD_CLIENTS.md#walletless-check) when root `instant_evaluation.enabled` is true; ordinary MCP or REST, no wallet/key/custom header. One attempt per verified network prefix per approved period, sharing existing capacity; no automatic payment.
 - [Start free as an agent](https://fresh402.com/docs#machine-trial) · [Source SDK 0.3.6 (Node 24+, not npm)](https://fresh402.com/docs#sdk). Machine enrollment requires an unfunded EOA ownership signature; an ordinary MCP connection cannot sign for you. Eligible new identities: up to 100 Checks (20/day) plus bounded samples, subject to shared capacity and the October 30–November 29, 2026 UTC operating window. Credentials last at most 30 days and are clipped to November 29; late joins get fewer days. Existing identities retain original quotas and expiry. Read live availability before enrollment.
@@ -24,7 +24,11 @@ Fresh402 keeps a hosted observation workflow across agent sessions: reusable wat
 | Wallet Watch | `fresh402_wallet_watch` | POST /v3/wallet-watch | $0.020 | 8, eligible all-service credits or original grant |
 | Token Facts | `fresh402_token_facts` | POST /v3/token-facts | $0.010 | 4, eligible all-service credits or original grant |
 
-## Start with a free baseline
+## Try one eligible Check without a wallet
+
+Inspect [root discovery](https://api.fresh402.com/) for `instant_evaluation.enabled`, then send `{"url":"https://example.com/","evaluation":true}` to `POST /v1/check` or MCP `fresh402_check`. No key or signing is required. One shared network attempt per approved period; exact replay returns retained evidence, not a fresh fetch. A 429 never authorizes a payment. [Ordinary-client examples and unsigned quotes](docs/STANDARD_CLIENTS.md).
+
+## Save a free baseline for later sessions
 
 ```sh
 curl https://api.fresh402.com/v1/register \

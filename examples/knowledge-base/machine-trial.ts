@@ -13,6 +13,6 @@ export async function prepareMachineTrialChallenge(base:string,wallet:string){
 export async function claimMachineTrialKey(base:string,wallet:string,challenge:Json,signature:string,persistPrivate:(record:Json)=>Promise<void>){
  if(!/^ma_[a-f0-9]{64}$/.test(challenge.challenge_id)||!/^0x[a-f0-9]{130}$/i.test(signature))throw Error('Original challenge and EOA ownership signature required');
  const r=await call(base,'/v3/agent-trial/claim',{wallet,challenge_id:challenge.challenge_id,signature});
- if(!/^fm_[a-f0-9]{64}$/.test(r.trial_key)||r.payments_automatic!==false||r.expires_at<=Date.now()||r.expires_at>Date.now()+604800000)throw Error('Unexpected machine-trial credential');
+ if(!/^fm_[a-f0-9]{64}$/.test(r.trial_key)||r.payments_automatic!==false||!Number.isSafeInteger(r.expires_at)||r.expires_at<=Date.now()||r.expires_at>Date.now()+2592000000)throw Error('Unexpected machine-trial credential');
  await persistPrivate({origin:base,trial_key:r.trial_key,expires_at:r.expires_at});return r;
 }

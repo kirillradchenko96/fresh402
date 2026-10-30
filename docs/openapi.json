@@ -3,7 +3,7 @@
     "enabled": true,
     "model": "one-time bounded machine trial; wallet control is not unique-agent identity",
     "allowances": {
-      "check": 2,
+      "check": 100,
       "extract": 1,
       "smart_diff": 1,
       "openapi_diff": 1,
@@ -16,16 +16,20 @@
     "quota_endpoint": "/v3/agent-trial/quota",
     "credential_header": "X-Fresh402-Trial-Key",
     "idempotency_header": "Idempotency-Key",
-    "credential_max_lifetime_seconds": 604800,
+    "credential_max_lifetime_seconds": 2592000,
     "captcha_required": false,
     "wallet_signature": "EIP-191 personal_sign of the exact returned challenge",
     "payments_automatic": false,
     "shared_limits": {
-      "work_units_day": 32,
-      "work_units_month": 64,
-      "work_units_network_day": 8,
-      "web_runtime_reservation_ms_day": 360000,
-      "web_runtime_reservation_ms_month": 1200000,
+      "work_units_day": 3000,
+      "work_units_month": 25000,
+      "work_units_network_day": 1000,
+      "web_runtime_reservation_ms_day": 60000000,
+      "web_runtime_reservation_ms_month": 1236000000,
+      "new_identities_day": 50,
+      "new_identities_network_day": 10,
+      "profile_state_ceiling": 1000,
+      "period_expires_at": 1795910400000,
       "blockchain_rpc_reservation_day": 18,
       "blockchain_units_month": 18000
     },
@@ -108,7 +112,7 @@
   "info": {
     "title": "Fresh402 Web and Blockchain Intelligence API",
     "version": "3.0.2",
-    "description": "Fresh402 3.0.2: bounded OpenAPI contract comparison; hosted persistent observations for agents: save a baseline, reuse watch IDs across sessions, revalidate conditionally, inspect scoped structured changes and recover original operation results. Free protocol discovery/Register need no wallet. Limited machine trial requires an unfunded EOA ownership signature; inspect current /v3/agent-trial availability, quotas and expiry. Seven paid products use explicitly authorized x402/MPP/prepaid, never automatic payment after trial exhaustion. Source SDK0.3.5 and workflows: https://fresh402.com/docs#sdk . Direct HTTP/local tools can be simpler for one-off work or existing local state. Public HTTPS only; bounded formats, no browser rendering, automatic monitoring, LLM inference or complete contract/chain guarantees.",
+    "description": "Fresh402 3.0.2: bounded OpenAPI contract comparison; hosted persistent observations for agents: save a baseline, reuse watch IDs across sessions, revalidate conditionally, inspect scoped structured changes and recover original operation results. Free protocol discovery/Register need no wallet. Limited machine trial requires an unfunded EOA ownership signature; inspect current /v3/agent-trial availability, quotas and expiry. Seven paid products use explicitly authorized x402/MPP/prepaid, never automatic payment after trial exhaustion. Source SDK0.3.6 and workflows: https://fresh402.com/docs#sdk . Direct HTTP/local tools can be simpler for one-off work or existing local state. Public HTTPS only; bounded formats, no browser rendering, automatic monitoring, LLM inference or complete contract/chain guarantees.",
     "contact": {
       "name": "Fresh402 support",
       "email": "fresh402@proton.me",
@@ -6399,7 +6403,7 @@
         "security": [],
         "responses": {
           "200": {
-            "description": "Wallet control is not proof of a unique agent. Allowances are maxima, admission may deny earlier. Each web attempt reserves120000ms; the shared pool permits at most3web attempts/day and10/month across ALL identities before other limits. No payment fallback.",
+            "description": "Wallet control is not proof of a unique agent. Allowances are maxima, admission may deny earlier. Each web attempt reserves120000ms; the shared pool permits at most500web attempts/day and10300/month across ALL identities before other limits. No payment fallback.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6416,7 +6420,7 @@
                       "properties": {
                         "check": {
                           "type": "integer",
-                          "const": 2,
+                          "const": 100,
                           "description": "One-time maximum successful check executions; shared capacity can deny earlier."
                         },
                         "extract": {
@@ -6456,23 +6460,39 @@
                       "properties": {
                         "work_units_day": {
                           "type": "integer",
-                          "const": 32
+                          "const": 3000
                         },
                         "work_units_month": {
                           "type": "integer",
-                          "const": 64
+                          "const": 25000
                         },
                         "work_units_network_day": {
                           "type": "integer",
-                          "const": 8
+                          "const": 1000
                         },
                         "web_runtime_reservation_ms_day": {
                           "type": "integer",
-                          "const": 360000
+                          "const": 60000000
                         },
                         "web_runtime_reservation_ms_month": {
                           "type": "integer",
-                          "const": 1200000
+                          "const": 1236000000
+                        },
+                        "new_identities_day": {
+                          "type": "integer",
+                          "const": 50
+                        },
+                        "new_identities_network_day": {
+                          "type": "integer",
+                          "const": 10
+                        },
+                        "profile_state_ceiling": {
+                          "type": "integer",
+                          "const": 1000
+                        },
+                        "period_expires_at": {
+                          "type": "integer",
+                          "const": 1795910400000
                         },
                         "blockchain_rpc_reservation_day": {
                           "type": "integer",
@@ -6501,7 +6521,7 @@
                     },
                     "credential_max_lifetime_seconds": {
                       "type": "integer",
-                      "const": 604800,
+                      "const": 2592000,
                       "description": "Maximum lifetime, further clipped by the existing operating expiry. Rotation never extends it."
                     },
                     "captcha_required": {
@@ -6876,7 +6896,7 @@
       "post": {
         "operationId": "fresh402_machine_trial_challenge",
         "summary": "Request the exact five-minute EIP-191 wallet-control message",
-        "description": "No CAPTCHA, funding, approval or merchant-side manual activation. Challenges bind wallet, canonical origin and network. Rotation preserves original quotas and expiry (at most 7 days, clipped to existing runtime authorization). Persist keys privately. Do not mix payment/prepaid credentials.",
+        "description": "No CAPTCHA, funding, approval or merchant-side manual activation. Challenges bind wallet, canonical origin and network. Rotation preserves original quotas and expiry (at most 30 days, clipped to existing runtime authorization). Persist keys privately. Do not mix payment/prepaid credentials.",
         "security": [],
         "requestBody": {
           "required": true,
@@ -7084,7 +7104,7 @@
       "post": {
         "operationId": "fresh402_machine_trial_claim",
         "summary": "Verify the exact EOA message, consume the challenge and issue or rotate fm_ credentials",
-        "description": "No CAPTCHA, funding, approval or merchant-side manual activation. Challenges bind wallet, canonical origin and network. Rotation preserves original quotas and expiry (at most 7 days, clipped to existing runtime authorization). Persist keys privately. Do not mix payment/prepaid credentials.",
+        "description": "No CAPTCHA, funding, approval or merchant-side manual activation. Challenges bind wallet, canonical origin and network. Rotation preserves original quotas and expiry (at most 30 days, clipped to existing runtime authorization). Persist keys privately. Do not mix payment/prepaid credentials.",
         "security": [],
         "requestBody": {
           "required": true,
@@ -7134,45 +7154,42 @@
                     },
                     "expires_at": {
                       "type": "integer",
-                      "description": "Original expiry, Unix milliseconds; at most7days and clipped by operating authorization."
+                      "description": "Original expiry, Unix milliseconds; at most30days and clipped by operating authorization."
                     },
                     "allowances": {
                       "type": "object",
                       "properties": {
                         "check": {
                           "type": "integer",
-                          "const": 2,
-                          "description": "One-time maximum successful check executions; shared capacity can deny earlier."
+                          "enum": [
+                            2,
+                            100
+                          ],
+                          "description": "Immutable original cohort entitlement; existing profiles retain2, new eligible expanded profiles100."
                         },
                         "extract": {
                           "type": "integer",
-                          "const": 1,
-                          "description": "One-time maximum successful extract executions; shared capacity can deny earlier."
+                          "const": 1
                         },
                         "smart_diff": {
                           "type": "integer",
-                          "const": 1,
-                          "description": "One-time maximum successful smart_diff executions; shared capacity can deny earlier."
+                          "const": 1
                         },
                         "openapi_diff": {
                           "type": "integer",
-                          "const": 1,
-                          "description": "One-time maximum successful openapi_diff executions; shared capacity can deny earlier."
+                          "const": 1
                         },
                         "contract_watch": {
                           "type": "integer",
-                          "const": 1,
-                          "description": "One-time maximum successful contract_watch executions; shared capacity can deny earlier."
+                          "const": 1
                         },
                         "wallet_watch": {
                           "type": "integer",
-                          "const": 1,
-                          "description": "One-time maximum successful wallet_watch executions; shared capacity can deny earlier."
+                          "const": 1
                         },
                         "token_facts": {
                           "type": "integer",
-                          "const": 1,
-                          "description": "One-time maximum successful token_facts executions; shared capacity can deny earlier."
+                          "const": 1
                         }
                       }
                     },

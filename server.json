@@ -3,7 +3,7 @@
   "name": "io.github.kirillradchenko96/fresh402",
   "title": "Fresh402 Agent Intelligence",
   "description": "Persistent web/Base observations and recoverable results. Free Register, 7 paid tools; REST/MCP.",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "websiteUrl": "https://fresh402.com",
   "repository": {
     "url": "https://github.com/kirillradchenko96/fresh402",
@@ -14,5 +14,27 @@
       "type": "streamable-http",
       "url": "https://api.fresh402.com/mcp"
     }
-  ]
+  ],
+  "icons": [
+    {
+      "src": "https://fresh402.com/favicon.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "256x256"
+      ]
+    },
+    {
+      "src": "https://fresh402.com/favicon.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": [
+        "any"
+      ]
+    }
+  ],
+  "_meta": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "apiVersion": "3.0.2",
+      "releaseType": "metadata-only"
+    }
+  }
 }

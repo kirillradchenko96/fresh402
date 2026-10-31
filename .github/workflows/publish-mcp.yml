@@ -36,7 +36,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           node scripts/validate-registry-metadata.mjs
           node examples/efficiency/read-only-smoke.ts > "$RUNNER_TEMP/fresh402-public-discovery.json"
-          node --input-type=module -e 'import fs from "node:fs"; import assert from "node:assert/strict"; const m=JSON.parse(fs.readFileSync("server.json")),d=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/fresh402-public-discovery.json")); assert.equal(d.version,m.version); assert.equal(d.restTools,8); assert.equal(d.mcpTools,8); assert.equal(d.newPayments,0);'
+          node --input-type=module -e 'import fs from "node:fs"; import assert from "node:assert/strict"; const m=JSON.parse(fs.readFileSync("server.json")),d=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/fresh402-public-discovery.json")); assert.equal(d.version,m._meta?.["io.modelcontextprotocol.registry/publisher-provided"]?.apiVersion??m.version); assert.equal(d.restTools,8); assert.equal(d.mcpTools,8); assert.equal(d.newPayments,0);'
       - name: Install signature verification
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
       - name: Verify pinned official publisher

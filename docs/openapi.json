@@ -9834,6 +9834,139 @@
           }
         }
       }
+    },
+    "/v2/payments/recovery": {
+      "post": {
+        "operationId": "fresh402_paid_result_by_nonce",
+        "summary": "Recover an original direct x402/MPP result by its authorization nonce, using an authenticated payer session. No new payment or execution.",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "nonce": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$",
+                    "description": "Original EIP-3009 authorization nonce, not a replacement signature. Only the authenticated payer can retrieve the retained result."
+                  }
+                },
+                "required": [
+                  "nonce"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Verified bounded early credit is available; original state is not credited and full finality remains pending."
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/payments/recovery/{claim}": {
+      "get": {
+        "operationId": "fresh402_paid_result_by_id",
+        "summary": "Recover an original direct x402/MPP result by its operation ID, using an authenticated payer session. Seven-day retention; unresolved settlement returns 409; expired results return 410.",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Verified bounded early credit is available; original state is not credited and full finality remains pending."
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        },
+        "parameters": [
+          {
+            "name": "claim",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "description": "Original X-Fresh402-Operation-Id. Public knowledge of this ID does not authorize recovery."
+          }
+        ]
+      }
     }
   },
   "components": {

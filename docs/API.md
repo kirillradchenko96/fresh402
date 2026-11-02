@@ -120,6 +120,10 @@ An empty unsigned POST to any of the four paid Web REST resources returns a disc
 
 Do not place a recovery token in a URL or log. A public transaction hash or payment signature alone is not a private recovery credential. For MCP transport and metadata keys, see [MCP.md](MCP.md).
 
+An uncertain direct x402/MPP settlement is reconciled through bounded read-only chain checks; only an exact matching finalized native-USDC authorization can release its original result. Never authorize a replacement while settlement is uncertain. An initially generated private recovery capability is also returned on pending responses, with `X-Fresh402-Operation-Id`. Save these headers privately.
+
+If both the initial response and private capability were lost, authenticate the **original payer** through the existing customer ownership challenge/session flow (a free ownership signature, never a USDC authorization). With `X-Fresh402-Customer-Session`, use `GET /v2/payments/recovery/{claim}`, or `POST /v2/payments/recovery` with only `{"nonce":"0x<original 64 hexadecimal digits>"}`. This returns only that payer's original retained result and receipt, without another execution, settlement or credit charge. Pending settlement returns 409; seven-day result expiry returns 410. Public transaction proofs alone remain insufficient. Normal payment retries still require the original origin, input, transport and proof.
+
 ## Limits and errors
 
 Targets must be external public HTTPS URLs on port 443 without embedded credentials. Fresh402's own service URLs, private addresses and unsafe redirects are rejected. Requests are on demand; there is no continuous monitoring, authenticated-site access or push alert service. Payload, target, stored-content and output limits apply.
@@ -186,3 +190,5 @@ Customer funding idempotency keys share one production account namespace across 
 ## Walletless Check evaluation
 
 Read root `instant_evaluation.enabled`, then POST `/v1/check` with `{"url":"https://example.com/","evaluation":true}` or use the same arguments for `fresh402_check`. No wallet/key/custom header is required. One attempted Check per verified IPv4 /24 or IPv6 /64 per approved B1 period shares the existing machine-trial work, admission, storage and runtime limits; it is not a unique-agent allowance. Repeating identical input on the same network returns the original retained result for up to seven days without another fetch. Changed input after use returns `evaluation_exhausted` (429); unavailable evaluation is 503 and exhausted shared capacity is 429. Failed admitted work consumes the attempt. There is no payment fallback. Omit `evaluation` for the existing paid Check. Expanded signed machine trials retain their original rights. See [standard clients](STANDARD_CLIENTS.md).
+
+Web trial admission applies separate short-lived raw network/global rate limits before proof verification. Malformed, invalid-proof and network-denied requests do not consume successful daily trial-claim counters. A verified claim commits its challenge, successful-claim counters and key allocation together. Existing identity, rotation, execution, storage and runtime limits still apply; admission is not a promise of available execution capacity. Machine trials and walletless Check evaluations retain their separate policies.

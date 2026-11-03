@@ -1,4 +1,4 @@
-# Fresh402 2.4 request examples
+# Fresh402 request examples
 
 These examples use the existing production URLs. Discovery is free. Unsigned paid requests return HTTP 402 requirements and do not pay for or deliver the paid operation. The free Register example does fetch a new public target if you choose to execute it.
 

@@ -88,7 +88,7 @@ The live service supports modern protocol discovery and legacy Streamable HTTP c
 
 A normal client can list all eight released tools and register a baseline. Paid execution requires x402, enabled native MPP or authenticated prepaid metadata. HTTP200 alone is not a successful paid result: inspect `isError` and structured content.
 
-The separate Web free-trial pilot is enabled in 3.0.0 within finite shared capacity. Read root `free_trial.enabled` or `GET /v2/trial` before use. Send `X-Fresh402-Trial-Key` and a persisted per-call `Idempotency-Key` in HTTP transport headers. Exact input/key replay shares the REST result and quota; there is no automatic payment fallback. Do not mix trial and financial credentials. [Trial guide](FREE_TRIAL.md).
+The separate Web free-trial pilot is enabled when live discovery says so within finite shared capacity. Read root `free_trial.enabled` or `GET /v2/trial` before use. Send `X-Fresh402-Trial-Key` and a persisted per-call `Idempotency-Key` in HTTP transport headers. Exact input/key replay shares the REST result and quota; there is no automatic payment fallback. Do not mix trial and financial credentials. [Trial guide](FREE_TRIAL.md).
 
 ## Finalized Base observation pilot
 

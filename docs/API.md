@@ -143,7 +143,7 @@ Circle Gateway is a separate optional x402 rail, not an MPP method. It is disabl
 
 ## Authenticated free-trial pilot
 
-Inspect `GET /v2/trial` or root `free_trial.enabled` before assuming free execution is active. The authenticated pilot is enabled in 3.0.0 within finite shared capacity. The [trial page](https://api.fresh402.com/trial) uses an unfunded EOA ownership message plus Cloudflare Turnstile; no payment, token approval or funded wallet is required.
+Inspect `GET /v2/trial` or root `free_trial.enabled` before assuming free execution is active. The authenticated pilot is enabled when live discovery says so within finite shared capacity. The [trial page](https://api.fresh402.com/trial) uses an unfunded EOA ownership message plus Cloudflare Turnstile; no payment, token approval or funded wallet is required.
 
 One-time entitlements are Check 20, Extract 10, Smart Diff 5 and OpenAPI Diff 3, subject to finite shared capacity. Send only `X-Fresh402-Trial-Key` and a unique privately persisted `Idempotency-Key` to the normal REST endpoint or MCP HTTP transport. A key identifies one logical tool/input; replay the exact original input/key for seven-day recovery without another quota debit or fetch. MCP clients must set a distinct operation header for each new call. Never mix trial and payment/prepaid credentials. Quota exhaustion cannot initiate a purchase. Inspect remaining allowances at `GET /v2/trial/quota`. Rotation requires a fresh ownership challenge and human verification, preserves used quota and invalidates the old credential. Failed work refunds its tool allowance once; infrastructure cost reservations remain consumed. Retained-result expiry returns 410 and never reruns work.
 

@@ -1,0 +1,66 @@
+{
+  "verified_at": "2026-11-03T08:54:28.090Z",
+  "api_origin": "https://api.fresh402.com",
+  "api_version": "3.0.2",
+  "sdk_version": "0.3.6",
+  "network": "eip155:8453",
+  "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "tools": [
+    {
+      "id": "register",
+      "tool": "fresh402_register",
+      "path": "/v1/register",
+      "atomic_usdc": 0,
+      "credits": 0
+    },
+    {
+      "id": "check",
+      "tool": "fresh402_check",
+      "path": "/v1/check",
+      "atomic_usdc": 5000,
+      "credits": 2
+    },
+    {
+      "id": "extract",
+      "tool": "fresh402_extract",
+      "path": "/v2/extract",
+      "atomic_usdc": 10000,
+      "credits": 3
+    },
+    {
+      "id": "smart_diff",
+      "tool": "fresh402_smart_diff",
+      "path": "/v2/smart-diff",
+      "atomic_usdc": 15000,
+      "credits": 4
+    },
+    {
+      "id": "openapi_contract_diff",
+      "tool": "fresh402_openapi_contract_diff",
+      "path": "/v2/openapi-contract-diff",
+      "atomic_usdc": 20000,
+      "credits": 5
+    },
+    {
+      "id": "contract_watch",
+      "tool": "fresh402_contract_watch",
+      "path": "/v3/contract-watch",
+      "atomic_usdc": 10000,
+      "credits": 4
+    },
+    {
+      "id": "wallet_watch",
+      "tool": "fresh402_wallet_watch",
+      "path": "/v3/wallet-watch",
+      "atomic_usdc": 20000,
+      "credits": 8
+    },
+    {
+      "id": "token_facts",
+      "tool": "fresh402_token_facts",
+      "path": "/v3/token-facts",
+      "atomic_usdc": 10000,
+      "credits": 4
+    }
+  ]
+}

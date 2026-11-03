@@ -1,17 +1,20 @@
-# Fresh402 2.5 pricing and product comparison
+# Prices and prepaid credits
 
-| Product | MCP tool | Price | Atomic USDC | Use it when |
-|---|---|---:|---:|---|
-| Persistent baseline | fresh402_register | Free | 0 | Establish a watch once; repeat registration retrieves its baseline |
-| Freshness Check | fresh402_check | $0.005 USDC | 5000 | Decide whether to reuse a source or run more expensive downstream work |
-| Web Extract | fresh402_extract | $0.01 USDC | 10000 | Get bounded text, titles, metadata, headings, links and structured data |
-| Smart Diff | fresh402_smart_diff | $0.015 USDC | 15000 | Inspect structured changes and significance with explainable deterministic rules |
-| OpenAPI Contract Diff | fresh402_openapi_contract_diff | $0.020 USDC | 20000 | Compare supported JSON OpenAPI contracts without fetching remote references |
+<!-- pricing-table:start -->
+| Tool | MCP identity | REST | USDC per call | Current prepaid credits |
+|---|---|---|---:|---:|
+| register | `fresh402_register` | `POST /v1/register` | Free | Free |
+| check | `fresh402_check` | `POST /v1/check` | $0.005 | 2 |
+| extract | `fresh402_extract` | `POST /v2/extract` | $0.010 | 3 |
+| smart diff | `fresh402_smart_diff` | `POST /v2/smart-diff` | $0.015 | 4 |
+| openapi contract diff | `fresh402_openapi_contract_diff` | `POST /v2/openapi-contract-diff` | $0.020 | 5 |
+| contract watch | `fresh402_contract_watch` | `POST /v3/contract-watch` | $0.010 | 4 |
+| wallet watch | `fresh402_wallet_watch` | `POST /v3/wallet-watch` | $0.020 | 8 |
+| token facts | `fresh402_token_facts` | `POST /v3/token-facts` | $0.010 | 4 |
+<!-- pricing-table:end -->
 
-Network: **Base mainnet**, chain ID **8453** (`eip155:8453`). Payment: **native USDC**, x402 v2 **exact** authorization. These are per-call service prices, not subscriptions or an unlimited monitoring plan. Cached Check results remain paid. Any client/facilitator transaction costs are separate from these service prices; no free-gas promise is made.
+This table is generated from the reviewed public discovery contract. Standalone calls use native USDC on Base mainnet (8453), x402 v2 exact or enabled native MPP EVM charge. A compatible, explicitly authorized payment client is required. Quotes are not charges; any client/facilitator costs are separate. Cached Check results remain paid.
 
-Metadata, OpenAPI, MCP tool discovery and legacy stored history/diff reads are free. Existing baseline registration does not refresh a watch. Public history/diff is not a free route to paid Smart Diff results.
+Starter is **$2.50 / 1,000 credits**; Developer is **$15 / 10,000 credits**. Packages are one-time purchases, not subscriptions; purchased credits do not expire. The account page offers Web packages. All-service packages require explicit accepted terms through the agent purchasing flow; old Web balances retain their original rights. Always read [live plans](https://api.fresh402.com/v2/prepaid/plans), [all-service eligibility](https://api.fresh402.com/v3/prepaid/all-services) and your authenticated quote.
 
-The price table was checked against live production requirements and schemas. Always read the current [OpenAPI](https://api.fresh402.com/openapi.json) and unsigned x402 challenge before signing. A 402 challenge is a quote, not proof of payment or catalog indexing. The [client payment contract](API.md#payment-and-recovery) covers receipts and private recovery.
-
-Tariff 3 prepaid costs are Check 2, Extract 3, Smart Diff 4 and OpenAPI Contract Diff 5 credits. Starter remains $2.50 / 1,000 credits and Developer $15 / 10,000 credits; historical tariffs retain their purchased terms. Public signup and one-time package purchasing are enabled in the verified 2.5 release. Read live availability before signing. Independently verified inclusion may unlock a bounded early tranche; full entitlement still requires canonical finality. See the [agent purchasing guide](AGENT_PREPAID.md). Read [live availability](https://api.fresh402.com/v2/prepaid/plans) and [self-service recovery](SELF_SERVICE.md).
+Free discovery, Register and eligible walletless/trial access are separate from purchased credits. Capacity can be unavailable before a free allowance is exhausted; no automatic paid fallback is authorized. [Free access](FREE_TRIAL.md), [machine trial](MACHINE_TRIAL.md), [agent purchase and recovery](AGENT_PREPAID.md), [current availability](RELEASE_AVAILABILITY.md).

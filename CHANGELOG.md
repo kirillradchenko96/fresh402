@@ -1,6 +1,18 @@
 # Hosted service release notes
 
-These notes describe the deployed API, independently of the legacy source package version in this repository. Documentation publication does not deploy infrastructure or merge the backend release PR.
+These notes distinguish hosted API behavior, source-client distribution and documentation maintenance. The public root package validates clients/docs; it is not the backend version. [Version relationships](docs/VERSIONS.md).
+
+## Documentation consolidation — November 2, 2026
+
+- Remove obsolete historical application/deployment files from current main while preserving all tags, branches and normal Git history. Retain supported client paths and compatibility guides.
+- Synchronize the public OpenAPI snapshot with live API 3.0.2, including complete native MPP offers; add publication/link/version checks. Correct stale trial calendar cutoffs without changing credentials, entitlements or operating policy.
+- Document source SDK 0.3.6, existing Registry metadata3.0.3 and current website/API relationships separately. No artificial version bump or npm release.
+
+## Compatible API 3.0.2 maintenance — verified November 2, 2026
+
+- Conservative supported OpenAPI string-length compatibility evidence now follows request/response direction. Complex/unsupported interactions remain review cases.
+- Complete native MPP offers derive from existing tool prices; runtime HTTP 402 stays authoritative. Existing prices, payment logic and customer balances are unchanged.
+- Existing eight MCP tools, free access, all-service packages and original-operation recovery remain available under live flags. This records deployed behavior, not a new product-version claim.
 
 ## 3.0.0 - October 25, 2026
 

@@ -13,9 +13,9 @@ Free discovery and Register need no wallet. The ownership signature is for trial
 ## Allowance and expiry
 
 - Eligible new identities receive up to **100 Checks**, at most **20/day**, plus at most one each of Extract, Smart Diff, OpenAPI Contract Diff, Contract Watch, Wallet Watch and Token Facts.
-- The approved window is **October 30, 2026 00:00 UTC through November 29, 2026 00:00 UTC**. A credential lasts at most 30 days and is clipped to the closing time; late joins get fewer days.
+- A newly issued credential lasts **at most 30 days**. Read the actual `expires_at` returned by claim/quota and live availability. The former November 29 operating cutoff is not the current production availability rule; this is not a guarantee of capacity or continuous uptime.
 - Existing identities retain their original allowances (including legacy 2 Checks), consumed quota and original expiry. Rotation invalidates the old key without upgrading, renewing or resetting rights. An expired identity cannot renew.
-- Purchased credits do not inherit trial expiry. The separate human Web trial retains its own allowances, Turnstile requirement and earlier November 14 operating gate.
+- Purchased credits do not inherit trial expiry. The separate human Web trial retains its own allowances and Turnstile requirement; read its live availability.
 
 An allowance is a maximum entitlement, not reserved infrastructure capacity. Shared admission can return 429 before the allowance is exhausted; 503 means unavailable. Neither authorizes payment. There is no automatic paid continuation.
 

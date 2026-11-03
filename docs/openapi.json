@@ -12,7 +12,7 @@
     "allowance": "one Check attempt per verified network prefix per approved period, not per unique agent",
     "recovery": "Repeat identical input from the same network; original retained result only, seven days maximum. No renewal or automatic payment.",
     "shared_with_machine_trial": true,
-    "expires_at": 1795910400000,
+    "expires_at": null,
     "payments_automatic": false
   },
   "x-machine-trial": {
@@ -45,7 +45,7 @@
       "new_identities_day": 50,
       "new_identities_network_day": 10,
       "profile_state_ceiling": 1000,
-      "period_expires_at": 1795910400000,
+      "period_expires_at": null,
       "blockchain_rpc_reservation_day": 18,
       "blockchain_units_month": 18000
     },
@@ -1084,6 +1084,139 @@
         }
       }
     },
+    "/v2/payments/recovery": {
+      "post": {
+        "operationId": "fresh402_paid_result_by_nonce",
+        "summary": "Recover an original direct x402/MPP result by its authorization nonce, using an authenticated payer session. No new payment or execution.",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "nonce": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$",
+                    "description": "Original EIP-3009 authorization nonce, not a replacement signature. Only the authenticated payer can retrieve the retained result."
+                  }
+                },
+                "required": [
+                  "nonce"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Verified bounded early credit is available; original state is not credited and full finality remains pending."
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        }
+      }
+    },
+    "/v2/payments/recovery/{claim}": {
+      "get": {
+        "operationId": "fresh402_paid_result_by_id",
+        "summary": "Recover an original direct x402/MPP result by its operation ID, using an authenticated payer session. Seven-day retention; unresolved settlement returns 409; expired results return 410.",
+        "tags": [
+          "prepaid-customer"
+        ],
+        "security": [
+          {
+            "customerSession": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Verified bounded early credit is available; original state is not credited and full finality remains pending."
+          },
+          "401": {
+            "description": "Ownership or session proof required"
+          },
+          "402": {
+            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
+          },
+          "403": {
+            "description": "Account, credential or global kill switch denied access"
+          },
+          "409": {
+            "description": "In progress, replay mismatch or used challenge; recover original intent"
+          },
+          "410": {
+            "description": "Expired unsubmitted intent or challenge"
+          },
+          "429": {
+            "description": "Bounded admission or credential limit"
+          },
+          "503": {
+            "description": "Public activation gated or finalized settlement pending; never pay again"
+          }
+        },
+        "parameters": [
+          {
+            "name": "claim",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "description": "Original X-Fresh402-Operation-Id. Public knowledge of this ID does not authorize recovery."
+          }
+        ]
+      }
+    },
     "/v1/check": {
       "post": {
         "operationId": "fresh402_check",
@@ -1120,7 +1253,16 @@
             "mode": "fixed",
             "currency": "USD",
             "amount": "0.005"
-          }
+          },
+          "offers": [
+            {
+              "amount": "5000",
+              "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits.",
+              "intent": "charge",
+              "method": "evm"
+            }
+          ]
         },
         "x-mcp-tool": "fresh402_check",
         "x-fresh402-tool": {
@@ -1831,7 +1973,16 @@
             "mode": "fixed",
             "currency": "USD",
             "amount": "0.01"
-          }
+          },
+          "offers": [
+            {
+              "amount": "10000",
+              "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch; opt-in feed_mode:entries projects RSS2/Atom. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base.",
+              "intent": "charge",
+              "method": "evm"
+            }
+          ]
         },
         "x-mcp-tool": "fresh402_extract",
         "x-fresh402-tool": {
@@ -2616,7 +2767,16 @@
             "mode": "fixed",
             "currency": "USD",
             "amount": "0.015"
-          }
+          },
+          "offers": [
+            {
+              "amount": "15000",
+              "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base.",
+              "intent": "charge",
+              "method": "evm"
+            }
+          ]
         },
         "x-mcp-tool": "fresh402_smart_diff",
         "x-fresh402-tool": {
@@ -3243,7 +3403,16 @@
             "mode": "fixed",
             "currency": "USD",
             "amount": "0.020"
-          }
+          },
+          "offers": [
+            {
+              "amount": "20000",
+              "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence after unfiltered free registration. Compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base.",
+              "intent": "charge",
+              "method": "evm"
+            }
+          ]
         },
         "x-mcp-tool": "fresh402_openapi_contract_diff",
         "x-fresh402-tool": {
@@ -3835,7 +4004,16 @@
             "mode": "fixed",
             "currency": "USD",
             "amount": "0.010000"
-          }
+          },
+          "offers": [
+            {
+              "amount": "10000",
+              "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "description": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown.",
+              "intent": "charge",
+              "method": "evm"
+            }
+          ]
         },
         "x-mcp-tool": "fresh402_contract_watch",
         "x-fresh402-tool": {
@@ -4806,7 +4984,16 @@
             "mode": "fixed",
             "currency": "USD",
             "amount": "0.020000"
-          }
+          },
+          "offers": [
+            {
+              "amount": "20000",
+              "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "description": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness.",
+              "intent": "charge",
+              "method": "evm"
+            }
+          ]
         },
         "x-mcp-tool": "fresh402_wallet_watch",
         "x-fresh402-tool": {
@@ -5677,7 +5864,16 @@
             "mode": "fixed",
             "currency": "USD",
             "amount": "0.010000"
-          }
+          },
+          "offers": [
+            {
+              "amount": "10000",
+              "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "description": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed.",
+              "intent": "charge",
+              "method": "evm"
+            }
+          ]
         },
         "x-mcp-tool": "fresh402_token_facts",
         "x-fresh402-tool": {
@@ -6559,7 +6755,7 @@
                         },
                         "period_expires_at": {
                           "type": "integer",
-                          "const": 1795910400000
+                          "const": null
                         },
                         "blockchain_rpc_reservation_day": {
                           "type": "integer",
@@ -9834,139 +10030,6 @@
           }
         }
       }
-    },
-    "/v2/payments/recovery": {
-      "post": {
-        "operationId": "fresh402_paid_result_by_nonce",
-        "summary": "Recover an original direct x402/MPP result by its authorization nonce, using an authenticated payer session. No new payment or execution.",
-        "tags": [
-          "prepaid-customer"
-        ],
-        "security": [
-          {
-            "customerSession": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "nonce": {
-                    "type": "string",
-                    "pattern": "^0x[a-fA-F0-9]{64}$",
-                    "description": "Original EIP-3009 authorization nonce, not a replacement signature. Only the authenticated payer can retrieve the retained result."
-                  }
-                },
-                "required": [
-                  "nonce"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "202": {
-            "description": "Verified bounded early credit is available; original state is not credited and full finality remains pending."
-          },
-          "401": {
-            "description": "Ownership or session proof required"
-          },
-          "402": {
-            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
-          },
-          "403": {
-            "description": "Account, credential or global kill switch denied access"
-          },
-          "409": {
-            "description": "In progress, replay mismatch or used challenge; recover original intent"
-          },
-          "410": {
-            "description": "Expired unsubmitted intent or challenge"
-          },
-          "429": {
-            "description": "Bounded admission or credential limit"
-          },
-          "503": {
-            "description": "Public activation gated or finalized settlement pending; never pay again"
-          }
-        }
-      }
-    },
-    "/v2/payments/recovery/{claim}": {
-      "get": {
-        "operationId": "fresh402_paid_result_by_id",
-        "summary": "Recover an original direct x402/MPP result by its operation ID, using an authenticated payer session. Seven-day retention; unresolved settlement returns 409; expired results return 410.",
-        "tags": [
-          "prepaid-customer"
-        ],
-        "security": [
-          {
-            "customerSession": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Authenticated result. Session tokens and API keys are confidential, no-store, never logged.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "202": {
-            "description": "Verified bounded early credit is available; original state is not credited and full finality remains pending."
-          },
-          "401": {
-            "description": "Ownership or session proof required"
-          },
-          "402": {
-            "description": "Payment required; inspect PAYMENT-REQUIRED. Not a completed purchase."
-          },
-          "403": {
-            "description": "Account, credential or global kill switch denied access"
-          },
-          "409": {
-            "description": "In progress, replay mismatch or used challenge; recover original intent"
-          },
-          "410": {
-            "description": "Expired unsubmitted intent or challenge"
-          },
-          "429": {
-            "description": "Bounded admission or credential limit"
-          },
-          "503": {
-            "description": "Public activation gated or finalized settlement pending; never pay again"
-          }
-        },
-        "parameters": [
-          {
-            "name": "claim",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^[a-f0-9]{64}$"
-            },
-            "description": "Original X-Fresh402-Operation-Id. Public knowledge of this ID does not authorize recovery."
-          }
-        ]
-      }
     }
   },
   "components": {
@@ -11321,7 +11384,7 @@
                       "observed_at": {
                         "type": "string",
                         "format": "date-time",
-                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                       },
                       "trust": {
                         "type": "string",
@@ -11534,7 +11597,7 @@
                       "observed_at": {
                         "type": "string",
                         "format": "date-time",
-                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                       },
                       "trust": {
                         "type": "string",
@@ -11763,7 +11826,7 @@
                   "observed_at": {
                     "type": "string",
                     "format": "date-time",
-                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                   },
                   "trust": {
                     "type": "string",
@@ -11979,7 +12042,7 @@
                   "observed_at": {
                     "type": "string",
                     "format": "date-time",
-                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                   },
                   "trust": {
                     "type": "string",
@@ -12203,7 +12266,7 @@
                   "observed_at": {
                     "type": "string",
                     "format": "date-time",
-                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                   },
                   "trust": {
                     "type": "string",
@@ -12432,7 +12495,7 @@
                   "observed_at": {
                     "type": "string",
                     "format": "date-time",
-                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
                   },
                   "trust": {
                     "type": "string",

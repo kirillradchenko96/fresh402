@@ -1,33 +1,29 @@
-name: CI
-
+name: Public client and documentation CI
 on:
   pull_request:
   push:
     branches: [main]
-
 permissions:
   contents: read
-
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 24
+          node-version: '24'
           cache: npm
-      - run: npm ci
-      - run: npx tsc --noEmit
-      - run: npx tsc --noEmit -p test/tsconfig.json
-      - run: npm test -- --run
-      - run: npx tsc --noEmit -p examples/knowledge-base/tsconfig.json
-      - run: node --test examples/knowledge-base/*.test.ts
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run check:docs
+      - run: npm test
+      - run: npm run typecheck
+      - run: node examples/knowledge-base/run.ts --demo
+      - run: node examples/knowledge-base/run.ts --demo --mcp
       - run: node examples/knowledge-base/prepaid-run.ts --demo

@@ -63,3 +63,7 @@ Public HTTPS only: no browser JavaScript execution, authenticated crawling, auto
 The existing Registry identity remains **io.github.kirillradchenko96/fresh402**. [Current distribution references](docs/DISCOVERY_AUDIT.md). Historical application tags/branches remain accessible; they are not current production deployment instructions. [Repository and history boundary](docs/REPOSITORY.md).
 
 Support and billing: [fresh402@proton.me](mailto:fresh402@proton.me) · [Terms](https://api.fresh402.com/terms) · [Privacy](https://api.fresh402.com/privacy).
+
+## Executable evidence workflows
+
+[Four runnable workflows](https://github.com/kirillradchenko96/fresh402/blob/main/docs/FLAGSHIP_WORKFLOWS.md) cover website changes, JSON OpenAPI review, finalized Base evidence and cross-domain release observations. Each operation needs explicit authorization and original-operation persistence. Tests are controlled fixtures, not newly purchased production observations. Current source SDK 0.3.6 remains source-only; the packed npm candidate is not published.

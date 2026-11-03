@@ -1,5 +1,5 @@
 {
-  "verified_at": "2026-11-03T08:54:28.090Z",
+  "verified_at": "2026-11-03T22:07:00.502Z",
   "api_origin": "https://api.fresh402.com",
   "api_version": "3.0.2",
   "sdk_version": "0.3.6",
@@ -11,56 +11,177 @@
       "tool": "fresh402_register",
       "path": "/v1/register",
       "atomic_usdc": 0,
-      "credits": 0
+      "credits": 0,
+      "product": {
+        "family": "web",
+        "maturity": "supported",
+        "tags": [
+          "document-baseline"
+        ],
+        "limitations": [
+          "No scheduler; existing registration does not refresh content."
+        ],
+        "docs": "https://fresh402.com/docs/tools#register",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
     },
     {
       "id": "check",
       "tool": "fresh402_check",
       "path": "/v1/check",
       "atomic_usdc": 5000,
-      "credits": 2
+      "credits": 2,
+      "product": {
+        "family": "web",
+        "maturity": "supported",
+        "tags": [
+          "website-change-detection",
+          "source-freshness",
+          "http-revalidation"
+        ],
+        "limitations": [
+          "Static public HTTPS only; no JavaScript rendering or scheduling."
+        ],
+        "docs": "https://fresh402.com/docs/tools#check",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
     },
     {
       "id": "extract",
       "tool": "fresh402_extract",
       "path": "/v2/extract",
       "atomic_usdc": 10000,
-      "credits": 3
+      "credits": 3,
+      "product": {
+        "family": "web",
+        "maturity": "supported",
+        "tags": [
+          "web-extraction",
+          "structured-content",
+          "html-json-rss"
+        ],
+        "limitations": [
+          "One bounded static document; no browser, crawl or cross-operation shared fetch."
+        ],
+        "docs": "https://fresh402.com/docs/tools#extract",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
     },
     {
       "id": "smart_diff",
       "tool": "fresh402_smart_diff",
       "path": "/v2/smart-diff",
       "atomic_usdc": 15000,
-      "credits": 4
+      "credits": 4,
+      "product": {
+        "family": "web",
+        "maturity": "supported",
+        "tags": [
+          "document-comparison",
+          "json-diff",
+          "html-diff"
+        ],
+        "limitations": [
+          "Requires compatible retained watch evidence; significance is rule-based, not semantic proof."
+        ],
+        "docs": "https://fresh402.com/docs/tools#smart-diff",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
     },
     {
       "id": "openapi_contract_diff",
       "tool": "fresh402_openapi_contract_diff",
       "path": "/v2/openapi-contract-diff",
       "atomic_usdc": 20000,
-      "credits": 5
+      "credits": 5,
+      "product": {
+        "family": "web",
+        "maturity": "supported",
+        "tags": [
+          "openapi-compatibility",
+          "api-contract-diff",
+          "breaking-change-review"
+        ],
+        "limitations": [
+          "Bounded JSON OpenAPI 3.0/3.1; no YAML or external-reference fetch; uncertainty needs review."
+        ],
+        "docs": "https://fresh402.com/docs/tools#openapi",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
     },
     {
       "id": "contract_watch",
       "tool": "fresh402_contract_watch",
       "path": "/v3/contract-watch",
       "atomic_usdc": 10000,
-      "credits": 4
+      "credits": 4,
+      "product": {
+        "family": "base",
+        "maturity": "restricted",
+        "tags": [
+          "base",
+          "smart-contract-observation",
+          "finalized-state",
+          "proxy-changes"
+        ],
+        "limitations": [
+          "Single-provider finalized evidence; one selected slot/read/topic; unknown controls remain unknown."
+        ],
+        "docs": "https://fresh402.com/docs/tools#blockchain",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
     },
     {
       "id": "wallet_watch",
       "tool": "fresh402_wallet_watch",
       "path": "/v3/wallet-watch",
       "atomic_usdc": 20000,
-      "credits": 8
+      "credits": 8,
+      "product": {
+        "family": "base",
+        "maturity": "restricted",
+        "tags": [
+          "base",
+          "wallet-observation",
+          "erc20-transfers",
+          "finalized-state"
+        ],
+        "limitations": [
+          "Selected ERC-20-shaped logs in bounded pages; no complete native/internal/NFT history or completeness guarantee."
+        ],
+        "docs": "https://fresh402.com/docs/tools#blockchain",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
     },
     {
       "id": "token_facts",
       "tool": "fresh402_token_facts",
       "path": "/v3/token-facts",
       "atomic_usdc": 10000,
-      "credits": 4
+      "credits": 4,
+      "product": {
+        "family": "base",
+        "maturity": "restricted",
+        "tags": [
+          "base",
+          "token-metadata",
+          "erc20-facts",
+          "finalized-state"
+        ],
+        "limitations": [
+          "Contract-reported facts; no token safety score, verified-source claim or inferred absence of privileges."
+        ],
+        "docs": "https://fresh402.com/docs/tools#blockchain",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
     }
   ]
 }

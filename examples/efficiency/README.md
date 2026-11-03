@@ -89,3 +89,7 @@ Use the same saved watch for Register → Check → optional Smart Diff / Extrac
 ## Why use this source SDK?
 
 Use BudgetGuard to bound explicitly authorized work, EvidenceCache to reuse compatible retained evidence, refresh recommendations to decide when another call is useful, and adapters to expose the same client to supported agent frameworks. The SDK does not make a wallet signer, consent, private persistence or uncertainty recovery disappear. Source release is efficiency-sdk-v0.3.6 on Node 24+; it is not an npm/Python package. Direct REST/MCP is simpler if your agent already supplies those controls. The zero-budget quickstart proves connectivity and returns an unpaid quote, not extracted content. [Free first-use path](https://fresh402.com/docs#machine-trial) · [Observation workflows](https://fresh402.com/docs#workflows).
+
+## Executable evidence workflows
+
+[Four runnable workflows](https://github.com/kirillradchenko96/fresh402/blob/main/docs/FLAGSHIP_WORKFLOWS.md) cover website changes, JSON OpenAPI review, finalized Base evidence and cross-domain release observations. Each operation needs explicit authorization and original-operation persistence. Tests are controlled fixtures, not newly purchased production observations. Current source SDK 0.3.6 remains source-only; the packed npm candidate is not published.

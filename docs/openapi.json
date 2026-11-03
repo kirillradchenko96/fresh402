@@ -1264,6 +1264,21 @@
             }
           ]
         },
+        "x-fresh402-product": {
+          "family": "web",
+          "maturity": "supported",
+          "tags": [
+            "website-change-detection",
+            "source-freshness",
+            "http-revalidation"
+          ],
+          "limitations": [
+            "Static public HTTPS only; no JavaScript rendering or scheduling."
+          ],
+          "docs": "https://fresh402.com/docs/tools#check",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
+        },
         "x-mcp-tool": "fresh402_check",
         "x-fresh402-tool": {
           "id": "check",
@@ -1983,6 +1998,21 @@
               "method": "evm"
             }
           ]
+        },
+        "x-fresh402-product": {
+          "family": "web",
+          "maturity": "supported",
+          "tags": [
+            "web-extraction",
+            "structured-content",
+            "html-json-rss"
+          ],
+          "limitations": [
+            "One bounded static document; no browser, crawl or cross-operation shared fetch."
+          ],
+          "docs": "https://fresh402.com/docs/tools#extract",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
         },
         "x-mcp-tool": "fresh402_extract",
         "x-fresh402-tool": {
@@ -2778,6 +2808,21 @@
             }
           ]
         },
+        "x-fresh402-product": {
+          "family": "web",
+          "maturity": "supported",
+          "tags": [
+            "document-comparison",
+            "json-diff",
+            "html-diff"
+          ],
+          "limitations": [
+            "Requires compatible retained watch evidence; significance is rule-based, not semantic proof."
+          ],
+          "docs": "https://fresh402.com/docs/tools#smart-diff",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
+        },
         "x-mcp-tool": "fresh402_smart_diff",
         "x-fresh402-tool": {
           "id": "smart_diff",
@@ -3414,6 +3459,21 @@
             }
           ]
         },
+        "x-fresh402-product": {
+          "family": "web",
+          "maturity": "supported",
+          "tags": [
+            "openapi-compatibility",
+            "api-contract-diff",
+            "breaking-change-review"
+          ],
+          "limitations": [
+            "Bounded JSON OpenAPI 3.0/3.1; no YAML or external-reference fetch; uncertainty needs review."
+          ],
+          "docs": "https://fresh402.com/docs/tools#openapi",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
+        },
         "x-mcp-tool": "fresh402_openapi_contract_diff",
         "x-fresh402-tool": {
           "id": "openapi_diff",
@@ -4014,6 +4074,22 @@
               "method": "evm"
             }
           ]
+        },
+        "x-fresh402-product": {
+          "family": "base",
+          "maturity": "restricted",
+          "tags": [
+            "base",
+            "smart-contract-observation",
+            "finalized-state",
+            "proxy-changes"
+          ],
+          "limitations": [
+            "Single-provider finalized evidence; one selected slot/read/topic; unknown controls remain unknown."
+          ],
+          "docs": "https://fresh402.com/docs/tools#blockchain",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
         },
         "x-mcp-tool": "fresh402_contract_watch",
         "x-fresh402-tool": {
@@ -4995,6 +5071,22 @@
             }
           ]
         },
+        "x-fresh402-product": {
+          "family": "base",
+          "maturity": "restricted",
+          "tags": [
+            "base",
+            "wallet-observation",
+            "erc20-transfers",
+            "finalized-state"
+          ],
+          "limitations": [
+            "Selected ERC-20-shaped logs in bounded pages; no complete native/internal/NFT history or completeness guarantee."
+          ],
+          "docs": "https://fresh402.com/docs/tools#blockchain",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
+        },
         "x-mcp-tool": "fresh402_wallet_watch",
         "x-fresh402-tool": {
           "id": "wallet_watch",
@@ -5874,6 +5966,22 @@
               "method": "evm"
             }
           ]
+        },
+        "x-fresh402-product": {
+          "family": "base",
+          "maturity": "restricted",
+          "tags": [
+            "base",
+            "token-metadata",
+            "erc20-facts",
+            "finalized-state"
+          ],
+          "limitations": [
+            "Contract-reported facts; no token safety score, verified-source claim or inferred absence of privileges."
+          ],
+          "docs": "https://fresh402.com/docs/tools#blockchain",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
         },
         "x-mcp-tool": "fresh402_token_facts",
         "x-fresh402-tool": {
@@ -8875,6 +8983,19 @@
         "operationId": "fresh402_register",
         "summary": "Create or retrieve a free persistent baseline; existing watches never refetch",
         "security": [],
+        "x-fresh402-product": {
+          "family": "web",
+          "maturity": "supported",
+          "tags": [
+            "document-baseline"
+          ],
+          "limitations": [
+            "No scheduler; existing registration does not refresh content."
+          ],
+          "docs": "https://fresh402.com/docs/tools#register",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
+        },
         "requestBody": {
           "required": true,
           "content": {

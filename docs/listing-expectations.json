@@ -1,0 +1,19 @@
+{
+  "canonical_api": "https://api.fresh402.com",
+  "canonical_mcp": "https://api.fresh402.com/mcp",
+  "supported_legacy_api": "https://fresh402.kirilllabs.workers.dev",
+  "paid_resources": 7,
+  "mcp_tools": 8,
+  "network": "eip155:8453",
+  "publication_rule": "Preserve existing identities; reconcile read-only. First-party deployment does not imply marketplace refresh or agent adoption.",
+  "listings": [
+    {"id":"official-mcp-registry","identity":"io.github.kirillradchenko96/fresh402","url":"https://registry.modelcontextprotocol.io/v0.1/servers/io.github.kirillradchenko96%2Ffresh402/versions/latest","expected_mcp":"https://api.fresh402.com/mcp","update":"Existing authorized Registry publisher; metadata version is independent of API version."},
+    {"id":"glama-registry","url":"https://glama.ai/mcp/connectors/io.github.kirillradchenko96/fresh402","expected_tools":8,"update":"Existing connector refresh; visible state and score must be independently observed."},
+    {"id":"glama-domain","url":"https://glama.ai/mcp/connectors/dev.workers.kirilllabs.fresh402/fresh402","expected_tools":8,"update":"Preserve verified domain ownership and existing connector identity."},
+    {"id":"mppscan","url":"https://www.mppscan.com/server/81dacea9df74ce6e6d269a32ff8283df8bbc3d5b8dabee07a17815677fc96f2e","registered_origin":"https://fresh402.kirilllabs.workers.dev","update":"Refresh original origin identity; do not create another registration for the canonical alias."},
+    {"id":"smithery","url":"https://smithery.ai/servers/kirillradchenko96/fresh402","last_verified_state":"404 on 2026-11-03","update":"Existing owner self-service access required; no replacement listing or outreach."},
+    {"id":"x402scan","url":"https://www.x402scan.com/server/dfd5b14d-f56d-4d5a-adb0-8511f02537ab","update":"Preserve existing server identity; visible metadata is externally controlled."},
+    {"id":"agentbit","url":"https://agentbit.app/api/discover?q=fresh402","update":"Read-only reconciliation of the established record."},
+    {"id":"coinbase-bazaar","resources_from":"https://api.fresh402.com/.well-known/x402","update":"Valid resource metadata and echoed Bazaar extension during a legitimate authorized settlement; indexing may be asynchronous. Never pay merely to refresh ranking."}
+  ]
+}

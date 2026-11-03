@@ -2,6 +2,12 @@
 
 These notes distinguish hosted API behavior, source-client distribution and documentation maintenance. The public root package validates clients/docs; it is not the backend version. [Version relationships](docs/VERSIONS.md).
 
+## Discovery and executable workflows — November 3, 2026
+
+- API3.0.2 metadata adds valid provider name, topical tags and existing HTTPS icon to all seven x402 resources. Product maturity/limitations are projected into OpenAPI from the runtime catalog; schema/price/network/credit drift fails public validation. Financial execution and tool identities are unchanged.
+- Add four bounded client-side workflow examples, with per-operation authorization, saved state and original-operation recovery. All seven paid tools are represented; tests use controlled fixtures.
+- Prepare a compiled ESM/declarations tarball candidate; npm remains unpublished because release authentication/ownership is not established. Base products retain their honest restricted scope.
+
 ## Documentation consolidation — November 2, 2026
 
 - Remove obsolete historical application/deployment files from current main while preserving all tags, branches and normal Git history. Retain supported client paths and compatibility guides.

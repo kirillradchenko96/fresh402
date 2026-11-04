@@ -1,5 +1,9 @@
 # Hosted service release notes
 
+## 2026-11-04 — OpenAPI comparison correction
+
+- Ignore harmless parameter declaration reordering in OpenAPI Contract Diff while retaining real requiredness and schema findings. Public routes, tool identities, prices, payment methods and SDK compatibility are unchanged. Hosted API remains 3.0.2.
+
 ## 2026-11-04 — SDK 0.4.0-rc.1 and workflow acceptance
 
 - Publish the MIT public client SDK prerelease with root/workflows exports, Node 24 ESM and declarations; verify registry bytes, clean installation and the actual OpenAI Agents adapter. Private backend licensing is unchanged.

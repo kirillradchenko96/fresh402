@@ -105,6 +105,8 @@ For wallet-owned prepaid accounts and automatic finalized-funding recovery, see 
 
 OpenAPI analysis uses `rules_version:2` / `openapi-directional-v2`. Supported local scalar type/enum/null domains distinguish request acceptance from response guarantees: narrowing accepted requests or widening possible responses can be breaking. Requiredness and effective security inheritance/anonymous overrides/OR alternatives/AND schemes/scopes are bounded and directional. Equivalent supported edits use the existing `additive` category. Complex composition, interacting assertions, custom dialects, ambiguous 3.1 visibility, changed/unknown credential definitions and unexpanded references retain review findings, even beside an additive endpoint.3.0 readOnly/writeOnly requiredness is not imposed on 3.1. Contracts are assumed satisfiable and enforced as documented; this is not a full JSON Schema interpreter or proof of deployed behavior.
 
+Parameter declaration order alone is ignored at both path and operation level, including unchanged local references. Reordering does not hide requiredness or schema changes. Order inside array-valued defaults, examples and data remains significant where applicable.
+
 ## Payment and recovery
 
 Payment is **x402 v2**, scheme **exact**, native **USDC on Base mainnet** (`eip155:8453`, chain ID 8453). The asset is `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`; the current receiving Safe is `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Always validate the current challenge before signing. Historical EOA-bound operations retain their original recipient, resource, proof and recovery identity; this documentation does not retarget an old authorization.

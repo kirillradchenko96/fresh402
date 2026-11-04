@@ -9,7 +9,7 @@ Use [workflows.ts](../examples/efficiency/workflows.ts) with a customer-controll
 | On-chain evidence brief | Contract Watch + Wallet Watch + Token Facts | $0.040 |
 | Cross-domain release evidence | Check, Extract if changed, Contract Watch | $0.025 |
 
-These are service fees for one completed bounded page/observation, excluding any wallet/provider overhead. No operation here was newly purchased during publication. Cache hits remain billable when paid. Free Register quotas and existing shared limits apply. Direct HTTP/local comparison is often preferable if you already hold both source versions; JavaScript rendering and full wallet history require another service.
+These are service fees for one completed bounded page/observation, excluding any wallet/provider overhead. These workflow tests do not perform real payments. Cache hits remain billable when paid. Free Register quotas and existing shared limits apply. Direct HTTP/local comparison is often preferable if you already hold both source versions; JavaScript rendering and full wallet history require another service.
 
 ```ts
 import {runFlagship} from '../examples/efficiency/workflows.ts';
@@ -35,4 +35,8 @@ Save real Register watch IDs and reuse them across sessions. Repeated Register d
 
 On-chain tools accept Base 8453 and finalized observations only. Retain owned snapshot/cursor IDs only when `observation_saved` is true. Wallet pages cover selected ERC-20-shaped logs, not full transaction history; provider completeness is not proven. Token metadata is contract-reported, not a safety or investment assessment. Preserve each result's block hash, source, observation time, uncertainty and accounting. Cross-domain reports keep web and chain evidence separate: close timestamps do not establish causation.
 
-The core source SDK remains 0.3.6; these additive orchestration examples are available on current main. npm publication is pending authentication; there is no supported npm installation command yet.
+The core source SDK remains 0.3.6. The MIT compiled npm prerelease is fresh402-sdk@0.4.0-rc.1; import runFlagship from `fresh402-sdk/workflows`. See [installation](SDK_PACKAGE.md).
+
+Acceptance: Website Change Intelligence and API Compatibility Review passed with the actual application in isolated workerd/D1, realistic changing HTML/OpenAPI fixtures and a synthetic local facilitator. Website acceptance includes saved watch IDs, conditional Extract/Smart Diff, budget denial, completed replay without new work and lost-response recovery returning the original result without a new signature or fetch. Only local cached-watch timestamps were aged to represent a later review.
+
+On-chain Evidence Brief uses the real domain engine with deterministic provider fixtures. Cross-domain Release Evidence combines that engine with the local workerd/D1 web path. These are controlled integration results; they are not newly paid production end-to-end workflows. The separate seven-service mainnet canary validates individual service executions. No independent agent adoption is implied.

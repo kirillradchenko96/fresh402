@@ -1,5 +1,11 @@
 # Hosted service release notes
 
+## 2026-11-04 — SDK 0.4.0-rc.1 and workflow acceptance
+
+- Publish the MIT public client SDK prerelease with root/workflows exports, Node 24 ESM and declarations; verify registry bytes, clean installation and the actual OpenAI Agents adapter. Private backend licensing is unchanged.
+- Accept Website/API workflows in controlled real workerd/D1; verify budgets, saved identities, conditional work and original lost-response recovery. Blockchain and cross-domain provider data remain fixtures in these workflow tests.
+- Preserve prices, payment methods, customer balances and finite operating safeguards.
+
 These notes distinguish hosted API behavior, source-client distribution and documentation maintenance. The public root package validates clients/docs; it is not the backend version. [Version relationships](docs/VERSIONS.md).
 
 ## Discovery and executable workflows — November 3, 2026

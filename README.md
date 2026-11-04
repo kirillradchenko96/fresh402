@@ -54,7 +54,7 @@ After uncertain delivery, recover the original input, operation key and payment 
 
 ## Source SDK and documentation
 
-The Node.js 24+ / TypeScript source SDK is **0.3.6**, distributed at the existing [efficiency-sdk-v0.3.6 tag](https://github.com/kirillradchenko96/fresh402/tree/efficiency-sdk-v0.3.6), **not on npm**. Its zero-budget quickstart reads discovery and an unpaid quote; it does not return paid content or authorize spending. [Source-client guide](examples/efficiency/README.md) · [Versioned quickstart](docs/AGENT_WORKFLOWS.md).
+The compiled prerelease [fresh402-sdk@0.4.0-rc.1](https://www.npmjs.com/package/fresh402-sdk/v/0.4.0-rc.1) is published under MIT for the public client SDK only. Install explicitly with `npm install fresh402-sdk@0.4.0-rc.1` (or select `@next`). Node 24+, ESM, declarations, zero runtime dependencies; no automatic wallet/signing or spending. The separately versioned source SDK remains 0.3.6. [Package guide](docs/SDK_PACKAGE.md).
 
 [Documentation index](docs/README.md) · [API](docs/API.md) · [MCP](docs/MCP.md) · [Examples](examples/README.md) · [Version relationships](docs/VERSIONS.md) · [Changelog](CHANGELOG.md) · [Website](https://fresh402.com/docs).
 
@@ -66,4 +66,4 @@ Support and billing: [fresh402@proton.me](mailto:fresh402@proton.me) · [Terms](
 
 ## Executable evidence workflows
 
-[Four runnable workflows](https://github.com/kirillradchenko96/fresh402/blob/main/docs/FLAGSHIP_WORKFLOWS.md) cover website changes, JSON OpenAPI review, finalized Base evidence and cross-domain release observations. Each operation needs explicit authorization and original-operation persistence. Tests are controlled fixtures, not newly purchased production observations. Current source SDK 0.3.6 remains source-only; the packed npm candidate is not published.
+[Four runnable workflows](https://github.com/kirillradchenko96/fresh402/blob/main/docs/FLAGSHIP_WORKFLOWS.md) cover website changes, JSON OpenAPI review, finalized Base evidence and cross-domain release observations. Each operation needs explicit authorization and original-operation persistence. Website/API workflow integration is accepted using actual local workerd/D1 with synthetic payments; on-chain orchestration uses the real domain engine with provider fixtures. Individual production canary calls are separate evidence, not a paid end-to-end workflow.

@@ -1,5 +1,5 @@
 {
-  "verified_at": "2026-11-03T22:07:00.502Z",
+  "verified_at": "2026-11-04T02:56:14.445Z",
   "api_origin": "https://api.fresh402.com",
   "api_version": "3.0.2",
   "sdk_version": "0.3.6",
@@ -122,7 +122,7 @@
       "credits": 4,
       "product": {
         "family": "base",
-        "maturity": "restricted",
+        "maturity": "supported",
         "tags": [
           "base",
           "smart-contract-observation",
@@ -168,7 +168,7 @@
       "credits": 4,
       "product": {
         "family": "base",
-        "maturity": "restricted",
+        "maturity": "supported",
         "tags": [
           "base",
           "token-metadata",

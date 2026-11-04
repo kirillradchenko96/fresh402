@@ -1,0 +1,19 @@
+{
+  "name": "fresh402-sdk",
+  "version": "0.4.0-rc.1",
+  "source_sdk_version": "0.3.6",
+  "source_client_base_commit": "6bcfccf140719d1789726f0c3d20398cf8a99dad",
+  "license": "MIT",
+  "scope": "Compiled public client files and accompanying package documentation only; private backend and unrelated repository contents excluded",
+  "integrity": "sha512-FmwuMce0GVHRob3zKVM9RCkNcOyd0/OeQv9K1kmIHSQUWLJyO92NzK2Pa7c2ulBQvTDjrnfr2LVc0hRdgTT4Sg==",
+  "registry": "https://registry.npmjs.org/",
+  "node": ">=24",
+  "format": "ESM",
+  "exports": [
+    ".",
+    "./workflows"
+  ],
+  "runtime_dependencies": 0,
+  "clean_public_registry_install": true,
+  "actual_framework_acceptance": "OpenAI Agents0.21.0 actual SDK, four offline tool adapter tests, no model/payment calls"
+}

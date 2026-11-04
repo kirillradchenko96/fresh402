@@ -4077,7 +4077,7 @@
         },
         "x-fresh402-product": {
           "family": "base",
-          "maturity": "restricted",
+          "maturity": "supported",
           "tags": [
             "base",
             "smart-contract-observation",
@@ -5969,7 +5969,7 @@
         },
         "x-fresh402-product": {
           "family": "base",
-          "maturity": "restricted",
+          "maturity": "supported",
           "tags": [
             "base",
             "token-metadata",

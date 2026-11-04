@@ -2,7 +2,7 @@
 
 Start with the [tested source quickstart and two agent jobs](../../docs/AGENT_WORKFLOWS.md): scoped API contract review and release-feed entry monitoring. Current source SDK 0.3.6 uses the canonical api.fresh402.com origin; 0.3.4 corrected current-Safe defaults in the shared HTTPS client, MPP and new package preparation. Source 0.3.3 contract evidence scoping remains unchanged. Original-operation recovery retains historical recipients without creating a replacement payment.
 
-Node.js 24+. Customer code only: no backend imports, wallet access, registration, payment, provider call or timer on import. This small module composes the existing public REST/MCP, prepaid, customer-recovery and machine-trial clients instead of replacing their payment behavior. Start with source from this repository; no npm publication or package ownership is claimed.
+Node.js 24+. Customer code only: no backend imports, wallet access, registration, payment, provider call or timer on import. This small module composes the existing public REST/MCP, prepaid, customer-recovery and machine-trial clients instead of replacing their payment behavior. Use source from this repository or the MIT compiled prerelease fresh402-sdk@0.4.0-rc.1. See [package installation](../../docs/SDK_PACKAGE.md).
 
 ```sh
 node --test examples/efficiency/efficiency.test.ts
@@ -88,8 +88,8 @@ Use the same saved watch for Register → Check → optional Smart Diff / Extrac
 
 ## Why use this source SDK?
 
-Use BudgetGuard to bound explicitly authorized work, EvidenceCache to reuse compatible retained evidence, refresh recommendations to decide when another call is useful, and adapters to expose the same client to supported agent frameworks. The SDK does not make a wallet signer, consent, private persistence or uncertainty recovery disappear. Source release is efficiency-sdk-v0.3.6 on Node 24+; it is not an npm/Python package. Direct REST/MCP is simpler if your agent already supplies those controls. The zero-budget quickstart proves connectivity and returns an unpaid quote, not extracted content. [Free first-use path](https://fresh402.com/docs#machine-trial) · [Observation workflows](https://fresh402.com/docs#workflows).
+Use BudgetGuard to bound explicitly authorized work, EvidenceCache to reuse compatible retained evidence, refresh recommendations to decide when another call is useful, and adapters to expose the same client to supported agent frameworks. The SDK does not make a wallet signer, consent, private persistence or uncertainty recovery disappear. Source release is efficiency-sdk-v0.3.6 on Node 24+; the compiled npm package has its own0.4.0-rc.1 version; no Python package is claimed. Direct REST/MCP is simpler if your agent already supplies those controls. The zero-budget quickstart proves connectivity and returns an unpaid quote, not extracted content. [Free first-use path](https://fresh402.com/docs#machine-trial) · [Observation workflows](https://fresh402.com/docs#workflows).
 
 ## Executable evidence workflows
 
-[Four runnable workflows](https://github.com/kirillradchenko96/fresh402/blob/main/docs/FLAGSHIP_WORKFLOWS.md) cover website changes, JSON OpenAPI review, finalized Base evidence and cross-domain release observations. Each operation needs explicit authorization and original-operation persistence. Tests are controlled fixtures, not newly purchased production observations. Current source SDK 0.3.6 remains source-only; the packed npm candidate is not published.
+[Four runnable workflows](https://github.com/kirillradchenko96/fresh402/blob/main/docs/FLAGSHIP_WORKFLOWS.md) cover website changes, JSON OpenAPI review, finalized Base evidence and cross-domain release observations. Each operation needs explicit authorization and original-operation persistence. Website/API workflows have controlled workerd/D1 integration acceptance; chain orchestration uses provider fixtures. npm 0.4.0-rc.1 is separately compiled from source SDK 0.3.6.

@@ -1,0 +1,55 @@
+name: Stage reviewed public SDK
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Reviewed immutable sdk-v tag
+        required: true
+      expected_commit:
+        description: Exact reviewed 40-character commit SHA
+        required: true
+permissions:
+  contents: read
+jobs:
+  stage:
+    if: github.repository == 'kirillradchenko96/fresh402' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: npm-sdk-release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify reviewed public source
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          EXPECTED_COMMIT: ${{ inputs.expected_commit }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^sdk-v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]
+          [[ "$EXPECTED_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" == "$EXPECTED_COMMIT" ]]
+          git merge-base --is-ancestor "$EXPECTED_COMMIT" origin/main
+          git checkout --detach "$EXPECTED_COMMIT"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm test && npm run typecheck && npm run check:docs
+      - name: Prepare reviewed client-only package
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/pack-sdk.mjs "$RUNNER_TEMP/fresh402-sdk"
+          node --input-type=module -e 'import fs from "node:fs";const p=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/fresh402-sdk/package.json"));if(p.name!=="fresh402-sdk"||p.license!=="MIT"||process.env.RELEASE_TAG!=="sdk-v"+p.version||p.scripts||p.dependencies)throw Error("Unreviewed package identity or permissions");'
+      - name: Stage only; owner must approve promotion with npm 2FA
+        shell: bash
+        run: npm stage publish "$RUNNER_TEMP"/fresh402-sdk/fresh402-sdk-*.tgz --tag next --access public --ignore-scripts --registry=https://registry.npmjs.org/

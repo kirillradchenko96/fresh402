@@ -18,7 +18,7 @@ Register is always free within admission limits. Eligible machine-trial Check co
 
 ## First connection: metadata and a quote, no wallet or spending
 
-Use Node.js 24 or newer and the versioned first-party source. This is a source release, not an npm/PyPI package. The native-only first step needs no npm installation. The current root package supplies optional offline client/documentation checks, not a backend deployment.
+Use Node.js 24 or newer and the versioned first-party source. This pinned quickstart uses the source release. The separately compiled MIT npm prerelease is [fresh402-sdk@0.4.0-rc.1](SDK_PACKAGE.md); no PyPI package is claimed. The native-only first step needs no npm installation. The current root package supplies optional offline client/documentation checks, not a backend deployment.
 
 ```sh
 git clone --depth 1 --branch efficiency-sdk-v0.3.6 https://github.com/kirillradchenko96/fresh402.git fresh402-client

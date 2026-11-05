@@ -16,10 +16,12 @@ Base Mainnet only: chain `8453` / `eip155:8453`; native USDC `0x833589fcd6edb6e0
 
 New purchases use `starter-all-services-v4` ($2.50 / 1,000 credits) or `developer-all-services-v4` ($15 / 10,000 credits). Both cover all seven tools after explicit acceptance of `/v3/prepaid/all-services` and finalized funding. The wallet page and agent flow use this same catalog and account. Historical v3 package IDs remain valid only for recovery of existing exact intents; they are not offered for new purchases. Existing customers retain their purchased rights. `PrepaidClient.quoteRemote(service)` discovers authenticated Base eligibility before tariff-4 calls (4 / 8 / 4 credits); Web operations retain tariff 3 (2 / 3 / 4 / 5). Trial keys and prepaid keys are distinct and never fall back to paid spending automatically.
 
-| Canonical package ID | USDC | Credits | Maximum early tranche |
+| Canonical package ID | USDC | Credits | Maximum conditional early Web tranche |
 |---|---:|---:|---:|
-| `starter-all-services-v4` | 2.50 (2500000 atomic) | 1000 | 0; finalized only |
-| `developer-all-services-v4` | 15.00 (15000000 atomic) | 10000 | 0; finalized only |
+| `starter-all-services-v4` | 2.50 (2500000 atomic) | 1000 | Up to 50; never Base access |
+| `developer-all-services-v4` | 15.00 (15000000 atomic) | 10000 | Up to 100; never Base access |
+
+These conditional early tranches are Web-only and are not a second grant on top of the package. Full seven-service entitlement requires finalized funding; Base calls cannot spend provisional credits. Inspect live availability and the limits below; early access can be denied or frozen.
 
 These are one-time purchases, not subscriptions. Purchased credits do not expire under the [terms](https://api.fresh402.com/terms); keys and durable result retention have separate lifetimes. Starter buys up to 500 Checks at $0.005 each; Developer up to 5000 at $0.003 each if entirely spent on Check. Use x402 for occasional use without a prepaid account. Prepaid suits repeated usage and uses different authentication. Existing account tariffs retain their original terms.
 
@@ -39,9 +41,9 @@ curl -sS https://api.fresh402.com/mcp \
   --data '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
 ```
 
-Follow your MCP client's initialization/initialized notification sequence and negotiated protocol. The server is stateless; it does not offer a GET SSE session. Check `availability.account_creation`, `package_purchasing` and `provisional.enabled` in plans before signing. Root `prepaid_packages` links to this guide and the same authoritative catalog.
+Follow your MCP client's initialization/initialized notification sequence and negotiated protocol. The server is stateless; it does not offer a GET SSE session. Check `availability.account_creation`, `availability.package_purchasing` and `availability.provisional.enabled` in plans before signing. Root `prepaid_packages` links to this guide and the same authoritative catalog.
 
-`POST /v2/prepaid/customer/challenge` takes `{"wallet":"YOUR_EOA_ADDRESS"}` and a persisted `Idempotency-Key` of 16–128 letters/digits/`_`/`-`. It returns `challenge_id`, `expires_at`, `typed_data`. Sign exactly that EIP-712 object locally after validation:
+`POST /v2/prepaid/customer/challenge` takes `{"wallet":"YOUR_EOA_ADDRESS"}` and a persisted `Idempotency-Key` of 16â€“128 letters/digits/`_`/`-`. It returns `challenge_id`, `expires_at`, `typed_data`. Sign exactly that EIP-712 object locally after validation:
 
 - Domain: `name=Fresh402 Account`, `version=1`, `chainId=8453`, `salt=keccak256(UTF8(origin + "|" + environment))`.
 - Primary type `CustomerOwnership`; fields in order: `wallet:address`, `action:string`, `origin:string`, `environment:string`, `nonce:bytes32`, `issuedAt:uint256`, `expiresAt:uint256`.
@@ -68,7 +70,7 @@ Signatures, transaction hashes, broadcast acknowledgements and mempool observati
 
 When enabled, a new eligible Starter purchase may unlock 50 credits, Developer 100. One unresolved early grant per account **or payer**, project ceiling 500 credits including unresolved consumed losses, evidence freshness, finite verification attempts and existing execution budgets can deny or freeze early access. These limits are maximums, not a promise. Historical purchases are never retroactively early-credited. Unused early credits can be frozen or revoked; finalized credits retain their nonexpiration terms. Verification is request-triggered plus bounded existing background recovery, without continuous Container execution. Network conditions determine timing; no exact activation/finality time is guaranteed.
 
-Use `GET /v2/prepaid/customer/funding/{intent_id}` (read-only) every 15–30 seconds, backing off on 429/503. Or call `CustomerClient.awaitSpendable` for bounded read-only polling; `awaitFunding` retains its default **finalized-only** behavior. Background recovery continues after process/session loss. `POST` to the same funding route with `{}` and **no payment header** requests recovery of the existing submission; it never resettles it.
+Use `GET /v2/prepaid/customer/funding/{intent_id}` (read-only) every 15â€“30 seconds, backing off on 429/503. Or call `CustomerClient.awaitSpendable` for bounded read-only polling; `awaitFunding` retains its default **finalized-only** behavior. Background recovery continues after process/session loss. `POST` to the same funding route with `{}` and **no payment header** requests recovery of the existing submission; it never resettles it.
 
 Additive status fields:
 

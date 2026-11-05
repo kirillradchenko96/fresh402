@@ -43,7 +43,7 @@ curl -sS https://api.fresh402.com/mcp \
 
 Follow your MCP client's initialization/initialized notification sequence and negotiated protocol. The server is stateless; it does not offer a GET SSE session. Check `availability.account_creation`, `availability.package_purchasing` and `availability.provisional.enabled` in plans before signing. Root `prepaid_packages` links to this guide and the same authoritative catalog.
 
-`POST /v2/prepaid/customer/challenge` takes `{"wallet":"YOUR_EOA_ADDRESS"}` and a persisted `Idempotency-Key` of 16â€“128 letters/digits/`_`/`-`. It returns `challenge_id`, `expires_at`, `typed_data`. Sign exactly that EIP-712 object locally after validation:
+`POST /v2/prepaid/customer/challenge` takes `{"wallet":"YOUR_EOA_ADDRESS"}` and a persisted `Idempotency-Key` of 16–128 letters/digits/`_`/`-`. It returns `challenge_id`, `expires_at`, `typed_data`. Sign exactly that EIP-712 object locally after validation:
 
 - Domain: `name=Fresh402 Account`, `version=1`, `chainId=8453`, `salt=keccak256(UTF8(origin + "|" + environment))`.
 - Primary type `CustomerOwnership`; fields in order: `wallet:address`, `action:string`, `origin:string`, `environment:string`, `nonce:bytes32`, `issuedAt:uint256`, `expiresAt:uint256`.
@@ -70,7 +70,7 @@ Signatures, transaction hashes, broadcast acknowledgements and mempool observati
 
 When enabled, a new eligible Starter purchase may unlock 50 credits, Developer 100. One unresolved early grant per account **or payer**, project ceiling 500 credits including unresolved consumed losses, evidence freshness, finite verification attempts and existing execution budgets can deny or freeze early access. These limits are maximums, not a promise. Historical purchases are never retroactively early-credited. Unused early credits can be frozen or revoked; finalized credits retain their nonexpiration terms. Verification is request-triggered plus bounded existing background recovery, without continuous Container execution. Network conditions determine timing; no exact activation/finality time is guaranteed.
 
-Use `GET /v2/prepaid/customer/funding/{intent_id}` (read-only) every 15â€“30 seconds, backing off on 429/503. Or call `CustomerClient.awaitSpendable` for bounded read-only polling; `awaitFunding` retains its default **finalized-only** behavior. Background recovery continues after process/session loss. `POST` to the same funding route with `{}` and **no payment header** requests recovery of the existing submission; it never resettles it.
+Use `GET /v2/prepaid/customer/funding/{intent_id}` (read-only) every 15–30 seconds, backing off on 429/503. Or call `CustomerClient.awaitSpendable` for bounded read-only polling; `awaitFunding` retains its default **finalized-only** behavior. Background recovery continues after process/session loss. `POST` to the same funding route with `{}` and **no payment header** requests recovery of the existing submission; it never resettles it.
 
 Additive status fields:
 

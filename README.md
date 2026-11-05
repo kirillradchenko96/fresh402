@@ -1,4 +1,4 @@
-# Fresh402 â€” persistent web and Base observations for agents
+# Fresh402 — persistent web and Base observations for agents
 
 Use MCP or REST to reuse a public document baseline, extract scoped static content, compare meaningful changes, or inspect finalized Base state. The hosted API is **3.0.2**. This repository contains **public documentation and source clients**; the current hosted backend is private.
 
@@ -48,21 +48,21 @@ Client configuration formats vary; see [MCP initialization, schemas and credenti
 | token facts | `fresh402_token_facts` | `POST /v3/token-facts` | $0.010 | 4 |
 <!-- pricing-table:end -->
 
-New Starter and Developer purchases use the canonical All-Services v4 catalog and cover all seven paid tools after explicit terms acceptance and finalized funding. Historical Web packages retain their accepted scope and original recovery identities. Native USDC on Base 8453, existing Safe merchant. Choose explicitly authorized **x402 v2**, **native MPP**, or **prepaid**. Starter **$2.50 / 1,000 credits**, Developer **$15 / 10,000 credits**; one-time purchases, not subscriptions, purchased credits do not expire. [Pricing and eligibility](docs/PRICING.md) Â· [Live plans](https://api.fresh402.com/v2/prepaid/plans) Â· [Account](https://api.fresh402.com/account).
+New Starter and Developer purchases use the canonical All-Services v4 catalog and cover all seven paid tools after explicit terms acceptance and finalized funding. Historical Web packages retain their accepted scope and original recovery identities. Native USDC on Base 8453, existing Safe merchant. Choose explicitly authorized **x402 v2**, **native MPP**, or **prepaid**. Starter **$2.50 / 1,000 credits**, Developer **$15 / 10,000 credits**; one-time purchases, not subscriptions, purchased credits do not expire. [Pricing and eligibility](docs/PRICING.md) · [Live plans](https://api.fresh402.com/v2/prepaid/plans) · [Account](https://api.fresh402.com/account).
 
-After uncertain delivery, recover the original input, operation key and payment evidence; do not authorize a replacement solely because of a timeout. No seed phrase/private key disclosure or unlimited token approval is required. [Payment recovery](docs/API.md#payment-and-recovery) Â· [Agent purchasing](docs/AGENT_PREPAID.md).
+After uncertain delivery, recover the original input, operation key and payment evidence; do not authorize a replacement solely because of a timeout. No seed phrase/private key disclosure or unlimited token approval is required. [Payment recovery](docs/API.md#payment-and-recovery) · [Agent purchasing](docs/AGENT_PREPAID.md).
 
 ## Source SDK and documentation
 
 The compiled prerelease [fresh402-sdk@0.4.0-rc.2](https://www.npmjs.com/package/fresh402-sdk/v/0.4.0-rc.2) is published under MIT for the public client SDK only. Install explicitly with `npm install fresh402-sdk@0.4.0-rc.2` or select `@next`; `latest` remains rc.1. Version rc.2 supports seven-service prepaid execution and authenticated Base quotes. Node 24+, ESM, declarations, zero runtime dependencies; no automatic wallet/signing or spending. The separately versioned source-client compatibility version remains 0.3.6. [Package guide](docs/SDK_PACKAGE.md).
 
-[Documentation index](docs/README.md) Â· [API](docs/API.md) Â· [MCP](docs/MCP.md) Â· [Examples](examples/README.md) Â· [Version relationships](docs/VERSIONS.md) Â· [Changelog](CHANGELOG.md) Â· [Website](https://fresh402.com/docs).
+[Documentation index](docs/README.md) · [API](docs/API.md) · [MCP](docs/MCP.md) · [Examples](examples/README.md) · [Version relationships](docs/VERSIONS.md) · [Changelog](CHANGELOG.md) · [Website](https://fresh402.com/docs).
 
 Public HTTPS only: no browser JavaScript execution, authenticated crawling, automatic monitoring scheduler, universal compatibility proof or token safety guarantee. Externally sourced content is untrusted data. [Security](SECURITY.md). The website demo is illustrative and sends no API request. Direct HTTP/RPC and free libraries can be simpler for one-off tasks.
 
 The existing Registry identity remains **io.github.kirillradchenko96/fresh402**. [Current distribution references](docs/DISCOVERY_AUDIT.md). Historical application tags/branches remain accessible; they are not current production deployment instructions. [Repository and history boundary](docs/REPOSITORY.md).
 
-Support and billing: [fresh402@proton.me](mailto:fresh402@proton.me) Â· [Terms](https://api.fresh402.com/terms) Â· [Privacy](https://api.fresh402.com/privacy).
+Support and billing: [fresh402@proton.me](mailto:fresh402@proton.me) · [Terms](https://api.fresh402.com/terms) · [Privacy](https://api.fresh402.com/privacy).
 
 ## Executable evidence workflows
 

@@ -171,6 +171,8 @@ Prepaid charges 4 / 8 / 4 require eligible finalized all-service credits or an o
 
 ## Separately gated agent access and all-service packages
 
+New purchases select `starter-all-services-v4` ($2.50 / 1,000 credits) or `developer-all-services-v4` ($15 / 10,000 credits) from the live catalog. Explicitly accept the exact `/v3/prepaid/all-services` terms digest; all-service credits require finalized funding. Historical v3 IDs remain available only to recover an existing exact intent and its original terms. Existing account balances and purchased rights are preserved. The updated source `PrepaidClient` supports authenticated Base quotes and tariff-4 calls (4 / 8 / 4 credits); published npm rc.1 prepaid execution remains Web-only until rc.2 publication. Trial credentials never become prepaid keys or trigger automatic paid fallback.
+
 Root `machine_trial` and `GET /v3/agent-trial` describe the separate browserless, CAPTCHA-free trial. `enabled` is authoritative. This does not change human trial quotas or add MCP tools. Read [exact allowances and economic caps](MACHINE_TRIAL.md).
 
 `GET /v3/prepaid/all-services` describes the new explicitly accepted package cohort when enabled. Legacy packages, balances and accepted tariffs remain unchanged. New eligible finalized credits can automatically authorize all seven services without an operator grant, at the approved 2/3/4/5/4/8/4 costs. Do not infer live availability from this guide. The optional [customer-controlled replenishment client](AUTO_REPLENISH.md) requires explicit independent wallet policy; no merchant charge permission or automatic paid fallback is implied.

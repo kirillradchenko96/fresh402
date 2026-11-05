@@ -48,13 +48,13 @@ Client configuration formats vary; see [MCP initialization, schemas and credenti
 | token facts | `fresh402_token_facts` | `POST /v3/token-facts` | $0.010 | 4 |
 <!-- pricing-table:end -->
 
-Current all-service credits cover all seven paid tools; old Web packages keep their accepted scope. Native USDC on Base 8453, existing Safe merchant. Choose explicitly authorized **x402 v2**, **native MPP**, or **prepaid**. Starter **$2.50 / 1,000 credits**, Developer **$15 / 10,000 credits**; one-time purchases, not subscriptions, purchased credits do not expire. [Pricing and eligibility](docs/PRICING.md) · [Live plans](https://api.fresh402.com/v2/prepaid/plans) · [Account](https://api.fresh402.com/account).
+New Starter and Developer purchases use the canonical All-Services v4 catalog and cover all seven paid tools after explicit terms acceptance and finalized funding. Historical Web packages retain their accepted scope and original recovery identities. Native USDC on Base 8453, existing Safe merchant. Choose explicitly authorized **x402 v2**, **native MPP**, or **prepaid**. Starter **$2.50 / 1,000 credits**, Developer **$15 / 10,000 credits**; one-time purchases, not subscriptions, purchased credits do not expire. [Pricing and eligibility](docs/PRICING.md) · [Live plans](https://api.fresh402.com/v2/prepaid/plans) · [Account](https://api.fresh402.com/account).
 
 After uncertain delivery, recover the original input, operation key and payment evidence; do not authorize a replacement solely because of a timeout. No seed phrase/private key disclosure or unlimited token approval is required. [Payment recovery](docs/API.md#payment-and-recovery) · [Agent purchasing](docs/AGENT_PREPAID.md).
 
 ## Source SDK and documentation
 
-The compiled prerelease [fresh402-sdk@0.4.0-rc.1](https://www.npmjs.com/package/fresh402-sdk/v/0.4.0-rc.1) is published under MIT for the public client SDK only. Install explicitly with `npm install fresh402-sdk@0.4.0-rc.1` (or select `@next`). Node 24+, ESM, declarations, zero runtime dependencies; no automatic wallet/signing or spending. The separately versioned source SDK remains 0.3.6. [Package guide](docs/SDK_PACKAGE.md).
+The published MIT client package is [fresh402-sdk@0.4.0-rc.1](https://www.npmjs.com/package/fresh402-sdk/v/0.4.0-rc.1). The reviewed **0.4.0-rc.2 candidate** adds seven-service prepaid execution and authenticated Base quotes; its source clients are available here, while npm publication is pending account access. The published rc.1 prepaid client covers the original four Web tools. Node 24+, ESM, declarations, zero runtime dependencies; no automatic wallet/signing or spending. The separately versioned source-client compatibility version remains 0.3.6. MIT applies only to public client SDK files. [Package guide](docs/SDK_PACKAGE.md).
 
 [Documentation index](docs/README.md) · [API](docs/API.md) · [MCP](docs/MCP.md) · [Examples](examples/README.md) · [Version relationships](docs/VERSIONS.md) · [Changelog](CHANGELOG.md) · [Website](https://fresh402.com/docs).
 
@@ -67,3 +67,7 @@ Support and billing: [fresh402@proton.me](mailto:fresh402@proton.me) · [Terms](
 ## Executable evidence workflows
 
 [Four runnable workflows](https://github.com/kirillradchenko96/fresh402/blob/main/docs/FLAGSHIP_WORKFLOWS.md) cover website changes, JSON OpenAPI review, finalized Base evidence and cross-domain release observations. Each operation needs explicit authorization and original-operation persistence. Website/API workflow integration is accepted using actual local workerd/D1 with synthetic payments; on-chain orchestration uses the real domain engine with provider fixtures. Individual production canary calls are separate evidence, not a paid end-to-end workflow.
+
+## Measured agent workflow
+
+[Agent Efficiency](https://fresh402.com/agent-efficiency) reports five paired controlled API-review trials: median total model tokens 50,113 with oasdiff versus 42,537 with Fresh402 output (15.1% fewer). Both conditions passed all five correctness cases. This is a token result for the tested workload, not a lower-total-cost or general superiority claim. [Method and limits](docs/AGENT_EFFICIENCY.md).

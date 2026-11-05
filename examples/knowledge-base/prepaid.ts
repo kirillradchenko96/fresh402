@@ -1,14 +1,16 @@
 import { randomUUID } from 'node:crypto';
 import { ApiError } from './client.ts';
 type Json=Record<string,any>;
-export type PrepaidRequest={key:string;service:'check'|'extract'|'smart_diff'|'openapi_diff';input:Json;cost:number;tariffVersion?:1|2|3;state:'pending'|'completed'|'released';result?:Json};
+export type PrepaidRequest={key:string;service:'check'|'extract'|'smart_diff'|'openapi_diff'|'contract_watch'|'wallet_watch'|'token_facts';input:Json;cost:number;tariffVersion?:1|2|3|4;state:'pending'|'completed'|'released';result?:Json};
 export class PendingPrepaid extends Error {declare operation:PrepaidRequest;constructor(operation:PrepaidRequest){super('Prepaid outcome uncertain. Recover the ORIGINAL idempotency key.');Object.defineProperty(this,'operation',{value:operation,enumerable:false});}}
+const blockchainCosts={contract_watch:4,wallet_watch:8,token_facts:4} as const;
+const isBlockchain=(service:PrepaidRequest['service']):service is keyof typeof blockchainCosts=>Object.hasOwn(blockchainCosts,service);
 const cost={check:1,extract:2,smart_diff:3};
-const charge=(version:number,service:PrepaidRequest['service'])=>{if(service==='openapi_diff'){if(version!==3)throw new Error('OpenAPI requires tariff 3');return 5;}return version===3?({check:2,extract:3,smart_diff:4}[service]):version===2&&service==='check'?2:cost[service];};
-const paths={check:'/v2/prepaid/check',extract:'/v2/prepaid/extract',smart_diff:'/v2/prepaid/smart-diff',openapi_diff:'/v2/prepaid/openapi-contract-diff'};
+const charge=(version:number,service:PrepaidRequest['service'])=>{if(isBlockchain(service)){if(version!==4)throw Error('Blockchain requires tariff 4');return blockchainCosts[service];}if(service==='openapi_diff'){if(version!==3)throw new Error('OpenAPI requires tariff 3');return 5;}return version===3?({check:2,extract:3,smart_diff:4}[service]):version===2&&service==='check'?2:cost[service];};
+const paths={check:'/v2/prepaid/check',extract:'/v2/prepaid/extract',smart_diff:'/v2/prepaid/smart-diff',openapi_diff:'/v2/prepaid/openapi-contract-diff',contract_watch:'/v3/prepaid/contract-watch',wallet_watch:'/v3/prepaid/wallet-watch',token_facts:'/v3/prepaid/token-facts'};
 /** REST/MCP prepaid-only: this client has no signer or payment submission path. */
 export class PrepaidClient {
- transport:'rest'|'mcp';base:string;budget:number;reserved=0;timeout:number;tariffVersion:1|2|3;persist:(op:PrepaidRequest)=>Promise<void>;declare credential:string;declare stagingToken?:string;specialized=false;
+ transport:'rest'|'mcp';base:string;budget:number;reserved=0;timeout:number;tariffVersion:1|2|3;persist:(op:PrepaidRequest)=>Promise<void>;declare credential:string;declare stagingToken?:string;specialized=false;private blockchainQuotes=new Set<string>();
  constructor(base:string,credential:string,options:{transport?:'rest'|'mcp';maxCredits:number;persist:(op:PrepaidRequest)=>Promise<void>;stagingToken?:string;timeoutMs?:number;restoredCredits?:number;tariffVersion?:1|2|3}){
   const u=new URL(base);if(u.username||u.password||u.search||u.hash||u.pathname!=='/'||!(u.protocol==='https:'||u.protocol==='http:'&&['127.0.0.1','localhost'].includes(u.hostname)))throw new Error('Use an HTTPS origin or local loopback');
   if(!/^fp_[a-f0-9]{64}$/.test(credential)||!Number.isSafeInteger(options.maxCredits)||options.maxCredits<0||typeof options.persist!=='function')throw new Error('Credential, integer credit cap and private persistence are required');
@@ -28,17 +30,17 @@ export class PrepaidClient {
  }
  async balance(){const {response,json}=await this.request('/v2/prepaid/balance');if(!response.ok)throw new ApiError(json.error??'prepaid_error',response.status);if(json.access_method!=='prepaid'||!Number.isSafeInteger(json.available)||json.available<0||!Number.isSafeInteger(json.reserved)||json.reserved<0)throw new Error('Invalid balance response');return json;}
  async usage(){const {response,json}=await this.request('/v2/prepaid/usage');if(!response.ok)throw new ApiError(json.error??'prepaid_error',response.status);return json;}
- quote(service:PrepaidRequest['service']){if(!Object.hasOwn(paths,service)||service==='openapi_diff'&&!this.specialized)throw new Error('Unknown prepaid product');return{tariff_version:this.tariffVersion,resource_class:'fixed',maximum_credits:charge(this.tariffVersion,service)};}
- async quoteRemote(){const {response,json}=await this.request('/v2/prepaid/quote');if(!response.ok)throw new ApiError(json.error??'prepaid_error',response.status);if(![1,2,3].includes(json.tariff_version)||json.resource_class!=='fixed'||['check','extract','smart_diff'].some(s=>json.credits?.[s]!== charge(json.tariff_version,s as keyof typeof cost)))throw new Error('Unsupported pricing contract');if(json.credits.openapi_diff!==undefined&&(json.tariff_version!==3||json.credits.openapi_diff!==5))throw new Error('Unsupported OpenAPI pricing contract');this.specialized=json.credits.openapi_diff===5;this.tariffVersion=json.tariff_version;return json;}
+ quote(service:PrepaidRequest['service']){if(isBlockchain(service)){if(!this.blockchainQuotes.has(service))throw Error('Read the authenticated service quote first');return{tariff_version:4,resource_class:'fixed',maximum_credits:charge(4,service)};}if(!Object.hasOwn(paths,service)||service==='openapi_diff'&&!this.specialized)throw new Error('Unknown prepaid product');return{tariff_version:this.tariffVersion,resource_class:'fixed',maximum_credits:charge(this.tariffVersion,service)};}
+ async quoteRemote(service?:PrepaidRequest['service']){if(service&&isBlockchain(service)){const {response,json}=await this.request('/v3/prepaid/quote/'+service);if(!response.ok)throw new ApiError(json.error??'prepaid_error',response.status);if(json.service!==service||json.tariff_version!==4||json.credits!==blockchainCosts[service]||!/^[a-f0-9]{64}$/.test(json.terms_digest))throw Error('Unsupported service pricing contract');this.blockchainQuotes.add(service);return json;}const {response,json}=await this.request('/v2/prepaid/quote');if(!response.ok)throw new ApiError(json.error??'prepaid_error',response.status);if(![1,2,3].includes(json.tariff_version)||json.resource_class!=='fixed'||['check','extract','smart_diff'].some(s=>json.credits?.[s]!== charge(json.tariff_version,s as keyof typeof cost)))throw new Error('Unsupported pricing contract');if(json.credits.openapi_diff!==undefined&&(json.tariff_version!==3||json.credits.openapi_diff!==5))throw new Error('Unsupported OpenAPI pricing contract');this.specialized=json.credits.openapi_diff===5;this.tariffVersion=json.tariff_version;return json;}
  async register(input:Json){const {response,json}=await this.request('/v1/register',input);if(!response.ok)throw new ApiError(json.error??'registration_error',response.status);return json;}
  async execute(service:PrepaidRequest['service'],input:Json){
-  const charge=this.quote(service).maximum_credits;if(this.reserved+charge>this.budget)throw new ApiError('client_credit_budget_exceeded',402);
-  const op:PrepaidRequest={key:randomUUID(),service,input:structuredClone(input),cost:charge,...(this.tariffVersion>=2?{tariffVersion:this.tariffVersion}:{}),state:'pending'};this.reserved+=charge;
+  const quoted=this.quote(service),charge=quoted.maximum_credits;if(this.reserved+charge>this.budget)throw new ApiError('client_credit_budget_exceeded',402);
+  const op:PrepaidRequest={key:randomUUID(),service,input:structuredClone(input),cost:charge,...(quoted.tariff_version>=2?{tariffVersion:quoted.tariff_version as 2|3|4}:{}),state:'pending'};this.reserved+=charge;
   try{await this.persist(op);}catch(e){this.reserved-=charge;throw e;}
   return this.recover(op);
  }
  async recover(op:PrepaidRequest){
-  const version=op.tariffVersion??1;if(![1,2,3].includes(version)||!Object.hasOwn(paths,op.service)||op.cost!==charge(version,op.service)||!/^[A-Za-z0-9_-]{16,128}$/.test(op.key))throw new Error('Invalid persisted prepaid operation');
+  const version=op.tariffVersion??1;if(![1,2,3,4].includes(version)||!Object.hasOwn(paths,op.service)||op.cost!==charge(version,op.service)||!/^[A-Za-z0-9_-]{16,128}$/.test(op.key))throw new Error('Invalid persisted prepaid operation');
   let r;try{r=await this.request(paths[op.service],op.input,op.key,{version,maximum:op.cost});}catch{throw new PendingPrepaid(op);}
   const durable=r.response.headers.get('x-fresh402-access')==='prepaid',charged=r.response.headers.get('x-fresh402-credits');
   // Retention expiry is terminal, not an uncertain settlement or a refund.

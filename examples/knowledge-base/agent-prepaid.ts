@@ -18,10 +18,11 @@ export async function authenticateAgent(client:CustomerClient,signer:AuthorizedS
 /** Invoke ONCE per owner-approved purchase. Ambiguous signing/submission must
  * retain the saved intent and authorization; resume with inspect/recover, not here.
  */
-export async function purchaseAgentPackage(client:CustomerClient,signer:AuthorizedSigner,store:PrivateStore,approval:{packageId:'candidate-starter-v3'|'candidate-developer-v3';maximumAtomicUSDC:bigint}){
+export async function purchaseAgentPackage(client:CustomerClient,signer:AuthorizedSigner,store:PrivateStore,approval:{packageId:'starter-all-services-v4'|'developer-all-services-v4';termsDigest:string;maximumAtomicUSDC:bigint}){
  const plans=await client.plans();if(!plans.availability.package_purchasing)throw Error('Purchasing is disabled');
+ const terms=await client.allServiceTerms();if(!terms.enabled||!/^[a-f0-9]{64}$/.test(approval.termsDigest)||terms.terms_digest!==approval.termsDigest)throw Error('Explicitly review and accept the current all-service terms first');
  const key=randomUUID();await store.save('purchase-start',{key,package_id:approval.packageId,signing_requested:false});
- const intent=await client.preparePurchase(approval.packageId,key);await store.save('purchase-intent',intent);
+ const intent=await client.preparePurchase(approval.packageId,key,approval.termsDigest);await store.save('purchase-intent',intent);
  if(intent.payer?.toLowerCase()!==signer.address.toLowerCase()||intent.network!=='eip155:8453'||intent.asset?.toLowerCase()!=='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'||intent.pay_to?.toLowerCase()!=='0xfac492a8d7843c9afcca6a1691bccb5425ab14f3')throw Error('Intent does not match the authorized payer/chain/asset/merchant');
  const quote=await client.paymentChallenge(intent),prepared=client.preparePayment(intent,quote,{chainId:signer.chainId,payer:signer.address,authorizedAtomicUSDC:approval.maximumAtomicUSDC});
  // Persist before requesting a signature. A signer timeout is ambiguous too.
@@ -31,7 +32,7 @@ export async function purchaseAgentPackage(client:CustomerClient,signer:Authoriz
 }
 /** Browserless first operation; no payment signer and no x402 fallback. */
 export async function firstAgentCheck(client:CustomerClient,intent:Json,store:PrivateStore,url:string,transport:'rest'|'mcp'='mcp'){
- const status=await client.awaitSpendable(intent,{intervalMs:15000});await store.save('funding-status',status);
+ const status=await client.awaitFunding(intent,{intervalMs:15000,allowProvisional:false});await store.save('funding-status',status);
  // Claiming replaces prior keys. Only call automatically for a new account
  // without existing keys; recover an existing private key or explicitly rotate.
  if((await client.credentials()).credentials.some((k:Json)=>k.revoked_at===null&&k.expires_at>Date.now()))throw Error('Reuse the existing private credential or explicitly authorize rotation');

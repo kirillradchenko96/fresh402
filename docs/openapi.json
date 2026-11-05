@@ -144,7 +144,7 @@
     "/v2/prepaid/plans": {
       "get": {
         "operationId": "fresh402_prepaid_plans",
-        "summary": "Exact Starter/Developer terms and current public availability",
+        "summary": "Current canonical Starter/Developer All-Services v4 catalog and purchasing availability; historical package recovery remains separate",
         "tags": [
           "prepaid-customer"
         ],
@@ -558,7 +558,7 @@
                   "all_services_terms_digest": {
                     "type": "string",
                     "pattern": "^[a-f0-9]{64}$",
-                    "description": "Conditionally required for all-services-v4 packages: exact explicit accepted digest from /v3/prepaid/all-services. Legacy purchases retain original terms."
+                    "description": "Required for new all-services-v4 purchases: exact explicitly accepted digest from /v3/prepaid/all-services. Existing intent recovery preserves its original terms."
                   },
                   "package_id": {
                     "type": "string",
@@ -567,7 +567,8 @@
                       "candidate-developer-v3",
                       "starter-all-services-v4",
                       "developer-all-services-v4"
-                    ]
+                    ],
+                    "description": "New purchases use starter-all-services-v4 or developer-all-services-v4 from the live catalog. Historical v3 IDs are retained only for recovery of an existing exact intent; do not substitute its package or terms."
                   },
                   "payment_protocol": {
                     "type": "string",

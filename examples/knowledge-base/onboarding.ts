@@ -22,6 +22,7 @@ export class CustomerClient{
   const json=JSON.parse(Buffer.concat(parts).toString('utf8'));if(!r.ok&&!(acceptChallenge&&r.status===402&&json.x402Version===2))throw new ApiError(typeof json.error==='string'&&/^[a-z][a-z0-9_]{0,79}$/.test(json.error)?json.error:'customer_http_'+r.status,r.status);return json;
  }
  plans(){return this.call('/v2/prepaid/plans');}
+ allServiceTerms(){return this.call('/v3/prepaid/all-services');}
  async beginSignup(wallet:string,key= randomUUID()){return validateOwnershipChallenge(await this.call('/v2/prepaid/customer/challenge',{wallet},{'idempotency-key':key}),wallet,this.base);}
  async verifyOwnership(challenge:Json,signature:string){if(!challenge?.challenge_id)throw Error('Missing persisted challenge');const r=await this.call('/v2/prepaid/customer/sessions',{challenge_id:challenge.challenge_id,signature});this.session=r.session_token;return r;}
  preparePurchase(packageId:PackageId,idempotencyKey:string,allServicesTermsDigest?:string){return this.call('/v2/prepaid/customer/funding',{package_id:packageId,...(allServicesTermsDigest?{all_services_terms_digest:allServicesTermsDigest}:{})},{'idempotency-key':idempotencyKey});}

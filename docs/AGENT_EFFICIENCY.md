@@ -1,0 +1,9 @@
+# Agent Efficiency: controlled API-review case
+
+The [live case study](https://fresh402.com/agent-efficiency) compares five paired fresh-model trials of a JSON OpenAPI compatibility-review workflow. Each contract has 65 operations; held-out updates remove an operation, make a query parameter required and reorder declarations. The competent free baseline uses oasdiff 1.34.1, not an unassisted raw-document comparison. Both conditions use gpt-6.1-sol, equivalent tasks, source data and correctness gates.
+
+Median total model tokens: **50,113 baseline / 42,537 Fresh402**, a **15.1% reduction**, calculated as `(50,113 - 42,537) / 50,113`. Both conditions passed 5/5 completed cases. Token totals include the reported cached inputs and outputs; reasoning is not added twice. Median local-plus-model wall times were 21.502 s / 21.887 s. These are controlled fixtures using production comparison functions, not hosted-network latency or independent customer adoption.
+
+This is not a lower-total-cost claim. Under the stated Starter credit valuation and API-price equivalent, median successful-task costs were $0.0390852 / $0.0439956. Model usage came from the authorized subscription runtime; API-price equivalents are not an invoice. Failed or interrupted development contexts are retained separately and excluded from the completed held-out median, with their count and reasons on the case-study page.
+
+[Download the ten completed API-review measurements](https://fresh402.com/agent-efficiency-results.json). The live page defines the pricing assumptions, service charges, setup, exclusions and interpretation. Direct HTTP/RPC and free parsers may remain preferable for one-off work. Four workflow examples cover website changes, API review, bounded finalized Base evidence and cross-domain release evidence; unmeasured or losing scenarios carry no savings claim. Wallet Watch remains a bounded pilot and is not complete wallet history.

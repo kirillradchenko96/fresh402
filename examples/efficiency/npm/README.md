@@ -1,6 +1,6 @@
 # Fresh402 SDK
 
-The compiled public client package is fresh402-sdk@0.4.0-rc.1, released under MIT. The source-client compatibility version remains 0.3.6; the hosted API has its own version. This license covers the package's public client files and accompanying documentation only, not the private Fresh402 backend or unrelated repository contents.
+The compiled public client package is fresh402-sdk@0.4.0-rc.2, released under MIT. The source-client compatibility version remains 0.3.6; the hosted API has its own version. This license covers the package's public client files and accompanying documentation only, not the private Fresh402 backend or unrelated repository contents.
 
 Node.js 24 or later, ESM only, TypeScript declarations included. Zero runtime dependencies and no install scripts. No CommonJS or browser-wallet support is claimed. The package never creates a wallet, signs a payment or spends on import.
 
@@ -16,3 +16,6 @@ console.log(typeof client, typeof BudgetGuard, typeof runFlagship);
 Payment execution needs an explicitly authorized customer-owned signer, reviewed quotes, wallet-wide budgets, private durable storage and original-operation recovery. Workflow orchestration is sequential and bounded; it does not supply those controls on the customer's behalf. Never retry uncertain payments with a new signature.
 
 Workflow and source adapter instructions: https://github.com/kirillradchenko96/fresh402/blob/main/docs/FLAGSHIP_WORKFLOWS.md and https://github.com/kirillradchenko96/fresh402/tree/main/examples/efficiency . OpenAI Agents, AgentKit and LangChain/LangGraph adapters remain separately tested source examples, not bundled integrations or runtime dependencies. No API credentials or signing material are included.
+
+
+Version 0.4.0-rc.2 adds authenticated prepaid Base quotes and execution to `PrepaidClient`. Call `await client.quoteRemote('token_facts')` before `client.execute('token_facts', input)`. The Web tariff remains 3; Base uses tariff 4 and 4/8/4 credits. An ineligible legacy key is not upgraded by the SDK. Exact original recovery, durable private persistence and the finite client credit cap remain mandatory. New packages use the all-service v4 IDs and explicit accepted terms, with finalized funding.

@@ -1,11 +1,11 @@
 {
   "name": "fresh402-sdk",
-  "version": "0.4.0-rc.1",
+  "version": "0.4.0-rc.2",
   "source_sdk_version": "0.3.6",
-  "source_client_base_commit": "6bcfccf140719d1789726f0c3d20398cf8a99dad",
+  "source_client_base_commit": "7abdb01b857545dc2c3f76b4214dd6a857983d1b",
   "license": "MIT",
   "scope": "Compiled public client files and accompanying package documentation only; private backend and unrelated repository contents excluded",
-  "integrity": "sha512-FmwuMce0GVHRob3zKVM9RCkNcOyd0/OeQv9K1kmIHSQUWLJyO92NzK2Pa7c2ulBQvTDjrnfr2LVc0hRdgTT4Sg==",
+  "integrity": "sha512-M0HnuaCWZhFCE7piBfAbYcxgjQLQ628J5euMzJ7iLroikQjxYqPLdrXhRvspUt/UryWxUQ4Z09B1FrDML41wFw==",
   "registry": "https://registry.npmjs.org/",
   "node": ">=24",
   "format": "ESM",
@@ -15,5 +15,26 @@
   ],
   "runtime_dependencies": 0,
   "clean_public_registry_install": true,
-  "actual_framework_acceptance": "OpenAI Agents0.21.0 actual SDK, four offline tool adapter tests, no model/payment calls"
+  "actual_framework_acceptance": "Optional framework adapters remain separately versioned source integrations; the historical rc.1 acceptance is not a new rc.2 framework execution claim.",
+  "tarball_sha256": "521003814eedf0854705645806a324d2a13ef9d18912bcb38cab1b1b76eb22d4",
+  "dist_tag": "next",
+  "dist_tags_at_verification": {
+    "latest": "0.4.0-rc.1",
+    "next": "0.4.0-rc.2"
+  },
+  "verified_at": "2026-11-05T22:10:07.529Z",
+  "public_registry_acceptance": {
+    "clean_install": true,
+    "exports": [
+      ".",
+      "./workflows"
+    ],
+    "base_quotes": {
+      "contract_watch": 4,
+      "wallet_watch": 8,
+      "token_facts": 4
+    },
+    "credit_debits": 0,
+    "payments": 0
+  }
 }

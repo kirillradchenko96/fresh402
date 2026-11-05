@@ -1,6 +1,6 @@
 # Future SDK releases
 
-The current MIT package is fresh402-sdk@0.4.0-rc.1. It was verified by downloading public registry bytes, checking integrity, installing by package name in a clean directory and testing root/workflows exports plus the real OpenAI Agents adapter. Package installation is documented in [SDK_PACKAGE.md](SDK_PACKAGE.md); the immutable package README is retained under examples/efficiency/npm.
+The current next prerelease is fresh402-sdk@0.4.0-rc.2 under MIT. Its exact reviewed archive was independently downloaded and matched by SHA-256 and registry SHA-512 integrity. Clean public-registry installation, root/workflows exports and authenticated Base quotes (4/8/4) passed without executing a product or payment. The previous rc.1 remains latest; its separately recorded adapter acceptance is historical evidence. Package installation is documented in [SDK_PACKAGE.md](SDK_PACKAGE.md); the immutable package README is retained under examples/efficiency/npm.
 
 The optional npm-sdk-stage.yml workflow is manual and **does not directly publish a new public version**. It verifies an exact reviewed commit and immutable sdk-v tag descended from public main, runs client/docs checks, packs only public client files and stages the next release. A maintainer must review/promote that stage using npm 2FA. Existing versions cannot be overwritten. No long-lived npm token, backend source, Cloudflare permission or wallet authority is needed.
 

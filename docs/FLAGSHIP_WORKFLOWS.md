@@ -1,4 +1,6 @@
-# Executable evidence workflows
+# Legacy client-orchestrated evidence workflows
+
+For the four single-charge server products, use [SERVER_WORKFLOWS.md](SERVER_WORKFLOWS.md). The code below is the retained client composition and still bills each chosen underlying operation separately.
 
 Use [workflows.ts](../examples/efficiency/workflows.ts) with a customer-controlled executor. It composes existing tools; it adds no endpoint, scheduler, wallet or automatic purchase. Run the controlled examples with `node --test examples/efficiency/workflows.test.ts` from this repository after its validation dependencies are installed. Tests validate every constructed input against the reviewed public OpenAPI. Their changed/unchanged and observation results are **fixtures, not production observations**.
 

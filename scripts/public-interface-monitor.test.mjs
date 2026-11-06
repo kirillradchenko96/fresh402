@@ -26,6 +26,13 @@ const discovery=()=>({version:'3.0.0',rootVersion:'3.0.0',mcpVersion:'3.0.0',res
 test('all seven advertised prices are compared numerically with the reviewed public contract',()=>{verifyPublicContract(discovery(),approved);const d=discovery();d.services[6].price.amount='0.02';assert.throws(()=>verifyPublicContract(d,approved),/price/);});
 test('missing tools, version disagreement or unexpected Circle activation cannot appear healthy',()=>{for(const change of [d=>d.mcpTools=7,d=>d.mcpVersion='2.4.0',d=>d.rootVersion='2.8.0',d=>d.circleEnabled=true,d=>d.circleEnabled=null]){const d=discovery();change(d);assert.throws(()=>verifyPublicContract(d,approved));}});
 
+test('reviewed workflow release requires all four new names, exact twelve-tool discovery and every original price guard',()=>{
+ const added=['website_change_intelligence','api_compatibility_review','onchain_evidence_brief','cross_domain_release_evidence'].map(n=>'fresh402_'+n),spec=structuredClone(approved);for(const [i,id]of added.entries())spec.paths['/new/'+i]={post:{operationId:id,'x-payment-info':{price:{currency:'USD',amount:['0.005','0.010','0.025','0.040'][i]}}}};
+ const d=discovery();d.restTools=d.mcpTools=12;for(const [i,tool]of added.entries())d.services.push({tool,price:{currency:'USD',amount:['0.005','0.010','0.025','0.040'][i]}});verifyPublicContract(d,spec);
+ for(const edit of [x=>x.mcpTools=8,x=>x.restTools=11,x=>x.services.pop(),x=>x.services[0].price.amount='0.02',x=>x.services.at(-1).price.amount='0.041',x=>x.circleEnabled=true]){const changed=structuredClone(d);edit(changed);assert.throws(()=>verifyPublicContract(changed,spec));}
+ for(const edit of [x=>delete x.paths['/new/0'],x=>x.paths['/new/0'].post.operationId='fresh402_unapproved',x=>delete x.paths['/fixture/0']]){const changed=structuredClone(spec);edit(changed);assert.throws(()=>verifyPublicContract(d,changed),/approved_contract_incomplete/);}
+});
+
 test('actual public-client discovery tags every request technical and cannot call a product, signer or customer endpoint',async()=>{
  const original=globalThis.fetch,seen=[],names=['fresh402_register',...ids],api={openapi:'3.1.0',info:{version:'3.0.0'},paths:Object.fromEntries(names.map((name,i)=>['/fixture/'+i,{post:{operationId:name,requestBody:{content:{'application/json':{schema:{type:'object'}}}},...(i?{'x-payment-info':{price:{currency:'USD',amount:'0.01'}}}:{})}}]))};
  globalThis.fetch=async(url,init)=>{const u=new URL(String(url)),headers=new Headers(init?.headers);assert.equal(headers.get('x-fresh402-purpose'),'probe');assert.equal(headers.has('payment-signature'),false);assert.equal(headers.has('x-fresh402-api-key'),false);assert.equal(headers.has('authorization'),false);seen.push(u.pathname);

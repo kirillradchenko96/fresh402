@@ -1,11 +1,11 @@
 {
   "name": "fresh402-sdk",
-  "version": "0.4.0-rc.2",
+  "version": "0.5.0-rc.1",
   "source_sdk_version": "0.3.6",
-  "source_client_base_commit": "7abdb01b857545dc2c3f76b4214dd6a857983d1b",
+  "source_client_base_commit": "f9f84b2a97886337be45cd0789bb512eaac92e33",
   "license": "MIT",
   "scope": "Compiled public client files and accompanying package documentation only; private backend and unrelated repository contents excluded",
-  "integrity": "sha512-M0HnuaCWZhFCE7piBfAbYcxgjQLQ628J5euMzJ7iLroikQjxYqPLdrXhRvspUt/UryWxUQ4Z09B1FrDML41wFw==",
+  "integrity": "sha512-Fjb9n9Z1QsATXlvjENvjedP0+wn+Eng7KQeWBADZflhH5gdWxpDE6vz3D5JptuiUsCvWjutCF2QRUZCpgkDNdg==",
   "registry": "https://registry.npmjs.org/",
   "node": ">=24",
   "format": "ESM",
@@ -15,25 +15,78 @@
   ],
   "runtime_dependencies": 0,
   "clean_public_registry_install": true,
-  "actual_framework_acceptance": "Optional framework adapters remain separately versioned source integrations; the historical rc.1 acceptance is not a new rc.2 framework execution claim.",
-  "tarball_sha256": "521003814eedf0854705645806a324d2a13ef9d18912bcb38cab1b1b76eb22d4",
+  "actual_framework_acceptance": "The new server-workflow SDK interfaces, all eleven current tariff quotes and twelve-tool discovery are independently verified from a clean public-registry installation. Optional framework adapters remain separately versioned source integrations.",
+  "tarball_sha256": "571d4ca0c016bee64a76456a3210f92dd1cb0cca309581541b6a3d9bff05b394",
   "dist_tag": "next",
   "dist_tags_at_verification": {
     "latest": "0.4.0-rc.1",
-    "next": "0.4.0-rc.2"
+    "next": "0.5.0-rc.1"
   },
-  "verified_at": "2026-11-05T22:10:07.529Z",
+  "verified_at": "2026-11-06T04:37:51.952Z",
   "public_registry_acceptance": {
     "clean_install": true,
     "exports": [
       ".",
       "./workflows"
     ],
-    "base_quotes": {
-      "contract_watch": 4,
-      "wallet_watch": 8,
-      "token_facts": 4
-    },
+    "authenticated_quotes": [
+      {
+        "product": "check",
+        "credits": 2,
+        "tariff": 3
+      },
+      {
+        "product": "extract",
+        "credits": 3,
+        "tariff": 3
+      },
+      {
+        "product": "smart_diff",
+        "credits": 4,
+        "tariff": 3
+      },
+      {
+        "product": "openapi_diff",
+        "credits": 5,
+        "tariff": 3
+      },
+      {
+        "product": "contract_watch",
+        "credits": 4,
+        "tariff": 4
+      },
+      {
+        "product": "wallet_watch",
+        "credits": 8,
+        "tariff": 4
+      },
+      {
+        "product": "token_facts",
+        "credits": 4,
+        "tariff": 4
+      },
+      {
+        "product": "website_change_intelligence",
+        "credits": 2,
+        "tariff": 5
+      },
+      {
+        "product": "api_compatibility_review",
+        "credits": 4,
+        "tariff": 5
+      },
+      {
+        "product": "onchain_evidence_brief",
+        "credits": 10,
+        "tariff": 5
+      },
+      {
+        "product": "cross_domain_release_evidence",
+        "credits": 16,
+        "tariff": 5
+      }
+    ],
+    "discovery_tools": 12,
     "credit_debits": 0,
     "payments": 0
   }

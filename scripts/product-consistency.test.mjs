@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {checkProducts}from './product-consistency.mjs';
 const load=p=>JSON.parse(fs.readFileSync(new URL('../docs/'+p,import.meta.url))),spec=load('openapi.json'),contract=load('public-contract.json');
-test('all eight runtime-derived products agree',()=>assert.equal(checkProducts(spec,contract).tools,8));
+test('all twelve runtime-derived tools agree',()=>assert.equal(checkProducts(spec,contract).tools,12));
 for(const mutation of ['credits','price','identity','maturity','network','example'])test('release consistency rejects '+mutation+' drift',()=>{const s=structuredClone(spec),c=structuredClone(contract),op=s.paths['/v1/check'].post;
  if(mutation==='credits')c.tools.find(t=>t.id==='check').credits++;
  if(mutation==='price')op['x-payment-info'].offers[0].amount='1';

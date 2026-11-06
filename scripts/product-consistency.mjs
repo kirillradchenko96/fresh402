@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';import fs from 'node:fs';import {pathToF
 import {Validator} from '@cfworker/json-schema';
 const root=new URL('../',import.meta.url),read=p=>JSON.parse(fs.readFileSync(new URL(p,root),'utf8'));
 export function checkProducts(spec,contract){
- assert.equal(contract.tools.length,8);const names=new Set();
+ assert.equal(contract.tools.length,12);const names=new Set();assert.deepEqual(contract.tools.map(t=>t.tool).sort(),['register','check','extract','smart_diff','openapi_contract_diff','contract_watch','wallet_watch','token_facts','website_change_intelligence','api_compatibility_review','onchain_evidence_brief','cross_domain_release_evidence'].map(s=>'fresh402_'+s).sort(),'Exact established twelve-tool identity set required');
  for(const t of contract.tools){const op=spec.paths[t.path]?.post;assert(op,'Missing product '+t.path);assert.equal(op.operationId,t.tool);assert(!names.has(t.tool));names.add(t.tool);assert.deepEqual(t.product,op['x-fresh402-product']);assert(['supported','restricted'].includes(t.product.maturity));assert(t.product.limitations.length);assert.equal(t.product.serviceName,'Fresh402');assert.equal(new URL(t.product.iconUrl).protocol,'https:');
   if(t.id==='register'){assert.equal(t.atomic_usdc,0);assert.equal(t.credits,0);continue;}
   const runtime=op['x-fresh402-tool'],tariffs=Object.values(runtime.prepaid_credits);assert.equal(t.credits,tariffs.at(-1));assert.equal(runtime.network,contract.network);assert.equal(runtime.asset,contract.asset);assert.equal(op['x-payment-info'].offers[0].amount,String(t.atomic_usdc));assert.equal(Math.round(Number(op['x-payment-info'].price.amount)*1e6),t.atomic_usdc);

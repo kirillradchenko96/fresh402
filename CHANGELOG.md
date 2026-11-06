@@ -1,3 +1,7 @@
+# 3.1.0 — Server-executed workflows
+
+Four separately billed bounded workflows complement the seven paid primitives and free Register. Eligible prepaid uses exact tariff 5; original prices, accepted package terms, customer identities and recovery remain intact. SDK 0.5.0-rc.1 adds public workflow contracts and original-operation recovery. Current server-workflow measurements are distinct from historical client-orchestrated trials. No new settlement claim is implied by metadata or synthetic tests.
+
 # Hosted service release notes
 
 ## 2026-11-04 — OpenAPI comparison correction

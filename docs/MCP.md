@@ -1,4 +1,4 @@
-# Fresh402 3.0 MCP integration
+# Fresh402 3.1 MCP integration
 
 Canonical endpoint: **https://api.fresh402.com/mcp**.
 Transport: **Streamable HTTP**. Official Registry identity: **io.github.kirillradchenko96/fresh402**.
@@ -38,7 +38,7 @@ The service is sessionless. GET/HEAD `/mcp` return HTTP 405; this server does no
 | fresh402_wallet_watch | Bounded finalized Base balance/selected ERC-20 transfer pages | $0.020 USDC |
 | fresh402_token_facts | Contract-reported token identity, supply and selected controls | $0.010 USDC |
 
-There are eight tools: free Register and seven paid products. The current new-payment merchant is Safe `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`, Base 8453/native USDC. Validate this pinned policy against the challenge; do not silently accept another recipient. A separate [machine trial](MACHINE_TRIAL.md) is enabled under finite quotas and expiry, with an EOA ownership message and no CAPTCHA; it is not the human Turnstile trial.
+When all four workflow products are enabled, there are twelve tools: free Register, the original seven paid primitives and four separately billed server workflows. Read live tools/list for actual availability. The current new-payment merchant is Safe `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`, Base 8453/native USDC. Validate this pinned policy against the challenge; do not silently accept another recipient. A separate [machine trial](MACHINE_TRIAL.md) is enabled under finite quotas and expiry, with an EOA ownership message and no CAPTCHA; it is not the human Turnstile trial.
 
 ## Walletless first Check
 
@@ -75,18 +75,18 @@ The API processes public HTTPS HTML, JSON and text on demand. Extraction does no
 
 ## Native MPP
 
-When root `mpp_payments.enabled` is true, the seven enabled paid tools accept official MPP EVM charge on Base native USDC at the same prices. Use `mppx/mcp/client`, `org.paymentauth/credential` and `org.paymentauth/receipt`; the existing x402 challenge envelope remains compatible. Explicit MPP selection uses standard JSON-RPC payment errors. Persist the original credential, input and private recovery token before submission; never mix billing credentials or sign another payment after uncertainty. See [MPP setup, tested SDKs and recovery](MPP.md).
+When root `mpp_payments.enabled` is true, enabled paid tools accept official MPP EVM charge on Base native USDC at the same prices. Use `mppx/mcp/client`, `org.paymentauth/credential` and `org.paymentauth/receipt`; the existing x402 challenge envelope remains compatible. Explicit MPP selection uses standard JSON-RPC payment errors. Persist the original credential, input and private recovery token before submission; never mix billing credentials or sign another payment after uncertainty. See [MPP setup, tested SDKs and recovery](MPP.md).
 
 ## Optional prepaid customer accounts
 
-The canonical MCP URL exposes eight tools; the five established Web tool identities remain unchanged. Standalone x402 needs no customer signup. Wallet ownership, package funding, API-key claim/recovery and credit execution use the [REST self-service contract](SELF_SERVICE.md) and [CustomerClient](../examples/knowledge-base/onboarding.ts). Public signup and one-time purchasing are available when enabled in the live `/v2/prepaid/plans` response. For prepaid MCP calls, pass X-Fresh402-API-Key in HTTP and params._meta["fresh402/prepaid"] containing idempotency_key, tariff_version and max_credits. Use the same 2/3/4/5 Web tariff and durable operation identity as REST. Blockchain products cost 4/8/4 under explicit tariff 4 metadata and eligible all-service credits or original grants. Never combine prepaid and x402 or automatically fall back to a new payment. See [the complete agent guide](AGENT_PREPAID.md) for signing, early-credit limits, key recovery and exact examples.
+With workflows enabled the canonical MCP URL exposes twelve tools; the five established Web tool identities remain unchanged. Standalone x402 needs no customer signup. Wallet ownership, package funding, API-key claim/recovery and credit execution use the [REST self-service contract](SELF_SERVICE.md) and [CustomerClient](../examples/knowledge-base/onboarding.ts). Public signup and one-time purchasing are available when enabled in the live `/v2/prepaid/plans` response. For prepaid MCP calls, pass X-Fresh402-API-Key in HTTP and params._meta["fresh402/prepaid"] containing idempotency_key, tariff_version and max_credits. Use the same 2/3/4/5 Web tariff and durable operation identity as REST. Blockchain products cost 4/8/4 under explicit tariff 4 metadata and eligible all-service credits or original grants. Never combine prepaid and x402 or automatically fall back to a new payment. See [the complete agent guide](AGENT_PREPAID.md) for signing, early-credit limits, key recovery and exact examples.
 
 
 ## 2.8 compatibility and gated trials
 
 The live service supports modern protocol discovery and legacy Streamable HTTP clients. Tools are static: `tools.listChanged=false`. An honored empty subscription subset acknowledges `notifications:{}` and completes; it does not retain an open subscription. Unsupported filters and real capacity errors remain errors.
 
-A normal client can list all eight released tools and register a baseline. Paid execution requires x402, enabled native MPP or authenticated prepaid metadata. HTTP200 alone is not a successful paid result: inspect `isError` and structured content.
+A normal client can list the released tools and register a baseline. Paid execution requires x402, enabled native MPP or authenticated prepaid metadata. HTTP200 alone is not a successful paid result: inspect `isError` and structured content.
 
 The separate Web free-trial pilot is enabled when live discovery says so within finite shared capacity. Read root `free_trial.enabled` or `GET /v2/trial` before use. Send `X-Fresh402-Trial-Key` and a persisted per-call `Idempotency-Key` in HTTP transport headers. Exact input/key replay shares the REST result and quota; there is no automatic payment fallback. Do not mix trial and financial credentials. [Trial guide](FREE_TRIAL.md).
 
@@ -101,3 +101,16 @@ Separate machine-agent trial access is advertised by root `machine_trial.enabled
 ## Maintained third-party clients
 
 Verified in an isolated synthetic server: `@x402/mcp@2.29.0`, `agents@0.32.0` `withX402Client`, `@x402/fetch@2.29.0`, `mppx@0.17.0`, and MCP SDK `1.32.2`, across all seven services. This is not fresh mainnet settlement evidence. The standard object PaymentPayload remains accepted; the Agents encoded envelope and `_meta["x402/error"]` quote alias are additionally supported. The official x402 wrapper uses `callTool(name, arguments)` and returns its payment receipt separately; its `onAfterPayment` callback exposes the raw result metadata for optional recovery storage. Generic MCP clients can use free evaluation but need a payment-capable wallet/client and spending authorization to pay.
+
+## First-class server workflows (API 3.1)
+
+| MCP tool | Fixed direct USDC | Eligible prepaid credits |
+|---|---:|---:|
+| `fresh402_website_change_intelligence` | 0.005 | 2 |
+| `fresh402_api_compatibility_review` | 0.010 | 4 |
+| `fresh402_onchain_evidence_brief` | 0.025 | 10 |
+| `fresh402_cross_domain_release_evidence` | 0.040 | 16 |
+
+Each is one server-executed and financially journaled operation, not a sequence of paid public calls. Use the [exact inputs, ownership, retained-state, scope and recovery guide](SERVER_WORKFLOWS.md). Website/API/Cross use returned owned `observation_id`, not primitive `watch_id`; on-chain comparison uses a compatible owned `contract_snapshot_id`. A new source seeds within one paid operation; unchanged observations retain the fixed charge. `detail` defaults to compact, and all evidence remains bounded. No workflow free trial or paid fallback is implied.
+
+For prepaid, first read `/v4/prepaid/workflows/quote/{underscored_workflow_id}` with the existing private API key, then pass `fresh402/prepaid` metadata containing the original `idempotency_key`, `tariff_version:5` and exact `max_credits`. Existing accepted constituent rights and finalized eligible credits are required; quotes do not create them. Keep a finite private client budget. Exact original replay preserves the original input/quote and performs no new work or debit, including after new workflow execution is disabled. Normal new observations need new operation identities. Do not replace uncertain payments. The previous seven tool names, prices and existing recovery contracts remain supported.

@@ -127,8 +127,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Fresh402 Web and Blockchain Intelligence API",
-    "version": "3.0.2",
-    "description": "Fresh402 3.0.2: bounded OpenAPI contract comparison; hosted persistent observations for agents: save a baseline, reuse watch IDs across sessions, revalidate conditionally, inspect scoped structured changes and recover original operation results. Free protocol discovery/Register need no wallet. Explicit Check evaluation:true needs no wallet, key or proprietary header when root instant_evaluation.enabled is true; one attempt per verified network prefix per approved period, not per unique agent, sharing existing limits. Expanded machine trial requires an unfunded EOA ownership signature; inspect /v3/agent-trial availability, quotas and expiry. Seven paid products use explicitly authorized x402/MPP/prepaid, never automatic payment after trial exhaustion. Source SDK0.3.6 and workflows: https://fresh402.com/docs#sdk . Direct HTTP/local tools can be simpler for one-off work or existing local state. Public HTTPS only; bounded formats, no browser rendering, automatic monitoring, LLM inference or complete contract/chain guarantees.",
+    "version": "3.1.0",
+    "description": "Fresh402 3.1.0: bounded OpenAPI contract comparison; hosted persistent observations for agents: save a baseline, reuse watch IDs across sessions, revalidate conditionally, inspect scoped structured changes and recover original operation results. Free protocol discovery/Register need no wallet. Explicit Check evaluation:true needs no wallet, key or proprietary header when root instant_evaluation.enabled is true; one attempt per verified network prefix per approved period, not per unique agent, sharing existing limits. Expanded machine trial requires an unfunded EOA ownership signature; inspect /v3/agent-trial availability, quotas and expiry. 11 paid products use explicitly authorized x402/MPP/prepaid, never automatic payment after trial exhaustion. Public client SDK and server workflow guide: https://fresh402.com/docs#sdk and https://fresh402.com/docs#server-workflows . Direct HTTP/local tools can be simpler for one-off work or existing local state. Public HTTPS only; bounded formats, no browser rendering, automatic monitoring, LLM inference or complete contract/chain guarantees.",
     "contact": {
       "name": "Fresh402 support",
       "email": "fresh402@proton.me",
@@ -144,7 +144,7 @@
     "/v2/prepaid/plans": {
       "get": {
         "operationId": "fresh402_prepaid_plans",
-        "summary": "Current canonical Starter/Developer All-Services v4 catalog and purchasing availability; historical package recovery remains separate",
+        "summary": "Exact Starter/Developer terms and current public availability",
         "tags": [
           "prepaid-customer"
         ],
@@ -558,7 +558,7 @@
                   "all_services_terms_digest": {
                     "type": "string",
                     "pattern": "^[a-f0-9]{64}$",
-                    "description": "Required for new all-services-v4 purchases: exact explicitly accepted digest from /v3/prepaid/all-services. Existing intent recovery preserves its original terms."
+                    "description": "Required for new all-services-v4 purchases: exact explicitly accepted digest from /v3/prepaid/all-services. Legacy purchases retain original terms."
                   },
                   "package_id": {
                     "type": "string",
@@ -568,7 +568,7 @@
                       "starter-all-services-v4",
                       "developer-all-services-v4"
                     ],
-                    "description": "New purchases use starter-all-services-v4 or developer-all-services-v4 from the live catalog. Historical v3 IDs are retained only for recovery of an existing exact intent; do not substitute its package or terms."
+                    "description": "New purchases: starter-all-services-v4 or developer-all-services-v4. Historical v3 IDs are accepted only when recovering their exact existing intent and original purchase key."
                   },
                   "payment_protocol": {
                     "type": "string",
@@ -6768,6 +6768,3606 @@
         }
       }
     },
+    "/v4/workflows/website-change-intelligence": {
+      "post": {
+        "operationId": "fresh402_website_change_intelligence",
+        "summary": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch. One fixed workflow charge; internal steps never create separate customer charges. First source use seeds state in this same operation; later observations use returned owned observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.005 USDC or 2 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "description": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch.",
+        "tags": [
+          "website_change_intelligence"
+        ],
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "mppPayment": []
+          }
+        ],
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            },
+            {
+              "mpp": {
+                "method": "evm",
+                "intent": "charge"
+              }
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.005"
+          },
+          "offers": [
+            {
+              "amount": "5000",
+              "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "description": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch.",
+              "intent": "charge",
+              "method": "evm"
+            }
+          ]
+        },
+        "x-fresh402-product": {
+          "family": "workflow",
+          "maturity": "restricted",
+          "tags": [
+            "website-change-monitoring",
+            "documentation-updates",
+            "agent-workflow"
+          ],
+          "limitations": [
+            "Static scoped evidence only; one fetch, no browser or scheduler. Unchanged means unchanged in the declared scope."
+          ],
+          "docs": "https://fresh402.com/workflows/website-change-intelligence",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
+        },
+        "x-mcp-tool": "fresh402_website_change_intelligence",
+        "x-fresh402-tool": {
+          "id": "website_change_intelligence",
+          "category": "intelligence-workflow",
+          "limits": {
+            "transfer_bytes": 5000000,
+            "decoded_bytes": 5000000,
+            "output_bytes": 131072,
+            "parser_characters": 256000,
+            "document_bytes": 256000,
+            "gateway_timeout_ms": 10000
+          },
+          "prepaid_credits": {
+            "5": 2
+          },
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "auth": "x402-or-mpp-or-prepaid",
+          "since": "3.1.0"
+        },
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Optional private recovery protection, not a prerequisite to a first purchase. Persist a random 32-byte hex/base64url secret before submission for recovery even if the whole response is lost. Otherwise save the private token returned in X-Fresh402-Recovery-Token on success. Replay identical input/payment/token within seven days; proof-only replay returns 409 without settlement. A public signature or transaction hash is not recovery authorization."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri"
+                  },
+                  "observation_id": {
+                    "type": "string",
+                    "pattern": "^wf_[a-f0-9]{64}$",
+                    "description": "Owned observation_id returned by this same workflow. Reuses its immutable source/scope and saved baseline/latest observations; not a primitive watch_id. Seven-day state retention. Missing, foreign or expired IDs never silently rebaseline."
+                  },
+                  "compare_to": {
+                    "default": "previous",
+                    "description": "Default previous compares with the latest successful workflow observation; baseline compares with its original seed. Seeding is one paid workflow operation and reports no comparison, never a second internal charge.",
+                    "type": "string",
+                    "enum": [
+                      "previous",
+                      "baseline"
+                    ]
+                  },
+                  "detail": {
+                    "default": "compact",
+                    "description": "Default compact: at most 20 evidence items per section. Expanded allows at most 200 document findings or 100 Base events and retains raw validated logs/getter ABI details within the same fixed work/output ceiling. Counts and omitted-evidence warnings remain explicit.",
+                    "type": "string",
+                    "enum": [
+                      "compact",
+                      "expanded"
+                    ]
+                  },
+                  "scope": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256,
+                        "description": "Optional HTML scope: a supported CSS selector, 1-256 characters, e.g. 'main' or 'article .content'. Only matching text is normalized; no match returns 422. Omit to normalize the page after built-in noise removal. Not supported for JSON or plain text."
+                      },
+                      "ignore_selectors": {
+                        "description": "Optional array of up to 20 CSS selectors (each 1-256 characters) to remove from HTML in addition to built-in noise filtering. Default: no extra exclusions ([]). HTML only; use ignore_json_paths for JSON. Example: ['.timestamp', '.ad'].",
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "description": "HTML element(s) to remove before normalization: a supported CSS selector, 1-256 characters, e.g. '.timestamp' or 'nav'."
+                        }
+                      },
+                      "ignore_json_paths": {
+                        "description": "Optional array of up to 20 JSON Pointer-style paths to remove before JSON normalization and hashing. Each must start with '/' and be 1-256 characters; supports '*' segments. Default: [] (no exclusions). JSON only. Example: ['/updated_at', '/items/*/request_id'].",
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^\\/",
+                          "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
+                        }
+                      },
+                      "html_attributes": {
+                        "description": "For workflow HTML, default is all four supported attributes: href,title,alt,aria-label. Explicit [] requests text-only comparison and is reported as limited scope. Ignored selectors apply to both text and attribute evidence. Not applied to JSON/text.",
+                        "maxItems": 4,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "alt",
+                            "aria-label",
+                            "href",
+                            "title"
+                          ],
+                          "description": "One explicitly observed HTML attribute: href (a/area only),title,alt or aria-label. No class/style/event attributes; links are inert evidence and never fetched."
+                        }
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Immutable supported normalization rules. Selected attributes participate in change detection; ignored fields are outside the reported scope. No browser execution or linked-page crawling."
+                  }
+                },
+                "additionalProperties": false,
+                "oneOf": [
+                  {
+                    "required": [
+                      "url"
+                    ],
+                    "not": {
+                      "required": [
+                        "observation_id"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "observation_id"
+                    ],
+                    "not": {
+                      "required": [
+                        "url"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "example": {
+                "url": "https://example.com/docs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paid result after confirmed settlement",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Fresh402-Recovery-Token": {
+                "description": "Optional server-issued private recovery capability when none was supplied. Save securely with original input and proof; never log. If the entire response is lost without a pre-supplied secret, proof alone cannot recover the private result.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Payment-Receipt": {
+                "description": "Base64url native MPP EVM receipt; inspect status and reference. Not proof of prepaid finality.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowResult_website_change_intelligence"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required or rejected; never a sale. No paid data returned.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 x402 v2 requirements",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Native MPP challenge for the original exact Base USDC EIP-3009 authorization. Persist the challenge and private recovery token before signing; never mix payment methods.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/prepaid/workflows/website-change-intelligence": {
+      "post": {
+        "operationId": "fresh402_prepaid_website_change_intelligence",
+        "summary": "Execute fresh402_website_change_intelligence using the existing account credit balance",
+        "description": "Same input/output and durable debit as prepaid MCP. Credentials stay in HTTP. Failed reserved execution releases credits; no x402 fallback. Reuse the original tool, input, key, tariff and maximum for seven-day durable recovery through either transport.",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "tags": [
+          "prepaid-execution"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Privately persisted operation identity, shared with fresh402/prepaid MCP metadata."
+          },
+          {
+            "name": "X-Fresh402-Tariff-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                5
+              ]
+            },
+            "description": "Required exact workflow version5 from /v4/prepaid/workflows/quote/{service}. Existing package funding terms and account tariff remain unchanged."
+          },
+          {
+            "name": "X-Fresh402-Max-Credits",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            },
+            "description": "Required integer maximum at least the exact version5 workflow quote; one workflow debit, never substep charges."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri"
+                  },
+                  "observation_id": {
+                    "type": "string",
+                    "pattern": "^wf_[a-f0-9]{64}$",
+                    "description": "Owned observation_id returned by this same workflow. Reuses its immutable source/scope and saved baseline/latest observations; not a primitive watch_id. Seven-day state retention. Missing, foreign or expired IDs never silently rebaseline."
+                  },
+                  "compare_to": {
+                    "default": "previous",
+                    "description": "Default previous compares with the latest successful workflow observation; baseline compares with its original seed. Seeding is one paid workflow operation and reports no comparison, never a second internal charge.",
+                    "type": "string",
+                    "enum": [
+                      "previous",
+                      "baseline"
+                    ]
+                  },
+                  "detail": {
+                    "default": "compact",
+                    "description": "Default compact: at most 20 evidence items per section. Expanded allows at most 200 document findings or 100 Base events and retains raw validated logs/getter ABI details within the same fixed work/output ceiling. Counts and omitted-evidence warnings remain explicit.",
+                    "type": "string",
+                    "enum": [
+                      "compact",
+                      "expanded"
+                    ]
+                  },
+                  "scope": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256,
+                        "description": "Optional HTML scope: a supported CSS selector, 1-256 characters, e.g. 'main' or 'article .content'. Only matching text is normalized; no match returns 422. Omit to normalize the page after built-in noise removal. Not supported for JSON or plain text."
+                      },
+                      "ignore_selectors": {
+                        "description": "Optional array of up to 20 CSS selectors (each 1-256 characters) to remove from HTML in addition to built-in noise filtering. Default: no extra exclusions ([]). HTML only; use ignore_json_paths for JSON. Example: ['.timestamp', '.ad'].",
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "description": "HTML element(s) to remove before normalization: a supported CSS selector, 1-256 characters, e.g. '.timestamp' or 'nav'."
+                        }
+                      },
+                      "ignore_json_paths": {
+                        "description": "Optional array of up to 20 JSON Pointer-style paths to remove before JSON normalization and hashing. Each must start with '/' and be 1-256 characters; supports '*' segments. Default: [] (no exclusions). JSON only. Example: ['/updated_at', '/items/*/request_id'].",
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^\\/",
+                          "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
+                        }
+                      },
+                      "html_attributes": {
+                        "description": "For workflow HTML, default is all four supported attributes: href,title,alt,aria-label. Explicit [] requests text-only comparison and is reported as limited scope. Ignored selectors apply to both text and attribute evidence. Not applied to JSON/text.",
+                        "maxItems": 4,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "alt",
+                            "aria-label",
+                            "href",
+                            "title"
+                          ],
+                          "description": "One explicitly observed HTML attribute: href (a/area only),title,alt or aria-label. No class/style/event attributes; links are inert evidence and never fetched."
+                        }
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Immutable supported normalization rules. Selected attributes participate in change detection; ignored fields are outside the reported scope. No browser execution or linked-page crawling."
+                  }
+                },
+                "additionalProperties": false,
+                "oneOf": [
+                  {
+                    "required": [
+                      "url"
+                    ],
+                    "not": {
+                      "required": [
+                        "observation_id"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "observation_id"
+                    ],
+                    "not": {
+                      "required": [
+                        "url"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "example": {
+                "url": "https://example.com/docs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Durable credit-paid result. X-Fresh402-Access=prepaid and X-Fresh402-Credits report the charged amount; replay never charges again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowResult_website_change_intelligence"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Prepaid HTTP credential required"
+          },
+          "402": {
+            "description": "Insufficient spendable credits or missing tariff/maximum; no x402 submission"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/prepaid/workflows/quote/website_change_intelligence": {
+      "get": {
+        "operationId": "fresh402_workflow_prepaid_quote_website_change_intelligence",
+        "summary": "Exact version5 workflow charge against existing constituent rights and finalized credits",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No debit or execution. Use tariff_version and credits as explicit maximum authorization. Provisional credits are ineligible; original package and funding terms are unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "const": "website_change_intelligence"
+                    },
+                    "tariff_version": {
+                      "const": 5
+                    },
+                    "credits": {
+                      "type": "integer"
+                    },
+                    "terms_digest": {
+                      "type": "string"
+                    },
+                    "workflow_terms": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "workflow_terms_digest": {
+                      "type": "string"
+                    },
+                    "one_financial_operation": {
+                      "const": true
+                    },
+                    "internal_charges": {
+                      "const": 0
+                    },
+                    "provisional_credits": {
+                      "const": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/workflows/api-compatibility-review": {
+      "post": {
+        "operationId": "fresh402_api_compatibility_review",
+        "summary": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof. One fixed workflow charge; internal steps never create separate customer charges. First source use seeds state in this same operation; later observations use returned owned observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "description": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof.",
+        "tags": [
+          "api_compatibility_review"
+        ],
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "mppPayment": []
+          }
+        ],
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            },
+            {
+              "mpp": {
+                "method": "evm",
+                "intent": "charge"
+              }
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.010"
+          },
+          "offers": [
+            {
+              "amount": "10000",
+              "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "description": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof.",
+              "intent": "charge",
+              "method": "evm"
+            }
+          ]
+        },
+        "x-fresh402-product": {
+          "family": "workflow",
+          "maturity": "restricted",
+          "tags": [
+            "openapi-compatibility",
+            "api-breaking-change-detection",
+            "coding-agents"
+          ],
+          "limitations": [
+            "JSON OpenAPI only; conservative supported-rule analysis, not universal runtime compatibility."
+          ],
+          "docs": "https://fresh402.com/workflows/api-compatibility-review",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
+        },
+        "x-mcp-tool": "fresh402_api_compatibility_review",
+        "x-fresh402-tool": {
+          "id": "api_compatibility_review",
+          "category": "intelligence-workflow",
+          "limits": {
+            "transfer_bytes": 5000000,
+            "decoded_bytes": 5000000,
+            "output_bytes": 131072,
+            "parser_characters": 256000,
+            "document_bytes": 256000,
+            "gateway_timeout_ms": 10000
+          },
+          "prepaid_credits": {
+            "5": 4
+          },
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "auth": "x402-or-mpp-or-prepaid",
+          "since": "3.1.0"
+        },
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Optional private recovery protection, not a prerequisite to a first purchase. Persist a random 32-byte hex/base64url secret before submission for recovery even if the whole response is lost. Otherwise save the private token returned in X-Fresh402-Recovery-Token on success. Replay identical input/payment/token within seven days; proof-only replay returns 409 without settlement. A public signature or transaction hash is not recovery authorization."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri"
+                  },
+                  "observation_id": {
+                    "type": "string",
+                    "pattern": "^wf_[a-f0-9]{64}$",
+                    "description": "Owned observation_id returned by this same workflow. Reuses its immutable source/scope and saved baseline/latest observations; not a primitive watch_id. Seven-day state retention. Missing, foreign or expired IDs never silently rebaseline."
+                  },
+                  "compare_to": {
+                    "default": "previous",
+                    "description": "Default previous compares with the latest successful workflow observation; baseline compares with its original seed. Seeding is one paid workflow operation and reports no comparison, never a second internal charge.",
+                    "type": "string",
+                    "enum": [
+                      "previous",
+                      "baseline"
+                    ]
+                  },
+                  "detail": {
+                    "default": "compact",
+                    "description": "Default compact: at most 20 evidence items per section. Expanded allows at most 200 document findings or 100 Base events and retains raw validated logs/getter ABI details within the same fixed work/output ceiling. Counts and omitted-evidence warnings remain explicit.",
+                    "type": "string",
+                    "enum": [
+                      "compact",
+                      "expanded"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "oneOf": [
+                  {
+                    "required": [
+                      "url"
+                    ],
+                    "not": {
+                      "required": [
+                        "observation_id"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "observation_id"
+                    ],
+                    "not": {
+                      "required": [
+                        "url"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "example": {
+                "url": "https://example.com/openapi.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paid result after confirmed settlement",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Fresh402-Recovery-Token": {
+                "description": "Optional server-issued private recovery capability when none was supplied. Save securely with original input and proof; never log. If the entire response is lost without a pre-supplied secret, proof alone cannot recover the private result.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Payment-Receipt": {
+                "description": "Base64url native MPP EVM receipt; inspect status and reference. Not proof of prepaid finality.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowResult_api_compatibility_review"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required or rejected; never a sale. No paid data returned.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 x402 v2 requirements",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Native MPP challenge for the original exact Base USDC EIP-3009 authorization. Persist the challenge and private recovery token before signing; never mix payment methods.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/prepaid/workflows/api-compatibility-review": {
+      "post": {
+        "operationId": "fresh402_prepaid_api_compatibility_review",
+        "summary": "Execute fresh402_api_compatibility_review using the existing account credit balance",
+        "description": "Same input/output and durable debit as prepaid MCP. Credentials stay in HTTP. Failed reserved execution releases credits; no x402 fallback. Reuse the original tool, input, key, tariff and maximum for seven-day durable recovery through either transport.",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "tags": [
+          "prepaid-execution"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Privately persisted operation identity, shared with fresh402/prepaid MCP metadata."
+          },
+          {
+            "name": "X-Fresh402-Tariff-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                5
+              ]
+            },
+            "description": "Required exact workflow version5 from /v4/prepaid/workflows/quote/{service}. Existing package funding terms and account tariff remain unchanged."
+          },
+          {
+            "name": "X-Fresh402-Max-Credits",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            },
+            "description": "Required integer maximum at least the exact version5 workflow quote; one workflow debit, never substep charges."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri"
+                  },
+                  "observation_id": {
+                    "type": "string",
+                    "pattern": "^wf_[a-f0-9]{64}$",
+                    "description": "Owned observation_id returned by this same workflow. Reuses its immutable source/scope and saved baseline/latest observations; not a primitive watch_id. Seven-day state retention. Missing, foreign or expired IDs never silently rebaseline."
+                  },
+                  "compare_to": {
+                    "default": "previous",
+                    "description": "Default previous compares with the latest successful workflow observation; baseline compares with its original seed. Seeding is one paid workflow operation and reports no comparison, never a second internal charge.",
+                    "type": "string",
+                    "enum": [
+                      "previous",
+                      "baseline"
+                    ]
+                  },
+                  "detail": {
+                    "default": "compact",
+                    "description": "Default compact: at most 20 evidence items per section. Expanded allows at most 200 document findings or 100 Base events and retains raw validated logs/getter ABI details within the same fixed work/output ceiling. Counts and omitted-evidence warnings remain explicit.",
+                    "type": "string",
+                    "enum": [
+                      "compact",
+                      "expanded"
+                    ]
+                  }
+                },
+                "additionalProperties": false,
+                "oneOf": [
+                  {
+                    "required": [
+                      "url"
+                    ],
+                    "not": {
+                      "required": [
+                        "observation_id"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "observation_id"
+                    ],
+                    "not": {
+                      "required": [
+                        "url"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "example": {
+                "url": "https://example.com/openapi.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Durable credit-paid result. X-Fresh402-Access=prepaid and X-Fresh402-Credits report the charged amount; replay never charges again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowResult_api_compatibility_review"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Prepaid HTTP credential required"
+          },
+          "402": {
+            "description": "Insufficient spendable credits or missing tariff/maximum; no x402 submission"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/prepaid/workflows/quote/api_compatibility_review": {
+      "get": {
+        "operationId": "fresh402_workflow_prepaid_quote_api_compatibility_review",
+        "summary": "Exact version5 workflow charge against existing constituent rights and finalized credits",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No debit or execution. Use tariff_version and credits as explicit maximum authorization. Provisional credits are ineligible; original package and funding terms are unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "const": "api_compatibility_review"
+                    },
+                    "tariff_version": {
+                      "const": 5
+                    },
+                    "credits": {
+                      "type": "integer"
+                    },
+                    "terms_digest": {
+                      "type": "string"
+                    },
+                    "workflow_terms": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "workflow_terms_digest": {
+                      "type": "string"
+                    },
+                    "one_financial_operation": {
+                      "const": true
+                    },
+                    "internal_charges": {
+                      "const": 0
+                    },
+                    "provisional_credits": {
+                      "const": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/workflows/onchain-evidence-brief": {
+      "post": {
+        "operationId": "fresh402_onchain_evidence_brief",
+        "summary": "Combine selected code/proxy observations, contract-reported token facts and one wallet's single-block ETH/Transfer evidence at one finalized Base block. Shared RPC cache; at most 18 reads. Wallet scope remains a restricted pilot; no complete history or security score. One fixed workflow charge; internal steps never create separate customer charges. First source use seeds state in this same operation; later observations use returned owned observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.025 USDC or 10 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "description": "Combine selected code/proxy observations, contract-reported token facts and one wallet's single-block ETH/Transfer evidence at one finalized Base block. Shared RPC cache; at most 18 reads. Wallet scope remains a restricted pilot; no complete history or security score.",
+        "tags": [
+          "onchain_evidence_brief"
+        ],
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "mppPayment": []
+          }
+        ],
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            },
+            {
+              "mpp": {
+                "method": "evm",
+                "intent": "charge"
+              }
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.025"
+          },
+          "offers": [
+            {
+              "amount": "25000",
+              "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "description": "Combine selected code/proxy observations, contract-reported token facts and one wallet's single-block ETH/Transfer evidence at one finalized Base block. Shared RPC cache; at most 18 reads. Wallet scope remains a restricted pilot; no complete history or security score.",
+              "intent": "charge",
+              "method": "evm"
+            }
+          ]
+        },
+        "x-fresh402-product": {
+          "family": "workflow",
+          "maturity": "restricted",
+          "tags": [
+            "base",
+            "contract-and-token-evidence",
+            "selected-wallet-transfers",
+            "agent-workflow"
+          ],
+          "limitations": [
+            "One selected contract/token and one wallet at one finalized block; Wallet Watch scope remains a pilot, not complete history."
+          ],
+          "docs": "https://fresh402.com/workflows/onchain-evidence-brief",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
+        },
+        "x-mcp-tool": "fresh402_onchain_evidence_brief",
+        "x-fresh402-tool": {
+          "id": "onchain_evidence_brief",
+          "category": "intelligence-workflow",
+          "limits": {
+            "transfer_bytes": 5000000,
+            "decoded_bytes": 5000000,
+            "output_bytes": 131072,
+            "parser_characters": 256000,
+            "document_bytes": 256000,
+            "gateway_timeout_ms": 40000
+          },
+          "prepaid_credits": {
+            "5": 10
+          },
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "auth": "x402-or-mpp-or-prepaid",
+          "since": "3.1.0"
+        },
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Optional private recovery protection, not a prerequisite to a first purchase. Persist a random 32-byte hex/base64url secret before submission for recovery even if the whole response is lost. Otherwise save the private token returned in X-Fresh402-Recovery-Token on success. Replay identical input/payment/token within seven days; proof-only replay returns 409 without settlement. A public signature or transaction hash is not recovery authorization."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453,
+                    "description": "Base mainnet only; provider chain is verified. All state is pinned to one selected finalized block."
+                  },
+                  "contract_address": {
+                    "description": "One selected contract which is also the token-facts and Transfer-log contract. The workflow does not infer that arbitrary bytecode is a safe or compliant token.",
+                    "type": "string",
+                    "minLength": 42,
+                    "maxLength": 42,
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "wallet_address": {
+                    "description": "One selected wallet. Returns its exact native-ETH balance and this contract's provider-reported Transfer events at the single selected finalized block, not complete wallet history.",
+                    "type": "string",
+                    "minLength": 42,
+                    "maxLength": 42,
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "previous_contract_snapshot": {
+                    "description": "Optional owned contract_snapshot_id from this workflow's same narrow code/proxy scope; incompatible primitive snapshots are rejected. Allows bounded selected-contract comparison.",
+                    "type": "string",
+                    "pattern": "^s_[a-f0-9]{64}$"
+                  },
+                  "detail": {
+                    "default": "compact",
+                    "description": "Default compact: at most 20 evidence items per section. Expanded allows at most 200 document findings or 100 Base events and retains raw validated logs/getter ABI details within the same fixed work/output ceiling. Counts and omitted-evidence warnings remain explicit.",
+                    "type": "string",
+                    "enum": [
+                      "compact",
+                      "expanded"
+                    ]
+                  }
+                },
+                "required": [
+                  "chain_id",
+                  "contract_address",
+                  "wallet_address"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "chain_id": 8453,
+                "contract_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "wallet_address": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paid result after confirmed settlement",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Fresh402-Recovery-Token": {
+                "description": "Optional server-issued private recovery capability when none was supplied. Save securely with original input and proof; never log. If the entire response is lost without a pre-supplied secret, proof alone cannot recover the private result.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Payment-Receipt": {
+                "description": "Base64url native MPP EVM receipt; inspect status and reference. Not proof of prepaid finality.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowResult_onchain_evidence_brief"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required or rejected; never a sale. No paid data returned.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 x402 v2 requirements",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Native MPP challenge for the original exact Base USDC EIP-3009 authorization. Persist the challenge and private recovery token before signing; never mix payment methods.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/prepaid/workflows/onchain-evidence-brief": {
+      "post": {
+        "operationId": "fresh402_prepaid_onchain_evidence_brief",
+        "summary": "Execute fresh402_onchain_evidence_brief using the existing account credit balance",
+        "description": "Same input/output and durable debit as prepaid MCP. Credentials stay in HTTP. Failed reserved execution releases credits; no x402 fallback. Reuse the original tool, input, key, tariff and maximum for seven-day durable recovery through either transport.",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "tags": [
+          "prepaid-execution"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Privately persisted operation identity, shared with fresh402/prepaid MCP metadata."
+          },
+          {
+            "name": "X-Fresh402-Tariff-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                5
+              ]
+            },
+            "description": "Required exact workflow version5 from /v4/prepaid/workflows/quote/{service}. Existing package funding terms and account tariff remain unchanged."
+          },
+          {
+            "name": "X-Fresh402-Max-Credits",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            },
+            "description": "Required integer maximum at least the exact version5 workflow quote; one workflow debit, never substep charges."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "chain_id": {
+                    "type": "number",
+                    "const": 8453,
+                    "description": "Base mainnet only; provider chain is verified. All state is pinned to one selected finalized block."
+                  },
+                  "contract_address": {
+                    "description": "One selected contract which is also the token-facts and Transfer-log contract. The workflow does not infer that arbitrary bytecode is a safe or compliant token.",
+                    "type": "string",
+                    "minLength": 42,
+                    "maxLength": 42,
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "wallet_address": {
+                    "description": "One selected wallet. Returns its exact native-ETH balance and this contract's provider-reported Transfer events at the single selected finalized block, not complete wallet history.",
+                    "type": "string",
+                    "minLength": 42,
+                    "maxLength": 42,
+                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                  },
+                  "previous_contract_snapshot": {
+                    "description": "Optional owned contract_snapshot_id from this workflow's same narrow code/proxy scope; incompatible primitive snapshots are rejected. Allows bounded selected-contract comparison.",
+                    "type": "string",
+                    "pattern": "^s_[a-f0-9]{64}$"
+                  },
+                  "detail": {
+                    "default": "compact",
+                    "description": "Default compact: at most 20 evidence items per section. Expanded allows at most 200 document findings or 100 Base events and retains raw validated logs/getter ABI details within the same fixed work/output ceiling. Counts and omitted-evidence warnings remain explicit.",
+                    "type": "string",
+                    "enum": [
+                      "compact",
+                      "expanded"
+                    ]
+                  }
+                },
+                "required": [
+                  "chain_id",
+                  "contract_address",
+                  "wallet_address"
+                ],
+                "additionalProperties": false
+              },
+              "example": {
+                "chain_id": 8453,
+                "contract_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                "wallet_address": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Durable credit-paid result. X-Fresh402-Access=prepaid and X-Fresh402-Credits report the charged amount; replay never charges again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowResult_onchain_evidence_brief"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Prepaid HTTP credential required"
+          },
+          "402": {
+            "description": "Insufficient spendable credits or missing tariff/maximum; no x402 submission"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/prepaid/workflows/quote/onchain_evidence_brief": {
+      "get": {
+        "operationId": "fresh402_workflow_prepaid_quote_onchain_evidence_brief",
+        "summary": "Exact version5 workflow charge against existing constituent rights and finalized credits",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No debit or execution. Use tariff_version and credits as explicit maximum authorization. Provisional credits are ineligible; original package and funding terms are unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "const": "onchain_evidence_brief"
+                    },
+                    "tariff_version": {
+                      "const": 5
+                    },
+                    "credits": {
+                      "type": "integer"
+                    },
+                    "terms_digest": {
+                      "type": "string"
+                    },
+                    "workflow_terms": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "workflow_terms_digest": {
+                      "type": "string"
+                    },
+                    "one_financial_operation": {
+                      "const": true
+                    },
+                    "internal_charges": {
+                      "const": 0
+                    },
+                    "provisional_credits": {
+                      "const": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/workflows/cross-domain-release-evidence": {
+      "post": {
+        "operationId": "fresh402_cross_domain_release_evidence",
+        "summary": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality. One fixed workflow charge; internal steps never create separate customer charges. First source use seeds state in this same operation; later observations use returned owned observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.040 USDC or 16 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "description": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality.",
+        "tags": [
+          "cross_domain_release_evidence"
+        ],
+        "security": [
+          {
+            "x402Payment": []
+          },
+          {
+            "mppPayment": []
+          }
+        ],
+        "x-payment-info": {
+          "protocols": [
+            {
+              "x402": {}
+            },
+            {
+              "mpp": {
+                "method": "evm",
+                "intent": "charge"
+              }
+            }
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.040"
+          },
+          "offers": [
+            {
+              "amount": "40000",
+              "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+              "description": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality.",
+              "intent": "charge",
+              "method": "evm"
+            }
+          ]
+        },
+        "x-fresh402-product": {
+          "family": "workflow",
+          "maturity": "restricted",
+          "tags": [
+            "release-evidence",
+            "documentation-updates",
+            "openapi-compatibility",
+            "base"
+          ],
+          "limitations": [
+            "At most two explicit public sources and one bounded Base brief; no deployment or causality proof."
+          ],
+          "docs": "https://fresh402.com/workflows/cross-domain-release-evidence",
+          "serviceName": "Fresh402",
+          "iconUrl": "https://fresh402.com/favicon.png"
+        },
+        "x-mcp-tool": "fresh402_cross_domain_release_evidence",
+        "x-fresh402-tool": {
+          "id": "cross_domain_release_evidence",
+          "category": "intelligence-workflow",
+          "limits": {
+            "transfer_bytes": 10000000,
+            "decoded_bytes": 10000000,
+            "output_bytes": 131072,
+            "parser_characters": 256000,
+            "document_bytes": 256000,
+            "gateway_timeout_ms": 40000
+          },
+          "prepaid_credits": {
+            "5": 16
+          },
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "auth": "x402-or-mpp-or-prepaid",
+          "since": "3.1.0"
+        },
+        "parameters": [
+          {
+            "name": "X-Fresh402-Recovery-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 43,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9_-]+$"
+            },
+            "description": "Optional private recovery protection, not a prerequisite to a first purchase. Persist a random 32-byte hex/base64url secret before submission for recovery even if the whole response is lost. Otherwise save the private token returned in X-Fresh402-Recovery-Token on success. Replay identical input/payment/token within seven days; proof-only replay returns 409 without settlement. A public signature or transaction hash is not recovery authorization."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri"
+                  },
+                  "observation_id": {
+                    "type": "string",
+                    "pattern": "^wf_[a-f0-9]{64}$",
+                    "description": "Owned observation_id returned by this same workflow. Reuses its immutable source/scope and saved baseline/latest observations; not a primitive watch_id. Seven-day state retention. Missing, foreign or expired IDs never silently rebaseline."
+                  },
+                  "compare_to": {
+                    "default": "previous",
+                    "description": "Default previous compares with the latest successful workflow observation; baseline compares with its original seed. Seeding is one paid workflow operation and reports no comparison, never a second internal charge.",
+                    "type": "string",
+                    "enum": [
+                      "previous",
+                      "baseline"
+                    ]
+                  },
+                  "detail": {
+                    "default": "compact",
+                    "description": "Default compact: at most 20 evidence items per section. Expanded allows at most 200 document findings or 100 Base events and retains raw validated logs/getter ABI details within the same fixed work/output ceiling. Counts and omitted-evidence warnings remain explicit.",
+                    "type": "string",
+                    "enum": [
+                      "compact",
+                      "expanded"
+                    ]
+                  },
+                  "scope": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256,
+                        "description": "Optional HTML scope: a supported CSS selector, 1-256 characters, e.g. 'main' or 'article .content'. Only matching text is normalized; no match returns 422. Omit to normalize the page after built-in noise removal. Not supported for JSON or plain text."
+                      },
+                      "ignore_selectors": {
+                        "description": "Optional array of up to 20 CSS selectors (each 1-256 characters) to remove from HTML in addition to built-in noise filtering. Default: no extra exclusions ([]). HTML only; use ignore_json_paths for JSON. Example: ['.timestamp', '.ad'].",
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "description": "HTML element(s) to remove before normalization: a supported CSS selector, 1-256 characters, e.g. '.timestamp' or 'nav'."
+                        }
+                      },
+                      "ignore_json_paths": {
+                        "description": "Optional array of up to 20 JSON Pointer-style paths to remove before JSON normalization and hashing. Each must start with '/' and be 1-256 characters; supports '*' segments. Default: [] (no exclusions). JSON only. Example: ['/updated_at', '/items/*/request_id'].",
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^\\/",
+                          "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
+                        }
+                      },
+                      "html_attributes": {
+                        "description": "For workflow HTML, default is all four supported attributes: href,title,alt,aria-label. Explicit [] requests text-only comparison and is reported as limited scope. Ignored selectors apply to both text and attribute evidence. Not applied to JSON/text.",
+                        "maxItems": 4,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "alt",
+                            "aria-label",
+                            "href",
+                            "title"
+                          ],
+                          "description": "One explicitly observed HTML attribute: href (a/area only),title,alt or aria-label. No class/style/event attributes; links are inert evidence and never fetched."
+                        }
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Immutable supported normalization rules. Selected attributes participate in change detection; ignored fields are outside the reported scope. No browser execution or linked-page crawling."
+                  },
+                  "api_url": {
+                    "description": "Optional explicit JSON OpenAPI source for a new cross-domain identity; no link discovery. Saved observation_id freezes this URL too.",
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri"
+                  },
+                  "onchain": {
+                    "description": "Required with url for a new cross-domain identity. One narrow finalized Base brief; its addresses become immutable and share one existing 18-RPC reservation.",
+                    "type": "object",
+                    "properties": {
+                      "chain_id": {
+                        "type": "number",
+                        "const": 8453,
+                        "description": "Base mainnet only; provider chain is verified. All state is pinned to one selected finalized block."
+                      },
+                      "contract_address": {
+                        "description": "One selected contract which is also the token-facts and Transfer-log contract. The workflow does not infer that arbitrary bytecode is a safe or compliant token.",
+                        "type": "string",
+                        "minLength": 42,
+                        "maxLength": 42,
+                        "pattern": "^0x[a-fA-F0-9]{40}$"
+                      },
+                      "wallet_address": {
+                        "description": "One selected wallet. Returns its exact native-ETH balance and this contract's provider-reported Transfer events at the single selected finalized block, not complete wallet history.",
+                        "type": "string",
+                        "minLength": 42,
+                        "maxLength": 42,
+                        "pattern": "^0x[a-fA-F0-9]{40}$"
+                      }
+                    },
+                    "required": [
+                      "chain_id",
+                      "contract_address",
+                      "wallet_address"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "release_label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Claimed release identifier. Exact source mentions are evidence only, never authentication, deployment proof or causality. May change between observations without changing source identity."
+                  }
+                },
+                "required": [
+                  "release_label"
+                ],
+                "additionalProperties": false,
+                "oneOf": [
+                  {
+                    "required": [
+                      "url"
+                    ],
+                    "not": {
+                      "required": [
+                        "observation_id"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "observation_id"
+                    ],
+                    "not": {
+                      "required": [
+                        "url"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "example": {
+                "url": "https://example.com/release",
+                "onchain": {
+                  "chain_id": 8453,
+                  "contract_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                  "wallet_address": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"
+                },
+                "release_label": "v1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paid result after confirmed settlement",
+            "headers": {
+              "PAYMENT-RESPONSE": {
+                "description": "Base64 x402 v2 settlement receipt",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Fresh402-Recovery-Token": {
+                "description": "Optional server-issued private recovery capability when none was supplied. Save securely with original input and proof; never log. If the entire response is lost without a pre-supplied secret, proof alone cannot recover the private result.",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Payment-Receipt": {
+                "description": "Base64url native MPP EVM receipt; inspect status and reference. Not proof of prepaid finality.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowResult_cross_domain_release_evidence"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required or rejected; never a sale. No paid data returned.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64 x402 v2 requirements",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "WWW-Authenticate": {
+                "description": "Native MPP challenge for the original exact Base USDC EIP-3009 authorization. Persist the challenge and private recovery token before signing; never mix payment methods.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/prepaid/workflows/cross-domain-release-evidence": {
+      "post": {
+        "operationId": "fresh402_prepaid_cross_domain_release_evidence",
+        "summary": "Execute fresh402_cross_domain_release_evidence using the existing account credit balance",
+        "description": "Same input/output and durable debit as prepaid MCP. Credentials stay in HTTP. Failed reserved execution releases credits; no x402 fallback. Reuse the original tool, input, key, tariff and maximum for seven-day durable recovery through either transport.",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "tags": [
+          "prepaid-execution"
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{16,128}$"
+            },
+            "description": "Privately persisted operation identity, shared with fresh402/prepaid MCP metadata."
+          },
+          {
+            "name": "X-Fresh402-Tariff-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "enum": [
+                5
+              ]
+            },
+            "description": "Required exact workflow version5 from /v4/prepaid/workflows/quote/{service}. Existing package funding terms and account tariff remain unchanged."
+          },
+          {
+            "name": "X-Fresh402-Max-Credits",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000000
+            },
+            "description": "Required integer maximum at least the exact version5 workflow quote; one workflow debit, never substep charges."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri"
+                  },
+                  "observation_id": {
+                    "type": "string",
+                    "pattern": "^wf_[a-f0-9]{64}$",
+                    "description": "Owned observation_id returned by this same workflow. Reuses its immutable source/scope and saved baseline/latest observations; not a primitive watch_id. Seven-day state retention. Missing, foreign or expired IDs never silently rebaseline."
+                  },
+                  "compare_to": {
+                    "default": "previous",
+                    "description": "Default previous compares with the latest successful workflow observation; baseline compares with its original seed. Seeding is one paid workflow operation and reports no comparison, never a second internal charge.",
+                    "type": "string",
+                    "enum": [
+                      "previous",
+                      "baseline"
+                    ]
+                  },
+                  "detail": {
+                    "default": "compact",
+                    "description": "Default compact: at most 20 evidence items per section. Expanded allows at most 200 document findings or 100 Base events and retains raw validated logs/getter ABI details within the same fixed work/output ceiling. Counts and omitted-evidence warnings remain explicit.",
+                    "type": "string",
+                    "enum": [
+                      "compact",
+                      "expanded"
+                    ]
+                  },
+                  "scope": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256,
+                        "description": "Optional HTML scope: a supported CSS selector, 1-256 characters, e.g. 'main' or 'article .content'. Only matching text is normalized; no match returns 422. Omit to normalize the page after built-in noise removal. Not supported for JSON or plain text."
+                      },
+                      "ignore_selectors": {
+                        "description": "Optional array of up to 20 CSS selectors (each 1-256 characters) to remove from HTML in addition to built-in noise filtering. Default: no extra exclusions ([]). HTML only; use ignore_json_paths for JSON. Example: ['.timestamp', '.ad'].",
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "description": "HTML element(s) to remove before normalization: a supported CSS selector, 1-256 characters, e.g. '.timestamp' or 'nav'."
+                        }
+                      },
+                      "ignore_json_paths": {
+                        "description": "Optional array of up to 20 JSON Pointer-style paths to remove before JSON normalization and hashing. Each must start with '/' and be 1-256 characters; supports '*' segments. Default: [] (no exclusions). JSON only. Example: ['/updated_at', '/items/*/request_id'].",
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^\\/",
+                          "description": "JSON Pointer-style path, 1-256 characters, starting with '/'. Decode '~0' as '~' and '~1' as '/'; '*' matches all object keys or array elements. Example: '/items/*/updated_at'."
+                        }
+                      },
+                      "html_attributes": {
+                        "description": "For workflow HTML, default is all four supported attributes: href,title,alt,aria-label. Explicit [] requests text-only comparison and is reported as limited scope. Ignored selectors apply to both text and attribute evidence. Not applied to JSON/text.",
+                        "maxItems": 4,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "alt",
+                            "aria-label",
+                            "href",
+                            "title"
+                          ],
+                          "description": "One explicitly observed HTML attribute: href (a/area only),title,alt or aria-label. No class/style/event attributes; links are inert evidence and never fetched."
+                        }
+                      }
+                    },
+                    "additionalProperties": false,
+                    "description": "Immutable supported normalization rules. Selected attributes participate in change detection; ignored fields are outside the reported scope. No browser execution or linked-page crawling."
+                  },
+                  "api_url": {
+                    "description": "Optional explicit JSON OpenAPI source for a new cross-domain identity; no link discovery. Saved observation_id freezes this URL too.",
+                    "type": "string",
+                    "maxLength": 4096,
+                    "format": "uri"
+                  },
+                  "onchain": {
+                    "description": "Required with url for a new cross-domain identity. One narrow finalized Base brief; its addresses become immutable and share one existing 18-RPC reservation.",
+                    "type": "object",
+                    "properties": {
+                      "chain_id": {
+                        "type": "number",
+                        "const": 8453,
+                        "description": "Base mainnet only; provider chain is verified. All state is pinned to one selected finalized block."
+                      },
+                      "contract_address": {
+                        "description": "One selected contract which is also the token-facts and Transfer-log contract. The workflow does not infer that arbitrary bytecode is a safe or compliant token.",
+                        "type": "string",
+                        "minLength": 42,
+                        "maxLength": 42,
+                        "pattern": "^0x[a-fA-F0-9]{40}$"
+                      },
+                      "wallet_address": {
+                        "description": "One selected wallet. Returns its exact native-ETH balance and this contract's provider-reported Transfer events at the single selected finalized block, not complete wallet history.",
+                        "type": "string",
+                        "minLength": 42,
+                        "maxLength": 42,
+                        "pattern": "^0x[a-fA-F0-9]{40}$"
+                      }
+                    },
+                    "required": [
+                      "chain_id",
+                      "contract_address",
+                      "wallet_address"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "release_label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128,
+                    "description": "Claimed release identifier. Exact source mentions are evidence only, never authentication, deployment proof or causality. May change between observations without changing source identity."
+                  }
+                },
+                "required": [
+                  "release_label"
+                ],
+                "additionalProperties": false,
+                "oneOf": [
+                  {
+                    "required": [
+                      "url"
+                    ],
+                    "not": {
+                      "required": [
+                        "observation_id"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "observation_id"
+                    ],
+                    "not": {
+                      "required": [
+                        "url"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "example": {
+                "url": "https://example.com/release",
+                "onchain": {
+                  "chain_id": 8453,
+                  "contract_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                  "wallet_address": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"
+                },
+                "release_label": "v1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Durable credit-paid result. X-Fresh402-Access=prepaid and X-Fresh402-Credits report the charged amount; replay never charges again.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowResult_cross_domain_release_evidence"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Prepaid HTTP credential required"
+          },
+          "402": {
+            "description": "Insufficient spendable credits or missing tariff/maximum; no x402 submission"
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/prepaid/workflows/quote/cross_domain_release_evidence": {
+      "get": {
+        "operationId": "fresh402_workflow_prepaid_quote_cross_domain_release_evidence",
+        "summary": "Exact version5 workflow charge against existing constituent rights and finalized credits",
+        "security": [
+          {
+            "prepaidKey": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "No debit or execution. Use tariff_version and credits as explicit maximum authorization. Provisional credits are ineligible; original package and funding terms are unchanged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "const": "cross_domain_release_evidence"
+                    },
+                    "tariff_version": {
+                      "const": 5
+                    },
+                    "credits": {
+                      "type": "integer"
+                    },
+                    "terms_digest": {
+                      "type": "string"
+                    },
+                    "workflow_terms": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "workflow_terms_digest": {
+                      "type": "string"
+                    },
+                    "one_financial_operation": {
+                      "const": true
+                    },
+                    "internal_charges": {
+                      "const": 0
+                    },
+                    "provisional_credits": {
+                      "const": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or disallowed target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "MCP Origin or staging access rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Watch or snapshot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "408": {
+            "description": "Request body timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Baseline incompatible or recovery pending/mismatched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Paid response retention expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Input, target, stored document or output too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported target media type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Selector not found, incompatible scope or complexity budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate, concurrency or daily operation budget",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Legacy core failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream or DNS failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service unavailable or settlement needs reconciliation; never automatically replace the payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Target timed out",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v3/agent-trial": {
       "get": {
         "operationId": "fresh402_machine_trial_discovery",
@@ -9943,7 +13543,7 @@
         "operationId": "fresh402_mcp",
         "summary": "MCP Streamable HTTP (2026-07-28 plus stateless 2025 compatibility)",
         "security": [],
-        "description": "8 tools, including configured finalized Base observations. Payment challenge is an isError tool result with structuredContent = PaymentRequired; payment goes in params._meta['x402/payment']; receipt in result._meta['x402/payment-response']. HTTP 200 alone is not success. Alternatively use X-Fresh402-API-Key in HTTP with params._meta['fresh402/prepaid'] containing idempotency_key, tariff_version and max_credits. Never combine billing methods. When x-mpp-payments.enabled, official MPP clients may use params._meta['org.paymentauth/credential']; receipt is result._meta['org.paymentauth/receipt']. Legacy x402 errors also carry standard org.paymentauth/payment-required metadata. See docs/MPP.md, AGENT_PREPAID.md and MCP.md.",
+        "description": "12 tools, including configured finalized Base observations. Payment challenge is an isError tool result with structuredContent = PaymentRequired; payment goes in params._meta['x402/payment']; receipt in result._meta['x402/payment-response']. HTTP 200 alone is not success. Alternatively use X-Fresh402-API-Key in HTTP with params._meta['fresh402/prepaid'] containing idempotency_key, tariff_version and max_credits. Never combine billing methods. When x-mpp-payments.enabled, official MPP clients may use params._meta['org.paymentauth/credential']; receipt is result._meta['org.paymentauth/receipt']. Legacy x402 errors also carry standard org.paymentauth/payment-required metadata. See docs/MPP.md, AGENT_PREPAID.md and MCP.md.",
         "requestBody": {
           "required": true,
           "content": {
@@ -12748,6 +16348,1332 @@
             "additionalProperties": {}
           }
         ]
+      },
+      "WorkflowResult_website_change_intelligence": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "workflow": {
+            "type": "string",
+            "const": "website_change_intelligence"
+          },
+          "version": {
+            "type": "number",
+            "const": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "baseline_seeded",
+              "no_supported_contract_change",
+              "unchanged_in_scope",
+              "changed_in_scope",
+              "review_required",
+              "descriptive_only",
+              "evidence_ready"
+            ]
+          },
+          "observed_at": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "changed": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "comparison": {
+                "type": "string",
+                "enum": [
+                  "seeded",
+                  "previous",
+                  "baseline"
+                ]
+              },
+              "findings": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                ]
+              },
+              "release_label": {
+                "type": "string"
+              },
+              "consistency": {
+                "type": "string",
+                "const": "not_established"
+              }
+            },
+            "additionalProperties": {},
+            "description": "Task-level result; a seeded baseline is not a comparison, and evidence does not prove deployment or causation."
+          },
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "website": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "baseline_seeded",
+                      "no_supported_contract_change",
+                      "unchanged_in_scope",
+                      "changed_in_scope",
+                      "review_required",
+                      "descriptive_only"
+                    ]
+                  },
+                  "changed": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "scope": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "previous_hash": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "summary": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      }
+                    ]
+                  },
+                  "evidence": {
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "description": "Bounded structural changes or directional API findings; API entries include classification, rule and JSON Pointer path. Counts survive compaction."
+                  },
+                  "comparison": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "comparison_executed": {
+                    "type": "boolean"
+                  },
+                  "completeness": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {},
+                    "description": "Explicit scope, omitted-evidence count and truncation; no browser or external-reference crawl. Warnings are deduplicated at the result root."
+                  }
+                },
+                "required": [
+                  "status",
+                  "changed",
+                  "scope",
+                  "hash",
+                  "previous_hash",
+                  "summary",
+                  "evidence",
+                  "comparison",
+                  "comparison_executed",
+                  "completeness"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "website"
+            ],
+            "additionalProperties": false
+          },
+          "provenance": {
+            "type": "object",
+            "properties": {
+              "website": {
+                "type": "object",
+                "properties": {
+                  "requested_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "final_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "raw_source_hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "observed_at": {
+                    "type": "string"
+                  },
+                  "content_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requested_url",
+                  "final_url",
+                  "raw_source_hash",
+                  "observed_at",
+                  "content_type"
+                ],
+                "additionalProperties": false
+              },
+              "scope_identity": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "website",
+              "scope_identity"
+            ],
+            "additionalProperties": false
+          },
+          "completeness": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "Scope and uncertainty are authoritative; wallet history and independent provider consensus are never asserted."
+          },
+          "warnings": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "accounting": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "Actual bounded execution counters, not inferred model-token savings or a billing invoice."
+          },
+          "billing": {
+            "type": "object",
+            "properties": {
+              "internal_charges": {
+                "type": "number",
+                "const": 0
+              },
+              "one_financial_operation": {
+                "type": "boolean",
+                "const": true
+              },
+              "tariff_version": {
+                "type": "number",
+                "const": 5
+              },
+              "credits": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "atomic_usdc": {
+                "type": "string",
+                "pattern": "^\\d+$"
+              }
+            },
+            "required": [
+              "internal_charges",
+              "one_financial_operation",
+              "tariff_version",
+              "credits",
+              "atomic_usdc"
+            ],
+            "additionalProperties": false
+          },
+          "observation_id": {
+            "type": "string",
+            "pattern": "^wf_[a-f0-9]{64}$"
+          },
+          "state_expires_at": {
+            "type": "string"
+          },
+          "workflow_state_saved": {
+            "type": "boolean"
+          },
+          "snapshot_saved": {
+            "type": "boolean"
+          },
+          "persistence_error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow",
+          "version",
+          "status",
+          "observed_at",
+          "summary",
+          "evidence",
+          "provenance",
+          "completeness",
+          "warnings",
+          "accounting",
+          "billing"
+        ],
+        "additionalProperties": false
+      },
+      "WorkflowResult_api_compatibility_review": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "workflow": {
+            "type": "string",
+            "const": "api_compatibility_review"
+          },
+          "version": {
+            "type": "number",
+            "const": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "baseline_seeded",
+              "no_supported_contract_change",
+              "unchanged_in_scope",
+              "changed_in_scope",
+              "review_required",
+              "descriptive_only",
+              "evidence_ready"
+            ]
+          },
+          "observed_at": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "changed": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "comparison": {
+                "type": "string",
+                "enum": [
+                  "seeded",
+                  "previous",
+                  "baseline"
+                ]
+              },
+              "findings": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                ]
+              },
+              "release_label": {
+                "type": "string"
+              },
+              "consistency": {
+                "type": "string",
+                "const": "not_established"
+              }
+            },
+            "additionalProperties": {},
+            "description": "Task-level result; a seeded baseline is not a comparison, and evidence does not prove deployment or causation."
+          },
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "api": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "baseline_seeded",
+                      "no_supported_contract_change",
+                      "unchanged_in_scope",
+                      "changed_in_scope",
+                      "review_required",
+                      "descriptive_only"
+                    ]
+                  },
+                  "changed": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "scope": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "previous_hash": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "summary": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      }
+                    ]
+                  },
+                  "evidence": {
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "description": "Bounded structural changes or directional API findings; API entries include classification, rule and JSON Pointer path. Counts survive compaction."
+                  },
+                  "comparison": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "comparison_executed": {
+                    "type": "boolean"
+                  },
+                  "completeness": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {},
+                    "description": "Explicit scope, omitted-evidence count and truncation; no browser or external-reference crawl. Warnings are deduplicated at the result root."
+                  }
+                },
+                "required": [
+                  "status",
+                  "changed",
+                  "scope",
+                  "hash",
+                  "previous_hash",
+                  "summary",
+                  "evidence",
+                  "comparison",
+                  "comparison_executed",
+                  "completeness"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "api"
+            ],
+            "additionalProperties": false
+          },
+          "provenance": {
+            "type": "object",
+            "properties": {
+              "api": {
+                "type": "object",
+                "properties": {
+                  "requested_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "final_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "raw_source_hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "observed_at": {
+                    "type": "string"
+                  },
+                  "content_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requested_url",
+                  "final_url",
+                  "raw_source_hash",
+                  "observed_at",
+                  "content_type"
+                ],
+                "additionalProperties": false
+              },
+              "scope_identity": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "api",
+              "scope_identity"
+            ],
+            "additionalProperties": false
+          },
+          "completeness": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "Scope and uncertainty are authoritative; wallet history and independent provider consensus are never asserted."
+          },
+          "warnings": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "accounting": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "Actual bounded execution counters, not inferred model-token savings or a billing invoice."
+          },
+          "billing": {
+            "type": "object",
+            "properties": {
+              "internal_charges": {
+                "type": "number",
+                "const": 0
+              },
+              "one_financial_operation": {
+                "type": "boolean",
+                "const": true
+              },
+              "tariff_version": {
+                "type": "number",
+                "const": 5
+              },
+              "credits": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "atomic_usdc": {
+                "type": "string",
+                "pattern": "^\\d+$"
+              }
+            },
+            "required": [
+              "internal_charges",
+              "one_financial_operation",
+              "tariff_version",
+              "credits",
+              "atomic_usdc"
+            ],
+            "additionalProperties": false
+          },
+          "observation_id": {
+            "type": "string",
+            "pattern": "^wf_[a-f0-9]{64}$"
+          },
+          "state_expires_at": {
+            "type": "string"
+          },
+          "workflow_state_saved": {
+            "type": "boolean"
+          },
+          "snapshot_saved": {
+            "type": "boolean"
+          },
+          "persistence_error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow",
+          "version",
+          "status",
+          "observed_at",
+          "summary",
+          "evidence",
+          "provenance",
+          "completeness",
+          "warnings",
+          "accounting",
+          "billing"
+        ],
+        "additionalProperties": false
+      },
+      "WorkflowResult_onchain_evidence_brief": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "workflow": {
+            "type": "string",
+            "const": "onchain_evidence_brief"
+          },
+          "version": {
+            "type": "number",
+            "const": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "baseline_seeded",
+              "no_supported_contract_change",
+              "unchanged_in_scope",
+              "changed_in_scope",
+              "review_required",
+              "descriptive_only",
+              "evidence_ready"
+            ]
+          },
+          "observed_at": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "changed": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "comparison": {
+                "type": "string",
+                "enum": [
+                  "seeded",
+                  "previous",
+                  "baseline"
+                ]
+              },
+              "findings": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                ]
+              },
+              "release_label": {
+                "type": "string"
+              },
+              "consistency": {
+                "type": "string",
+                "const": "not_established"
+              }
+            },
+            "additionalProperties": {},
+            "description": "Task-level result; a seeded baseline is not a comparison, and evidence does not prove deployment or causation."
+          },
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "contract": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "token": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "wallet": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "contract",
+              "token",
+              "wallet"
+            ],
+            "additionalProperties": false
+          },
+          "provenance": {
+            "type": "object",
+            "properties": {
+              "block": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "contract_snapshot_id": {
+                "type": "string"
+              },
+              "observation_saved": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "block",
+              "contract_snapshot_id",
+              "observation_saved"
+            ],
+            "additionalProperties": false
+          },
+          "completeness": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "Scope and uncertainty are authoritative; wallet history and independent provider consensus are never asserted."
+          },
+          "warnings": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "accounting": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "Actual bounded execution counters, not inferred model-token savings or a billing invoice."
+          },
+          "billing": {
+            "type": "object",
+            "properties": {
+              "internal_charges": {
+                "type": "number",
+                "const": 0
+              },
+              "one_financial_operation": {
+                "type": "boolean",
+                "const": true
+              },
+              "tariff_version": {
+                "type": "number",
+                "const": 5
+              },
+              "credits": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "atomic_usdc": {
+                "type": "string",
+                "pattern": "^\\d+$"
+              }
+            },
+            "required": [
+              "internal_charges",
+              "one_financial_operation",
+              "tariff_version",
+              "credits",
+              "atomic_usdc"
+            ],
+            "additionalProperties": false
+          },
+          "observation_id": {
+            "type": "string",
+            "pattern": "^wf_[a-f0-9]{64}$"
+          },
+          "state_expires_at": {
+            "type": "string"
+          },
+          "workflow_state_saved": {
+            "type": "boolean"
+          },
+          "snapshot_saved": {
+            "type": "boolean"
+          },
+          "persistence_error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow",
+          "version",
+          "status",
+          "observed_at",
+          "summary",
+          "evidence",
+          "provenance",
+          "completeness",
+          "warnings",
+          "accounting",
+          "billing"
+        ],
+        "additionalProperties": false
+      },
+      "WorkflowResult_cross_domain_release_evidence": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "workflow": {
+            "type": "string",
+            "const": "cross_domain_release_evidence"
+          },
+          "version": {
+            "type": "number",
+            "const": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "baseline_seeded",
+              "no_supported_contract_change",
+              "unchanged_in_scope",
+              "changed_in_scope",
+              "review_required",
+              "descriptive_only",
+              "evidence_ready"
+            ]
+          },
+          "observed_at": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "changed": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "comparison": {
+                "type": "string",
+                "enum": [
+                  "seeded",
+                  "previous",
+                  "baseline"
+                ]
+              },
+              "findings": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  }
+                ]
+              },
+              "release_label": {
+                "type": "string"
+              },
+              "consistency": {
+                "type": "string",
+                "const": "not_established"
+              }
+            },
+            "additionalProperties": {},
+            "description": "Task-level result; a seeded baseline is not a comparison, and evidence does not prove deployment or causation."
+          },
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "website": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "baseline_seeded",
+                      "no_supported_contract_change",
+                      "unchanged_in_scope",
+                      "changed_in_scope",
+                      "review_required",
+                      "descriptive_only"
+                    ]
+                  },
+                  "changed": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "scope": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "previous_hash": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "summary": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      }
+                    ]
+                  },
+                  "evidence": {
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "description": "Bounded structural changes or directional API findings; API entries include classification, rule and JSON Pointer path. Counts survive compaction."
+                  },
+                  "comparison": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "comparison_executed": {
+                    "type": "boolean"
+                  },
+                  "completeness": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {},
+                    "description": "Explicit scope, omitted-evidence count and truncation; no browser or external-reference crawl. Warnings are deduplicated at the result root."
+                  }
+                },
+                "required": [
+                  "status",
+                  "changed",
+                  "scope",
+                  "hash",
+                  "previous_hash",
+                  "summary",
+                  "evidence",
+                  "comparison",
+                  "comparison_executed",
+                  "completeness"
+                ],
+                "additionalProperties": false
+              },
+              "api": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "baseline_seeded",
+                      "no_supported_contract_change",
+                      "unchanged_in_scope",
+                      "changed_in_scope",
+                      "review_required",
+                      "descriptive_only"
+                    ]
+                  },
+                  "changed": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "scope": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {}
+                  },
+                  "hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "previous_hash": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "summary": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      }
+                    ]
+                  },
+                  "evidence": {
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "description": "Bounded structural changes or directional API findings; API entries include classification, rule and JSON Pointer path. Counts survive compaction."
+                  },
+                  "comparison": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {}
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "comparison_executed": {
+                    "type": "boolean"
+                  },
+                  "completeness": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {},
+                    "description": "Explicit scope, omitted-evidence count and truncation; no browser or external-reference crawl. Warnings are deduplicated at the result root."
+                  }
+                },
+                "required": [
+                  "status",
+                  "changed",
+                  "scope",
+                  "hash",
+                  "previous_hash",
+                  "summary",
+                  "evidence",
+                  "comparison",
+                  "comparison_executed",
+                  "completeness"
+                ],
+                "additionalProperties": false
+              },
+              "onchain": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              }
+            },
+            "required": [
+              "website",
+              "onchain"
+            ],
+            "additionalProperties": false
+          },
+          "provenance": {
+            "type": "object",
+            "properties": {
+              "website": {
+                "type": "object",
+                "properties": {
+                  "requested_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "final_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "raw_source_hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "observed_at": {
+                    "type": "string"
+                  },
+                  "content_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requested_url",
+                  "final_url",
+                  "raw_source_hash",
+                  "observed_at",
+                  "content_type"
+                ],
+                "additionalProperties": false
+              },
+              "api": {
+                "type": "object",
+                "properties": {
+                  "requested_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "final_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "raw_source_hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "observed_at": {
+                    "type": "string"
+                  },
+                  "content_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requested_url",
+                  "final_url",
+                  "raw_source_hash",
+                  "observed_at",
+                  "content_type"
+                ],
+                "additionalProperties": false
+              },
+              "onchain": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "scope_identity": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "website",
+              "onchain",
+              "scope_identity"
+            ],
+            "additionalProperties": false
+          },
+          "completeness": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "Scope and uncertainty are authoritative; wallet history and independent provider consensus are never asserted."
+          },
+          "warnings": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "accounting": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "Actual bounded execution counters, not inferred model-token savings or a billing invoice."
+          },
+          "billing": {
+            "type": "object",
+            "properties": {
+              "internal_charges": {
+                "type": "number",
+                "const": 0
+              },
+              "one_financial_operation": {
+                "type": "boolean",
+                "const": true
+              },
+              "tariff_version": {
+                "type": "number",
+                "const": 5
+              },
+              "credits": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "atomic_usdc": {
+                "type": "string",
+                "pattern": "^\\d+$"
+              }
+            },
+            "required": [
+              "internal_charges",
+              "one_financial_operation",
+              "tariff_version",
+              "credits",
+              "atomic_usdc"
+            ],
+            "additionalProperties": false
+          },
+          "observation_id": {
+            "type": "string",
+            "pattern": "^wf_[a-f0-9]{64}$"
+          },
+          "state_expires_at": {
+            "type": "string"
+          },
+          "workflow_state_saved": {
+            "type": "boolean"
+          },
+          "snapshot_saved": {
+            "type": "boolean"
+          },
+          "persistence_error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow",
+          "version",
+          "status",
+          "observed_at",
+          "summary",
+          "evidence",
+          "provenance",
+          "completeness",
+          "warnings",
+          "accounting",
+          "billing"
+        ],
+        "additionalProperties": false
       },
       "PrepaidBalance": {
         "type": "object",

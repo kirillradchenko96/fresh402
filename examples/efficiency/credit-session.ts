@@ -1,3 +1,4 @@
+import {SERVER_WORKFLOWS,isServerWorkflow} from '../knowledge-base/workflow-products.ts';
 import {DatabaseSync} from 'node:sqlite';
 import {createHash,randomBytes,randomUUID,createCipheriv,createDecipheriv} from 'node:crypto';
 import {existsSync,realpathSync,lstatSync,openSync,closeSync,chmodSync} from 'node:fs';
@@ -11,7 +12,7 @@ export interface CreditSessionPolicy{
  origin:string;accountId:string;transport:'rest'|'mcp';allowedServices:CreditService[];
  perCallCredits:number;dailyCredits:number;monthlyCredits:number;lifetimeCredits:number;
 }
-const services:Record<string,CreditService>={fresh402_check:'check',fresh402_extract:'extract',fresh402_smart_diff:'smart_diff',fresh402_openapi_contract_diff:'openapi_diff'};
+const services:Record<string,CreditService>={...Object.fromEntries(SERVER_WORKFLOWS.map(id=>['fresh402_'+id,id])),fresh402_check:'check',fresh402_extract:'extract',fresh402_smart_diff:'smart_diff',fresh402_openapi_contract_diff:'openapi_diff'};
 const encode=(v:unknown)=>JSON.stringify(v,(_k,x)=>x&&typeof x==='object'&&!Array.isArray(x)?Object.fromEntries(Object.keys(x).sort().map(k=>[k,x[k]])):x);
 const digest=(v:unknown)=>createHash('sha256').update(encode(v)).digest('hex');
 type Stored={tool:string;input:Json;op?:PrepaidRequest;terminal?:'prepaid_result_expired'};
@@ -65,8 +66,9 @@ export class CreditSession{
   const client=new PrepaidClient(this.#policy.origin,this.#credential,{transport:this.#policy.transport,tariffVersion:3,maxCredits:this.#policy.perCallCredits,stagingToken:this.#stagingToken,persist:async op=>{current={tool,input,op:structuredClone(op)};this.#save(callId,owner,current);}});
   // Read-only identity/tariff checks cannot sign or purchase. Credential rotation
   // is supported only when the new key still authenticates the pinned account.
-  const balance=await client.balance();if(balance.account_id!==this.#policy.accountId||balance.tariff_version!==3)throw new ApiError('client_account_policy_mismatch',403);const quote=await client.quoteRemote();if(quote.tariff_version!==3)throw new ApiError('client_tariff_policy_mismatch',409);
-  const cost=client.quote(service).maximum_credits,reserved=this.#reserve(callId,{tool,input},cost);owner=reserved.owner;current=reserved.stored;
+  const balance=await client.balance();if(balance.account_id!==this.#policy.accountId||balance.tariff_version!==3)throw new ApiError('client_account_policy_mismatch',403);const prior=this.#db.prepare('SELECT cost FROM credit_calls WHERE id=?').get(callId) as {cost:number}|undefined;
+  if(!prior){const quote=await client.quoteRemote(isServerWorkflow(service)?service:undefined);if(quote.tariff_version!==(isServerWorkflow(service)?5:3))throw new ApiError('client_tariff_policy_mismatch',409);}
+  const cost=prior?.cost??client.quote(service).maximum_credits,reserved=this.#reserve(callId,{tool,input},cost);owner=reserved.owner;current=reserved.stored;
   try{
    if(current.op?.state==='completed')return{result:structuredClone(current.op.result!),localReplay:true};
    if(current.terminal)throw new ApiError(current.terminal,410);

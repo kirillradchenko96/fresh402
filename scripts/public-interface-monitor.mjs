@@ -38,10 +38,11 @@ export async function inspectPublicHealth({fetcher=fetch,now=Date.now,deadlineMs
 }
 
 export function verifyPublicContract(discovery,approved){
- if(discovery.version!==approved.info.version||discovery.rootVersion!==discovery.version||discovery.mcpVersion!==discovery.version||discovery.restTools!==8||discovery.mcpTools!==8)throw Error('public_contract_mismatch');
  if(discovery.circleEnabled!==false)throw Error('unexpected_payment_configuration');
  const expected=new Map(Object.values(approved.paths).filter(p=>p.post?.operationId?.startsWith('fresh402_')&&p.post['x-payment-info']?.price).map(p=>[p.post.operationId,p.post['x-payment-info'].price]));
- if(expected.size!==7)throw Error('approved_contract_incomplete');
+ const original=['check','extract','smart_diff','openapi_contract_diff','contract_watch','wallet_watch','token_facts'].map(id=>'fresh402_'+id),workflows=['website_change_intelligence','api_compatibility_review','onchain_evidence_brief','cross_domain_release_evidence'].map(id=>'fresh402_'+id);
+ if(!original.every(id=>expected.has(id))||![7,11].includes(expected.size)||expected.size===11&&!workflows.every(id=>expected.has(id)))throw Error('approved_contract_incomplete');
+ if(discovery.version!==approved.info.version||discovery.rootVersion!==discovery.version||discovery.mcpVersion!==discovery.version||discovery.restTools!==expected.size+1||discovery.mcpTools!==expected.size+1)throw Error('public_contract_mismatch');
  const decimal=s=>{if(!/^\d+(\.\d{1,6})?$/.test(String(s)))throw Error('invalid_price');const [w,f='']=String(s).split('.');return BigInt(w)*1000000n+BigInt(f.padEnd(6,'0'));};
  for(const [tool,price]of expected){const live=discovery.services.find(o=>o.tool===tool)?.price;if(!live||live.currency!==price.currency||decimal(live.amount)!==decimal(price.amount))throw Error('unexpected_price_configuration');}
 }

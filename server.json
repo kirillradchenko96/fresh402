@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.kirillradchenko96/fresh402",
   "title": "Fresh402 Agent Intelligence",
-  "description": "Persistent web/Base observations and recoverable results. Free Register, 7 paid tools; REST/MCP.",
-  "version": "3.0.3",
+  "description": "Persistent web/Base intelligence: 7 paid primitives, 4 server workflows, free Register; REST/MCP.",
+  "version": "3.1.0",
   "websiteUrl": "https://fresh402.com",
   "repository": {
     "url": "https://github.com/kirillradchenko96/fresh402",
@@ -33,8 +33,8 @@
   ],
   "_meta": {
     "io.modelcontextprotocol.registry/publisher-provided": {
-      "apiVersion": "3.0.2",
-      "releaseType": "metadata-only"
+      "apiVersion": "3.1.0",
+      "releaseType": "server-workflows"
     }
   }
 }

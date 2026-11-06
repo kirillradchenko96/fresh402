@@ -1,7 +1,7 @@
 {
-  "verified_at": "2026-11-04T02:56:14.445Z",
+  "verified_at": "2026-11-06T04:26:20.983Z",
   "api_origin": "https://api.fresh402.com",
-  "api_version": "3.0.2",
+  "api_version": "3.1.0",
   "sdk_version": "0.3.6",
   "network": "eip155:8453",
   "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
@@ -179,6 +179,96 @@
           "Contract-reported facts; no token safety score, verified-source claim or inferred absence of privileges."
         ],
         "docs": "https://fresh402.com/docs/tools#blockchain",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
+    },
+    {
+      "id": "website_change_intelligence",
+      "tool": "fresh402_website_change_intelligence",
+      "path": "/v4/workflows/website-change-intelligence",
+      "atomic_usdc": 5000,
+      "credits": 2,
+      "product": {
+        "family": "workflow",
+        "maturity": "restricted",
+        "tags": [
+          "website-change-monitoring",
+          "documentation-updates",
+          "agent-workflow"
+        ],
+        "limitations": [
+          "Static scoped evidence only; one fetch, no browser or scheduler. Unchanged means unchanged in the declared scope."
+        ],
+        "docs": "https://fresh402.com/workflows/website-change-intelligence",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
+    },
+    {
+      "id": "api_compatibility_review",
+      "tool": "fresh402_api_compatibility_review",
+      "path": "/v4/workflows/api-compatibility-review",
+      "atomic_usdc": 10000,
+      "credits": 4,
+      "product": {
+        "family": "workflow",
+        "maturity": "restricted",
+        "tags": [
+          "openapi-compatibility",
+          "api-breaking-change-detection",
+          "coding-agents"
+        ],
+        "limitations": [
+          "JSON OpenAPI only; conservative supported-rule analysis, not universal runtime compatibility."
+        ],
+        "docs": "https://fresh402.com/workflows/api-compatibility-review",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
+    },
+    {
+      "id": "onchain_evidence_brief",
+      "tool": "fresh402_onchain_evidence_brief",
+      "path": "/v4/workflows/onchain-evidence-brief",
+      "atomic_usdc": 25000,
+      "credits": 10,
+      "product": {
+        "family": "workflow",
+        "maturity": "restricted",
+        "tags": [
+          "base",
+          "contract-and-token-evidence",
+          "selected-wallet-transfers",
+          "agent-workflow"
+        ],
+        "limitations": [
+          "One selected contract/token and one wallet at one finalized block; Wallet Watch scope remains a pilot, not complete history."
+        ],
+        "docs": "https://fresh402.com/workflows/onchain-evidence-brief",
+        "serviceName": "Fresh402",
+        "iconUrl": "https://fresh402.com/favicon.png"
+      }
+    },
+    {
+      "id": "cross_domain_release_evidence",
+      "tool": "fresh402_cross_domain_release_evidence",
+      "path": "/v4/workflows/cross-domain-release-evidence",
+      "atomic_usdc": 40000,
+      "credits": 16,
+      "product": {
+        "family": "workflow",
+        "maturity": "restricted",
+        "tags": [
+          "release-evidence",
+          "documentation-updates",
+          "openapi-compatibility",
+          "base"
+        ],
+        "limitations": [
+          "At most two explicit public sources and one bounded Base brief; no deployment or causality proof."
+        ],
+        "docs": "https://fresh402.com/workflows/cross-domain-release-evidence",
         "serviceName": "Fresh402",
         "iconUrl": "https://fresh402.com/favicon.png"
       }

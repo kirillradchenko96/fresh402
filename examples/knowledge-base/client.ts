@@ -1,4 +1,5 @@
 import {randomBytes} from 'node:crypto';
+import {isServerWorkflow,serverWorkflowPath} from './workflow-products.ts';
 
 type Json=Record<string,any>;
 export type Operation={tool:string,input:Json,payment:Json,recoveryToken:string,amount:string,state:'authorized'|'pending'|'completed',result?:Json,receipt?:Json};
@@ -33,11 +34,19 @@ export class Fresh402Client {
   const {response,json:api}=await this.request('/openapi.json');if(!response.ok||!api.openapi?.startsWith('3.'))throw new Error('OpenAPI discovery failed');
   for(const [path,item]of Object.entries(api.paths) as Array<[string,Json]>){const post=item.post;if(post?.operationId?.startsWith('fresh402_')&&(post.operationId==='fresh402_register'||post['x-payment-info']?.price))this.operations.set(post.operationId,{path,schema:post.requestBody?.content?.['application/json']?.schema,price:post['x-payment-info']?.price,summary:post.summary});}
   for(const name of ['fresh402_register','fresh402_check','fresh402_extract','fresh402_smart_diff'])if(!this.operations.has(name))throw new Error('Required public operation missing: '+name);
-  if(this.transport==='mcp'){await this.rpc('initialize',{protocolVersion:'2025-11-25',capabilities:{},clientInfo:{name:'Fresh402KnowledgeBase',version:'1.0.0'}});await this.request('/mcp',{jsonrpc:'2.0',method:'notifications/initialized'});const tools=await this.rpc('tools/list');for(const tool of tools.tools){const operation=this.operations.get(tool.name);if(operation)operation.schema=tool.inputSchema;}for(const name of this.operations.keys())if(['fresh402_register','fresh402_check','fresh402_extract','fresh402_smart_diff'].includes(name)&&!tools.tools.some((t:Json)=>t.name===name))throw new Error('MCP tool missing: '+name);}
+  if(this.transport==='mcp'){await this.rpc('initialize',{protocolVersion:'2025-11-25',capabilities:{},clientInfo:{name:'Fresh402KnowledgeBase',version:'1.0.0'}});await this.request('/mcp',{jsonrpc:'2.0',method:'notifications/initialized'});const tools=await this.rpc('tools/list');for(const tool of tools.tools){const operation=this.operations.get(tool.name);if(operation)operation.schema=tool.inputSchema;}for(const name of this.operations.keys())if(!tools.tools.some((t:Json)=>t.name===name))throw new Error('MCP tool missing: '+name);}
   return{version:api.info.version,operations:[...this.operations].map(([tool,op])=>({tool,path:op.path,summary:op.summary,price:op.price,schema:op.schema}))};
  }
  async raw(tool:string,input:Json,operation?:Operation){
-  const op=this.operations.get(tool);if(!op)throw new Error('Discover before using operations');
+  const workflowId=tool.startsWith('fresh402_')?tool.slice(9):'';
+  // New-work discovery may disappear after a kill switch. Recovery still sends
+  // only the persisted original proof to its exact original resource/origin.
+  let originalPath:string|undefined;
+  if(operation&&isServerWorkflow(workflowId)){
+   originalPath=serverWorkflowPath(workflowId);const accepted=operation.payment?.accepted,resource=this.base+(this.transport==='rest'?originalPath:'/mcp#'+tool);
+   if(operation.tool!==tool||canonical(operation.input)!==canonical(input)||operation.payment?.x402Version!==2||operation.payment.resource?.url!==resource||accepted?.scheme!=='exact'||accepted.network!=='eip155:8453'||accepted.asset?.toLowerCase()!==USDC||accepted.payTo?.toLowerCase()!==this.expectedRecipient||accepted.amount!==operation.amount||!/^[1-9][0-9]*$/.test(operation.amount))throw new Error('Original workflow recovery policy mismatch; preserve evidence and original origin');
+  }
+  const op=this.operations.get(tool)??(originalPath?{path:originalPath}:undefined);if(!op)throw new Error('Discover before using operations');
   if(this.transport==='mcp'){
    const params:Json={name:tool,arguments:input,...(operation?{_meta:{'x402/payment':operation.payment,'fresh402/recovery-token':operation.recoveryToken}}:{})};
    // Recovery header is the shared public REST/MCP credential contract.
@@ -66,7 +75,7 @@ export class Fresh402Client {
   const operation:Operation={tool,input:structuredClone(input),payment,recoveryToken:randomBytes(32).toString('hex'),amount:String(amount),state:'authorized'};await this.persist?.(operation);return this.recover(operation);
  }
  async recover(operation:Operation){
-  try{const data=await this.raw(operation.tool,operation.input,operation);if(data.challenge)throw new ApiError('original_payment_not_accepted',402);if(data.receipt?.success!==true||data.receipt.network!=='eip155:8453'||!/^0x[a-fA-F0-9]{64}$/.test(data.receipt.transaction??''))throw new Error('Paid result is missing a valid successful settlement receipt');operation.state='completed';operation.result=data.result;operation.receipt=data.receipt;await this.persist?.(operation);return{result:data.result!,operation};}
+  try{const data=await this.raw(operation.tool,operation.input,operation);if(data.challenge)throw new ApiError('original_payment_not_accepted',402);if(data.receipt?.success!==true||data.receipt.network!=='eip155:8453'||!/^0x[a-fA-F0-9]{64}$/.test(data.receipt.transaction??''))throw new Error('Paid result is missing a valid successful settlement receipt');if(data.result?.persistence_error||data.result?.snapshot_saved===false||data.result?.observation_saved===false||data.result?.workflow_state_saved===false)throw new Error('Original financial delivery is pending; recover without a replacement payment');operation.state='completed';operation.result=data.result;operation.receipt=data.receipt;await this.persist?.(operation);return{result:data.result!,operation};}
   catch(error){if(error instanceof ApiError&&error.status<500&&error.status!==409)throw error;operation.state='pending';await this.persist?.(operation);throw new PendingPayment(operation,error);}
  }
 }

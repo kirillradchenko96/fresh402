@@ -1,8 +1,8 @@
-# Fresh402 3.0.2 public API
+# Fresh402 3.1.0 public API
 
 Base URL: https://api.fresh402.com
 
-The hosted service reports version **3.0.2**. [Live OpenAPI](https://api.fresh402.com/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
+The hosted service reports version **3.1.0**. [Live OpenAPI](https://api.fresh402.com/openapi.json) is the authoritative contract for field constraints, defaults, schemas and response codes. These examples describe public client behavior and contain no payment credentials.
 
 | Operation | Method and path | MCP tool | Price |
 |---|---|---|---:|
@@ -14,6 +14,12 @@ The hosted service reports version **3.0.2**. [Live OpenAPI](https://api.fresh40
 | Contract Watch | POST /v3/contract-watch | fresh402_contract_watch | $0.010000 USDC |
 | Wallet Watch | POST /v3/wallet-watch | fresh402_wallet_watch | $0.020000 USDC |
 | Token Facts | POST /v3/token-facts | fresh402_token_facts | $0.010000 USDC |
+| Website Change Intelligence | POST /v4/workflows/website-change-intelligence | fresh402_website_change_intelligence | $0.005 USDC |
+| API Compatibility Review | POST /v4/workflows/api-compatibility-review | fresh402_api_compatibility_review | $0.010 USDC |
+| On-chain Evidence Brief | POST /v4/workflows/onchain-evidence-brief | fresh402_onchain_evidence_brief | $0.025 USDC |
+| Cross-domain Release Evidence | POST /v4/workflows/cross-domain-release-evidence | fresh402_cross_domain_release_evidence | $0.040 USDC |
+
+The four [server workflows](SERVER_WORKFLOWS.md) each have one fixed financial charge, retained scoped evidence and eligible tariff-5 prepaid access (2/4/10/16 credits). Original seven prices, purchased rights and package terms are unchanged. A source's first workflow observation seeds within that paid operation; it is not free Register or a primitive watch. Check live discovery/availability before authorization. No free-trial entitlement or automatic payment fallback is implied.
 
 ## Register
 
@@ -83,11 +89,11 @@ For explicit JSON array identities, use `json_array_keys:[{"path":"/items","key"
 
 - `GET /`: version, health, endpoint and standalone x402 prices, plus additive `prepaid_packages` discovery. Package IDs and integer credit amounts match `/v2/prepaid/plans`; `enabled` reflects public purchasing availability. Packages are one-time purchases with non-expiring credits, not subscriptions. Existing root fields and values are unchanged.
 - `GET /openapi.json`: OpenAPI 3.1 reference.
-- `GET /.well-known/x402`: all seven paid REST resource URLs.
+- `GET /.well-known/x402`: enabled paid REST resource URLs (eleven with all four workflows enabled).
 - `GET /v1/history?watch_id=...`: retained legacy snapshot metadata.
 - `GET /v1/diff?watch_id=...`: a legacy deterministic diff of retained v1 snapshots, without a target fetch.
 - `GET /v1/stats`: public confirmed-settlement statistics.
-- `POST /mcp`: free protocol and tool discovery, free Register, and seven paid tools.
+- `POST /mcp`: free protocol and tool discovery, free Register, seven original paid tools and four enabled server workflows.
 
 Legacy public history/diff is separate from paid Smart Diff results. MCP uses POST; GET /mcp returns 405.
 
@@ -104,8 +110,6 @@ Fresh402's own `/openapi.json` describes this service for discovery; it cannot b
 For wallet-owned prepaid accounts and automatic finalized-funding recovery, see [self-service](SELF_SERVICE.md). Check live `/v2/prepaid/plans` availability before signing any payment.
 
 OpenAPI analysis uses `rules_version:2` / `openapi-directional-v2`. Supported local scalar type/enum/null domains distinguish request acceptance from response guarantees: narrowing accepted requests or widening possible responses can be breaking. Requiredness and effective security inheritance/anonymous overrides/OR alternatives/AND schemes/scopes are bounded and directional. Equivalent supported edits use the existing `additive` category. Complex composition, interacting assertions, custom dialects, ambiguous 3.1 visibility, changed/unknown credential definitions and unexpanded references retain review findings, even beside an additive endpoint.3.0 readOnly/writeOnly requiredness is not imposed on 3.1. Contracts are assumed satisfiable and enforced as documented; this is not a full JSON Schema interpreter or proof of deployed behavior.
-
-Parameter declaration order alone is ignored at both path and operation level, including unchanged local references. Reordering does not hide requiredness or schema changes. Order inside array-valued defaults, examples and data remains significant where applicable.
 
 ## Payment and recovery
 
@@ -145,17 +149,15 @@ Circle Gateway is a separate optional x402 rail, not an MPP method. It is disabl
 
 ## Authenticated free-trial pilot
 
-Inspect `GET /v2/trial` or root `free_trial.enabled` before assuming free execution is active. The authenticated pilot is enabled when live discovery says so within finite shared capacity. The [trial page](https://api.fresh402.com/trial) uses an unfunded EOA ownership message plus Cloudflare Turnstile; no payment, token approval or funded wallet is required.
+Inspect `GET /v2/trial` or root `free_trial.enabled` before assuming free execution is active. The authenticated pilot is enabled in 3.0.0 within finite shared capacity. The [trial page](https://api.fresh402.com/trial) uses an unfunded EOA ownership message plus Cloudflare Turnstile; no payment, token approval or funded wallet is required.
 
 One-time entitlements are Check 20, Extract 10, Smart Diff 5 and OpenAPI Diff 3, subject to finite shared capacity. Send only `X-Fresh402-Trial-Key` and a unique privately persisted `Idempotency-Key` to the normal REST endpoint or MCP HTTP transport. A key identifies one logical tool/input; replay the exact original input/key for seven-day recovery without another quota debit or fetch. MCP clients must set a distinct operation header for each new call. Never mix trial and payment/prepaid credentials. Quota exhaustion cannot initiate a purchase. Inspect remaining allowances at `GET /v2/trial/quota`. Rotation requires a fresh ownership challenge and human verification, preserves used quota and invalidates the old credential. Failed work refunds its tool allowance once; infrastructure cost reservations remain consumed. Retained-result expiry returns 410 and never reruns work.
 
-Contract Watch and Token Facts are supported within their declared bounded Base scope; Wallet Watch remains a bounded commercial pilot. Human Web trials do not grant on-chain calls; separately admitted machine credentials retain their explicit per-tool limits. Existing prices, nonexpiring purchased credits, customer terms and recovery remain unchanged. [Dedicated developer quickstart](https://fresh402.com/docs), [tool reference](https://fresh402.com/docs/tools), [prices](https://fresh402.com/pricing) and [limits](https://fresh402.com/security).
+On-chain products are available in the bounded commercial pilot described below, without a free-trial allowance. Existing prices, nonexpiring purchased credits, customer terms and recovery remain unchanged. [Dedicated developer quickstart](https://fresh402.com/docs), [tool reference](https://fresh402.com/docs/tools), [prices](https://fresh402.com/pricing) and [limits](https://fresh402.com/security).
 
-<a id="finalized-base-observation-pilot"></a>
+## Finalized Base observation pilot
 
-## Bounded finalized Base observations
-
-Contract Watch, Wallet Watch and Token Facts accept per-call x402 and native MPP on the existing Base native-USDC rail. The seven service quotes advertise exact atomic amount (5000 / 10000 / 15000 / 20000 / 10000 / 20000 / 10000), in the table order above. Validate the live quote, asset, recipient and resource before signing. Individual production canary calls provide per-service paid delivery and original-replay evidence. Integrated workflow tests use a synthetic local facilitator and chain-provider fixtures; they do not validate every paid tool/protocol combination or demonstrate independent customer adoption.
+Contract Watch, Wallet Watch and Token Facts accept per-call x402 and native MPP on the existing Base native-USDC rail. The seven original service quotes advertise exact atomic amount (5000 / 10000 / 15000 / 20000 / 10000 / 20000 / 10000). With the four server workflows, the eleven paid quotes advertise exact atomic amount (5000 / 10000 / 15000 / 20000 / 10000 / 20000 / 10000 / 5000 / 10000 / 25000 / 40000), in the table order above. Validate the live quote, asset, recipient and resource before signing. No new real-money blockchain settlement test is claimed by this release; official-SDK composed payment tests use a mock facilitator, separately from actual Coinbase provider application acceptance.
 
 All three require `chain_id:8453` and a valid checksummed `address`; `block` defaults to `finalized`. State reads pin the selected canonical block hash. This is bounded single-provider evidence, not independent consensus, token safety, trading advice or complete history. Use live input/output schemas for the complete fields.
 
@@ -170,8 +172,6 @@ Standard first purchases need no Fresh402 recovery header or preflight. On succe
 Prepaid charges 4 / 8 / 4 require eligible finalized all-service credits or an original explicitly accepted service-specific tariff 4 grant and authenticated `/v3/prepaid/quote/{service_id}`. Existing Web package/account terms and aggregate Web tariff remain unchanged. This release does not create grants or silently make old package credits eligible. The human Web trial has no blockchain allowance; the separate machine trial may admit one bounded blockchain observation within its shared 18 RPC/day cap. Shared finite daily/monthly admission can return 429 before a customer exhausts their balance.
 
 ## Separately gated agent access and all-service packages
-
-New purchases select `starter-all-services-v4` ($2.50 / 1,000 credits) or `developer-all-services-v4` ($15 / 10,000 credits) from the live catalog. Explicitly accept the exact `/v3/prepaid/all-services` terms digest; all-service credits require finalized funding. Historical v3 IDs remain available only to recover an existing exact intent and its original terms. Existing account balances and purchased rights are preserved. The updated source `PrepaidClient` supports authenticated Base quotes and tariff-4 calls (4 / 8 / 4 credits); published npm rc.2 supports all seven prepaid tools; historical rc.1 prepaid execution remains Web-only. Trial credentials never become prepaid keys or trigger automatic paid fallback.
 
 Root `machine_trial` and `GET /v3/agent-trial` describe the separate browserless, CAPTCHA-free trial. `enabled` is authoritative. This does not change human trial quotas or add MCP tools. Read [exact allowances and economic caps](MACHINE_TRIAL.md).
 

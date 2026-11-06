@@ -1,6 +1,6 @@
 # Stateful API and release-feed monitoring for agents
 
-Fresh402 retains normalized watches and bounded comparison evidence behind REST/MCP. Its useful niche is an agent that needs saved observations and original-result recovery without operating its own archival comparison service. Seven paid tools and free Register remain available; this guide focuses on two jobs.
+Fresh402 retains normalized watches and bounded comparison evidence behind REST/MCP. Its useful niche is an agent that needs saved observations and original-result recovery without operating its own archival comparison service. Seven paid primitives and free Register remain available; this guide focuses on two jobs. Four additional [server-executed workflows](SERVER_WORKFLOWS.md) perform bounded internal stages with one tariff-5 charge, distinct from the client orchestration below.
 
 If you already operate HTTP/ETag caching, a feed reader or oasdiff with durable local state, that can be cheaper. Fresh402 does not promise more complete OpenAPI analysis than oasdiff, universal token savings or lower fees than direct HTTP. It supports bounded JSON OpenAPI 3.0/3.1, with explicit uncertainty for unsupported semantics; it does not fetch remote references or accept YAML contracts.
 
@@ -18,7 +18,7 @@ Register is always free within admission limits. Eligible machine-trial Check co
 
 ## First connection: metadata and a quote, no wallet or spending
 
-Use Node.js 24 or newer and the versioned first-party source. This pinned quickstart uses the source release. The separately compiled MIT npm prerelease is [fresh402-sdk@0.4.0-rc.1](SDK_PACKAGE.md); no PyPI package is claimed. The native-only first step needs no npm installation. The current root package supplies optional offline client/documentation checks, not a backend deployment.
+Use Node.js 24 or newer and the versioned first-party source. This is a source release, not an npm/PyPI package. The repository's historical root package is unrelated; do not install it to run this native-only first step.
 
 ```sh
 git clone --depth 1 --branch efficiency-sdk-v0.3.6 https://github.com/kirillradchenko96/fresh402.git fresh402-client

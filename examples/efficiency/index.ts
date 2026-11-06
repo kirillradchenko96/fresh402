@@ -18,3 +18,6 @@ export {PrepaidClient,PendingPrepaid} from '../knowledge-base/prepaid.ts';
 export type {PrepaidRequest} from '../knowledge-base/prepaid.ts';
 export {CustomerClient} from '../knowledge-base/onboarding.ts';
 export {prepareMachineTrialChallenge,claimMachineTrialKey} from '../knowledge-base/machine-trial.ts';
+
+export {SERVER_WORKFLOWS,isServerWorkflow,serverWorkflowPath,serverWorkflowPrepaidPath} from '../knowledge-base/workflow-products.ts';
+export type {ServerWorkflow,ServerWorkflowInputs,ServerWorkflowResult,WorkflowScope,WorkflowChainSelection} from '../knowledge-base/workflow-products.ts';

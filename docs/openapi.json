@@ -6966,8 +6966,17 @@
                       "observation_id"
                     ],
                     "not": {
-                      "required": [
-                        "url"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
                       ]
                     }
                   }
@@ -7332,8 +7341,17 @@
                       "observation_id"
                     ],
                     "not": {
-                      "required": [
-                        "url"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
                       ]
                     }
                   }
@@ -7845,8 +7863,17 @@
                       "observation_id"
                     ],
                     "not": {
-                      "required": [
-                        "url"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
                       ]
                     }
                   }
@@ -8160,8 +8187,17 @@
                       "observation_id"
                     ],
                     "not": {
-                      "required": [
-                        "url"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
                       ]
                     }
                   }
@@ -9565,7 +9601,8 @@
                 "oneOf": [
                   {
                     "required": [
-                      "url"
+                      "url",
+                      "onchain"
                     ],
                     "not": {
                       "required": [
@@ -9578,8 +9615,27 @@
                       "observation_id"
                     ],
                     "not": {
-                      "required": [
-                        "url"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "api_url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "onchain"
+                          ]
+                        }
                       ]
                     }
                   }
@@ -9983,7 +10039,8 @@
                 "oneOf": [
                   {
                     "required": [
-                      "url"
+                      "url",
+                      "onchain"
                     ],
                     "not": {
                       "required": [
@@ -9996,8 +10053,27 @@
                       "observation_id"
                     ],
                     "not": {
-                      "required": [
-                        "url"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "api_url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "onchain"
+                          ]
+                        }
                       ]
                     }
                   }

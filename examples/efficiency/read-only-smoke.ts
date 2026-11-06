@@ -16,6 +16,7 @@ export async function readOnlyAcceptance(base='https://api.fresh402.com',options
  const [r,m]=await Promise.all([rest.discover(),mcp.discover()]);
  const root=await rest.request('/');if(!root.response.ok||root.json.version!==r.version||mcp.observedMcpVersion!==r.version)throw Error('Public version agreement failed');
  const names=['register','check','extract','smart_diff','openapi_contract_diff','contract_watch','wallet_watch','token_facts'].map(s=>'fresh402_'+s);
+ const [major,minor]=r.version.split('.').map(Number);if(major>3||major===3&&minor>=1)names.push(...['website_change_intelligence','api_compatibility_review','onchain_evidence_brief','cross_domain_release_evidence'].map(s=>'fresh402_'+s));
  for(const name of names)if(!r.operations.some(o=>o.tool===name)||!m.operations.some(o=>o.tool===name))throw Error('Public discovery is missing an expected tool');
  admitted();const response=await fetch(base+'/v2/prepaid/plans',{redirect:'error',headers:{'x-fresh402-purpose':'probe'},signal:AbortSignal.timeout(15000)});if(response.status!==200)throw Error('Public plans unavailable');const plans=await response.json() as any;
  if(plans.network!=='eip155:8453'||plans.asset?.toLowerCase()!=='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'||plans.pay_to.toLowerCase()!=='0xfac492a8d7843c9afcca6a1691bccb5425ab14f3')throw Error('Unexpected live merchant policy; stop before any authorization');

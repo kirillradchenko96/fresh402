@@ -2,7 +2,7 @@
 
 Start with the [tested source quickstart and two agent jobs](../../docs/AGENT_WORKFLOWS.md): scoped API contract review and release-feed entry monitoring. Current source SDK 0.3.6 uses the canonical api.fresh402.com origin; 0.3.4 corrected current-Safe defaults in the shared HTTPS client, MPP and new package preparation. Source 0.3.3 contract evidence scoping remains unchanged. Original-operation recovery retains historical recipients without creating a replacement payment.
 
-Node.js 24+. Customer code only: no backend imports, wallet access, registration, payment, provider call or timer on import. This small module composes the existing public REST/MCP, prepaid, customer-recovery and machine-trial clients instead of replacing their payment behavior. Use source from this repository or the MIT compiled prerelease fresh402-sdk@0.4.0-rc.1. See [package installation](../../docs/SDK_PACKAGE.md).
+Node.js 24+. Customer code only: no backend imports, wallet access, registration, payment, provider call or timer on import. This small module composes the existing public REST/MCP, prepaid, customer-recovery and machine-trial clients instead of replacing their payment behavior. Use source from this repository or the MIT compiled prerelease fresh402-sdk@0.5.0-rc.1. See [package installation](../../docs/SDK_PACKAGE.md).
 
 ```sh
 node --test examples/efficiency/efficiency.test.ts

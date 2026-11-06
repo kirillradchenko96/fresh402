@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.kirillradchenko96/fresh402",
   "title": "Fresh402 Agent Intelligence",
-  "description": "Persistent web/Base intelligence: 7 paid primitives, 4 server workflows, free Register; REST/MCP.",
-  "version": "3.1.0",
+  "description": "Four web/API/Base workflows, 11 paid MCP/REST resources and free Register; x402/MPP/prepaid.",
+  "version": "3.1.1",
   "websiteUrl": "https://fresh402.com",
   "repository": {
     "url": "https://github.com/kirillradchenko96/fresh402",

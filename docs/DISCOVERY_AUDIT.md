@@ -1,13 +1,18 @@
-# Existing distribution references
+# Existing Fresh402 distribution references
 
-Observed November 5, 2026 (Alaska), during API3.1.0 publication. Registration, indexing, search retrieval and independent use are separate outcomes. A listing or score does not establish adoption.
+Observed November 6, 2026 (Alaska). Listings, scores and commissioned acceptance are not organic adoption. Backend/API remains 3.1.0; Registry 3.1.1 is a description-only catalog revision with the same identity, logo and canonical MCP URL.
 
-- [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.kirillradchenko96%2Ffresh402/versions/latest): identity preserved. Registry metadata3.1.0 is independently confirmed live at the existing identity and canonical endpoint. The existing signed-publisher OIDC workflow completed successfully (run42166425713); all historical versions remain intact. Registry publication is distinct from downstream refresh and adoption.
-- [Glama Registry connector](https://glama.ai/mcp/connectors/io.github.kirillradchenko96/fresh402): public listing independently exposes all eleven paid tool identities, including the four server workflows. The [verified legacy connector](https://glama.ai/mcp/connectors/dev.workers.kirilllabs.fresh402/fresh402) still exposes the seven primitives; downstream refresh is external. Both identities remain intact.
-- [MPPScan](https://www.mppscan.com/server/81dacea9df74ce6e6d269a32ff8283df8bbc3d5b8dabee07a17815677fc96f2e): existing identity independently exposes all eleven paid tool names. No duplicate canonical-origin listing was created.
-- [x402scan](https://www.x402scan.com/server/dfd5b14d-f56d-4d5a-adb0-8511f02537ab): established server page responds200; this alone does not verify new-resource indexing.
-- Coinbase Bazaar discovery remains separately measured against actual official merchant/search responses; no index or ranking improvement is inferred from a quote or internal acceptance.
+| Existing identity | Independently observed | Action / remaining boundary |
+|---|---|---|
+| [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.kirillradchenko96%2Ffresh402/versions/latest) | 3.1.0, correct icons and canonical MCP | Prepared workflow-first 3.1.1 metadata; publication uses existing signed OIDC workflow. Check live Registry for propagation. |
+| [Glama Registry connector](https://glama.ai/mcp/connectors/io.github.kirillradchenko96/fresh402) | All twelve tools | Preserved existing verified identity. |
+| [Glama legacy connector](https://glama.ai/mcp/connectors/dev.workers.kirilllabs.fresh402/fresh402) | Now also all twelve tools, including all four workflows | Previous stale cache has refreshed; no duplicate or support request. |
+| [Coinbase Bazaar](https://api.cdp.coinbase.com/platform/v2/x402/discovery/merchant?payTo=0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3&limit=100&offset=0) | Eleven canonical resources plus preserved legacy Check | Existing prices, schemas and Safe unchanged. No new payment for indexing. |
+| [MPPScan](https://www.mppscan.com/server/81dacea9df74ce6e6d269a32ff8283df8bbc3d5b8dabee07a17815677fc96f2e) | All eleven paid paths, including four workflows | Preserved existing record and supported legacy installation URL. |
+| [mcptry](https://mcptry.com/servers/io.github.kirillradchenko96/fresh402) | Twelve tools, original icon, verified/claimed identity; observed 100/100 | Existing automatic Registry/check refresh. This was already observed before this polish publication; no causal score improvement claimed. |
+| [x402scan](https://www.x402scan.com/server/dfd5b14d-f56d-4d5a-adb0-8511f02537ab) | Established UUID live; overview exposes only historical Web paths | Full eleven-resource indexing unverified; authenticated SIWX refresh requires a separately authorized wallet signature. No duplicate or payment. |
+| [Smithery](https://smithery.ai/servers/kirillradchenko96/fresh402) | Existing URL 404 | Provider retired accounts/API/managed proxy October 31; see [official notice](https://www.smithery.ai/future). No supported authenticated repair established. Use the direct canonical MCP URL. |
+| [PayAPI Market](https://payapi.market/api/fresh402) | Existing listing live; historical overview stale | Existing dashboard requires owner email magic-link login. No email triggered; no new submission. |
+| [AgentBIT](https://agentbit.app/api/discover?q=fresh402) | Read-only downstream search rechecked | Bazaar-derived data; no verified owner editor. |
 
-The historical Smithery URL returns404; its badge is not advertised as a working connection. An owner-only interactive repair remains outside non-GUI automation. Existing identity is preserved; no duplicate submission or outreach. AgentBIT was unreachable in this observation. These external limitations do not change current runtime contracts.
-
-The [October10 historical audit](https://github.com/kirillradchenko96/fresh402/blob/2d83fa3dc13008df75081980484aca724e9bd607/docs/DISCOVERY_AUDIT.md) remains in normal Git history. Its old merchant, price and distribution observations are not current onboarding instructions. Use live discovery and current pricing for authorization.
+Public-source mirrors and other historical submissions are tracked separately; no new external PR, comment, outreach, paid placement or duplicate submission was made. An unavailable provider control is not a reason to change payment safeguards or advertise unaccepted capabilities.

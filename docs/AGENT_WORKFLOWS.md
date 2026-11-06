@@ -2,7 +2,7 @@
 
 Fresh402 retains normalized watches and bounded comparison evidence behind REST/MCP. Its useful niche is an agent that needs saved observations and original-result recovery without operating its own archival comparison service. Seven paid primitives and free Register remain available; this guide focuses on two jobs. Four additional [server-executed workflows](SERVER_WORKFLOWS.md) perform bounded internal stages with one tariff-5 charge, distinct from the client orchestration below.
 
-If you already operate HTTP/ETag caching, a feed reader or oasdiff with durable local state, that can be cheaper. Fresh402 does not promise more complete OpenAPI analysis than oasdiff, universal token savings or lower fees than direct HTTP. It supports bounded JSON OpenAPI 3.0/3.1, with explicit uncertainty for unsupported semantics; it does not fetch remote references or accept YAML contracts.
+Use hosted state to retain scoped observations between agent sessions, then return bounded supported comparison evidence without operating a separate archival pipeline. JSON OpenAPI 3.0/3.1 is supported; external-reference fetching and YAML contracts are outside the supported scope.
 
 ## Documentation Guardian — persistent documentation and API change intelligence
 
@@ -120,4 +120,4 @@ A ten-line fetch/hash script may be all you need. Fresh402 adds saved URL/rules/
 
 For documentation, Register is free; Check is $0.005 and Extract is a separately authorized $0.010 call with its own fetch. Check→Extract costs $0.015 when both are paid (current Web credits 2+3); there is no bundled endpoint/discount or automatic payment. A simple fee model favors conditional extraction only below 50% changing calls (below one third for those credit tariffs), without guaranteeing token, latency or total-cost savings. Trial calls consume their own eligible allowances and shared admission; exhaustion never authorizes payment.
 
-For API updates, register a real unfiltered JSON OpenAPI watch, then use Contract Diff ($0.020 / 5 current Web credits) and review supported changes/ambiguities. A local oasdiff workflow may be more appropriate. These examples describe verified capabilities and illustrative orchestration, not measured customer success.
+For API updates, register a real unfiltered JSON OpenAPI watch, then use Contract Diff ($0.020 / 5 current Web credits) and review supported changes/ambiguities. These examples describe verified capabilities and illustrative orchestration, not measured customer success.

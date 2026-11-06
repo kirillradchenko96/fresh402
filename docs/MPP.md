@@ -57,7 +57,7 @@ For recovery call `resumeMppRequest(originalSavedOperation)`. It has no signer a
 
 ## MCP
 
-The canonical endpoint exposes eight tools: free Register and seven paid products. Use the official MCP SDK (tested `@modelcontextprotocol/sdk@1.31.0`) and `mppx/mcp/client`. Install the MCP SDK in addition to the two packages above: `npm install @modelcontextprotocol/sdk@1.31.0`.
+The canonical endpoint exposes twelve tools: free Register, four complete server workflows and seven focused paid products. Use the official MCP SDK (tested `@modelcontextprotocol/sdk@1.31.0`) and `mppx/mcp/client`. Install the MCP SDK in addition to the two packages above: `npm install @modelcontextprotocol/sdk@1.31.0`.
 
 ```ts
 import {Client} from '@modelcontextprotocol/sdk/client/index.js';

@@ -2,7 +2,7 @@
 
 Fresh402 3.0.2 provides wallet-authenticated customer onboarding alongside the independent x402 pay-per-call API. Discover one-time, non-expiring credit packages through `GET /` → `prepaid_packages`. Read `GET /v2/prepaid/plans` and OpenAPI `x-customer-onboarding` for current public signup and purchasing availability before proceeding. A deployed endpoint, an HTTP 402, and a simulated settlement are not proof of a customer purchase.
 
-The canonical `/mcp` URL exposes eight tools: free Register and seven paid products. MCP supports standalone x402 operations without signup. Customer management uses REST; prepaid execution works through REST and the same seven paid MCP tools (blockchain execution requires eligible all-service credits or the account's original explicit service grant). MCP discovery alone does not grant credentials or payment authority. See the complete [browserless agent purchasing guide](AGENT_PREPAID.md).
+The canonical `/mcp` URL exposes twelve tools: free Register, four complete workflows and seven focused paid products. MCP supports standalone x402 operations without signup. Customer management uses REST; prepaid execution works through REST and the same seven paid MCP tools (blockchain execution requires eligible all-service credits or the account's original explicit service grant). MCP discovery alone does not grant credentials or payment authority. See the complete [browserless agent purchasing guide](AGENT_PREPAID.md).
 
 | Product | x402 USDC | Prepaid credits, tariff 3 |
 |---|---:|---:|

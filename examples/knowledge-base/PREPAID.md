@@ -28,7 +28,7 @@ Service credits are nontransferable usage rights, separate from USDC atomic unit
 
 ## Current tariff 3 and historical compatibility
 
-The engineering candidate preserves existing v1 (1/2/3) and v2 (2/2/3) purchased terms. New v3 uses Check/Extract/Smart Diff = 2/3/4 credits, with Starter $2.50/1,000 and Developer $15/10,000 bundles. Funding must quote the account-specific immutable package before any wallet authorization; the agent guide describes explicit budgeted signing and recovery.
+Historical v1 (1/2/3) and v2 (2/2/3) purchased terms remain intact. The current Web tariff 3 uses Check/Extract/Smart Diff = 2/3/4 credits. New purchases use All-Services v4 IDs: Starter $2.50/1,000 and Developer $15/10,000, with explicit accepted terms and finalized eligibility; see the [current purchase guide](../../docs/AGENT_PREPAID.md). Funding must quote the account-specific immutable package before any wallet authorization; the agent guide describes explicit budgeted signing and recovery.
 
 At Developer rates, 100 Checks plus 10 Extracts consume 230 credits ($0.345), versus 300 credits ($0.450) for 100 Extracts, excluding initialization equally. Conditional extraction wins only below one-third changed polls: 0%?200, 10%?230, 25%?275, 50%?350, 75%?425, 100%?500 credits, compared with 300 unconditional. At higher change rates choose unconditional Extract. These are service-fee comparisons, not proof of total business profitability.
 

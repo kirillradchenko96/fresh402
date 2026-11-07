@@ -4,6 +4,10 @@ Production reports **3.1.0** at [the established API origin](https://api.fresh40
 
 | Paid product | Standalone x402/MPP USDC | Prepaid credits |
 |---|---:|---:|
+| Website Change Intelligence | 0.005 | 2 |
+| API Compatibility Review | 0.010 | 4 |
+| On-chain Evidence Brief | 0.025 | 10 |
+| Cross-domain Release Evidence | 0.040 | 16 |
 | Check | 0.005 | 2 |
 | Extract | 0.010 | 3 |
 | Smart Diff | 0.015 | 4 |
@@ -14,9 +18,9 @@ Production reports **3.1.0** at [the established API origin](https://api.fresh40
 
 New payments use Base Mainnet (8453), native USDC, and Safe merchant 0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3. A compatible externally authorized ECDSA/EIP-712 signer is required; ERC-1271 contract-wallet signatures are unsupported. A delegated EIP-7702 EOA is not automatically a contract-wallet signing mode. Standalone x402/MPP require neither signup nor a trial. Circle Gateway remains disabled and has no real-money acceptance.
 
-Public wallet ownership signup and one-time Starter ($2.50/1000 credits) and Developer ($15/10000) purchasing are enabled. These are not subscriptions; finalized purchased credits do not expire under the approved terms. Use [live plans](https://api.fresh402.com/v2/prepaid/plans) for canonical package IDs, current flags, accepted terms and eligible products. New all-service purchases require explicit terms acceptance; old Web-only balances are not automatically blockchain entitlements. The Web client example supports four Web products; the blockchain guide documents the additional routes and tariff 4 metadata. [Agent purchasing and recovery](AGENT_PREPAID.md) explains both cohorts.
+Public wallet ownership signup and one-time Starter ($2.50/1000 credits) and Developer ($15/10000) purchasing are enabled. These are not subscriptions; finalized purchased credits do not expire under the approved terms. Use [live plans](https://api.fresh402.com/v2/prepaid/plans) for canonical package IDs, current flags, accepted terms and eligible products. New all-service purchases require explicit terms acceptance; old Web-only balances are not automatically blockchain entitlements. The current PrepaidClient supports all eleven paid products using authenticated Web tariff-3, Base tariff-4 and workflow tariff-5 quotes; account eligibility and original terms still apply. [Agent purchasing and recovery](AGENT_PREPAID.md) explains both cohorts.
 
-The separate [machine trial](MACHINE_TRIAL.md) requires a bounded wallet-control signature, not a funded wallet, purchase or human CAPTCHA. Admission, per-tool quotas, network/global budgets and credential expiry apply; availability is not a promise of capacity. Root discovery and /v3/agent-trial are authoritative. Its approved period is October 30, 2026 00:00 UTC through November 29, 2026 00:00 UTC; credentials last at most 30 days and are clipped to that end. Existing identities retain their original quota and expiry. The separate human Web trial has independent live availability and credential expiry: inspect /v2/trial and /v2/trial/quota; this document extends neither. This documentation does not extend any operating allowance.
+The separate [machine trial](MACHINE_TRIAL.md) requires a bounded wallet-control signature, not a funded wallet, purchase or human CAPTCHA. Admission, per-tool quotas, network/global budgets and credential expiry apply; availability is not a promise of capacity. Root discovery and /v3/agent-trial are authoritative. Read the actual current period and enabled state from live discovery; new machine credentials last at most 30 days and are clipped to the configured eligibility period. Existing identities retain their original quota and expiry. The separate human Web trial has independent live availability and credential expiry: inspect /v2/trial and /v2/trial/quota; this document extends neither. This documentation does not extend any operating allowance.
 
 Historical owner-controlled staging acceptance verified a finalized Starter purchase and all seven paid products (x402 for six products, official MPP for Extract), durable delivery and original-operation replay. This is not organic demand or new financial acceptance. Developer purchasing and all protocol/tool combinations have not each received independent real-money acceptance. Current unpaid production challenges and local synthetic SDK/D1 tests must be distinguished from settlement on Base. No new payment is authorized by these examples.
 

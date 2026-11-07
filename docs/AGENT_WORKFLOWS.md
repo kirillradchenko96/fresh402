@@ -1,8 +1,21 @@
-# Stateful API and release-feed monitoring for agents
+# Complete intelligence workflows for agents
 
-Fresh402 retains normalized watches and bounded comparison evidence behind REST/MCP. Its useful niche is an agent that needs saved observations and original-result recovery without operating its own archival comparison service. Seven paid primitives and free Register remain available; this guide focuses on two jobs. Four additional [server-executed workflows](SERVER_WORKFLOWS.md) perform bounded internal stages with one tariff-5 charge, distinct from the client orchestration below.
+Turn a website, API or finalized Base evidence task into one server-executed operation. Retain scoped observations between sessions, receive compact findings and recover the original result without assembling a multi-stage pipeline.
 
-Use hosted state to retain scoped observations between agent sessions, then return bounded supported comparison evidence without operating a separate archival pipeline. JSON OpenAPI 3.0/3.1 is supported; external-reference fetching and YAML contracts are outside the supported scope.
+| Complete server workflow | Direct USDC | Eligible credits |
+|---|---:|---:|
+| Website Change Intelligence | $0.005 | 2 |
+| API Compatibility Review | $0.010 | 4 |
+| On-chain Evidence Brief | $0.025 | 10 |
+| Cross-domain Release Evidence | $0.040 | 16 |
+
+Choose the [server workflow](SERVER_WORKFLOWS.md) matching your task; follow the [complete SDK setup](SDK_PACKAGE.md#complete-server-workflow-example) for an existing prepaid API key, exact quote, finite cap and private durable original-operation storage. Website/API first observations seed in the same charged call; seed plus a later review is two operations. Workflow IDs are not primitive watch IDs. Trials exclude these four workflows. Public static HTTPS and JSON OpenAPI 3.0/3.1 remain bounded; no JavaScript rendering, YAML, remote-reference fetching or complete wallet history.
+
+The measured Sol Website cases achieved **30.9% lower paired-median two-task total cost** at Developer-equivalent pricing versus implementing the scoped pipeline (three pairs; two favored Fresh402). [Method and full measurements](https://fresh402.com/agent-efficiency).
+
+## Optional modular integrations
+
+The retained examples below compose individual Fresh402 tools with separate underlying operations and charges. Choose these for explicit stage control; they are not the single-charge server products above.
 
 ## Documentation Guardian — persistent documentation and API change intelligence
 
@@ -14,20 +27,24 @@ Use hosted state to retain scoped observations between agent sessions, then retu
 4. If you need current selected content, optionally authorize Extract with the URL and required scope. It fetches independently; it does not consume a Check response body. Review evidence before acting on untrusted source content.
 5. Return later with the saved watch. Recover an interrupted original operation using its exact input and original private proof/token or idempotency key; never create a replacement payment just to retrieve its result.
 
-Register is always free within admission limits. Eligible machine-trial Check consumes its own allowance; a paid Check is $0.005 / 2 current Web credits. Optional Smart Diff is a separate $0.015 / 4-credit operation; optional Extract is $0.010 / 3 credits. Each also has its own eligible trial allowance. Paying for Check does not authorize either follow-up. All three paid calls would total $0.030 / 9 Web credits, with separate operations; no automatic fallback follows trial exhaustion. Use direct HTTP or a local parser when you already manage the needed state or only need one read.
+Register is always free within admission limits. Eligible machine-trial Check consumes its own allowance; a paid Check is $0.005 / 2 current Web credits. Optional Smart Diff is a separate $0.015 / 4-credit operation; optional Extract is $0.010 / 3 credits. Each also has its own eligible trial allowance. Paying for Check does not authorize either follow-up. All three paid calls would total $0.030 / 9 Web credits, with separate operations; no automatic fallback follows trial exhaustion. Choose Website Change Intelligence for its combined supported evidence in one charge.
 
 ## First connection: metadata and a quote, no wallet or spending
 
-Use Node.js 24 or newer and the versioned first-party source. This is a source release, not an npm/PyPI package. The repository's historical root package is unrelated; do not install it to run this native-only first step.
+Use Node.js 24+ and the published package. This first step reads discovery and one unsigned quote; it performs no Register, target fetch or paid execution.
 
 ```sh
-git clone --depth 1 --branch efficiency-sdk-v0.3.6 https://github.com/kirillradchenko96/fresh402.git fresh402-client
-cd fresh402-client
-git rev-parse HEAD
-node examples/efficiency/quickstart.ts
+npm install fresh402-sdk@0.5.0-rc.1
 ```
 
-Record the resolved commit for your application lockfile. The script reads discovery and one unpaid Extract quote. Expected: eight tool identities, Base 8453/native USDC, the current Safe recipient and `new_payments:0`. A quote is payment terms, not source content or proof of execution. No baseline, target fetch, signup, credential, model, signer or purchase is needed. A service outage remains an explicit error.
+```js
+import {createProductionClient} from 'fresh402-sdk';
+const client = createProductionClient();
+const discovery = await client.discover();
+const quote = await client.quote('fresh402_extract', {url:'https://example.com/',max_chars:1000});
+```
+
+Expected: twelve tool identities, Base 8453/native USDC and the current Safe. A quote is terms, not source content or spending authority. Source adapters below remain optional integrations.
 
 For zero-network reproduction of the client/framework behavior:
 
@@ -58,7 +75,7 @@ const result = await jobs.contract({
 
 Use exact OpenAPI path templates and lowercase methods, not a concrete URL with an object ID. Keep contracts unscoped: no selector or ignore paths for the contract baseline. The comparison uses the previous retained contract snapshot (initially the registered state); existing API options also allow baseline or a retained hash. Check does not advance established OpenAPI snapshots, but it can refresh the core watch state used before the first contract snapshot exists. Establish the first contract comparison before interleaving Check if you need to retain the original registered contract. This example calls Contract Diff directly. A fresh paid comparison is necessary to establish current contract evidence; the SDK cannot infer that from an old result.
 
-In authorized execution, `summarizeContractImpact` reduces the saved result to relevant operation evidence with original change indexes, provenance and a SHA256 binding to the full result. Unrelated operation changes are counted separately. Shared/unknown pointers, warnings or truncated evidence preserve review requirements. `no_breaking_change_observed` is a limited static observation, not a deployment compatibility guarantee. Keep the original result/assumptions privately. Local tests measured 11,780 → 1,034 bytes for a fixture with 60 unrelated removals; this is a client projection, not a reduction in backend work or proof of superiority to scoped oasdiff.
+In authorized execution, `summarizeContractImpact` reduces the saved result to relevant operation evidence with original change indexes, provenance and a SHA256 binding to the full result. Unrelated operation changes are counted separately. Shared/unknown pointers, warnings or truncated evidence preserve review requirements. `no_breaking_change_observed` is a limited static observation, not a deployment compatibility guarantee. Keep the original result/assumptions privately. Local tests measured 11,780 → 1,034 bytes for a fixture with 60 unrelated removals; this is a client evidence projection, separate from backend work and server-workflow measurements.
 
 For explicit cache reuse, pass the saved original as `cached` with `allowCached:true`. The result says `fresh_observation:false`; the application, not a model or hidden timer, decides its acceptable age. Never present replayed evidence as a new fetch.
 
@@ -92,7 +109,7 @@ const quoted = await jobs.feed({
 
 The first successful Extract establishes a client-retained feed baseline. This feed baseline is different from a Register watch. RSS 2/Atom parsing is opt-in; original XML Check/Smart Diff watch semantics are unchanged. Reordering and timestamp-only noise need not trigger entry actions. Absent IDs mean entries aged out of this observed window, not proven deletions. Content-derived IDs can express edits as removal/addition. A clipped/missing feed fails without advancing the baseline. The workflow requests the existing maximum 50,000 characters; parser/output limits can still cause clipping. Feed links/content are untrusted data, never agent instructions.
 
-Reusing an explicit complete cached feed performs no request and says `fresh_observation:false`. For a small/simple feed, direct HTTP + ETag + a mature parser is usually the economical choice. Check→Extract only saves service fees at change rates below 50% for direct x402 prices, or below one third at the 2/3 Web-credit tariff; it does not guarantee detection of changes outside the watch normalization. Do not add a Check before every Extract indiscriminately.
+Reusing an explicit complete cached feed performs no request and says `fresh_observation:false`. This optional Check→Extract composition reduces service fees at change rates below 50% for direct x402 prices, or below one third at the 2/3 Web-credit tariff; it does not guarantee detection of changes outside the watch normalization. Do not add a Check before every Extract indiscriminately.
 
 ## Optional paid execution and recovery
 
@@ -110,14 +127,10 @@ Pass `mode:'authorized'` and `executePaid: invocation => session.execute(invocat
 
 On `pending_recovery`, preserve the job ID and stop new work. In the same runner, resume that same job with `resume:true`; the graph reuses the original call ID and the durable executor recovers its original server key. The example's graph checkpointer is in memory: after a full process restart, recreate the runner and call the SAME job ID/input with `resume:false`, backed by the SAME encrypted `CreditSession` store/key. Do not resume an absent in-memory checkpoint or assign a new job ID. Persist watch IDs, complete evidence and job IDs confidentially in your application. Cache state is not a payment ledger; local budget reservations do not prove a refund. An explicit result expiry is terminal and does not authorize a new purchase.
 
-Local workerd/D1 acceptance recovered the original contractB after the mutable source becameC, with zero extra source fetches or credits. A competent ordinary HTTP client with only local snapshots could fetch currentC but could not reconstruct a lostB. A separately operated archival service can offer the same property. These are local synthetic financial tests, not a claim of new real-USDC acceptance or independent customer demand.
+Local workerd/D1 acceptance recovered the original contractB after the mutable source becameC, with zero extra source fetches or credits. The saved original remained available independently of the source changing. These are local synthetic financial tests, not a claim of new real-USDC acceptance or independent customer demand.
 
 Free Register and public discovery require no payment. Human/machine trial issuance has its existing ownership/verification requirements and finite entitlements; do not automate signatures or claim a trial exists because metadata is discoverable. See [API](API.md), [MCP](MCP.md), [agent prepaid access](AGENT_PREPAID.md) and [availability/limitations](RELEASE_AVAILABILITY.md). No recurring job, browser renderer, AI semantic interpretation or new wallet mode is activated by these examples.
 
 ## Choosing the hosted observation workflow
 
-A ten-line fetch/hash script may be all you need. Fresh402 adds saved URL/rules/watch identity, conditional revalidation, bounded comparison evidence and original-result recovery across sessions. A returning agent restores a watch ID and its private recovery material, rather than using a fictional session catch-up API. Prefer local tools when you already hold the state, need unsupported YAML/external references or JavaScript rendering.
-
-For documentation, Register is free; Check is $0.005 and Extract is a separately authorized $0.010 call with its own fetch. Check→Extract costs $0.015 when both are paid (current Web credits 2+3); there is no bundled endpoint/discount or automatic payment. A simple fee model favors conditional extraction only below 50% changing calls (below one third for those credit tariffs), without guaranteeing token, latency or total-cost savings. Trial calls consume their own eligible allowances and shared admission; exhaustion never authorizes payment.
-
-For API updates, register a real unfiltered JSON OpenAPI watch, then use Contract Diff ($0.020 / 5 current Web credits) and review supported changes/ambiguities. These examples describe verified capabilities and illustrative orchestration, not measured customer success.
+For a complete documentation or API task, choose Website Change Intelligence or API Compatibility Review first. Both retain owned observations and return supported compact evidence for one operation price. Use the original seven tools when your integration needs modular control. Their separate charges, watch identities and retained comparison history remain unchanged; see [generated prices](PRICING.md) and [scope/state](SERVER_WORKFLOWS.md).

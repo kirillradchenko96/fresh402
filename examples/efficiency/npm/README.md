@@ -17,7 +17,7 @@ const client = createProductionClient(); // canonical API, existing Safe, no sig
 console.log(typeof client, typeof BudgetGuard, typeof runFlagship);
 ```
 
-Payment execution needs an explicitly authorized customer-owned signer, reviewed quotes, wallet-wide budgets, private durable storage and original-operation recovery. Workflow orchestration is sequential and bounded; it does not supply those controls on the customer's behalf. Never retry uncertain payments with a new signature.
+Direct x402/MPP payments need an explicitly authorized customer-owned signer and wallet-wide budgets. Prepaid execution uses an existing private API key and finite credit cap. Both require reviewed quotes, private durable storage and original-operation recovery. Workflow orchestration is sequential and bounded; it does not supply those controls on the customer's behalf. Never retry uncertain payments with a new signature.
 
 Workflow and source adapter instructions: https://github.com/kirillradchenko96/fresh402/blob/main/docs/FLAGSHIP_WORKFLOWS.md and https://github.com/kirillradchenko96/fresh402/tree/main/examples/efficiency . OpenAI Agents, AgentKit and LangChain/LangGraph adapters remain separately tested source examples, not bundled integrations or runtime dependencies. No API credentials or signing material are included.
 

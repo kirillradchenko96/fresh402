@@ -4,6 +4,10 @@ Four server workflows turn website, API and finalized Base tasks into structured
 
 Hosted API **3.1.0**. This repository contains public documentation and source clients; the hosted backend remains private. [Choose a workflow](https://fresh402.com/workflows) · [Working inputs and state](docs/SERVER_WORKFLOWS.md) · [Start free](https://fresh402.com/docs#instant-evaluation).
 
+## Documentation consistency
+
+`npm run check:docs` checks public-copy context, current product/SDK/package guidance, exact generated prices, schemas, examples and internal links. `node scripts/commercial-copy.mjs --live` additionally reads the live website, OpenAPI and MCP discovery without executing products, signing or spending.
+
 ## Start without spending
 
 Read [live discovery](https://api.fresh402.com/). Discovery makes no payment. For a free persistent baseline:

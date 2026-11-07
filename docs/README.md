@@ -4,7 +4,8 @@
 
 - [Current availability](RELEASE_AVAILABILITY.md), [standard clients and walletless evaluation](STANDARD_CLIENTS.md)
 - [MCP connection and tool schemas](MCP.md), [REST API](API.md), [OpenAPI snapshot](openapi.json)
-- [Observation workflows and source quickstart](AGENT_WORKFLOWS.md), [source SDK](../examples/efficiency/README.md), [request examples](../examples/README.md)
+- [Choose a complete workflow](AGENT_WORKFLOWS.md), [published SDK setup](SDK_PACKAGE.md), [request examples](../examples/README.md)
+- [Optional source-client integrations](../examples/efficiency/README.md)
 - [Four server-executed paid workflows](SERVER_WORKFLOWS.md), [legacy client orchestration with separate constituent charges](FLAGSHIP_WORKFLOWS.md)
 - [Existing external listing identities and update expectations](listing-expectations.json)
 

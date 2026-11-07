@@ -4,7 +4,7 @@ import {PrepaidClient} from './prepaid.ts';
 import {ApiError} from './client.ts';
 type Json=Record<string,any>;
 type Wallet={address:string;chainId:number;signIdentity:(typedData:Json)=>Promise<string>;confirmExactPurchase:(terms:Json)=>Promise<boolean>;signAuthorizedUSDC:(typedData:Json)=>Promise<string>};
-/** No entry-point execution. persistPrivate must append or merge events, preserving earlier authorizations. Wallet approval is always caller supplied. */
+/** Historical v3 purchase/top-up helper: retained for original-intent compatibility, not new All-Services purchases. Use agent-prepaid.ts and the accepted live terms digest for new funding. No entry-point execution. persistPrivate must append or merge events, preserving earlier authorizations. Wallet approval is always caller supplied. */
 export async function purchase(client:CustomerClient,wallet:Wallet,pkg:'candidate-starter-v3'|'candidate-developer-v3',persistPrivate:(value:Json)=>Promise<void>){
  const plans=await client.plans();if(!plans.availability.package_purchasing)throw Error('Public package purchasing is gated; do not connect or sign');
  const challenge=await client.beginSignup(wallet.address);await client.verifyOwnership(challenge,await wallet.signIdentity(challenge.typed_data));

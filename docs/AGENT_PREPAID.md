@@ -6,6 +6,10 @@ Base Mainnet only: chain `8453` / `eip155:8453`; native USDC `0x833589fcd6edb6e0
 
 | Product | One x402/MPP call, USDC | Credits (tariff) | Prepaid REST route |
 |---|---:|---:|---|
+| Website Change Intelligence | 0.005 | 2 (5) | `/v4/prepaid/workflows/website-change-intelligence` |
+| API Compatibility Review | 0.010 | 4 (5) | `/v4/prepaid/workflows/api-compatibility-review` |
+| On-chain Evidence Brief | 0.025 | 10 (5) | `/v4/prepaid/workflows/onchain-evidence-brief` |
+| Cross-domain Release Evidence | 0.040 | 16 (5) | `/v4/prepaid/workflows/cross-domain-release-evidence` |
 | Check | 0.005 | 2 | `/v2/prepaid/check` |
 | Extract | 0.010 | 3 | `/v2/prepaid/extract` |
 | Smart Diff | 0.015 | 4 | `/v2/prepaid/smart-diff` |
@@ -14,14 +18,14 @@ Base Mainnet only: chain `8453` / `eip155:8453`; native USDC `0x833589fcd6edb6e0
 | Wallet Watch | 0.020 | 8 (4) | `/v3/prepaid/wallet-watch` |
 | Token Facts | 0.010 | 4 (4) | `/v3/prepaid/token-facts` |
 
-New purchases use `starter-all-services-v4` ($2.50 / 1,000 credits) or `developer-all-services-v4` ($15 / 10,000 credits). Both cover all seven tools after explicit acceptance of `/v3/prepaid/all-services` and finalized funding. The wallet page and agent flow use this same catalog and account. Historical v3 package IDs remain valid only for recovery of existing exact intents; they are not offered for new purchases. Existing customers retain their purchased rights. `PrepaidClient.quoteRemote(service)` discovers authenticated Base eligibility before tariff-4 calls (4 / 8 / 4 credits); Web operations retain tariff 3 (2 / 3 / 4 / 5). Trial keys and prepaid keys are distinct and never fall back to paid spending automatically.
+New purchases use `starter-all-services-v4` ($2.50 / 1,000 credits) or `developer-all-services-v4` ($15 / 10,000 credits). Both cover all eleven paid products, including four server workflows, after explicit acceptance of `/v3/prepaid/all-services` and finalized funding. The wallet page and agent flow use this same catalog and account. Historical v3 package IDs remain valid only for recovery of existing exact intents; they are not offered for new purchases. Existing customers retain their purchased rights. `PrepaidClient.quoteRemote(service)` discovers authenticated Base eligibility before tariff-4 calls (4 / 8 / 4 credits); Web operations retain tariff 3 (2 / 3 / 4 / 5). Trial keys and prepaid keys are distinct and never fall back to paid spending automatically.
 
 | Canonical package ID | USDC | Credits | Maximum conditional early Web tranche |
 |---|---:|---:|---:|
 | `starter-all-services-v4` | 2.50 (2500000 atomic) | 1000 | Up to 50; never Base access |
 | `developer-all-services-v4` | 15.00 (15000000 atomic) | 10000 | Up to 100; never Base access |
 
-These conditional early tranches are Web-only and are not a second grant on top of the package. Full seven-service entitlement requires finalized funding; Base calls cannot spend provisional credits. Inspect live availability and the limits below; early access can be denied or frozen.
+These conditional early tranches are Web-only and are not a second grant on top of the package. Full All-Services entitlement requires finalized funding; Base calls cannot spend provisional credits. Inspect live availability and the limits below; early access can be denied or frozen.
 
 These are one-time purchases, not subscriptions. Purchased credits do not expire under the [terms](https://api.fresh402.com/terms); keys and durable result retention have separate lifetimes. Starter buys up to 500 Checks at $0.005 each; Developer up to 5000 at $0.003 each if entirely spent on Check. Use x402 for occasional use without a prepaid account. Prepaid suits repeated usage and uses different authentication. Existing account tariffs retain their original terms.
 
@@ -139,4 +143,4 @@ When root `mpp_payments.prepaid_purchases` and public purchasing availability ar
 
 ## Selecting all-service scope explicitly
 
-The wallet account page and existing agent API both select the same all-seven-tools Starter/Developer packages: inspect GET /v3/prepaid/all-services and its enabled flag, review exact terms/terms_digest, then explicitly select starter-all-services-v4 or developer-all-services-v4 and send the accepted digest as all_services_terms_digest when creating the single funding intent. Prices remain $2.50/1,000 or $15/10,000; no existing Web credit is upgraded. This does not authorize signing or funding. All existing nonce/amount/asset/recipient checks, original-proof recovery and finalized blockchain eligibility remain mandatory. [First-party purchase-path guide](https://fresh402.com/docs#all-service-purchase).
+The wallet account page and existing agent API both select the same All-Services Starter/Developer packages covering eleven paid products with eligible finalized funding and constituent scope rights: inspect GET /v3/prepaid/all-services and its enabled flag, review exact terms/terms_digest, then explicitly select starter-all-services-v4 or developer-all-services-v4 and send the accepted digest as all_services_terms_digest when creating the single funding intent. Prices remain $2.50/1,000 or $15/10,000; no existing Web credit is upgraded. This does not authorize signing or funding. All existing nonce/amount/asset/recipient checks, original-proof recovery and finalized blockchain eligibility remain mandatory. [First-party purchase-path guide](https://fresh402.com/docs#all-service-purchase).

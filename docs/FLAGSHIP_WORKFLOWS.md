@@ -1,6 +1,19 @@
-# Legacy client-orchestrated evidence workflows
+# Server workflows and optional legacy client composition
 
-For the four single-charge server products, use [SERVER_WORKFLOWS.md](SERVER_WORKFLOWS.md). The code below is the retained client composition and still bills each chosen underlying operation separately.
+For complete intelligence tasks, start with the four [server workflows](SERVER_WORKFLOWS.md). They combine supported observation and evidence stages in one fixed-price operation, with saved state and original-operation recovery.
+
+| Complete server workflow | Direct USDC | Eligible credits |
+|---|---:|---:|
+| Website Change Intelligence | $0.005 | 2 |
+| API Compatibility Review | $0.010 | 4 |
+| On-chain Evidence Brief | $0.025 | 10 |
+| Cross-domain Release Evidence | $0.040 | 16 |
+
+[Complete published SDK setup](SDK_PACKAGE.md#complete-server-workflow-example) · [Measured coding-agent value](https://fresh402.com/agent-efficiency).
+
+## Optional legacy client composition
+
+The retained functions below give advanced integrations explicit control over individual Fresh402 tools. They are not the four server products and still bill each chosen underlying operation separately.
 
 Use [workflows.ts](../examples/efficiency/workflows.ts) with a customer-controlled executor. It composes existing tools; it adds no endpoint, scheduler, wallet or automatic purchase. Run the controlled examples with `node --test examples/efficiency/workflows.test.ts` from this repository after its validation dependencies are installed. Tests validate every constructed input against the reviewed public OpenAPI. Their changed/unchanged and observation results are **fixtures, not production observations**.
 
@@ -11,7 +24,7 @@ Use [workflows.ts](../examples/efficiency/workflows.ts) with a customer-controll
 | On-chain evidence brief | Contract Watch + Wallet Watch + Token Facts | $0.040 |
 | Cross-domain release evidence | Check, Extract if changed, Contract Watch | $0.025 |
 
-These are service fees for one completed bounded page/observation, excluding any wallet/provider overhead. These workflow tests do not perform real payments. Cache hits remain billable when paid. Free Register quotas and existing shared limits apply. Direct HTTP/local comparison is often preferable if you already hold both source versions; JavaScript rendering and full wallet history require another service.
+These are service fees for one completed bounded page/observation, excluding any wallet/provider overhead. These workflow tests do not perform real payments. Cache hits remain billable when paid. Free Register quotas and existing shared limits apply. Reuse saved baselines and original results across agent sessions. JavaScript rendering and complete wallet history are outside the supported scope.
 
 ```ts
 import {runFlagship} from '../examples/efficiency/workflows.ts';
@@ -37,7 +50,7 @@ Save real Register watch IDs and reuse them across sessions. Repeated Register d
 
 On-chain tools accept Base 8453 and finalized observations only. Retain owned snapshot/cursor IDs only when `observation_saved` is true. Wallet pages cover selected ERC-20-shaped logs, not full transaction history; provider completeness is not proven. Token metadata is contract-reported, not a safety or investment assessment. Preserve each result's block hash, source, observation time, uncertainty and accounting. Cross-domain reports keep web and chain evidence separate: close timestamps do not establish causation.
 
-The core source SDK remains 0.3.6. The MIT compiled npm prerelease is fresh402-sdk@0.4.0-rc.1; import runFlagship from `fresh402-sdk/workflows`. See [installation](SDK_PACKAGE.md).
+The core source SDK remains 0.3.6. The current flagship-capable MIT compiled npm prerelease is fresh402-sdk@0.5.0-rc.1; import runFlagship from `fresh402-sdk/workflows`. See [installation](SDK_PACKAGE.md).
 
 Acceptance: Website Change Intelligence and API Compatibility Review passed with the actual application in isolated workerd/D1, realistic changing HTML/OpenAPI fixtures and a synthetic local facilitator. Website acceptance includes saved watch IDs, conditional Extract/Smart Diff, budget denial, completed replay without new work and lost-response recovery returning the original result without a new signature or fetch. Only local cached-watch timestamps were aged to represent a later review.
 

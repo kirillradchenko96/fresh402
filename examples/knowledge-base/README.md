@@ -1,4 +1,6 @@
-# Noise-aware documentation knowledge base
+# Modular documentation integration examples
+
+For complete tasks, start with the four [server workflows](../../docs/SERVER_WORKFLOWS.md) and [published SDK](../../docs/SDK_PACKAGE.md). This retained client demonstrates optional lower-level composition of individual Fresh402 tools, not a single-charge server product.
 
 Requires Node.js 24 or later. No installation, API key or wallet is needed for the demo or discovery mode.
 
@@ -31,7 +33,7 @@ Watch IDs identify shared public-resource state, not private ownership or access
 
 ## When it is useful
 
-Persistent shared watches, explicit noise rules, compact changes and paid-result recovery can simplify repeated agent workflows. At the current prices, Check plus Extract on changes costs $0.005 + $0.010 times the change rate per subsequent poll; it is cheaper in service fees than buying Extract every poll only when fewer than half of polls change, before infrastructure, wallet and development costs. A competent developer's own direct fetch/parser/diff can be cheaper. Fresh402 is not inherently preferable for one-off static extraction or JavaScript rendering.
+Persistent shared watches, explicit noise rules, compact changes and paid-result recovery can simplify repeated agent workflows. At the current prices, Check plus Extract on changes costs $0.005 + $0.010 times the change rate per subsequent poll; it is cheaper in service fees than buying Extract every poll only when fewer than half of polls change, before infrastructure, wallet and development costs. Use saved watches, scoped results and original-operation recovery to retain evidence across agent sessions. JavaScript rendering remains unsupported.
 
 The five-poll contract demo uses two Extracts and four Checks: $0.040 in **simulated service amounts**, compared with $0.050 for five Extracts. Three full document outputs are avoided. These are reproducible workflow mechanics, not real customer savings, profit or commercial traction.
 
@@ -42,14 +44,14 @@ Use the [agent purchasing guide](../../docs/AGENT_PREPAID.md) for the current br
 
 ## Current product availability
 
-See [current availability](../../docs/RELEASE_AVAILABILITY.md): production 3.0 exposes seven paid products, including the bounded Base observation pilot and one-time prepaid purchasing, subject to live feature flags.
+See [current availability](../../docs/RELEASE_AVAILABILITY.md): production 3.1.0 exposes eleven paid products and free Register: four server workflows and seven primitives. Contract Watch and Token Facts are bounded production capabilities; Wallet Watch remains a restricted pilot. One-time All-Services purchasing is available, subject to live feature flags.
 
 [Tariff-v3 workflow economics](PREPAID.md) and [OpenAPI Contract Diff](OPENAPI.md) describe the deployed prepaid and specialized product contracts. Original x402 prices remain unchanged. Read deployed discovery/quotes before using a tool; the client cannot auto-fund or fall back from prepaid to x402. The new example uses public REST/MCP contracts only.
 
 
 ## Wallet-owned customer onboarding
 
-[CustomerClient](onboarding.ts) manages ownership challenges, original funding intents, account history and replacement API keys. [Complete examples](onboarding-example.ts) cover Starter plus Check, Developer tools and intentional top-ups. Wallet connection and each exact payment confirmation are externally supplied explicit actions. Manual onboarding examples do not pay without caller-supplied wallet confirmation; the optional replenishment integration below requires separate explicit opt-in. Read [availability, finality and recovery rules](../../docs/SELF_SERVICE.md); read the independent live signup, purchasing and early-credit flags before signing.
+[CustomerClient](onboarding.ts) manages ownership challenges, original funding intents, account history and replacement API keys. Use the [current All-Services agent example](agent-prepaid.ts) for new purchases and the accepted terms digest. [Historical modular examples](onboarding-example.ts) retain v3 purchase/top-up compatibility and reusable Web execution helpers; their v3 purchase functions are not current onboarding. Wallet connection and each exact payment confirmation are externally supplied explicit actions. Manual onboarding examples do not pay without caller-supplied wallet confirmation; the optional replenishment integration below requires separate explicit opt-in. Read [availability, finality and recovery rules](../../docs/SELF_SERVICE.md); read the independent live signup, purchasing and early-credit flags before signing.
 
 ## Official MPP client fragment
 
@@ -63,4 +65,4 @@ Use [machine-trial.ts](machine-trial.ts) for the separate browserless ownership 
 
 ## Current production versus historical fixtures
 
-For real service access use the canonical HTTPS origin and the source Efficiency SDK production factory. Both HTTPS client constructors now pin the current Safe by default; there is no automatic recipient discovery/substitution or spending authority. The HTTP loopback simulator is intentionally a historical legacy-recipient fixture, not a funding recommendation. Do not copy its fictional proofs or root historical backend source into production. Stored original legacy proofs recover unchanged through recover(originalOperation); do not recreate or retarget their signatures. Current API 3.0.2 has eight tools/seven paid products. See [current machine trial](../../docs/MACHINE_TRIAL.md), [MPP](../../docs/MPP.md) and [agent purchases](../../docs/AGENT_PREPAID.md).
+For real service access use the canonical HTTPS origin and the source Efficiency SDK production factory. Both HTTPS client constructors now pin the current Safe by default; there is no automatic recipient discovery/substitution or spending authority. The HTTP loopback simulator is intentionally a historical legacy-recipient fixture, not a funding recommendation. Do not copy its fictional proofs or root historical backend source into production. Stored original legacy proofs recover unchanged through recover(originalOperation); do not recreate or retarget their signatures. Current API 3.1.0 has twelve MCP tools: free Register and eleven paid products. See [current machine trial](../../docs/MACHINE_TRIAL.md), [MPP](../../docs/MPP.md) and [agent purchases](../../docs/AGENT_PREPAID.md).

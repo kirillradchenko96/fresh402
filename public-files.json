@@ -125,6 +125,8 @@
   "public-files.json",
   "scripts/check-public-docs.mjs",
   "scripts/check-public-docs.test.mjs",
+  "scripts/commercial-copy.mjs",
+  "scripts/commercial-copy.test.mjs",
   "scripts/pack-sdk.mjs",
   "scripts/product-consistency.mjs",
   "scripts/product-consistency.test.mjs",

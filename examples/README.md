@@ -2,6 +2,8 @@
 
 These examples use the existing production URLs. Discovery is free. Unsigned paid requests return HTTP 402 requirements and do not pay for or deliver the paid operation. The free Register example does fetch a new public target if you choose to execute it.
 
+For complete tasks, use the four [server workflows](../docs/SERVER_WORKFLOWS.md) and [published SDK](../docs/SDK_PACKAGE.md). The requests below remain useful for modular integrations.
+
 For a runnable TypeScript client and a local no-money documentation workflow, see [the knowledge-base integration](knowledge-base/README.md). It includes REST/MCP discovery, explicit payment caps, private recovery and automated tests. Its demo does not execute hosted paid operations.
 
 ## Discover

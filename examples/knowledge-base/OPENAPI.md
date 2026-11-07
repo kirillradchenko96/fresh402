@@ -1,6 +1,6 @@
 # OpenAPI Contract Diff
 
-Production 3.0.2 advertises seven paid products; this example covers the OpenAPI member of the four Web Intelligence products. Execute this product only when the service explicitly advertises `fresh402_openapi_contract_diff`. The example uses public APIs and the existing client; it contains no backend imports or payment signer.
+Production 3.1.0 advertises eleven paid products and free Register. Start complete API tasks with [API Compatibility Review](../../docs/SERVER_WORKFLOWS.md#api-compatibility-review); this advanced example covers the separate primitive OpenAPI Contract Diff. Execute this product only when the service explicitly advertises `fresh402_openapi_contract_diff`. The example uses public APIs and the existing client; it contains no backend imports or payment signer.
 
 ```ts
 import { inspectContractProduct, compareOpenApi } from './openapi-example.ts';
@@ -17,7 +17,7 @@ const client = new PrepaidClient(serviceOrigin, privateCredential, {
 await compareOpenApi(client, 'https://your-public-api.example/openapi.json');
 ```
 
-The inactive candidate is $0.020 x402 USDC on Base, or 5 tariff-v3 credits ($0.0075 at the inactive Developer bundle). Original x402 prices and tariff-v1/v2 obligations are unchanged. Query the actual service before execution. This example never switches to x402 when credits are insufficient.
+The released OpenAPI Contract Diff primitive costs $0.020 x402 USDC on Base, or 5 tariff-v3 credits ($0.0075 at Developer consumed-credit pricing). Original x402 prices and tariff-v1/v2 obligations are unchanged. Query the actual service before execution. This example never switches to x402 when credits are insufficient.
 
 Register an **unscoped public HTTPS JSON OpenAPI 3.0/3.1** document. An initially registered JSON watch must be untruncated (the existing watch storage cap is 200,000 UTF-16 code units); incompatible baselines return 409. The first successful comparison establishes a persistent contract baseline from the registered watch state, which can have advanced through Check. Subsequent calls compare the previous specialized snapshot or that fixed baseline. The result explains which source was used and retains URL/time/hash provenance. Up to 20 recent specialized snapshots are retained; exact paid-result recovery uses the existing seven-day retention and original operation record.
 

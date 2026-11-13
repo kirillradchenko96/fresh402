@@ -1,5 +1,6 @@
 import {randomBytes} from 'node:crypto';
 import {isServerWorkflow,serverWorkflowPath} from './workflow-products.ts';
+import {BASE_NETWORK,SOLANA_NETWORK,SOLANA_MERCHANT,SOLANA_CDP_FEE_PAYER,nativeSolanaRequirement,solanaSignature,type PaymentNetwork} from './payment-networks.ts';
 
 type Json=Record<string,any>;
 export type Operation={tool:string,input:Json,payment:Json,recoveryToken:string,amount:string,state:'authorized'|'pending'|'completed',result?:Json,receipt?:Json};
@@ -17,12 +18,14 @@ async function readResponse(response:Response){if(!response.body)return '';const
 
 /** Public-interface client. No imports from Fresh402 backend or payment secrets. */
 export class Fresh402Client {
- base:string;transport:'rest'|'mcp';signer?:Signer;budget:bigint;reserved=0n;operations=new Map<string,Json>();timeoutMs:number;sequence=0;persist?:(operation:Operation)=>Promise<void>;expectedRecipient:string;contractScopeHeader?:string;
- constructor(base:string,options:{transport?:'rest'|'mcp',signer?:Signer,maxAtomicUSDC?:bigint,timeoutMs?:number,persist?:(operation:Operation)=>Promise<void>,expectedRecipient?:string,contractScope?:Array<{path:string;method:string}>}={}){
+ base:string;transport:'rest'|'mcp';signer?:Signer;budget:bigint;reserved=0n;operations=new Map<string,Json>();timeoutMs:number;sequence=0;persist?:(operation:Operation)=>Promise<void>;expectedRecipient:string;contractScopeHeader?:string;paymentNetwork:PaymentNetwork;expectedSolanaFeePayer:string;
+ constructor(base:string,options:{transport?:'rest'|'mcp',signer?:Signer,maxAtomicUSDC?:bigint,timeoutMs?:number,persist?:(operation:Operation)=>Promise<void>,expectedRecipient?:string,paymentNetwork?:PaymentNetwork,expectedSolanaFeePayer?:string,contractScope?:Array<{path:string;method:string}>}={}){
   const url=new URL(base);if(url.username||url.password||url.search||url.hash||url.pathname!=='/'||!(url.protocol==='https:'||url.protocol==='http:'&&['127.0.0.1','localhost'].includes(url.hostname)))throw new Error('Use an HTTPS service origin, or a loopback local demo origin');
   // Only the existing HTTP loopback simulator retains its historical fixture
   // recipient. Every HTTPS client defaults to the current production Safe.
-  this.base=url.origin;this.transport=options.transport??'rest';this.signer=options.signer;this.budget=options.maxAtomicUSDC??0n;this.timeoutMs=options.timeoutMs??15000;this.persist=options.persist;this.expectedRecipient=(options.expectedRecipient??(url.protocol==='http:'?'0x58b4b483fbe31860335eceb12cccf4338b251085':RECIPIENT)).toLowerCase();
+  this.paymentNetwork=options.paymentNetwork??BASE_NETWORK;if(this.paymentNetwork!==BASE_NETWORK&&this.paymentNetwork!==SOLANA_NETWORK)throw Error('Unsupported payment network');this.expectedSolanaFeePayer=options.expectedSolanaFeePayer??SOLANA_CDP_FEE_PAYER;
+  this.base=url.origin;this.transport=options.transport??'rest';this.signer=options.signer;this.budget=options.maxAtomicUSDC??0n;this.timeoutMs=options.timeoutMs??15000;this.persist=options.persist;this.expectedRecipient=this.paymentNetwork===SOLANA_NETWORK?(options.expectedRecipient??SOLANA_MERCHANT):(options.expectedRecipient??(url.protocol==='http:'?'0x58b4b483fbe31860335eceb12cccf4338b251085':RECIPIENT)).toLowerCase();
+  if(this.paymentNetwork===SOLANA_NETWORK&&this.expectedRecipient!==SOLANA_MERCHANT)throw Error('Unexpected Solana merchant');
   if(options.contractScope!==undefined){const scope=options.contractScope;if(!Array.isArray(scope)||!scope.length||scope.length>64||scope.some(o=>!o||Object.keys(o).length!==2||typeof o.path!=='string'||!o.path.startsWith('/')||o.path.length>512||!['get','put','post','delete','options','head','patch','trace'].includes(o.method)))throw Error('Invalid contractScope');this.contractScopeHeader=JSON.stringify(scope).replace(/[\u007f-\uffff]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));if(this.contractScopeHeader.length>4096)throw Error('contractScope exceeds 4096 header characters');}
  }
  async request(path:string,body?:Json,headers:Record<string,string>={}){
@@ -44,7 +47,8 @@ export class Fresh402Client {
   let originalPath:string|undefined;
   if(operation&&isServerWorkflow(workflowId)){
    originalPath=serverWorkflowPath(workflowId);const accepted=operation.payment?.accepted,resource=this.base+(this.transport==='rest'?originalPath:'/mcp#'+tool);
-   if(operation.tool!==tool||canonical(operation.input)!==canonical(input)||operation.payment?.x402Version!==2||operation.payment.resource?.url!==resource||accepted?.scheme!=='exact'||accepted.network!=='eip155:8453'||accepted.asset?.toLowerCase()!==USDC||accepted.payTo?.toLowerCase()!==this.expectedRecipient||accepted.amount!==operation.amount||!/^[1-9][0-9]*$/.test(operation.amount))throw new Error('Original workflow recovery policy mismatch; preserve evidence and original origin');
+   const originalPaymentValid=this.paymentNetwork===SOLANA_NETWORK?nativeSolanaRequirement(accepted,operation.amount,this.expectedSolanaFeePayer):accepted?.scheme==='exact'&&accepted.network===BASE_NETWORK&&accepted.asset?.toLowerCase()===USDC&&accepted.payTo?.toLowerCase()===this.expectedRecipient&&accepted.amount===operation.amount;
+   if(operation.tool!==tool||canonical(operation.input)!==canonical(input)||operation.payment?.x402Version!==2||operation.payment.resource?.url!==resource||!originalPaymentValid||!/^[1-9][0-9]*$/.test(operation.amount))throw new Error('Original workflow recovery policy mismatch; preserve evidence and original origin');
   }
   const op=this.operations.get(tool)??(originalPath?{path:originalPath}:undefined);if(!op)throw new Error('Discover before using operations');
   if(this.transport==='mcp'){
@@ -61,7 +65,9 @@ export class Fresh402Client {
   const receipt=response.headers.get('payment-response');return{result:json,receipt:receipt?JSON.parse(Buffer.from(receipt,'base64').toString('utf8')):undefined};
  }
  validateChallenge(tool:string,challenge:Json){
-  const op=this.operations.get(tool)!,accepted=challenge.accepts?.[0];if(challenge.x402Version!==2||challenge.accepts?.length!==1||!accepted||accepted.scheme!=='exact'||accepted.network!=='eip155:8453'||accepted.asset?.toLowerCase()!==USDC||accepted.payTo?.toLowerCase()!==this.expectedRecipient||!/^[0-9]+$/.test(accepted.amount)||!Number.isInteger(accepted.maxTimeoutSeconds)||accepted.maxTimeoutSeconds<1||accepted.maxTimeoutSeconds>300)throw new Error('Unsafe or unexpected x402 challenge');
+  const op=this.operations.get(tool)!,offers=challenge.accepts,base=offers?.[0],baseRecipient=this.paymentNetwork===BASE_NETWORK?this.expectedRecipient:RECIPIENT;
+  if(challenge.x402Version!==2||!Array.isArray(offers)||![1,2].includes(offers.length)||base?.scheme!=='exact'||base.network!==BASE_NETWORK||base.asset?.toLowerCase()!==USDC||base.payTo?.toLowerCase()!==baseRecipient||typeof base.amount!=='string'||!/^[0-9]+$/.test(base.amount)||!Number.isInteger(base.maxTimeoutSeconds)||base.maxTimeoutSeconds<1||base.maxTimeoutSeconds>300||offers.length===2&&!nativeSolanaRequirement(offers[1],base.amount,this.expectedSolanaFeePayer))throw new Error('Unsafe or unexpected x402 challenge');
+  const accepted=offers.find((r:Json)=>r.network===this.paymentNetwork);if(!accepted)throw Error('Selected payment network is unavailable; no fallback payment is authorized');
   const resource=this.base+(this.transport==='rest'?op.path:'/mcp#'+tool);if(challenge.resource?.url!==resource)throw new Error('Payment resource does not match discovered operation');
   const amount=BigInt(accepted.amount);if(!op.price||atomic(op.price.amount)!==amount)throw new Error('Challenge price differs from discovery');if(amount<=0n)throw new Error('Invalid service amount');return amount;
  }
@@ -70,12 +76,16 @@ export class Fresh402Client {
  async execute(tool:string,input:Json){
   const challenge=await this.quote(tool,input),amount=this.validateChallenge(tool,challenge);if(!this.signer||this.budget===0n)throw new PaymentRequired(challenge);if(!this.persist)throw new Error('Configure private operation persistence before enabling a signer');if(this.reserved+amount>this.budget)throw new Error('Explicit client payment cap exceeded');
   // Reserve before invoking a signer; uncertain signatures/outcomes never free this budget.
-  this.reserved+=amount;const payment=await this.signer(challenge);
-  if(payment.x402Version!==2||canonical(payment.accepted)!==canonical(challenge.accepts[0])||canonical(payment.resource)!==canonical(challenge.resource)||canonical(payment.extensions??{})!==canonical(challenge.extensions??{}))throw new Error('Signer altered payment resource, requirements or extensions');
+  this.reserved+=amount;const selected=challenge.accepts.find((r:Json)=>r.network===this.paymentNetwork),payment=await this.signer({...challenge,accepts:[selected]});
+  if(payment.x402Version!==2||canonical(payment.accepted)!==canonical(selected)||canonical(payment.resource)!==canonical(challenge.resource)||canonical(payment.extensions??{})!==canonical(challenge.extensions??{}))throw new Error('Signer altered payment resource, requirements or extensions');
   const operation:Operation={tool,input:structuredClone(input),payment,recoveryToken:randomBytes(32).toString('hex'),amount:String(amount),state:'authorized'};await this.persist?.(operation);return this.recover(operation);
  }
  async recover(operation:Operation){
-  try{const data=await this.raw(operation.tool,operation.input,operation);if(data.challenge)throw new ApiError('original_payment_not_accepted',402);if(data.receipt?.success!==true||data.receipt.network!=='eip155:8453'||!/^0x[a-fA-F0-9]{64}$/.test(data.receipt.transaction??''))throw new Error('Paid result is missing a valid successful settlement receipt');if(data.result?.persistence_error||data.result?.snapshot_saved===false||data.result?.observation_saved===false||data.result?.workflow_state_saved===false)throw new Error('Original financial delivery is pending; recover without a replacement payment');operation.state='completed';operation.result=data.result;operation.receipt=data.receipt;await this.persist?.(operation);return{result:data.result!,operation};}
+  try{if((this.paymentNetwork===SOLANA_NETWORK||operation.payment?.accepted?.network===SOLANA_NETWORK)&&(operation.payment?.accepted?.network!==this.paymentNetwork||new URL(operation.payment?.resource?.url??'https://invalid.invalid').origin!==this.base))throw Error('Recover only the original payment network and origin; no fallback is authorized');const data=await this.raw(operation.tool,operation.input,operation);if(data.challenge)throw new ApiError('original_payment_not_accepted',402);if(data.receipt?.success!==true||data.receipt.network!==this.paymentNetwork||(this.paymentNetwork===SOLANA_NETWORK?!solanaSignature(data.receipt.transaction):!/^0x[a-fA-F0-9]{64}$/.test(data.receipt.transaction??'')))throw new Error('Paid result is missing a valid successful settlement receipt');
+   // Existing Web observations can reuse a snapshot; Wallet Watch saves a
+   // cursor rather than a snapshot. Neither is a failed financial delivery.
+   const optionalSnapshot=['fresh402_check','fresh402_smart_diff','fresh402_openapi_contract_diff'].includes(operation.tool)||(operation.tool==='fresh402_wallet_watch'&&data.result?.observation_saved===true&&data.result?.cursor_saved===true);
+   if(data.result?.persistence_error||data.result?.snapshot_saved===false&&!optionalSnapshot||data.result?.observation_saved===false||data.result?.workflow_state_saved===false)throw new Error('Original financial delivery is pending; recover without a replacement payment');operation.state='completed';operation.result=data.result;operation.receipt=data.receipt;await this.persist?.(operation);return{result:data.result!,operation};}
   catch(error){if(error instanceof ApiError&&error.status<500&&error.status!==409)throw error;operation.state='pending';await this.persist?.(operation);throw new PendingPayment(operation,error);}
  }
 }

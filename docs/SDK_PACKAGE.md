@@ -1,9 +1,9 @@
 # Fresh402 SDK
 
-The client package is `fresh402-sdk@0.5.0-rc.1`, under MIT. Use the exact prerelease version; confirm the version, integrity and `next` tag in the public npm registry. Earlier 0.4.0-rc.2 remains available; `latest` currently resolves to 0.4.0-rc.1, so use the exact version below or `@next` for the four workflow bindings. The source-client compatibility version remains 0.3.6; the hosted API has its own version. This license covers the package's public client files and accompanying documentation only, not the private Fresh402 backend or unrelated repository contents.
+The client package is `fresh402-sdk@0.6.0-rc.1`, under MIT. Use the exact prerelease version; confirm the version, integrity and `next` tag in the public npm registry. Earlier 0.4.0-rc.2 remains available; `latest` currently resolves to 0.4.0-rc.1, so use the exact version below or `@next` for the four workflow bindings. The source-client compatibility version remains 0.3.6; the hosted API has its own version. This license covers the package's public client files and accompanying documentation only, not the private Fresh402 backend or unrelated repository contents.
 
 ```sh
-npm install fresh402-sdk@0.5.0-rc.1
+npm install fresh402-sdk@0.6.0-rc.1
 ```
 
 Node.js 24 or later, ESM only, TypeScript declarations included. Zero runtime dependencies and no install scripts. No CommonJS or browser-wallet support is claimed. The package never creates a wallet, signs a payment or spends on import.
@@ -74,3 +74,7 @@ export async function observeOrRecover(input, originalName) {
 ```
 
 The seed URL must be your actual public JSON OpenAPI source; replace the placeholder before execution. A workflow observation_id is not a primitive watch_id. Observation state and original-result retention are separately bounded; expired results do not authorize rerunning an original. For Website Change Intelligence use its corresponding service, two-credit quote/cap and saved observation ID. Other workflows have their own published schemas and prices. No USDC signing or package purchase is performed by this prepaid example.
+
+## Explicit native-USDC network choice
+
+Version 0.6.0-rc.1 accepts validated dual-network x402 challenges while preserving Base as the default. Set `paymentNetwork: SOLANA_NETWORK` in `createProductionClient` or `Fresh402Client` for Solana; the merchant and sponsored fee payer are pinned. Only the selected requirement reaches an explicitly supplied signer. Missing Solana admission never falls back to Base. Existing uncertain originals retain their original origin/network/input/proof/private capability; recovery never signs again. `CustomerClient` has the same explicit network option for plans, ownership and package terms. Solana ownership is a single-use, origin-bound Ed25519 `signMessage`, not EVM typed data. No Base wallet is required for Solana accounts. Packages share the existing credit ledger; Solana funding is finalized-only and has no provisional credits. This Node package remains dependency-free and does not provide a browser wallet or private-key store. [Exact policy and account flow](https://github.com/kirillradchenko96/fresh402/blob/main/docs/SOLANA_USDC.md).

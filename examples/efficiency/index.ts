@@ -17,6 +17,10 @@ export type {Operation,Signer} from '../knowledge-base/client.ts';
 export {PrepaidClient,PendingPrepaid} from '../knowledge-base/prepaid.ts';
 export type {PrepaidRequest} from '../knowledge-base/prepaid.ts';
 export {CustomerClient} from '../knowledge-base/onboarding.ts';
+export {validateSolanaOwnershipChallenge} from '../knowledge-base/onboarding.ts';
+export {prepareSolanaFundingAuthorization} from '../knowledge-base/funding.ts';
+export {SOLANA_NETWORK,SOLANA_USDC,SOLANA_MERCHANT,SOLANA_CDP_FEE_PAYER} from '../knowledge-base/payment-networks.ts';
+export type {PaymentNetwork} from '../knowledge-base/payment-networks.ts';
 export {prepareMachineTrialChallenge,claimMachineTrialKey} from '../knowledge-base/machine-trial.ts';
 
 export {SERVER_WORKFLOWS,isServerWorkflow,serverWorkflowPath,serverWorkflowPrepaidPath} from '../knowledge-base/workflow-products.ts';

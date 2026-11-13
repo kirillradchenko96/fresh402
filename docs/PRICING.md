@@ -17,8 +17,12 @@
 | cross domain release evidence | `fresh402_cross_domain_release_evidence` | `POST /v4/workflows/cross-domain-release-evidence` | $0.040 | 16 |
 <!-- pricing-table:end -->
 
-This table is generated from the reviewed public discovery contract. Standalone calls use native USDC on Base mainnet (8453), x402 v2 exact or enabled native MPP EVM charge. A compatible, explicitly authorized payment client is required. Quotes are not charges; any client/facilitator costs are separate. Cached Check results remain paid.
+This table is generated from the reviewed public discovery contract. Standalone calls use native USDC on Base mainnet (8453) or explicitly selected Solana Mainnet with x402 v2 exact; enabled native MPP EVM charge remains Base-only. A compatible, explicitly authorized payment client is required. Quotes are not charges; any client/facilitator costs are separate. Cached Check results remain paid.
 
 Starter is **$2.50 / 1,000 credits**; Developer is **$15 / 10,000 credits**. Packages are one-time purchases, not subscriptions; purchased credits do not expire. The account page and agent flow offer the canonical All-Services packages after explicit terms acceptance and finalized funding. The four server workflows additionally require exact tariff-5 quotes and constituent rights; no internal substep charge. Old Web balances retain their original rights. Always read [live plans](https://api.fresh402.com/v2/prepaid/plans), [all-service eligibility](https://api.fresh402.com/v3/prepaid/all-services) and your authenticated quote.
 
 Free discovery, Register and eligible walletless/trial access are separate from purchased credits. Capacity can be unavailable before a free allowance is exhausted; no automatic paid fallback is authorized. [Free access](FREE_TRIAL.md), [machine trial](MACHINE_TRIAL.md), [agent purchase and recovery](AGENT_PREPAID.md), [current availability](RELEASE_AVAILABILITY.md).
+
+## Native USDC on Solana
+
+The existing paid resources also support explicitly selected native Circle USDC on Solana Mainnet where the live unpaid challenge advertises it. Base stays first, all current service prices/credit costs stay the same, and MPP remains Base-only. Payment network does not change the chain observed by the product. Solana package funding requires matching Solana wallet ownership, network-specific terms and finalized native-USDC evidence, with no provisional credits. Distinct chain wallets are not automatically linked. Existing credentials retain their accepted rights. [Network selection, compatible client requirements and original recovery](SOLANA_USDC.md).

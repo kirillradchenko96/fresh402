@@ -27,7 +27,7 @@ export function checkCopyFiles(files,load){
  const spec=JSON.parse(load('docs/openapi.json'));const walk=(x,p='openapi')=>{if(!x||typeof x!=='object')return;for(const[k,v]of Object.entries(x))if(typeof v==='string'&&['description','summary'].includes(k))assertCopy(v,{path:p+'.'+k});else if(v&&typeof v==='object')walk(v,p+'.'+k);};walk(spec);
  for(const f of ['docs/AGENT_WORKFLOWS.md','docs/FLAGSHIP_WORKFLOWS.md']){const text=load(f),server=text.indexOf('SERVER_WORKFLOWS.md');assert(server>=0&&server<text.indexOf('## Optional'),f+' must lead with server products');}
  const self=load('docs/SELF_SERVICE.md');assert(self.indexOf('starter-all-services-v4')<self.indexOf('candidate-starter-v3'),'Current package must precede historical ID');assert(/all_services_terms_digest/.test(self));
- const versions=load('docs/VERSIONS.md');assert(versions.includes('3.1.1 catalog revision'));assert(versions.includes('0.4.0-rc.1 remains'));return{prose_files:prose,metadata_checked:true,contextual_sales_rules:true};
+ const versions=load('docs/VERSIONS.md');assert(versions.includes(JSON.parse(load('server.json')).version+' catalog revision'));assert(versions.includes('0.4.0-rc.1 remains'));return{prose_files:prose,metadata_checked:true,contextual_sales_rules:true};
 }
 export async function checkLiveCopy({origin='https://api.fresh402.com',website='https://fresh402.com',fetcher=fetch}={}){
  assert.equal(new URL(origin).protocol,'https:');assert.equal(new URL(website).protocol,'https:');

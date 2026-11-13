@@ -6,5 +6,5 @@ export const PRODUCTION_RECIPIENT='0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3';
  * still wins; discovery must never silently choose a merchant for the caller.
  */
 export function createProductionClient(options:ConstructorParameters<typeof Fresh402Client>[1]={}){
- return new Fresh402Client(PRODUCTION_ORIGIN,{expectedRecipient:PRODUCTION_RECIPIENT,...options});
+ return new Fresh402Client(PRODUCTION_ORIGIN,{...(options.paymentNetwork==='solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'?{}:{expectedRecipient:PRODUCTION_RECIPIENT}),...options});
 }

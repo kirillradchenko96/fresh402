@@ -1,4 +1,26 @@
 {
+  "x-payment-networks": [
+    {
+      "network": "eip155:8453",
+      "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+      "decimals": 6,
+      "scheme": "exact",
+      "currency": "USDC",
+      "client": "x402 v2 exact/EVM"
+    },
+    {
+      "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+      "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+      "decimals": 6,
+      "scheme": "exact",
+      "currency": "USDC",
+      "client": "x402 v2 exact/SVM",
+      "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+      "finality": "finalized"
+    }
+  ],
   "x-instant-evaluation": {
     "enabled": true,
     "tool": "fresh402_check",
@@ -85,10 +107,10 @@
     "account_creation": true,
     "package_purchasing": true,
     "terms_approved": true,
-    "wallet_signatures": "EIP-712, 65-byte EOA only; contract wallets unsupported",
+    "wallet_signatures": "Base: EIP-712, 65-byte EOA. Solana: exact UTF-8 ownership signMessage, 64-byte Ed25519 signature in canonical Base64. No Base wallet is required for Solana accounts; no payment or approval is authorized.",
     "session_header": "X-Fresh402-Customer-Session",
     "credential_header": "X-Fresh402-API-Key",
-    "finality": "Finalized Base receipt, canonical block, direct native USDC EIP-3009 call and matching authorization/transfer logs",
+    "finality": "Base: finalized canonical native-USDC EIP-3009 evidence. Solana: finalized original message/signature and exact native-USDC source/destination owner, mint, program and balance deltas. Solana purchases never receive provisional credits.",
     "recovery": "Recover the original intent. Never replace a submitted authorization. Recover lost keys by wallet authentication and replacement.",
     "account_url": "/account",
     "terms_url": "/terms",
@@ -184,13 +206,29 @@
           "503": {
             "description": "Public activation gated or finalized settlement pending; never pay again"
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "network",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "eip155:8453",
+                "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+              ],
+              "default": "eip155:8453"
+            },
+            "description": "Select package funding terms and availability. Omission preserves Base; this never switches or signs an existing purchase."
+          }
+        ]
       }
     },
     "/v2/prepaid/customer/challenge": {
       "post": {
         "operationId": "fresh402_customer_challenge",
-        "summary": "Create a five-minute single-use Base EIP-712 ownership challenge",
+        "summary": "Create a five-minute single-use, host-bound wallet ownership challenge; no payment or approval",
         "tags": [
           "prepaid-customer"
         ],
@@ -204,12 +242,57 @@
                 "additionalProperties": false,
                 "properties": {
                   "wallet": {
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^0x[a-fA-F0-9]{40}$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$"
+                      }
+                    ],
+                    "description": "Base EOA address by default; with explicit Solana network, a canonical ordinary on-curve Solana wallet. Case is significant. Distinct chain wallets remain distinct owners; no automatic linking."
+                  },
+                  "network": {
                     "type": "string",
-                    "pattern": "^0x[a-fA-F0-9]{40}$"
+                    "enum": [
+                      "eip155:8453",
+                      "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+                    ],
+                    "default": "eip155:8453",
+                    "description": "Omit for unchanged Base EIP-712 behavior. Explicit Solana returns the exact UTF-8 signMessage, not typed EVM data or a transaction."
                   }
                 },
                 "required": [
                   "wallet"
+                ],
+                "oneOf": [
+                  {
+                    "properties": {
+                      "network": {
+                        "const": "eip155:8453"
+                      },
+                      "wallet": {
+                        "type": "string",
+                        "pattern": "^0x[a-fA-F0-9]{40}$"
+                      }
+                    }
+                  },
+                  {
+                    "required": [
+                      "network"
+                    ],
+                    "properties": {
+                      "network": {
+                        "const": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+                      },
+                      "wallet": {
+                        "type": "string",
+                        "pattern": "^[1-9A-HJ-NP-Za-km-z]{32,44}$"
+                      }
+                    }
+                  }
                 ]
               }
             }
@@ -267,7 +350,7 @@
     "/v2/prepaid/customer/sessions": {
       "post": {
         "operationId": "fresh402_customer_session",
-        "summary": "Prove EOA wallet ownership; create or recover the same zero-credit account",
+        "summary": "Prove the original wallet challenge; create or recover the same zero-credit account",
         "tags": [
           "prepaid-customer"
         ],
@@ -285,8 +368,17 @@
                     "pattern": "^cc_[a-f0-9]{64}$"
                   },
                   "signature": {
-                    "type": "string",
-                    "pattern": "^0x[a-fA-F0-9]{130}$"
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^0x[a-fA-F0-9]{130}$"
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^[A-Za-z0-9+/]{85}[AQgw]==$"
+                      }
+                    ],
+                    "description": "Signature of the exact returned challenge. Base: 65-byte EIP-712 signature, 0x hex. Solana: 64-byte Ed25519 signMessage signature, canonical Base64. Network, origin, environment, action, wallet, nonce and expiry are bound; challenge is single-use. Never a payment authorization."
                   }
                 },
                 "required": [
@@ -555,6 +647,15 @@
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
+                  "network": {
+                    "type": "string",
+                    "enum": [
+                      "eip155:8453",
+                      "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+                    ],
+                    "default": "eip155:8453",
+                    "description": "Explicit funding chain. Default Base preserves existing clients. Solana requires matching Solana ownership and x402; MPP remains Base-only. Existing purchase keys cannot change network. Read /v2/prepaid/plans?network=... and /v3/prepaid/all-services?network=... before accepting terms."
+                  },
                   "all_services_terms_digest": {
                     "type": "string",
                     "pattern": "^[a-f0-9]{64}$",
@@ -1222,7 +1323,7 @@
       "post": {
         "operationId": "fresh402_check",
         "summary": "Use Check for on-demand changed/unchanged, hash, cache status and optional text diff across sessions. Exactly one url or real watch_id; URL/rules can create a watch, while watch_id reuses rules and forbids overrides. Save returned ID/hash. First URL observation may return changed:null. max_age_seconds defaults0 (conditional revalidation); positive age permits cached evidence. html_attributes observes selected same-text attribute changes. Public HTTPS, no JavaScript or scheduler. Use Smart Diff for structured changes; when advertised, Website Change Intelligence combines observation and supported evidence in one charge. Walletless first Check: require root instant_evaluation.enabled, then set evaluation:true with valid URL/watch input. One attempt per verified network prefix per approved period, sharing finite capacity; no wallet, key, custom header or proprietary SDK. Exact replay returns retained evidence, not a new fetch;429 never authorizes payment. $0.005 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge. Explicit evaluation:true selects one bounded walletless Check attempt per verified network prefix per approved period, sharing existing machine-trial budgets. No custom headers, credential or automatic payment; default remains paid. Identical input from the same network replays the retained result for at most seven days; changed input after use returns429. Availability and capacity can deny earlier.",
+        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge. Explicit evaluation:true selects one bounded walletless Check attempt per verified network prefix per approved period, sharing existing machine-trial budgets. No custom headers, credential or automatic payment; default remains paid. Identical input from the same network replays the retained result for at most seven days; changed input after use returns429. Availability and capacity can deny earlier.",
         "tags": [
           "check"
         ],
@@ -1280,6 +1381,30 @@
           "serviceName": "Fresh402",
           "iconUrl": "https://fresh402.com/favicon.png"
         },
+        "x-x402-payment-networks": [
+          {
+            "network": "eip155:8453",
+            "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/EVM",
+            "amount": "5000"
+          },
+          {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/SVM",
+            "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+            "finality": "finalized",
+            "amount": "5000"
+          }
+        ],
         "x-mcp-tool": "fresh402_check",
         "x-fresh402-tool": {
           "id": "check",
@@ -1958,7 +2083,7 @@
       "post": {
         "operationId": "fresh402_extract",
         "summary": "Use Extract for text, metadata, headings, links, JSON-LD and content hash from one public document; no watch required. No comparison, crawl or JavaScript. CSS scopes HTML; json_pointer selects one JSON value, json_pointers selects1-8 ordered fields; missing selections fail422. feed_mode:entries projects bounded RSS2/Atom; omit for XML-as-text. max_chars defaults20000, clips text but not the full hash; clipped structured data is omitted. For repeat observations use Check, then separately authorize Extract if needed. Use the retained source identity and scoped output to keep agent evidence consistent across sessions. $0.01 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch; opt-in feed_mode:entries projects RSS2/Atom. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch; opt-in feed_mode:entries projects RSS2/Atom. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "extract"
         ],
@@ -2015,6 +2140,30 @@
           "serviceName": "Fresh402",
           "iconUrl": "https://fresh402.com/favicon.png"
         },
+        "x-x402-payment-networks": [
+          {
+            "network": "eip155:8453",
+            "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/EVM",
+            "amount": "10000"
+          },
+          {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/SVM",
+            "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+            "finality": "finalized",
+            "amount": "10000"
+          }
+        ],
         "x-mcp-tool": "fresh402_extract",
         "x-fresh402-tool": {
           "id": "extract",
@@ -2767,7 +2916,7 @@
       "post": {
         "operationId": "fresh402_smart_diff",
         "summary": "Use Smart Diff for bounded JSON Pointer/HTML block changes and deterministic significance evidence across sessions. Requires real registered watch_id; fetches using saved rules. compare_to: previous(default) or baseline; previous_hash overrides with compatible retained same-watch evidence. json_array_keys explicitly matches unique typed identities; ambiguity fails. No cache-age option or scheduler. Missing history404; truncated/incompatible baseline409. Not complete semantic proof. Use Check for a focused changed/unchanged signal; choose the advertised Website Change Intelligence workflow for combined supported observation and comparison. $0.015 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "smart_diff"
         ],
@@ -2824,6 +2973,30 @@
           "serviceName": "Fresh402",
           "iconUrl": "https://fresh402.com/favicon.png"
         },
+        "x-x402-payment-networks": [
+          {
+            "network": "eip155:8453",
+            "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/EVM",
+            "amount": "15000"
+          },
+          {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/SVM",
+            "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+            "finality": "finalized",
+            "amount": "15000"
+          }
+        ],
         "x-mcp-tool": "fresh402_smart_diff",
         "x-fresh402-tool": {
           "id": "smart_diff",
@@ -3418,7 +3591,7 @@
       "post": {
         "operationId": "fresh402_openapi_contract_diff",
         "summary": "Use for bounded directional OpenAPI3.0/3.1 JSON contract-change evidence, including supported paths/operations, required fields, types/enums/null and authentication. Requires real watch_id from free unfiltered registration; no URL override. compare_to: previous(default) or baseline; previous_hash overrides with supported retained evidence. First call seeds contract history. No YAML, external-reference fetch or endpoint execution; uncertainty requires review, not a complete compatibility proof. Save and reuse watch IDs across sessions. For a complete single-charge server workflow, use API Compatibility Review when advertised. $0.020 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence after unfiltered free registration. Compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence after unfiltered free registration. Compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "openapi_diff"
         ],
@@ -3475,6 +3648,30 @@
           "serviceName": "Fresh402",
           "iconUrl": "https://fresh402.com/favicon.png"
         },
+        "x-x402-payment-networks": [
+          {
+            "network": "eip155:8453",
+            "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/EVM",
+            "amount": "20000"
+          },
+          {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/SVM",
+            "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+            "finality": "finalized",
+            "amount": "20000"
+          }
+        ],
         "x-mcp-tool": "fresh402_openapi_contract_diff",
         "x-fresh402-tool": {
           "id": "openapi_diff",
@@ -4034,7 +4231,7 @@
       "post": {
         "operationId": "fresh402_contract_watch",
         "summary": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. $0.010000 native USDC/call on Base (eip155:8453); compatible x402 or enabled native MPP client required, no Fresh402 token for first purchase. Save proof/input and private recovery token BEFORE paying for full-response-loss protection: REST X-Fresh402-Recovery-Token; MCP params._meta['fresh402/recovery-token']. Recover originals without new RPC/debit; foreign snapshot/cursor forbidden. Provider failure/partial scan is not paid success. observation_saved=false/persistence_error: recover only, never use unsaved IDs. Prepaid needs eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect /v3/prepaid/quote/contract_watch and /v3/prepaid/all-services. Historical Web rights unchanged; paying agents do not need their own RPC credentials. Observations30days, private financial recovery7days. Not full history, financial advice or security audit. Clients: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "contract_watch"
         ],
@@ -4092,6 +4289,30 @@
           "serviceName": "Fresh402",
           "iconUrl": "https://fresh402.com/favicon.png"
         },
+        "x-x402-payment-networks": [
+          {
+            "network": "eip155:8453",
+            "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/EVM",
+            "amount": "10000"
+          },
+          {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/SVM",
+            "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+            "finality": "finalized",
+            "amount": "10000"
+          }
+        ],
         "x-mcp-tool": "fresh402_contract_watch",
         "x-fresh402-tool": {
           "id": "contract_watch",
@@ -5030,7 +5251,7 @@
       "post": {
         "operationId": "fresh402_wallet_watch",
         "summary": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. $0.020000 native USDC/call on Base (eip155:8453); compatible x402 or enabled native MPP client required, no Fresh402 token for first purchase. Save proof/input and private recovery token BEFORE paying for full-response-loss protection: REST X-Fresh402-Recovery-Token; MCP params._meta['fresh402/recovery-token']. Recover originals without new RPC/debit; foreign snapshot/cursor forbidden. Provider failure/partial scan is not paid success. observation_saved=false/persistence_error: recover only, never use unsaved IDs. Prepaid needs eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect /v3/prepaid/quote/wallet_watch and /v3/prepaid/all-services. Historical Web rights unchanged; paying agents do not need their own RPC credentials. Observations30days, private financial recovery7days. Not full history, financial advice or security audit. Clients: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "wallet_watch"
         ],
@@ -5088,6 +5309,30 @@
           "serviceName": "Fresh402",
           "iconUrl": "https://fresh402.com/favicon.png"
         },
+        "x-x402-payment-networks": [
+          {
+            "network": "eip155:8453",
+            "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/EVM",
+            "amount": "20000"
+          },
+          {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/SVM",
+            "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+            "finality": "finalized",
+            "amount": "20000"
+          }
+        ],
         "x-mcp-tool": "fresh402_wallet_watch",
         "x-fresh402-tool": {
           "id": "wallet_watch",
@@ -5926,7 +6171,7 @@
       "post": {
         "operationId": "fresh402_token_facts",
         "summary": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. $0.010000 native USDC/call on Base (eip155:8453); compatible x402 or enabled native MPP client required, no Fresh402 token for first purchase. Save proof/input and private recovery token BEFORE paying for full-response-loss protection: REST X-Fresh402-Recovery-Token; MCP params._meta['fresh402/recovery-token']. Recover originals without new RPC/debit; foreign snapshot/cursor forbidden. Provider failure/partial scan is not paid success. observation_saved=false/persistence_error: recover only, never use unsaved IDs. Prepaid needs eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect /v3/prepaid/quote/token_facts and /v3/prepaid/all-services. Historical Web rights unchanged; paying agents do not need their own RPC credentials. Observations30days, private financial recovery7days. Not full history, financial advice or security audit. Clients: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "token_facts"
         ],
@@ -5984,6 +6229,30 @@
           "serviceName": "Fresh402",
           "iconUrl": "https://fresh402.com/favicon.png"
         },
+        "x-x402-payment-networks": [
+          {
+            "network": "eip155:8453",
+            "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/EVM",
+            "amount": "10000"
+          },
+          {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/SVM",
+            "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+            "finality": "finalized",
+            "amount": "10000"
+          }
+        ],
         "x-mcp-tool": "fresh402_token_facts",
         "x-fresh402-tool": {
           "id": "token_facts",
@@ -6772,7 +7041,7 @@
       "post": {
         "operationId": "fresh402_website_change_intelligence",
         "summary": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch. One fixed workflow charge; internal steps never create separate customer charges. First source use seeds state in this same operation; later observations use returned owned observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.005 USDC or 2 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch.",
+        "description": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "website_change_intelligence"
         ],
@@ -6826,6 +7095,30 @@
           "serviceName": "Fresh402",
           "iconUrl": "https://fresh402.com/favicon.png"
         },
+        "x-x402-payment-networks": [
+          {
+            "network": "eip155:8453",
+            "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/EVM",
+            "amount": "5000"
+          },
+          {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/SVM",
+            "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+            "finality": "finalized",
+            "amount": "5000"
+          }
+        ],
         "x-mcp-tool": "fresh402_website_change_intelligence",
         "x-fresh402-tool": {
           "id": "website_change_intelligence",
@@ -7720,7 +8013,7 @@
       "post": {
         "operationId": "fresh402_api_compatibility_review",
         "summary": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof. One fixed workflow charge; internal steps never create separate customer charges. First source use seeds state in this same operation; later observations use returned owned observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof.",
+        "description": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "api_compatibility_review"
         ],
@@ -7774,6 +8067,30 @@
           "serviceName": "Fresh402",
           "iconUrl": "https://fresh402.com/favicon.png"
         },
+        "x-x402-payment-networks": [
+          {
+            "network": "eip155:8453",
+            "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/EVM",
+            "amount": "10000"
+          },
+          {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/SVM",
+            "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+            "finality": "finalized",
+            "amount": "10000"
+          }
+        ],
         "x-mcp-tool": "fresh402_api_compatibility_review",
         "x-fresh402-tool": {
           "id": "api_compatibility_review",
@@ -8566,7 +8883,7 @@
       "post": {
         "operationId": "fresh402_onchain_evidence_brief",
         "summary": "Combine selected code/proxy observations, contract-reported token facts and one wallet's single-block ETH/Transfer evidence at one finalized Base block. Shared RPC cache; at most 18 reads. Wallet scope remains a restricted pilot; no complete history or security score. One fixed workflow charge; internal steps never create separate customer charges. Each call selects one finalized Base block. Reuse its contract_snapshot_id only as previous_contract_snapshot for compatible contract comparison; this workflow accepts no observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.025 USDC or 10 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Combine selected code/proxy observations, contract-reported token facts and one wallet's single-block ETH/Transfer evidence at one finalized Base block. Shared RPC cache; at most 18 reads. Wallet scope remains a restricted pilot; no complete history or security score.",
+        "description": "Combine selected code/proxy observations, contract-reported token facts and one wallet's single-block ETH/Transfer evidence at one finalized Base block. Shared RPC cache; at most 18 reads. Wallet scope remains a restricted pilot; no complete history or security score. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "onchain_evidence_brief"
         ],
@@ -8621,6 +8938,30 @@
           "serviceName": "Fresh402",
           "iconUrl": "https://fresh402.com/favicon.png"
         },
+        "x-x402-payment-networks": [
+          {
+            "network": "eip155:8453",
+            "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/EVM",
+            "amount": "25000"
+          },
+          {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/SVM",
+            "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+            "finality": "finalized",
+            "amount": "25000"
+          }
+        ],
         "x-mcp-tool": "fresh402_onchain_evidence_brief",
         "x-fresh402-tool": {
           "id": "onchain_evidence_brief",
@@ -9373,7 +9714,7 @@
       "post": {
         "operationId": "fresh402_cross_domain_release_evidence",
         "summary": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality. One fixed workflow charge; internal steps never create separate customer charges. First source use seeds state in this same operation; later observations use returned owned observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.040 USDC or 16 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality.",
+        "description": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "cross_domain_release_evidence"
         ],
@@ -9428,6 +9769,30 @@
           "serviceName": "Fresh402",
           "iconUrl": "https://fresh402.com/favicon.png"
         },
+        "x-x402-payment-networks": [
+          {
+            "network": "eip155:8453",
+            "asset": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "pay_to": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/EVM",
+            "amount": "40000"
+          },
+          {
+            "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+            "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "pay_to": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+            "decimals": 6,
+            "scheme": "exact",
+            "currency": "USDC",
+            "client": "x402 v2 exact/SVM",
+            "network_fee_payer": "BENrLoUbndxoNMUS5JXApGMtNykLjFXXixMtpDwDR9SP",
+            "finality": "finalized",
+            "amount": "40000"
+          }
+        ],
         "x-mcp-tool": "fresh402_cross_domain_release_evidence",
         "x-fresh402-tool": {
           "id": "cross_domain_release_evidence",
@@ -11417,7 +11782,7 @@
         "security": [],
         "responses": {
           "200": {
-            "description": "When disabled no purchase is offered. When enabled, accept the exact terms_digest explicitly when creating a new all-services-v4 purchase. One-time native Base USDC; no subscription. Existing balances retain original rights. Only finalized eligible credits fund blockchain calls; finite provider/runtime budgets apply.",
+            "description": "When disabled no purchase is offered. When enabled, accept the exact terms_digest explicitly when creating a new all-services-v4 purchase. Network-selected native USDC on Base or Solana where purchasing is available; no subscription. Accept the exact network-bound terms digest. Existing balances retain original rights. Only finalized eligible credits fund blockchain calls; finite provider/runtime budgets apply.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11585,7 +11950,23 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "network",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "eip155:8453",
+                "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+              ],
+              "default": "eip155:8453"
+            },
+            "description": "Choose funding-network-specific terms; omission preserves Base. The exact digest must match the original purchase network."
+          }
+        ]
       }
     },
     "/v2/trial": {
@@ -13305,6 +13686,41 @@
                     "normalizer_version": {
                       "type": "integer"
                     },
+                    "payment_networks": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "network": {
+                            "type": "string"
+                          },
+                          "asset": {
+                            "type": "string"
+                          },
+                          "pay_to": {
+                            "type": "string"
+                          },
+                          "decimals": {
+                            "type": "integer"
+                          },
+                          "scheme": {
+                            "type": "string"
+                          },
+                          "currency": {
+                            "type": "string"
+                          },
+                          "client": {
+                            "type": "string"
+                          },
+                          "network_fee_payer": {
+                            "type": "string"
+                          },
+                          "finality": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
                     "pricing": {
                       "type": "object",
                       "properties": {}
@@ -13412,6 +13828,26 @@
                         },
                         "credits_expire": {
                           "type": "boolean"
+                        },
+                        "payment_networks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "network": {
+                                "type": "string"
+                              },
+                              "asset": {
+                                "type": "string"
+                              },
+                              "pay_to": {
+                                "type": "string"
+                              },
+                              "new_purchases_enabled": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
                         },
                         "plans": {
                           "type": "array",
@@ -13860,7 +14296,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "PAYMENT-SIGNATURE",
-        "description": "x402 v2 exact USDC on Base (eip155:8453); use PAYMENT-REQUIRED challenge."
+        "description": "x402 v2 exact native Circle USDC on Base or Solana Mainnet. Select one PAYMENT-REQUIRED offer; pin its network, contract/mint, recipient, amount and fee payer. MPP is Base-only. Never rewrite an original signed resource or switch networks during recovery."
       }
     },
     "schemas": {
@@ -17938,7 +18374,8 @@
             "type": "string",
             "enum": [
               "eoa-v1",
-              "safe-v1"
+              "safe-v1",
+              "solana-v1"
             ],
             "description": "Immutable original merchant policy. Recover using this intent recipient, regardless of current new-purchase quotes."
           },

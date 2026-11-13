@@ -1,6 +1,9 @@
+import {validateSolanaOwnershipChallenge} from './solana-ownership.ts';
+export {validateSolanaOwnershipChallenge} from './solana-ownership.ts';
 import {randomUUID} from 'node:crypto';
 import {ApiError} from './client.ts';
-import {prepareFundingAuthorization} from './funding.ts';
+import {prepareFundingAuthorization,prepareSolanaFundingAuthorization} from './funding.ts';
+import {BASE_NETWORK,SOLANA_NETWORK,type PaymentNetwork} from './payment-networks.ts';
 type Json=Record<string,any>;
 export type PackageId='candidate-starter-v3'|'candidate-developer-v3'|'starter-all-services-v4'|'developer-all-services-v4';
 export function validateOwnershipChallenge(c:Json,wallet:string,origin:string){
@@ -9,9 +12,10 @@ export function validateOwnershipChallenge(c:Json,wallet:string,origin:string){
 }
 /** Wallet signatures are supplied by the caller. This client never connects a wallet or signs automatically. */
 export class CustomerClient{
- readonly base:string;declare private session?:string;declare private stagingToken?:string;declare private pilotToken?:string;
- constructor(origin:string,options:{stagingToken?:string;pilotToken?:string;sessionToken?:string}={}){
+ readonly base:string;readonly paymentNetwork:PaymentNetwork;declare private session?:string;declare private stagingToken?:string;declare private pilotToken?:string;
+ constructor(origin:string,options:{stagingToken?:string;pilotToken?:string;sessionToken?:string;paymentNetwork?:PaymentNetwork}={}){
   const u=new URL(origin);if(u.protocol!=='https:'||u.pathname!=='/'||u.search||u.hash||u.username||u.password)throw Error('Use a plain HTTPS service origin');this.base=u.origin;
+  this.paymentNetwork=options.paymentNetwork??BASE_NETWORK;if(this.paymentNetwork!==BASE_NETWORK&&this.paymentNetwork!==SOLANA_NETWORK)throw Error('Unsupported payment network');
   for(const [name,value] of Object.entries({session:options.sessionToken,stagingToken:options.stagingToken,pilotToken:options.pilotToken}))Object.defineProperty(this,name,{value,writable:true,enumerable:false});
  }
  private async call(path:string,body?:Json,headers:Record<string,string>={},acceptChallenge=false){
@@ -21,16 +25,17 @@ export class CustomerClient{
   try{while(true){const {value,done}=await reader.read();if(done)break;bytes+=value.byteLength;if(bytes>262144)throw Error('Customer response too large');parts.push(value);}}catch(e){void reader.cancel().catch(()=>{});throw e;}finally{reader.releaseLock();}
   const json=JSON.parse(Buffer.concat(parts).toString('utf8'));if(!r.ok&&!(acceptChallenge&&r.status===402&&json.x402Version===2))throw new ApiError(typeof json.error==='string'&&/^[a-z][a-z0-9_]{0,79}$/.test(json.error)?json.error:'customer_http_'+r.status,r.status);return json;
  }
- plans(){return this.call('/v2/prepaid/plans');}
- allServiceTerms(){return this.call('/v3/prepaid/all-services');}
- async beginSignup(wallet:string,key= randomUUID()){return validateOwnershipChallenge(await this.call('/v2/prepaid/customer/challenge',{wallet},{'idempotency-key':key}),wallet,this.base);}
+ plans(){return this.call('/v2/prepaid/plans'+(this.paymentNetwork===SOLANA_NETWORK?'?network='+encodeURIComponent(this.paymentNetwork):''));}
+ allServiceTerms(){return this.call('/v3/prepaid/all-services'+(this.paymentNetwork===SOLANA_NETWORK?'?network='+encodeURIComponent(this.paymentNetwork):''));}
+ async beginSignup(wallet:string,key= randomUUID()){const c=await this.call('/v2/prepaid/customer/challenge',{wallet,...(this.paymentNetwork===SOLANA_NETWORK?{network:this.paymentNetwork}:{})},{'idempotency-key':key});return this.paymentNetwork===SOLANA_NETWORK?validateSolanaOwnershipChallenge(c,wallet,this.base):validateOwnershipChallenge(c,wallet,this.base);}
  async verifyOwnership(challenge:Json,signature:string){if(!challenge?.challenge_id)throw Error('Missing persisted challenge');const r=await this.call('/v2/prepaid/customer/sessions',{challenge_id:challenge.challenge_id,signature});this.session=r.session_token;return r;}
- preparePurchase(packageId:PackageId,idempotencyKey:string,allServicesTermsDigest?:string){return this.call('/v2/prepaid/customer/funding',{package_id:packageId,...(allServicesTermsDigest?{all_services_terms_digest:allServicesTermsDigest}:{})},{'idempotency-key':idempotencyKey});}
+ preparePurchase(packageId:PackageId,idempotencyKey:string,allServicesTermsDigest?:string){return this.call('/v2/prepaid/customer/funding',{package_id:packageId,...(allServicesTermsDigest?{all_services_terms_digest:allServicesTermsDigest}:{}),...(this.paymentNetwork===SOLANA_NETWORK?{network:this.paymentNetwork}:{})},{'idempotency-key':idempotencyKey});}
  private intentId(intent:Json){if(!/^pf_[a-f0-9]{32}$/.test(intent?.intent_id))throw Error('Invalid funding identity');return intent.intent_id;}
  paymentChallenge(intent:Json){return this.call('/v2/prepaid/customer/funding/'+this.intentId(intent),{}, {},true);}
  preparePayment(intent:Json,challenge:Json,owner:{chainId:number;payer:string;authorizedAtomicUSDC:bigint;expectedRecipient?:string;authorizationDeadline?:number}){const terms:Record<string,[number,number]>={'candidate-starter-v3':[2500000,1000],'candidate-developer-v3':[15000000,10000],'starter-all-services-v4':[2500000,1000],'developer-all-services-v4':[15000000,10000]},expected=terms[intent?.package_id];if(!expected||intent.amount_atomic!==expected[0]||intent.credits!==expected[1]||intent.tariff_version!==3)throw Error('Unsupported or changed package terms; do not sign');return prepareFundingAuthorization(intent,challenge,owner);}
+ prepareSolanaPayment(intent:Json,challenge:Json,owner:Parameters<typeof prepareSolanaFundingAuthorization>[2]){return prepareSolanaFundingAuthorization(intent,challenge,{...owner,expectedOrigin:this.base});}
  /** Explicit already-authorized payment only. Persist intent and authorization privately BEFORE calling. No retry/replacement fallback. */
- submitAuthorizedPayment(intent:Json,payload:Json){if(payload.resource?.url!==intent.resource||payload.payload?.authorization?.nonce!==intent.nonce)throw Error('Use the original persisted funding authorization');return this.call('/v2/prepaid/customer/funding/'+this.intentId(intent),{}, {'payment-signature':Buffer.from(JSON.stringify(payload)).toString('base64')});}
+ submitAuthorizedPayment(intent:Json,payload:Json){if(payload.resource?.url!==intent.resource||(intent.network===SOLANA_NETWORK?payload.accepted?.network!==SOLANA_NETWORK||payload.accepted?.extra?.memo!=='Fresh402 funding '+intent.nonce||typeof payload.payload?.transaction!=='string':payload.payload?.authorization?.nonce!==intent.nonce))throw Error('Use the original persisted funding authorization');return this.call('/v2/prepaid/customer/funding/'+this.intentId(intent),{}, {'payment-signature':Buffer.from(JSON.stringify(payload)).toString('base64')});}
  inspectOriginalPayment(intent:Json,payment:Json){return this.call('/v2/prepaid/customer/funding/'+this.intentId(intent)+'/inspect',{payment});}
  fundingStatus(intent:Json){return this.call('/v2/prepaid/customer/funding/'+this.intentId(intent));}
  /** Read-only bounded polling. The server continues recovery even if this process closes. */

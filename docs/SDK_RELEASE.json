@@ -1,11 +1,11 @@
 {
   "name": "fresh402-sdk",
-  "version": "0.5.0-rc.1",
+  "version": "0.6.0-rc.1",
   "source_sdk_version": "0.3.6",
   "source_client_base_commit": "f9f84b2a97886337be45cd0789bb512eaac92e33",
   "license": "MIT",
   "scope": "Compiled public client files and accompanying package documentation only; private backend and unrelated repository contents excluded",
-  "integrity": "sha512-Fjb9n9Z1QsATXlvjENvjedP0+wn+Eng7KQeWBADZflhH5gdWxpDE6vz3D5JptuiUsCvWjutCF2QRUZCpgkDNdg==",
+  "integrity": "sha512-q7GaYG9zAYi55010sIJcGSacLKS50oApuCPqb5BNl9MYO6p+Il+R6WpqeRDdRGJpldUngQt23mGYhfb8kmc7sg==",
   "registry": "https://registry.npmjs.org/",
   "node": ">=24",
   "format": "ESM",
@@ -15,78 +15,89 @@
   ],
   "runtime_dependencies": 0,
   "clean_public_registry_install": true,
-  "actual_framework_acceptance": "The new server-workflow SDK interfaces, all eleven current tariff quotes and twelve-tool discovery are independently verified from a clean public-registry installation. Optional framework adapters remain separately versioned source integrations.",
-  "tarball_sha256": "571d4ca0c016bee64a76456a3210f92dd1cb0cca309581541b6a3d9bff05b394",
+  "actual_framework_acceptance": "A clean public-registry installation verified root/workflows exports, twelve-tool discovery and all eleven unsigned native-USDC x402 quotes on Base and Solana. No payment was made. Optional framework adapters remain separately versioned source integrations.",
+  "tarball_sha256": "bbc7b85fd5dac60972a5095ff49af9b76689dbd4d6299a0f29c48a9302acddbb",
   "dist_tag": "next",
   "dist_tags_at_verification": {
     "latest": "0.4.0-rc.1",
-    "next": "0.5.0-rc.1"
+    "next": "0.6.0-rc.1"
   },
-  "verified_at": "2026-11-06T04:37:51.952Z",
+  "verified_at": "2026-11-12T23:46:39.673Z",
   "public_registry_acceptance": {
     "clean_install": true,
     "exports": [
       ".",
       "./workflows"
     ],
-    "authenticated_quotes": [
+    "discovery_tools": 12,
+    "unsigned_payment_quotes": [
       {
         "product": "check",
-        "credits": 2,
-        "tariff": 3
+        "amount": "5000",
+        "base": true,
+        "solana": true
       },
       {
         "product": "extract",
-        "credits": 3,
-        "tariff": 3
+        "amount": "10000",
+        "base": true,
+        "solana": true
       },
       {
         "product": "smart_diff",
-        "credits": 4,
-        "tariff": 3
+        "amount": "15000",
+        "base": true,
+        "solana": true
       },
       {
         "product": "openapi_diff",
-        "credits": 5,
-        "tariff": 3
+        "amount": "20000",
+        "base": true,
+        "solana": true
       },
       {
         "product": "contract_watch",
-        "credits": 4,
-        "tariff": 4
+        "amount": "10000",
+        "base": true,
+        "solana": true
       },
       {
         "product": "wallet_watch",
-        "credits": 8,
-        "tariff": 4
+        "amount": "20000",
+        "base": true,
+        "solana": true
       },
       {
         "product": "token_facts",
-        "credits": 4,
-        "tariff": 4
+        "amount": "10000",
+        "base": true,
+        "solana": true
       },
       {
         "product": "website_change_intelligence",
-        "credits": 2,
-        "tariff": 5
+        "amount": "5000",
+        "base": true,
+        "solana": true
       },
       {
         "product": "api_compatibility_review",
-        "credits": 4,
-        "tariff": 5
+        "amount": "10000",
+        "base": true,
+        "solana": true
       },
       {
         "product": "onchain_evidence_brief",
-        "credits": 10,
-        "tariff": 5
+        "amount": "25000",
+        "base": true,
+        "solana": true
       },
       {
         "product": "cross_domain_release_evidence",
-        "credits": 16,
-        "tariff": 5
+        "amount": "40000",
+        "base": true,
+        "solana": true
       }
     ],
-    "discovery_tools": 12,
     "credit_debits": 0,
     "payments": 0
   }

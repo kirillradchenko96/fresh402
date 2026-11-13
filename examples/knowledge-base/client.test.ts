@@ -2,7 +2,20 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {inspect} from 'node:util';
 import {Fresh402Client,localMockSigner,syncDocumentation,PendingPayment,PaymentRequired} from './client.ts';
+import type {Operation} from './client.ts';
 import {startContractDemo} from './demo.ts';
+
+test('completed Web snapshot reuse and Wallet Watch cursor delivery do not become false payment incidents',async()=>{
+ const cases:[string,Record<string,unknown>][]=[['fresh402_check',{snapshot_saved:false,cached:true,changed:true}],['fresh402_check',{snapshot_saved:false,cache_status:'revalidated_not_modified',changed:false}],['fresh402_check',{snapshot_saved:false,cache_status:'miss',changed:false}],['fresh402_smart_diff',{snapshot_saved:false,changed:false}],['fresh402_openapi_contract_diff',{snapshot_saved:false,changed:false}],['fresh402_wallet_watch',{snapshot_saved:false,observation_saved:true,cursor_saved:true}]];
+ for(const [tool,result]of cases){let signs=0,saves=0,calls=0;const c=new Fresh402Client('https://example.com',{signer:async()=>{signs++;throw Error('No replacement signing');},persist:async()=>{saves++;}});c.raw=async()=>{calls++;return{result,receipt:{success:true,network:'eip155:8453',transaction:'0x'+'1'.repeat(64)}};};const op:Operation={tool,input:{},payment:{},recoveryToken:'private-unit-placeholder',amount:'5000',state:'pending'};
+  await c.recover(op);await c.recover(op);assert.equal(op.state,'completed',tool);assert.deepEqual(op.result,result);assert.equal(signs,0);assert.equal(c.reserved,0n);assert.equal(calls,2);assert.equal(saves,2);
+ }
+});
+
+test('explicit persistence failures and required snapshots/cursors still require original-only recovery',async()=>{
+ const cases:[string,Record<string,unknown>][]=[['fresh402_check',{snapshot_saved:false,persistence_error:'pending'}],['fresh402_smart_diff',{snapshot_saved:false,persistence_error:'pending'}],['fresh402_openapi_contract_diff',{snapshot_saved:false,persistence_error:'pending'}],['fresh402_wallet_watch',{snapshot_saved:false,observation_saved:true,cursor_saved:false}],['fresh402_wallet_watch',{snapshot_saved:false,observation_saved:true}],['fresh402_wallet_watch',{snapshot_saved:false,observation_saved:false,cursor_saved:true}],['fresh402_contract_watch',{snapshot_saved:false,observation_saved:true}],['fresh402_token_facts',{snapshot_saved:false,observation_saved:true}],['fresh402_website_change_intelligence',{snapshot_saved:false}],['fresh402_website_change_intelligence',{workflow_state_saved:false}]];
+ for(const [tool,result]of cases){const c=new Fresh402Client('https://example.com',{persist:async()=>{}});c.raw=async()=>({result,receipt:{success:true,network:'eip155:8453',transaction:'0x'+'1'.repeat(64)}});const op:Operation={tool,input:{},payment:{},recoveryToken:'private-unit-placeholder',amount:'5000',state:'authorized'};await assert.rejects(c.recover(op),PendingPayment);assert.equal(op.state,'pending',tool);assert.equal(op.result,undefined);assert.equal(c.reserved,0n);}
+});
 
 for(const transport of ['rest','mcp'] as const)test('public-contract '+transport+' discovery, noise filtering and private recovery',async()=>{
  const demo=await startContractDemo(),operations=new Map<string,any>();try{const client=new Fresh402Client(demo.base,{transport,maxAtomicUSDC:100000n,signer:localMockSigner(demo.base),persist:async op=>{operations.set(op.recoveryToken,structuredClone(op));}});assert.equal((await client.discover()).version,'2.0.0');let state=await syncDocumentation(client,'https://documentation.fixture.example/');assert.equal(state.refreshes,1);assert.equal(client.reserved,10000n);

@@ -13,6 +13,7 @@
 
 - [Machine trial](MACHINE_TRIAL.md), [human Web trial](FREE_TRIAL.md)
 - [Current prices](PRICING.md), [agent prepaid purchase](AGENT_PREPAID.md), [customer API](SELF_SERVICE.md)
+- [Base and Solana native-USDC selection, ownership and recovery](SOLANA_USDC.md)
 - [Native MPP and original-operation recovery](MPP.md), [payment recovery](API.md#payment-and-recovery)
 - [Explicitly opted-in customer replenishment](AUTO_REPLENISH.md), [disabled Circle rail](CIRCLE_GATEWAY.md)
 

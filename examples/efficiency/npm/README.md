@@ -1,9 +1,9 @@
 # Fresh402 SDK
 
-The client package is `fresh402-sdk@0.5.0-rc.1`, under MIT. Use the exact prerelease version; confirm the version, integrity and `next` tag in the public npm registry. Earlier 0.4.0-rc.2 and the separate `latest` release remain available. The source-client compatibility version remains 0.3.6; the hosted API has its own version. This license covers the package's public client files and accompanying documentation only, not the private Fresh402 backend or unrelated repository contents.
+The client package is `fresh402-sdk@0.6.0-rc.1`, under MIT. Use the exact prerelease version; confirm the version, integrity and `next` tag in the public npm registry. Earlier 0.4.0-rc.2 and the separate `latest` release remain available. The source-client compatibility version remains 0.3.6; the hosted API has its own version. This license covers the package's public client files and accompanying documentation only, not the private Fresh402 backend or unrelated repository contents.
 
 ```sh
-npm install fresh402-sdk@0.5.0-rc.1
+npm install fresh402-sdk@0.6.0-rc.1
 ```
 
 Node.js 24 or later, ESM only, TypeScript declarations included. Zero runtime dependencies and no install scripts. No CommonJS or browser-wallet support is claimed. The package never creates a wallet, signs a payment or spends on import.

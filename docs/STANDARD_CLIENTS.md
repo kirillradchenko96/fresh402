@@ -39,7 +39,7 @@ The equivalent unsigned REST POST returns HTTP 402 with `PAYMENT-REQUIRED`. A cl
 
 ## Payment-capable clients
 
-The client needs its own compatible authorized signer, native Base USDC and spending permission. Merely connecting an MCP server supplies none of these. Do not put private keys in prompts, source, URLs or logs. Obtain signer objects through your wallet provider's protected integration.
+The client needs its own compatible authorized signer, native USDC on the explicitly selected advertised network and spending permission. The EVM wrapper below is the Base example; [Solana uses a compatible exact/SVM signer and its separate mint/merchant](SOLANA_USDC.md). Merely connecting an MCP server supplies none of these. Do not put private keys in prompts, source, URLs or logs. Obtain signer objects through your wallet provider's protected integration.
 
 Current client acceptance: MCP SDK 1.32.2, `@x402/core`, `@x402/evm`, `@x402/mcp` and `@x402/fetch` 2.29.0; `agents` 0.32.0; `mppx` 0.17.0. All seven products completed isolated synthetic server tests with unmodified clients. This is not fresh mainnet settlement proof. Older tracked examples remain documented separately.
 
@@ -78,8 +78,25 @@ An on-chain signature, nonce or transaction hash is public evidence, not private
 
 ## Wallet and error boundaries
 
-Signed human/machine trial enrollment uses the exact returned EIP-191 EOA message. Customer-account ownership uses the returned EIP-712 typed data; it is a separate authentication flow. This does not require a funded wallet. Per-call payments use EIP-3009 USDC authorization through a compatible EIP-712 signer and the facilitator. EOA, delegated EOA and provider-managed EOA signers must expose the required signing interface; provider integration itself was not independently certified by the synthetic tests. Do not infer ERC-1271 contract-wallet support, an arbitrary smart-account signature mode or every delegated-wallet extension from SDK support alone. Fresh402 native MPP currently requires its supported 65-byte ECDSA signature form. The receiving Safe is independent of payer-wallet support.
+Signed human/machine trial enrollment uses the exact returned EIP-191 EOA message. Base customer-account ownership uses the returned EIP-712 typed data; Solana customer ownership uses its exact single-use UTF-8 message and Ed25519 signature. These are separate authentication flows. This does not require a funded wallet. Per-call payments use EIP-3009 USDC authorization through a compatible EIP-712 signer and the facilitator. EOA, delegated EOA and provider-managed EOA signers must expose the required signing interface; provider integration itself was not independently certified by the synthetic tests. Do not infer ERC-1271 contract-wallet support, an arbitrary smart-account signature mode or every delegated-wallet extension from SDK support alone. Fresh402 native MPP currently requires its supported 65-byte ECDSA signature form. The receiving Safe is independent of payer-wallet support.
 
 MCP errors must be read through `isError` and structured `error`, `message`, `status` where present; native MPP also has its standard payment errors. Wallet-not-configured, owner-denied approval and insufficient local wallet funds can originate in the client before Fresh402 receives a request. Do not mislabel them server outages. Server errors distinguish invalid input (400), payment rejection (402), original-operation conflict/pending (409), expired result (410), bounded rate/capacity denial (429), upstream failure (502/504) and service/reconciliation unavailable (503). Preserve original evidence after any payment uncertainty; neither 409 nor 503 authorizes a new payment.
 
-For repeated use, [prepaid accounts](AGENT_PREPAID.md) share existing REST/MCP balances. Optional convenience clients are available as the published [fresh402-sdk@0.5.0-rc.1](SDK_PACKAGE.md) and separately versioned source integrations. They are not required for the standard integrations above.
+For repeated use, [prepaid accounts](AGENT_PREPAID.md) share existing REST/MCP balances. Optional convenience clients are available as the published [fresh402-sdk@0.6.0-rc.1](SDK_PACKAGE.md) and separately versioned source integrations. They are not required for the standard integrations above.
+
+## Python ordinary HTTP discovery
+
+Cloudflare currently rejects the default Python urllib User-Agent with 403 / 1010. Identify your client truthfully; do not impersonate a browser, retry a denial repeatedly or disable edge protections. This standard-library discovery request uses no wallet, API key, trial quota or product execution:
+
+```python
+import json, urllib.request
+request = urllib.request.Request(
+    "https://api.fresh402.com/",
+    headers={"Accept": "application/json",
+             "User-Agent": "Fresh402-Python-Example/1.0"})
+with urllib.request.urlopen(request, timeout=30) as response:
+    discovery = json.load(response)
+print(discovery["version"])
+```
+
+Use the same client identification with the [free Register example](https://fresh402.com/docs#clients). Registration performs a bounded source fetch only for a new canonical watch, consumes admission capacity and is distinct from a Check. A descriptive User-Agent is not authentication or permission to bypass a denial.

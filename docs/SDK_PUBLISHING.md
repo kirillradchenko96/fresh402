@@ -1,6 +1,6 @@
 # Future SDK releases
 
-The current next prerelease is fresh402-sdk@0.5.0-rc.1 under client-only MIT; latest remains 0.4.0-rc.1. Its archive integrity, clean public-registry installation, exports, twelve-tool discovery and all eleven authenticated quotes were verified. Earlier prereleases remain historical. See [current installation](SDK_PACKAGE.md) and [recorded integrity](SDK_RELEASE.json). No SDK publication is needed for prose changes.
+The current next prerelease is fresh402-sdk@0.6.0-rc.1 under client-only MIT; latest remains 0.4.0-rc.1. Its archive integrity, clean public-registry installation, exports, twelve-tool discovery and all eleven authenticated quotes were verified. Earlier prereleases remain historical. See [current installation](SDK_PACKAGE.md) and [recorded integrity](SDK_RELEASE.json). No SDK publication is needed for prose changes.
 
 The optional npm-sdk-stage.yml workflow is manual and **does not directly publish a new public version**. It verifies an exact reviewed commit and immutable sdk-v tag descended from public main, runs client/docs checks, packs only public client files and stages the next release. A maintainer must review/promote that stage using npm 2FA. Existing versions cannot be overwritten. No long-lived npm token, backend source, Cloudflare permission or wallet authority is needed.
 

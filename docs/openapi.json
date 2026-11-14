@@ -13774,7 +13774,11 @@
                           "const": true
                         },
                         "expires_at": {
-                          "type": "integer"
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Authorization expiry in Unix milliseconds, or null for the existing cumulative mode; live eligibility and finite shared budgets still apply."
                         },
                         "payments_automatic": {
                           "const": false

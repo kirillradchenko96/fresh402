@@ -1,5 +1,7 @@
 # Fresh402 — complete intelligence workflows for autonomous agents
 
+Start with the [walletless Check guide](https://api.fresh402.com/start), [read-only network eligibility](https://api.fresh402.com/v1/check/evaluation-eligibility), or fixed real-code [Website](https://api.fresh402.com/v4/demos/website-change) and [API](https://api.fresh402.com/v4/demos/api-compatibility) fixtures. Fixtures do not fetch live sources, mutate customer state or charge money. [Reuse a free Register baseline in an explicitly authorized workflow](docs/BASELINE_CONTINUITY.md). The [live release identity](https://api.fresh402.com/release.json) distinguishes product, contract, registry metadata and SDK versions.
+
 Four server workflows turn website, API and finalized Base tasks into structured evidence: **Website Change Intelligence**, **API Compatibility Review**, **On-chain Evidence Brief** and **Cross-domain Release Evidence**. One authorized operation combines its internal stages, with reusable observations and exact original-result recovery. Seven focused paid tools and free Register remain available through REST and MCP.
 
 Hosted API **3.1.0**. This repository contains public documentation and source clients; the hosted backend remains private. [Choose a workflow](https://fresh402.com/workflows) · [Working inputs and state](docs/SERVER_WORKFLOWS.md) · [Start free](https://fresh402.com/docs#instant-evaluation).
@@ -59,7 +61,7 @@ After uncertain delivery, recover the original input, operation key and payment 
 
 ## Source SDK and documentation
 
-The compiled prerelease [fresh402-sdk@0.6.0-rc.1](https://www.npmjs.com/package/fresh402-sdk/v/0.6.0-rc.1) is published under MIT for the public client SDK only. Install explicitly with `npm install fresh402-sdk@0.6.0-rc.1` or select `@next`; `latest` remains `0.4.0-rc.1`. Version 0.5.0-rc.1 adds four server workflow bindings, exact tariff-5 quotes and original-operation recovery alongside seven-service prepaid execution. Node 24+, ESM, declarations, zero runtime dependencies; no automatic wallet/signing or spending. The separately versioned source-client compatibility version remains 0.3.6. [Package guide](docs/SDK_PACKAGE.md).
+The compiled prerelease [fresh402-sdk@0.6.1-rc.1](https://www.npmjs.com/package/fresh402-sdk/v/0.6.1-rc.1) is published under MIT for the public client SDK only. Install explicitly with `npm install fresh402-sdk@0.6.1-rc.1` or select `@next`; `latest` remains `0.4.0-rc.1`. Version 0.5.0-rc.1 adds four server workflow bindings, exact tariff-5 quotes and original-operation recovery alongside seven-service prepaid execution. Node 24+, ESM, declarations, zero runtime dependencies; no automatic wallet/signing or spending. The separately versioned source-client compatibility version remains 0.3.6. [Package guide](docs/SDK_PACKAGE.md).
 
 [Documentation index](docs/README.md) · [API](docs/API.md) · [MCP](docs/MCP.md) · [Examples](examples/README.md) · [Version relationships](docs/VERSIONS.md) · [Changelog](CHANGELOG.md) · [Website](https://fresh402.com/docs).
 

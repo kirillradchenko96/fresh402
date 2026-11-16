@@ -1,4 +1,37 @@
 {
+  "x-release": {
+    "schema": "fresh402-release-definition-v1",
+    "product_version": "3.1.0",
+    "mcp_server_version": "3.1.0",
+    "api_contract_revision": "2026-11-16.1",
+    "tool_catalog_revision": "12-tools-baseline-continuity-v1",
+    "registry_metadata_version": "3.1.2",
+    "sdk": {
+      "recommended": "0.6.1-rc.1",
+      "channel": "next",
+      "prerelease": true,
+      "source_compatibility_version": "0.3.6",
+      "node": ">=24",
+      "module": "ESM"
+    },
+    "baseline_continuity": {
+      "input": "source_watch_id",
+      "website": true,
+      "api": "unfiltered JSON OpenAPI 3.0/3.1",
+      "cross_domain_component": "website only",
+      "ownership_from_public_watch": false
+    },
+    "workflow_retention_days": 7,
+    "solana_mpp_mainnet_accepted": false,
+    "solana_mpp_default": "disabled",
+    "canonical_origin": "https://api.fresh402.com",
+    "legacy_origin": "https://fresh402.kirilllabs.workers.dev",
+    "documentation_url": "https://github.com/kirillradchenko96/fresh402",
+    "source_commit": null,
+    "worker_version": null,
+    "build_timestamp": null,
+    "capability_policy": "Live feature flags and exact unpaid requirements are authoritative; the release definition does not enable a payment method or grant capacity."
+  },
   "x-payment-networks": [
     {
       "network": "eip155:8453",
@@ -22,9 +55,16 @@
     }
   ],
   "x-instant-evaluation": {
-    "enabled": true,
+    "enabled": false,
     "tool": "fresh402_check",
     "endpoint": "/v1/check",
+    "eligibility_endpoint": "/v1/check/evaluation-eligibility",
+    "eligibility_advisory": true,
+    "start_url": "https://api.fresh402.com/start",
+    "demo_urls": [
+      "/v4/demos/website-change",
+      "/v4/demos/api-compatibility"
+    ],
     "input": {
       "evaluation": true
     },
@@ -38,7 +78,7 @@
     "payments_automatic": false
   },
   "x-machine-trial": {
-    "enabled": true,
+    "enabled": false,
     "model": "one-time bounded machine trial; wallet control is not unique-agent identity",
     "allowances": {
       "check": 100,
@@ -131,6 +171,10 @@
       "mixed_x402": false
     },
     "provisional": {
+      "eligible_cohort": "eligible legacy Base purchases only",
+      "all_services_eligible": false,
+      "new_all_services_requires_finalized": true,
+      "payment_network": "eip155:8453",
       "enabled": true,
       "starter_max": 50,
       "developer_max": 100,
@@ -138,7 +182,7 @@
       "minimum_l2_confirmations": 3,
       "independent_corroboration": true,
       "not_finality": true,
-      "policy": "New eligible purchases only; evidence freshness, finite verification and account/payer/project caps may freeze or deny early access. Full entitlement requires finalized settlement."
+      "policy": "Eligible legacy Base purchases only; new AllServices packages require finalized settlement. Solana purchases never receive provisional credits. Legacy eligibility remains subject to evidence freshness, finite verification and account/payer/project caps may freeze or deny early access. Full entitlement requires finalized settlement."
     }
   },
   "x-prepaid-availability": {
@@ -1319,11 +1363,261 @@
         ]
       }
     },
+    "/release.json": {
+      "get": {
+        "operationId": "fresh402_release_identity",
+        "summary": "Canonical public release/contract/SDK/build identity; live flags and exact quotes remain authoritative",
+        "responses": {
+          "200": {
+            "description": "No secrets, financial identifiers or grants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "schema": {
+                      "type": "string"
+                    },
+                    "product_version": {
+                      "type": "string"
+                    },
+                    "mcp_server_version": {
+                      "type": "string"
+                    },
+                    "api_contract_revision": {
+                      "type": "string"
+                    },
+                    "tool_catalog_revision": {
+                      "type": "string"
+                    },
+                    "registry_metadata_version": {
+                      "type": "string"
+                    },
+                    "sdk": {
+                      "type": "object",
+                      "properties": {
+                        "recommended": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "prerelease": {
+                          "type": "boolean"
+                        },
+                        "source_compatibility_version": {
+                          "type": "string"
+                        },
+                        "node": {
+                          "type": "string"
+                        },
+                        "module": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "baseline_continuity": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "workflow_retention_days": {
+                      "type": "integer"
+                    },
+                    "solana_mpp_mainnet_accepted": {
+                      "type": "boolean"
+                    },
+                    "solana_mpp_default": {
+                      "type": "string"
+                    },
+                    "canonical_origin": {
+                      "type": "string"
+                    },
+                    "legacy_origin": {
+                      "type": "string"
+                    },
+                    "documentation_url": {
+                      "type": "string"
+                    },
+                    "source_commit": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "worker_version": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "build_timestamp": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "capability_policy": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/check/evaluation-eligibility": {
+      "get": {
+        "operationId": "fresh402_evaluation_eligibility",
+        "summary": "Advisory SELECT-only walletless Check eligibility for this verified network; consumes no allowance and creates no identity",
+        "responses": {
+          "200": {
+            "description": "No reservation or payment authority. Exhausted is terminal for the approved period; shared capacity can change after an eligible response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "state",
+                    "advisory",
+                    "consumes_allowance",
+                    "reserves_capacity"
+                  ],
+                  "properties": {
+                    "state": {
+                      "type": "string",
+                      "enum": [
+                        "eligible",
+                        "exhausted",
+                        "temporarily_unavailable",
+                        "disabled"
+                      ]
+                    },
+                    "advisory": {
+                      "const": true
+                    },
+                    "consumes_allowance": {
+                      "const": false
+                    },
+                    "reserves_capacity": {
+                      "const": false
+                    },
+                    "payments_automatic": {
+                      "const": false
+                    },
+                    "retryable": {
+                      "type": "boolean"
+                    },
+                    "next_actions": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "demo_urls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v4/demos/website-change": {
+      "get": {
+        "operationId": "fresh402_fixture_website_change",
+        "summary": "Fixed embedded fixtures evaluated by production normalization and comparison code; no live source, customer state or payment",
+        "responses": {
+          "200": {
+            "description": "Seed/change/unchanged fixture evidence with explicit provenance. No arbitrary inputs or workflow execution.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fixture": {
+                      "const": true
+                    },
+                    "live_source": {
+                      "const": false
+                    },
+                    "payment": {
+                      "const": false
+                    },
+                    "source_fetches": {
+                      "const": 0
+                    },
+                    "steps": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Query input is not accepted"
+          }
+        }
+      }
+    },
+    "/v4/demos/api-compatibility": {
+      "get": {
+        "operationId": "fresh402_fixture_api_compatibility",
+        "summary": "Fixed embedded fixtures evaluated by production normalization and comparison code; no live source, customer state or payment",
+        "responses": {
+          "200": {
+            "description": "Seed/change/unchanged fixture evidence with explicit provenance. No arbitrary inputs or workflow execution.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fixture": {
+                      "const": true
+                    },
+                    "live_source": {
+                      "const": false
+                    },
+                    "payment": {
+                      "const": false
+                    },
+                    "source_fetches": {
+                      "const": 0
+                    },
+                    "steps": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Query input is not accepted"
+          }
+        }
+      }
+    },
     "/v1/check": {
       "post": {
         "operationId": "fresh402_check",
         "summary": "Use Check for on-demand changed/unchanged, hash, cache status and optional text diff across sessions. Exactly one url or real watch_id; URL/rules can create a watch, while watch_id reuses rules and forbids overrides. Save returned ID/hash. First URL observation may return changed:null. max_age_seconds defaults0 (conditional revalidation); positive age permits cached evidence. html_attributes observes selected same-text attribute changes. Public HTTPS, no JavaScript or scheduler. Use Smart Diff for structured changes; when advertised, Website Change Intelligence combines observation and supported evidence in one charge. Walletless first Check: require root instant_evaluation.enabled, then set evaluation:true with valid URL/watch input. One attempt per verified network prefix per approved period, sharing finite capacity; no wallet, key, custom header or proprietary SDK. Exact replay returns retained evidence, not a new fetch;429 never authorizes payment. $0.005 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge. Explicit evaluation:true selects one bounded walletless Check attempt per verified network prefix per approved period, sharing existing machine-trial budgets. No custom headers, credential or automatic payment; default remains paid. Identical input from the same network replays the retained result for at most seven days; changed input after use returns429. Availability and capacity can deny earlier.",
+        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "check"
         ],
@@ -1333,11 +1627,7 @@
           },
           {
             "mppPayment": []
-          },
-          {
-            "trialKey": []
-          },
-          {}
+          }
         ],
         "x-payment-info": {
           "protocols": [
@@ -1466,8 +1756,8 @@
                     "description": "Supply exactly one of url or watch_id. URL must be absolute public HTTPS on port 443, at most 4096 characters, with no credentials/private targets, e.g. 'https://example.com/docs'. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. With url, optional content rules identify the watch; an existing watch is reused or a new one is created by this paid Check. Separate registration is not required. No JavaScript rendering.",
                     "type": "string",
                     "maxLength": 4096,
-                    "format": "uri",
-                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]://"
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
+                    "format": "uri"
                   },
                   "watch_id": {
                     "description": "Supply exactly one of watch_id or url. An existing ID returned by fresh402_register (free), POST /v1/register, or a URL-based Check: 'w_' followed by 32 lowercase hexadecimal characters. Reuses that watch's stored URL and rules. When supplied, omit selector, ignore_selectors and ignore_json_paths entirely, even empty arrays. Do not invent an ID.",
@@ -1539,12 +1829,46 @@
                   {
                     "required": [
                       "url"
-                    ]
+                    ],
+                    "not": {
+                      "required": [
+                        "watch_id"
+                      ]
+                    }
                   },
                   {
                     "required": [
                       "watch_id"
-                    ]
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "selector"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "ignore_selectors"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "ignore_json_paths"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "html_attributes"
+                          ]
+                        }
+                      ]
+                    }
                   }
                 ],
                 "examples": [
@@ -1822,8 +2146,8 @@
                     "description": "Supply exactly one of url or watch_id. URL must be absolute public HTTPS on port 443, at most 4096 characters, with no credentials/private targets, e.g. 'https://example.com/docs'. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. With url, optional content rules identify the watch; an existing watch is reused or a new one is created by this paid Check. Separate registration is not required. No JavaScript rendering.",
                     "type": "string",
                     "maxLength": 4096,
-                    "format": "uri",
-                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]://"
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
+                    "format": "uri"
                   },
                   "watch_id": {
                     "description": "Supply exactly one of watch_id or url. An existing ID returned by fresh402_register (free), POST /v1/register, or a URL-based Check: 'w_' followed by 32 lowercase hexadecimal characters. Reuses that watch's stored URL and rules. When supplied, omit selector, ignore_selectors and ignore_json_paths entirely, even empty arrays. Do not invent an ID.",
@@ -1895,12 +2219,46 @@
                   {
                     "required": [
                       "url"
-                    ]
+                    ],
+                    "not": {
+                      "required": [
+                        "watch_id"
+                      ]
+                    }
                   },
                   {
                     "required": [
                       "watch_id"
-                    ]
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "selector"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "ignore_selectors"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "ignore_json_paths"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "html_attributes"
+                          ]
+                        }
+                      ]
+                    }
                   }
                 ],
                 "examples": [
@@ -2093,9 +2451,6 @@
           },
           {
             "mppPayment": []
-          },
-          {
-            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -2220,9 +2575,9 @@
                   "url": {
                     "type": "string",
                     "maxLength": 4096,
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
                     "format": "uri",
-                    "description": "Required absolute public HTTPS document URL, at most 4096 characters, e.g. 'https://example.com/docs'. Only port 443; no embedded credentials, private/local targets or authenticated pages. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. HTML, JSON and plain text are supported; JavaScript is not executed. DNS, redirect and size limits also apply.",
-                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]://"
+                    "description": "Required absolute public HTTPS document URL, at most 4096 characters, e.g. 'https://example.com/docs'. Only port 443; no embedded credentials, private/local targets or authenticated pages. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. HTML, JSON and plain text are supported; JavaScript is not executed. DNS, redirect and size limits also apply."
                   },
                   "selector": {
                     "description": "Optional HTML CSS scope, 1-256 characters, e.g. 'article'. If omitted, choose main, then article, then body, then the document. Explicit scope must match (otherwise 422). Built-in noise and ignore_selectors are removed. Not supported for JSON/plain text.",
@@ -2613,9 +2968,9 @@
                   "url": {
                     "type": "string",
                     "maxLength": 4096,
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
                     "format": "uri",
-                    "description": "Required absolute public HTTPS document URL, at most 4096 characters, e.g. 'https://example.com/docs'. Only port 443; no embedded credentials, private/local targets or authenticated pages. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. HTML, JSON and plain text are supported; JavaScript is not executed. DNS, redirect and size limits also apply.",
-                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]://"
+                    "description": "Required absolute public HTTPS document URL, at most 4096 characters, e.g. 'https://example.com/docs'. Only port 443; no embedded credentials, private/local targets or authenticated pages. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. HTML, JSON and plain text are supported; JavaScript is not executed. DNS, redirect and size limits also apply."
                   },
                   "selector": {
                     "description": "Optional HTML CSS scope, 1-256 characters, e.g. 'article'. If omitted, choose main, then article, then body, then the document. Explicit scope must match (otherwise 422). Built-in noise and ignore_selectors are removed. Not supported for JSON/plain text.",
@@ -2926,9 +3281,6 @@
           },
           {
             "mppPayment": []
-          },
-          {
-            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -3601,9 +3953,6 @@
           },
           {
             "mppPayment": []
-          },
-          {
-            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -4241,9 +4590,6 @@
           },
           {
             "mppPayment": []
-          },
-          {
-            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -5261,9 +5607,6 @@
           },
           {
             "mppPayment": []
-          },
-          {
-            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -6181,9 +6524,6 @@
           },
           {
             "mppPayment": []
-          },
-          {
-            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -7040,7 +7380,7 @@
     "/v4/workflows/website-change-intelligence": {
       "post": {
         "operationId": "fresh402_website_change_intelligence",
-        "summary": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch. One fixed workflow charge; internal steps never create separate customer charges. First source use seeds state in this same operation; later observations use returned owned observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.005 USDC or 2 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "summary": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch. One fixed workflow charge; internal steps never create separate customer charges. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.005 USDC or 2 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
         "description": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "website_change_intelligence"
@@ -7162,10 +7502,16 @@
                 "type": "object",
                 "properties": {
                   "url": {
-                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Exactly one of url, source_watch_id or observation_id. A new URL identity seeds once; the next operation compares.",
                     "type": "string",
                     "maxLength": 4096,
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
                     "format": "uri"
+                  },
+                  "source_watch_id": {
+                    "description": "Adopt the current retained public Register observation as the prior baseline, with its exact immutable URL/scope and original timestamp. No baseline refetch or ownership grant. Exactly one of url, source_watch_id or observation_id; omit scope. Complete compatible normalizer-v2 evidence required; API review additionally requires unfiltered JSON OpenAPI. One paid new observation is compared; save returned owned observation_id for continuation. Missing/incomplete baselines fail explicitly, never silently reseed.",
+                    "type": "string",
+                    "pattern": "^w_[a-f0-9]{32}$"
                   },
                   "observation_id": {
                     "type": "string",
@@ -7249,8 +7595,41 @@
                       "url"
                     ],
                     "not": {
-                      "required": [
-                        "observation_id"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "source_watch_id"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
                       ]
                     }
                   },
@@ -7263,6 +7642,11 @@
                         {
                           "required": [
                             "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
                           ]
                         },
                         {
@@ -7537,10 +7921,16 @@
                 "type": "object",
                 "properties": {
                   "url": {
-                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Exactly one of url, source_watch_id or observation_id. A new URL identity seeds once; the next operation compares.",
                     "type": "string",
                     "maxLength": 4096,
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
                     "format": "uri"
+                  },
+                  "source_watch_id": {
+                    "description": "Adopt the current retained public Register observation as the prior baseline, with its exact immutable URL/scope and original timestamp. No baseline refetch or ownership grant. Exactly one of url, source_watch_id or observation_id; omit scope. Complete compatible normalizer-v2 evidence required; API review additionally requires unfiltered JSON OpenAPI. One paid new observation is compared; save returned owned observation_id for continuation. Missing/incomplete baselines fail explicitly, never silently reseed.",
+                    "type": "string",
+                    "pattern": "^w_[a-f0-9]{32}$"
                   },
                   "observation_id": {
                     "type": "string",
@@ -7624,8 +8014,41 @@
                       "url"
                     ],
                     "not": {
-                      "required": [
-                        "observation_id"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "source_watch_id"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
                       ]
                     }
                   },
@@ -7638,6 +8061,11 @@
                         {
                           "required": [
                             "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
                           ]
                         },
                         {
@@ -8012,7 +8440,7 @@
     "/v4/workflows/api-compatibility-review": {
       "post": {
         "operationId": "fresh402_api_compatibility_review",
-        "summary": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof. One fixed workflow charge; internal steps never create separate customer charges. First source use seeds state in this same operation; later observations use returned owned observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "summary": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof. One fixed workflow charge; internal steps never create separate customer charges. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
         "description": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "api_compatibility_review"
@@ -8134,10 +8562,16 @@
                 "type": "object",
                 "properties": {
                   "url": {
-                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Exactly one of url, source_watch_id or observation_id. A new URL identity seeds once; the next operation compares.",
                     "type": "string",
                     "maxLength": 4096,
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
                     "format": "uri"
+                  },
+                  "source_watch_id": {
+                    "description": "Adopt the current retained public Register observation as the prior baseline, with its exact immutable URL/scope and original timestamp. No baseline refetch or ownership grant. Exactly one of url, source_watch_id or observation_id; omit scope. Complete compatible normalizer-v2 evidence required; API review additionally requires unfiltered JSON OpenAPI. One paid new observation is compared; save returned owned observation_id for continuation. Missing/incomplete baselines fail explicitly, never silently reseed.",
+                    "type": "string",
+                    "pattern": "^w_[a-f0-9]{32}$"
                   },
                   "observation_id": {
                     "type": "string",
@@ -8170,8 +8604,41 @@
                       "url"
                     ],
                     "not": {
-                      "required": [
-                        "observation_id"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "source_watch_id"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
                       ]
                     }
                   },
@@ -8184,6 +8651,11 @@
                         {
                           "required": [
                             "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
                           ]
                         },
                         {
@@ -8458,10 +8930,16 @@
                 "type": "object",
                 "properties": {
                   "url": {
-                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Exactly one of url, source_watch_id or observation_id. A new URL identity seeds once; the next operation compares.",
                     "type": "string",
                     "maxLength": 4096,
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
                     "format": "uri"
+                  },
+                  "source_watch_id": {
+                    "description": "Adopt the current retained public Register observation as the prior baseline, with its exact immutable URL/scope and original timestamp. No baseline refetch or ownership grant. Exactly one of url, source_watch_id or observation_id; omit scope. Complete compatible normalizer-v2 evidence required; API review additionally requires unfiltered JSON OpenAPI. One paid new observation is compared; save returned owned observation_id for continuation. Missing/incomplete baselines fail explicitly, never silently reseed.",
+                    "type": "string",
+                    "pattern": "^w_[a-f0-9]{32}$"
                   },
                   "observation_id": {
                     "type": "string",
@@ -8494,8 +8972,41 @@
                       "url"
                     ],
                     "not": {
-                      "required": [
-                        "observation_id"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "source_watch_id"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
                       ]
                     }
                   },
@@ -8508,6 +9019,11 @@
                         {
                           "required": [
                             "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
                           ]
                         },
                         {
@@ -9713,7 +10229,7 @@
     "/v4/workflows/cross-domain-release-evidence": {
       "post": {
         "operationId": "fresh402_cross_domain_release_evidence",
-        "summary": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality. One fixed workflow charge; internal steps never create separate customer charges. First source use seeds state in this same operation; later observations use returned owned observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.040 USDC or 16 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "summary": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality. One fixed workflow charge; internal steps never create separate customer charges. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.040 USDC or 16 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
         "description": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "cross_domain_release_evidence"
@@ -9836,10 +10352,16 @@
                 "type": "object",
                 "properties": {
                   "url": {
-                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Exactly one of url, source_watch_id or observation_id. A new URL identity seeds once; the next operation compares.",
                     "type": "string",
                     "maxLength": 4096,
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
                     "format": "uri"
+                  },
+                  "source_watch_id": {
+                    "description": "Adopt the current retained public Register observation as the prior baseline, with its exact immutable URL/scope and original timestamp. No baseline refetch or ownership grant. Exactly one of url, source_watch_id or observation_id; omit scope. Complete compatible normalizer-v2 evidence required; API review additionally requires unfiltered JSON OpenAPI. One paid new observation is compared; save returned owned observation_id for continuation. Missing/incomplete baselines fail explicitly, never silently reseed.",
+                    "type": "string",
+                    "pattern": "^w_[a-f0-9]{32}$"
                   },
                   "observation_id": {
                     "type": "string",
@@ -9916,13 +10438,14 @@
                     "description": "Immutable supported normalization rules. Selected attributes participate in change detection; ignored fields are outside the reported scope. No browser execution or linked-page crawling."
                   },
                   "api_url": {
-                    "description": "Optional explicit JSON OpenAPI source for a new cross-domain identity; no link discovery. Saved observation_id freezes this URL too.",
+                    "description": "Optional explicit JSON OpenAPI source for a new cross-domain identity; no link discovery. Saved observation_id freezes this URL too. source_watch_id adopts only the website; this API source seeds separately.",
                     "type": "string",
                     "maxLength": 4096,
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
                     "format": "uri"
                   },
                   "onchain": {
-                    "description": "Required with url for a new cross-domain identity. One narrow finalized Base brief; its addresses become immutable and share one existing 18-RPC reservation.",
+                    "description": "Required with url or source_watch_id for a new cross-domain identity. One narrow finalized Base brief; its addresses become immutable and share one existing 18-RPC reservation.",
                     "type": "object",
                     "properties": {
                       "chain_id": {
@@ -9970,8 +10493,42 @@
                       "onchain"
                     ],
                     "not": {
-                      "required": [
-                        "observation_id"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "source_watch_id",
+                      "onchain"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
                       ]
                     }
                   },
@@ -9984,6 +10541,11 @@
                         {
                           "required": [
                             "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
                           ]
                         },
                         {
@@ -10274,10 +10836,16 @@
                 "type": "object",
                 "properties": {
                   "url": {
-                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Supply exactly one of url or observation_id. A new identity seeds once; the next operation compares.",
+                    "description": "Public HTTPS source for a new or existing canonical source/scope identity. Exactly one of url, source_watch_id or observation_id. A new URL identity seeds once; the next operation compares.",
                     "type": "string",
                     "maxLength": 4096,
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
                     "format": "uri"
+                  },
+                  "source_watch_id": {
+                    "description": "Adopt the current retained public Register observation as the prior baseline, with its exact immutable URL/scope and original timestamp. No baseline refetch or ownership grant. Exactly one of url, source_watch_id or observation_id; omit scope. Complete compatible normalizer-v2 evidence required; API review additionally requires unfiltered JSON OpenAPI. One paid new observation is compared; save returned owned observation_id for continuation. Missing/incomplete baselines fail explicitly, never silently reseed.",
+                    "type": "string",
+                    "pattern": "^w_[a-f0-9]{32}$"
                   },
                   "observation_id": {
                     "type": "string",
@@ -10354,13 +10922,14 @@
                     "description": "Immutable supported normalization rules. Selected attributes participate in change detection; ignored fields are outside the reported scope. No browser execution or linked-page crawling."
                   },
                   "api_url": {
-                    "description": "Optional explicit JSON OpenAPI source for a new cross-domain identity; no link discovery. Saved observation_id freezes this URL too.",
+                    "description": "Optional explicit JSON OpenAPI source for a new cross-domain identity; no link discovery. Saved observation_id freezes this URL too. source_watch_id adopts only the website; this API source seeds separately.",
                     "type": "string",
                     "maxLength": 4096,
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
                     "format": "uri"
                   },
                   "onchain": {
-                    "description": "Required with url for a new cross-domain identity. One narrow finalized Base brief; its addresses become immutable and share one existing 18-RPC reservation.",
+                    "description": "Required with url or source_watch_id for a new cross-domain identity. One narrow finalized Base brief; its addresses become immutable and share one existing 18-RPC reservation.",
                     "type": "object",
                     "properties": {
                       "chain_id": {
@@ -10408,8 +10977,42 @@
                       "onchain"
                     ],
                     "not": {
-                      "required": [
-                        "observation_id"
+                      "anyOf": [
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "source_watch_id",
+                      "onchain"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
                       ]
                     }
                   },
@@ -10422,6 +11025,11 @@
                         {
                           "required": [
                             "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
                           ]
                         },
                         {
@@ -13065,6 +13673,7 @@
                   "url": {
                     "type": "string",
                     "maxLength": 4096,
+                    "pattern": "^[Hh][Tt][Tt][Pp][Ss]:\\/\\/",
                     "format": "uri",
                     "description": "Required absolute public HTTPS document URL, at most 4096 characters, e.g. 'https://example.com/docs'. Only port 443; no embedded credentials, private/local targets or authenticated pages. Fresh402's own service URLs, including its discovery /openapi.json, cannot be targets; choose an external public document. HTML, JSON and plain text are supported; JavaScript is not executed. DNS, redirect and size limits also apply."
                   },
@@ -13686,6 +14295,95 @@
                     "normalizer_version": {
                       "type": "integer"
                     },
+                    "release": {
+                      "type": "object",
+                      "properties": {
+                        "schema": {
+                          "type": "string"
+                        },
+                        "product_version": {
+                          "type": "string"
+                        },
+                        "mcp_server_version": {
+                          "type": "string"
+                        },
+                        "api_contract_revision": {
+                          "type": "string"
+                        },
+                        "tool_catalog_revision": {
+                          "type": "string"
+                        },
+                        "registry_metadata_version": {
+                          "type": "string"
+                        },
+                        "sdk": {
+                          "type": "object",
+                          "properties": {
+                            "recommended": {
+                              "type": "string"
+                            },
+                            "channel": {
+                              "type": "string"
+                            },
+                            "prerelease": {
+                              "type": "boolean"
+                            },
+                            "source_compatibility_version": {
+                              "type": "string"
+                            },
+                            "node": {
+                              "type": "string"
+                            },
+                            "module": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "baseline_continuity": {
+                          "type": "object",
+                          "properties": {}
+                        },
+                        "workflow_retention_days": {
+                          "type": "integer"
+                        },
+                        "solana_mpp_mainnet_accepted": {
+                          "type": "boolean"
+                        },
+                        "solana_mpp_default": {
+                          "type": "string"
+                        },
+                        "canonical_origin": {
+                          "type": "string"
+                        },
+                        "legacy_origin": {
+                          "type": "string"
+                        },
+                        "documentation_url": {
+                          "type": "string"
+                        },
+                        "source_commit": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "worker_version": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "build_timestamp": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "capability_policy": {
+                          "type": "string"
+                        }
+                      }
+                    },
                     "payment_networks": {
                       "type": "array",
                       "items": {
@@ -13746,6 +14444,21 @@
                         },
                         "endpoint": {
                           "type": "string"
+                        },
+                        "eligibility_endpoint": {
+                          "type": "string"
+                        },
+                        "eligibility_advisory": {
+                          "const": true
+                        },
+                        "start_url": {
+                          "type": "string"
+                        },
+                        "demo_urls": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         },
                         "input": {
                           "type": "object",
@@ -14581,6 +15294,72 @@
           "html_attribute_rules_version": {
             "const": 1
           },
+          "workflow_baseline": {
+            "type": "object",
+            "properties": {
+              "source_watch_id": {
+                "type": "string"
+              },
+              "public_evidence": {
+                "const": true
+              },
+              "ownership_granted": {
+                "const": false
+              },
+              "scope_override_allowed": {
+                "const": false
+              },
+              "normalizer_version": {
+                "type": "integer"
+              },
+              "compatible_retained_content": {
+                "type": "boolean"
+              },
+              "selected_snapshot_time": {
+                "type": "string"
+              },
+              "candidates": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "tool": {
+                      "type": "string"
+                    },
+                    "endpoint": {
+                      "type": "string"
+                    },
+                    "source_input": {
+                      "type": "object",
+                      "properties": {
+                        "source_watch_id": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "requires_explicit_paid_authorization": {
+                      "const": true
+                    },
+                    "additional_validation": {
+                      "type": "string"
+                    },
+                    "additional_required_inputs": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "adopted_component": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "limitation": {
+                "type": "string"
+              }
+            }
+          },
           "watch_id": {
             "type": "string"
           },
@@ -14597,6 +15376,21 @@
             "type": "boolean"
           },
           "hash": {
+            "type": "string"
+          },
+          "raw_hash": {
+            "type": "string"
+          },
+          "first_seen_at": {
+            "type": "string"
+          },
+          "fetch_time_ms": {
+            "type": "integer"
+          },
+          "next_step": {
+            "type": "string"
+          },
+          "note": {
             "type": "string"
           },
           "content_kind": {
@@ -17087,6 +17881,20 @@
               },
               "scope_identity": {
                 "type": "string"
+              },
+              "previous_observation": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "register_baseline": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
               }
             },
             "required": [
@@ -17406,6 +18214,20 @@
               },
               "scope_identity": {
                 "type": "string"
+              },
+              "previous_observation": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "register_baseline": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
               }
             },
             "required": [
@@ -18093,6 +18915,20 @@
               },
               "scope_identity": {
                 "type": "string"
+              },
+              "previous_observation": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "register_baseline": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
               }
             },
             "required": [

@@ -1,11 +1,11 @@
 {
   "name": "fresh402-sdk",
-  "version": "0.6.0-rc.1",
+  "version": "0.6.1-rc.1",
   "source_sdk_version": "0.3.6",
-  "source_client_base_commit": "f9f84b2a97886337be45cd0789bb512eaac92e33",
+  "source_client_base_commit": "7f9756a79dd93be171f935b0cddabe33ae142e51",
   "license": "MIT",
   "scope": "Compiled public client files and accompanying package documentation only; private backend and unrelated repository contents excluded",
-  "integrity": "sha512-q7GaYG9zAYi55010sIJcGSacLKS50oApuCPqb5BNl9MYO6p+Il+R6WpqeRDdRGJpldUngQt23mGYhfb8kmc7sg==",
+  "integrity": "sha512-o7EWu06FlyMrwZRHGTYjtjbIlhoCzu2WVXqbHvxwJaXejsJTDBioqvpCup8EkGxEPsnpKJDYWQLN+4wcKNhDCw==",
   "registry": "https://registry.npmjs.org/",
   "node": ">=24",
   "format": "ESM",
@@ -15,14 +15,14 @@
   ],
   "runtime_dependencies": 0,
   "clean_public_registry_install": true,
-  "actual_framework_acceptance": "A clean public-registry installation verified root/workflows exports, twelve-tool discovery and all eleven unsigned native-USDC x402 quotes on Base and Solana. No payment was made. Optional framework adapters remain separately versioned source integrations.",
-  "tarball_sha256": "bbc7b85fd5dac60972a5095ff49af9b76689dbd4d6299a0f29c48a9302acddbb",
+  "actual_framework_acceptance": "Clean public-registry installation verified 31 root exports, root/workflows modules, twelve-tool discovery, all eleven unsigned x402 quotes and zero-budget refusal. Both advertised network requirements were independently checked against exact native USDC and existing merchants. No payment or signature.",
+  "tarball_sha256": "159e41f092c6c42594a24f12eecccc10a4da957462287e84364ce45534317e2c",
   "dist_tag": "next",
   "dist_tags_at_verification": {
     "latest": "0.4.0-rc.1",
-    "next": "0.6.0-rc.1"
+    "next": "0.6.1-rc.1"
   },
-  "verified_at": "2026-11-12T23:46:39.673Z",
+  "verified_at": "2026-11-16T22:13:18.380Z",
   "public_registry_acceptance": {
     "clean_install": true,
     "exports": [
@@ -100,5 +100,6 @@
     ],
     "credit_debits": 0,
     "payments": 0
-  }
+  },
+  "source_build_commit": "55c2563eb30c2d065e754a9f81578928b523882f"
 }

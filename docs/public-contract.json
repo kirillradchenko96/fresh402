@@ -273,5 +273,34 @@
         "iconUrl": "https://fresh402.com/favicon.png"
       }
     }
-  ]
+  ],
+  "release": {
+    "schema": "fresh402-release-definition-v1",
+    "product_version": "3.1.0",
+    "mcp_server_version": "3.1.0",
+    "api_contract_revision": "2026-11-16.1",
+    "tool_catalog_revision": "12-tools-baseline-continuity-v1",
+    "registry_metadata_version": "3.1.2",
+    "sdk": {
+      "recommended": "0.6.1-rc.1",
+      "channel": "next",
+      "prerelease": true,
+      "source_compatibility_version": "0.3.6",
+      "node": ">=24",
+      "module": "ESM"
+    },
+    "baseline_continuity": {
+      "input": "source_watch_id",
+      "website": true,
+      "api": "unfiltered JSON OpenAPI 3.0/3.1",
+      "cross_domain_component": "website only",
+      "ownership_from_public_watch": false
+    },
+    "workflow_retention_days": 7,
+    "solana_mpp_mainnet_accepted": false,
+    "solana_mpp_default": "disabled",
+    "canonical_origin": "https://api.fresh402.com",
+    "legacy_origin": "https://fresh402.kirilllabs.workers.dev",
+    "documentation_url": "https://github.com/kirillradchenko96/fresh402"
+  }
 }

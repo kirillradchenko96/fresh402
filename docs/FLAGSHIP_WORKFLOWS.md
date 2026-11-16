@@ -50,7 +50,7 @@ Save real Register watch IDs and reuse them across sessions. Repeated Register d
 
 On-chain tools accept Base 8453 and finalized observations only. Retain owned snapshot/cursor IDs only when `observation_saved` is true. Wallet pages cover selected ERC-20-shaped logs, not full transaction history; provider completeness is not proven. Token metadata is contract-reported, not a safety or investment assessment. Preserve each result's block hash, source, observation time, uncertainty and accounting. Cross-domain reports keep web and chain evidence separate: close timestamps do not establish causation.
 
-The core source SDK remains 0.3.6. The current flagship-capable MIT compiled npm prerelease is fresh402-sdk@0.6.0-rc.1; import runFlagship from `fresh402-sdk/workflows`. See [installation](SDK_PACKAGE.md).
+The core source SDK remains 0.3.6. The current flagship-capable MIT compiled npm prerelease is fresh402-sdk@0.6.1-rc.1; import runFlagship from `fresh402-sdk/workflows`. See [installation](SDK_PACKAGE.md).
 
 Acceptance: Website Change Intelligence and API Compatibility Review passed with the actual application in isolated workerd/D1, realistic changing HTML/OpenAPI fixtures and a synthetic local facilitator. Website acceptance includes saved watch IDs, conditional Extract/Smart Diff, budget denial, completed replay without new work and lost-response recovery returning the original result without a new signature or fetch. Only local cached-watch timestamps were aged to represent a later review.
 

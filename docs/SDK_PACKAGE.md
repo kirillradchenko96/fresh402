@@ -1,12 +1,14 @@
 # Fresh402 SDK
 
-The client package is `fresh402-sdk@0.6.0-rc.1`, under MIT. Use the exact prerelease version; confirm the version, integrity and `next` tag in the public npm registry. Earlier 0.4.0-rc.2 remains available; `latest` currently resolves to 0.4.0-rc.1, so use the exact version below or `@next` for the four workflow bindings. The source-client compatibility version remains 0.3.6; the hosted API has its own version. This license covers the package's public client files and accompanying documentation only, not the private Fresh402 backend or unrelated repository contents.
+The client package is `fresh402-sdk@0.6.1-rc.1`, under MIT. Use the exact prerelease version; confirm the version, integrity and `next` tag in the public npm registry. Earlier 0.4.0-rc.2 remains available; `latest` currently resolves to 0.4.0-rc.1, so use the exact version below or `@next` for the four workflow bindings. The source-client compatibility version remains 0.3.6; the hosted API has its own version. This license covers the package's public client files and accompanying documentation only, not the private Fresh402 backend or unrelated repository contents.
 
 ```sh
-npm install fresh402-sdk@0.6.0-rc.1
+npm install fresh402-sdk@0.6.1-rc.1
 ```
 
 Node.js 24 or later, ESM only, TypeScript declarations included. Zero runtime dependencies and no install scripts. No CommonJS or browser-wallet support is claimed. The package never creates a wallet, signs a payment or spends on import.
+
+The 0.6.1 prerelease adds typed `source_watch_id` selection for compatible Website/API workflows and the website component of Cross-domain evidence. [Baseline continuity examples](https://github.com/kirillradchenko96/fresh402/blob/main/docs/BASELINE_CONTINUITY.md) distinguish free public Register state from a newly authorized owned comparison. Existing URL and observation-ID inputs remain supported. Solana x402 remains available under its live flags; native Solana MPP is a separately disabled, not-mainnet-accepted backend candidate, not a new SDK payment guarantee. Default npm installation still selects the older `latest`; use the exact tested prerelease intentionally. No stable-tag promotion is implied.
 
 ```js
 import {createProductionClient, BudgetGuard} from 'fresh402-sdk';
@@ -77,4 +79,4 @@ The seed URL must be your actual public JSON OpenAPI source; replace the placeho
 
 ## Explicit native-USDC network choice
 
-Version 0.6.0-rc.1 accepts validated dual-network x402 challenges while preserving Base as the default. Set `paymentNetwork: SOLANA_NETWORK` in `createProductionClient` or `Fresh402Client` for Solana; the merchant and sponsored fee payer are pinned. Only the selected requirement reaches an explicitly supplied signer. Missing Solana admission never falls back to Base. Existing uncertain originals retain their original origin/network/input/proof/private capability; recovery never signs again. `CustomerClient` has the same explicit network option for plans, ownership and package terms. Solana ownership is a single-use, origin-bound Ed25519 `signMessage`, not EVM typed data. No Base wallet is required for Solana accounts. Packages share the existing credit ledger; Solana funding is finalized-only and has no provisional credits. This Node package remains dependency-free and does not provide a browser wallet or private-key store. [Exact policy and account flow](https://github.com/kirillradchenko96/fresh402/blob/main/docs/SOLANA_USDC.md).
+Version 0.6.1-rc.1 accepts validated dual-network x402 challenges while preserving Base as the default. Set `paymentNetwork: SOLANA_NETWORK` in `createProductionClient` or `Fresh402Client` for Solana; the merchant and sponsored fee payer are pinned. Only the selected requirement reaches an explicitly supplied signer. Missing Solana admission never falls back to Base. Existing uncertain originals retain their original origin/network/input/proof/private capability; recovery never signs again. `CustomerClient` has the same explicit network option for plans, ownership and package terms. Solana ownership is a single-use, origin-bound Ed25519 `signMessage`, not EVM typed data. No Base wallet is required for Solana accounts. Packages share the existing credit ledger; Solana funding is finalized-only and has no provisional credits. This Node package remains dependency-free and does not provide a browser wallet or private-key store. [Exact policy and account flow](https://github.com/kirillradchenko96/fresh402/blob/main/docs/SOLANA_USDC.md).

@@ -13,7 +13,7 @@ Direct REST paths are `/v4/workflows/` followed by the hyphenated workflow ID. P
 
 ## First observation and reuse
 
-Website and API operations accept exactly one of `url` and the returned owned `observation_id`. A new source identity seeds its baseline within the first charged operation: no comparison exists yet and `changed` is null. Later operations compare against `previous` by default, or `baseline`. Every new observation, including unchanged evidence, carries the quoted fixed price. Exact original-operation replay is different: it returns the saved result without fresh work or another charge.
+Website and API operations accept exactly one of `url`, `source_watch_id` and the returned owned `observation_id`. A new URL source identity seeds its baseline within the first charged operation: no comparison exists yet and `changed` is null. A compatible `source_watch_id` instead adopts retained public Register evidence, with its original immutable scope and timestamp, for a genuine first comparison against one new authorized fetch. It grants no private ownership and makes no extra internal charge. Later operations compare against `previous` by default, or `baseline`. Every new observation, including unchanged evidence, carries the quoted fixed price. Exact original-operation replay returns the saved result without fresh work or another charge. See [curl, JavaScript, Python and MCP baseline-continuation examples](BASELINE_CONTINUITY.md).
 
 `wf_` observation IDs are not primitive `watch_id` values. They belong to the authenticated billing principal and the same workflow; a prepaid-account identity is not automatically interchangeable with an x402 payer identity. Save the ID and original financial recovery material privately. Saved source URLs and normalization rules are immutable. Supply no URL or scope overrides with an observation ID. State expires seven days after creation; an expired ID fails rather than silently seeding a new baseline. Missing/foreign IDs are rejected. Global and per-principal storage/capacity ceilings can deny new work.
 
@@ -62,6 +62,12 @@ Eligible finalized prepaid credits use tariff **5**, exact authenticated quotes 
 Persist original inputs, idempotency identity, exact quote/maximum, payment proof and private recovery token before submission. Reuse those originals across REST/MCP as supported; never create a replacement authorization after uncertainty. A completed result may report unsaved workflow state: recover the same original until delivery is complete, and do not use an unsaved ID. Settled-but-pending delivery is not a zero-charge failure or an invented refund. Financial-result retention is separately bounded; do not equate it with observation retention.
 
 The SDK's `PrepaidClient.quoteRemote(workflowId)` reads the authenticated price; `execute` requires a finite credit cap and private durable persistence. It never signs or buys USDC. The older client-orchestrated `runFlagship` remains available and still bills each underlying operation separately; it is not this server product. See [SDK package](SDK_PACKAGE.md), [public API](API.md) and [live OpenAPI](https://api.fresh402.com/openapi.json).
+
+## Economics: an existing pipeline versus building one
+
+These are separate comparisons. A new integration may avoid implementing source validation, normalized state, bounded comparison and recovery. An already running pipeline has sunk engineering costs; a hosted workflow adds its published per-operation charge and can be more expensive in cash. There is no general token, latency or cash-saving guarantee against a warm existing pipeline.
+
+Compare equivalent source scope, retained history, output detail and failure recovery. Count client orchestration, provider/source calls, model input/output tokens, retained bytes and paid operations separately. Fixed fixture benchmarks measure deterministic processing and local wall time; they do not measure third-party model tokens, Cloudflare Container latency or customer infrastructure savings. The bounded hosted evidence and original-operation recovery are the product value; whether they justify the charge depends on the customer's existing system.
 
 ## Native USDC on Solana
 

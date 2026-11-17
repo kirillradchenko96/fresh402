@@ -155,7 +155,6 @@ One-time entitlements are Check 20, Extract 10, Smart Diff 5 and OpenAPI Diff 3,
 
 Contract Watch and Token Facts are supported bounded production capabilities. Wallet Watch retains its restricted pilot scope; machine-trial samples, when enabled, have separate finite allowances. Existing prices, nonexpiring purchased credits, customer terms and recovery remain unchanged. [Dedicated developer quickstart](https://fresh402.com/docs), [tool reference](https://fresh402.com/docs/tools), [prices](https://fresh402.com/pricing) and [limits](https://fresh402.com/security).
 
-<a id="finalized-base-observation-pilot"></a>
 ## Finalized Base intelligence
 
 Contract Watch, Wallet Watch and Token Facts accept per-call x402 and native MPP on the existing Base native-USDC rail. The seven original service quotes advertise exact atomic amount (5000 / 10000 / 15000 / 20000 / 10000 / 20000 / 10000). With the four server workflows, the eleven paid quotes advertise exact atomic amount (5000 / 10000 / 15000 / 20000 / 10000 / 20000 / 10000 / 5000 / 10000 / 25000 / 40000), in the table order above. Validate the live quote, asset, recipient and resource before signing. No new real-money blockchain settlement test is claimed by this release; official-SDK composed payment tests use a mock facilitator, separately from actual Coinbase provider application acceptance.
@@ -206,3 +205,13 @@ Extracted text, titles, links, JSON-LD and change excerpts originate from extern
 Native MPP discovery uses `x-payment-info.offers[]` when MPP is enabled. Amounts are atomic native USDC units; legacy `protocols` and USD `price` fields remain available. The live HTTP 402 challenge is authoritative for the current network, recipient, amount and resource. Discovery grants no signing or payment authority.
 
 OpenAPI Contract Diff classifies supported string-length intervals in the request/response direction: tightening accepted request lengths can be breaking; narrowing promised response lengths can be additive. Patterns, formats, enums, custom dialects and other interacting assertions remain subject to conservative review. This does not prove that a deployed client will break.
+
+## Explicit contracts, typed extraction and voluntary feedback
+
+OpenAPI Contract Diff accepts exactly one `watch_id` or `contracts:{before,after}` serialized JSON pair. Pair mode costs the same $0.020 /5eligible credits, uses no fetch or saved watch and returns a conservative CI `verdict`. API Compatibility Review supports the same pair at its existing $0.010 /4credit price. Each string <=24,000 characters; combined <=48,000 UTF-8 bytes, complete request <=65,536bytes. Stored-watch behavior is unchanged.
+
+Extract optionally accepts `fields:[{name,pointer,type,required}]`,1-12 uniquely named typed projections for JSON only, after exclusions. Exact RFC6901 pointers, no coercion. Required defaults true; missing, invalid and over-budget fields are explicitly listed in `structured`, with completeness/partial flags and source pointers. At most4,096bytes/value,16,384bytes/2,000nodes total. JSON arrays/objects allow bounded repeated records; individual item schemas and HTML table-to-record inference are not provided. Exclusive with json_pointer/json_pointers/feed_mode. Original text/data/hash and their max_chars behavior remain unchanged; structured values have their separate fixed budget/hash. No inference or additional fetch.
+
+POST `/v1/agent-feedback` accepts voluntary enums: task website_change/api_upgrade/extraction/ci/blockchain/cross_domain/integration/other; outcome solved/partial/blocked/not_evaluated; obstacle none/capability/documentation/payment/integration/capacity/quality/other; optional alternative none/local_code/another_service/abandoned/undisclosed(default). No extra keys or free text;1,024bytes, global100/day plus existing request limiter,30day aggregate retention. Never required for service. Responses202accepted,400invalid,413oversize,429capacity; feedback does not authenticate identity or demonstrate demand.
+
+[Framework examples](INTEGRATIONS.md). Native Solana MPP is still disabled; existing payment methods and prices are unchanged.

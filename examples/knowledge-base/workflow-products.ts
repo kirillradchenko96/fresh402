@@ -10,7 +10,7 @@ type Comparison={compare_to?:'previous'|'baseline';detail?:'compact'|'expanded'}
 export interface WorkflowChainSelection {chain_id:8453;contract_address:string;wallet_address:string}
 export interface ServerWorkflowInputs {
  website_change_intelligence:Selection&Comparison;
- api_compatibility_review:({url:string;source_watch_id?:never;observation_id?:never}|{source_watch_id:string;url?:never;observation_id?:never}|{observation_id:string;url?:never;source_watch_id?:never})&Comparison;
+ api_compatibility_review:({contracts:{before:string;after:string};url?:never;source_watch_id?:never;observation_id?:never;compare_to?:'previous'}|{url:string;source_watch_id?:never;observation_id?:never}|{source_watch_id:string;url?:never;observation_id?:never}|{observation_id:string;url?:never;source_watch_id?:never})&Comparison;
  onchain_evidence_brief:WorkflowChainSelection&{previous_contract_snapshot?:string;detail?:'compact'|'expanded'};
  cross_domain_release_evidence:Comparison&{release_label:string}&({url:string;source_watch_id?:never;scope?:WorkflowScope;api_url?:string;onchain:WorkflowChainSelection;observation_id?:never}|{source_watch_id:string;url?:never;scope?:never;api_url?:string;onchain:WorkflowChainSelection;observation_id?:never}|{observation_id:string;url?:never;source_watch_id?:never;scope?:never;api_url?:never;onchain?:never});
 }

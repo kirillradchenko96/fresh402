@@ -6,10 +6,6 @@ Four server workflows turn website, API and finalized Base tasks into structured
 
 Hosted API **3.1.0**. This repository contains public documentation and source clients; the hosted backend remains private. [Choose a workflow](https://fresh402.com/workflows) · [Working inputs and state](docs/SERVER_WORKFLOWS.md) · [Start free](https://fresh402.com/docs#instant-evaluation).
 
-## Documentation consistency
-
-`npm run check:docs` checks public-copy context, current product/SDK/package guidance, exact generated prices, schemas, examples and internal links. `node scripts/commercial-copy.mjs --live` additionally reads the live website, OpenAPI and MCP discovery without executing products, signing or spending.
-
 ## Start without spending
 
 Read [live discovery](https://api.fresh402.com/). Discovery makes no payment. For a free persistent baseline:
@@ -20,7 +16,7 @@ curl https://api.fresh402.com/v1/register \
   -d '{"url":"https://example.com/"}'
 ```
 
-Save the actual returned `watch_id` and `hash`. Repeating the same canonical URL and rules returns existing state without another fetch or refresh. Registration has source, rate and capacity limits. Smart Diff and OpenAPI Diff require a saved watch; Check also accepts a URL directly.
+Save the actual returned `watch_id` and `hash`. Repeating the same canonical URL and rules returns existing state without another fetch or refresh. Registration has source, rate and capacity limits. Smart Diff uses a saved watch. OpenAPI Diff accepts a saved watch or an explicit `contracts:{before,after}` pair; Check also accepts a URL directly.
 
 For one eligible walletless Check, inspect `instant_evaluation.enabled` and send `{"url":"https://example.com/","evaluation":true}` to Check. One attempted Check per verified network prefix per approved resource period; exact replay returns retained evidence, not a new observation. No automatic payment after 429. [Standard clients](docs/STANDARD_CLIENTS.md).
 
@@ -84,3 +80,5 @@ In three paired GPT-6.1 Sol Website cases, the server workflow achieved **30.9% 
 Four [server-executed workflows](docs/SERVER_WORKFLOWS.md) complement the seven original paid primitives: Website Change Intelligence ($0.005 /2 eligible credits), API Compatibility Review ($0.010 /4), On-chain Evidence Brief ($0.025 /10) and Cross-domain Release Evidence ($0.040 /16). Each has one financial parent and no internal extra charges. New source identities seed in the same charged operation; later owned observations support compact evidence and exact original-result recovery. Finite capacity applies; Base wallet coverage remains a selected-block pilot, and static documents do not prove deployed behavior or causation. No browser rendering or server-side LLM inference.
 
 Live discovery determines availability. Eligible prepaid workflows use exact authenticated tariff-5 quotes and existing constituent rights; purchased package/funding terms and the original seven prices remain unchanged. Use the exact published SDK version listed above; verify npm version and integrity before installation. The older client-orchestrated `runFlagship` is still distinct and bills its underlying operations separately.
+
+[Agent framework integrations](docs/INTEGRATIONS.md): tested MCP connectivity for OpenAI Agents, LangChain/LangGraph, CrewAI and Vercel. Payment authority is separate. [Explicit CI contracts and typed Extract projection](docs/API.md#explicit-contracts-typed-extraction-and-voluntary-feedback) use existing prices and bounded execution.

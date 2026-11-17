@@ -60,6 +60,8 @@ Unsigned extraction challenge (no payment is made):
 
 All tool names, input schemas and descriptions are returned by `tools/list`. Use a real Register result for a `watch_id`; do not treat example IDs as existing watches.
 
+OpenAPI Contract Diff alternatively accepts `contracts:{before,after}` containing serialized JSON OpenAPI documents; omit `watch_id` in this mode. API Compatibility Review accepts the same pair instead of `url`, `source_watch_id` or `observation_id`. These immediate CI comparisons fetch nothing and save no observation state, but still require one authorized paid operation. Extract's optional `fields` selects and validates named typed values from JSON after exclusions; it is exclusive with `json_pointer`, `json_pointers` and feed projection. Exact bounds, defaults and missing/type-mismatch behavior are part of each live input schema. See [API](API.md) and [workflow examples](SERVER_WORKFLOWS.md).
+
 ## x402 tool payments
 
 An unpaid call returns a tool error: `result.isError` is true and `result.structuredContent` contains x402 PaymentRequired. **HTTP 200 does not prove payment or success.**

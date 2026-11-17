@@ -3,8 +3,8 @@
     "schema": "fresh402-release-definition-v1",
     "product_version": "3.1.0",
     "mcp_server_version": "3.1.0",
-    "api_contract_revision": "2026-11-16.1",
-    "tool_catalog_revision": "12-tools-baseline-continuity-v1",
+    "api_contract_revision": "2026-11-16.2",
+    "tool_catalog_revision": "12-tools-ci-contracts-typed-extraction-v1",
     "registry_metadata_version": "3.1.2",
     "sdk": {
       "recommended": "0.6.1-rc.1",
@@ -1363,6 +1363,91 @@
         ]
       }
     },
+    "/v1/agent-feedback": {
+      "post": {
+        "operationId": "fresh402_optional_feedback",
+        "summary": "Voluntary enum-only feedback; no prompts, personal data, credentials or free text. Unverified self-selected signal, not proof of adoption.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "enum": [
+                      "website_change",
+                      "api_upgrade",
+                      "extraction",
+                      "ci",
+                      "blockchain",
+                      "cross_domain",
+                      "integration",
+                      "other"
+                    ]
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "enum": [
+                      "solved",
+                      "partial",
+                      "blocked",
+                      "not_evaluated"
+                    ]
+                  },
+                  "obstacle": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "capability",
+                      "documentation",
+                      "payment",
+                      "integration",
+                      "capacity",
+                      "quality",
+                      "other"
+                    ]
+                  },
+                  "alternative": {
+                    "default": "undisclosed",
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "local_code",
+                      "another_service",
+                      "abandoned",
+                      "undisclosed"
+                    ]
+                  }
+                },
+                "required": [
+                  "task",
+                  "outcome",
+                  "obstacle"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted; no identity verified"
+          },
+          "400": {
+            "description": "Invalid enum-only feedback"
+          },
+          "413": {
+            "description": "Body exceeds1,024bytes"
+          },
+          "429": {
+            "description": "Existing request limiter or global100/day feedback cap; no required feedback or payment"
+          }
+        }
+      }
+    },
     "/release.json": {
       "get": {
         "operationId": "fresh402_release_identity",
@@ -2572,6 +2657,54 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "type": "object",
                 "properties": {
+                  "fields": {
+                    "minItems": 1,
+                    "maxItems": 12,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,47}$",
+                          "description": "Unique output property name, 1-48 ASCII letters/digits/underscores, starting with a letter."
+                        },
+                        "pointer": {
+                          "type": "string",
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Exact RFC6901 JSON Pointer after exclusions; empty string selects root, ~0/~1 escape ~ and /. No wildcards, inference or linked-source fetching."
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "string",
+                            "number",
+                            "integer",
+                            "boolean",
+                            "object",
+                            "array",
+                            "null"
+                          ],
+                          "description": "Required exact JSON value type. No string-to-number coercion; integer requires a safe integer. object excludes arrays/null."
+                        },
+                        "required": {
+                          "default": true,
+                          "description": "Default true. A missing required value makes complete:false; optional missing values are still reported. No invented default or placeholder value.",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "pointer",
+                        "type"
+                      ],
+                      "additionalProperties": false,
+                      "description": "One named typed field: exact source pointer, accepted JSON type and explicit requiredness. Missing/type-mismatched/over-budget values are reported, never invented or coerced."
+                    },
+                    "uniqueItems": true,
+                    "description": "Optional 1-12 named typed fields for JSON sources only, exclusive with json_pointer/json_pointers/feed_mode. Uses one existing fetch/parse after ignore_json_paths. Missing/type-mismatched fields are reported individually, never silently coerced. Each selected value <=4,096 UTF-8 bytes; total values <=16,384 bytes/2,000 nodes. Over-budget fields are omitted explicitly. HTML/text retain ordinary extraction; no semantic or browser extraction."
+                  },
                   "url": {
                     "type": "string",
                     "maxLength": 4096,
@@ -2965,6 +3098,54 @@
                 "$schema": "https://json-schema.org/draft/2020-12/schema",
                 "type": "object",
                 "properties": {
+                  "fields": {
+                    "minItems": 1,
+                    "maxItems": 12,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_]{0,47}$",
+                          "description": "Unique output property name, 1-48 ASCII letters/digits/underscores, starting with a letter."
+                        },
+                        "pointer": {
+                          "type": "string",
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Exact RFC6901 JSON Pointer after exclusions; empty string selects root, ~0/~1 escape ~ and /. No wildcards, inference or linked-source fetching."
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "string",
+                            "number",
+                            "integer",
+                            "boolean",
+                            "object",
+                            "array",
+                            "null"
+                          ],
+                          "description": "Required exact JSON value type. No string-to-number coercion; integer requires a safe integer. object excludes arrays/null."
+                        },
+                        "required": {
+                          "default": true,
+                          "description": "Default true. A missing required value makes complete:false; optional missing values are still reported. No invented default or placeholder value.",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "pointer",
+                        "type"
+                      ],
+                      "additionalProperties": false,
+                      "description": "One named typed field: exact source pointer, accepted JSON type and explicit requiredness. Missing/type-mismatched/over-budget values are reported, never invented or coerced."
+                    },
+                    "uniqueItems": true,
+                    "description": "Optional 1-12 named typed fields for JSON sources only, exclusive with json_pointer/json_pointers/feed_mode. Uses one existing fetch/parse after ignore_json_paths. Missing/type-mismatched fields are reported individually, never silently coerced. Each selected value <=4,096 UTF-8 bytes; total values <=16,384 bytes/2,000 nodes. Over-budget fields are omitted explicitly. HTML/text retain ordinary extraction; no semantic or browser extraction."
+                  },
                   "url": {
                     "type": "string",
                     "maxLength": 4096,
@@ -3942,7 +4123,7 @@
     "/v2/openapi-contract-diff": {
       "post": {
         "operationId": "fresh402_openapi_contract_diff",
-        "summary": "Use for bounded directional OpenAPI3.0/3.1 JSON contract-change evidence, including supported paths/operations, required fields, types/enums/null and authentication. Requires real watch_id from free unfiltered registration; no URL override. compare_to: previous(default) or baseline; previous_hash overrides with supported retained evidence. First call seeds contract history. No YAML, external-reference fetch or endpoint execution; uncertainty requires review, not a complete compatibility proof. Save and reuse watch IDs across sessions. For a complete single-charge server workflow, use API Compatibility Review when advertised. $0.020 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "summary": "Use for bounded directional OpenAPI3.0/3.1 JSON contract-change evidence, including supported paths/operations, required fields, types/enums/null and authentication. Use exactly one real watch_id from free unfiltered registration or contracts:{before,after} serialized JSON strings (24,000 characters each/48,000 combined UTF-8 bytes). Supplied pairs compare before to after without a fetch or saved watch; omit comparison overrides. Same price and original-operation recovery. Stored mode has no URL override. compare_to: previous(default) or baseline; previous_hash overrides with supported retained evidence. First stored-watch call seeds contract history; explicit pairs compare immediately and return a conservative CI verdict. No YAML, external-reference fetch or endpoint execution; uncertainty requires review, not a complete compatibility proof. Save and reuse watch IDs across sessions. For a complete single-charge server workflow, use API Compatibility Review when advertised. $0.020 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence after unfiltered free registration. Compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "openapi_diff"
@@ -4090,9 +4271,32 @@
                 "type": "object",
                 "properties": {
                   "watch_id": {
+                    "description": "Existing watch ID: 'w_' plus 32 lowercase hexadecimal characters. Required unless contracts is supplied; these inputs are exclusive. Obtain it with free Register using the public JSON OpenAPI 3.0/3.1 URL and no selector or ignore rules. Reuses the saved URL. No URL override, YAML or scoped/filtered watches.",
                     "type": "string",
-                    "pattern": "^w_[a-f0-9]{32}$",
-                    "description": "Required existing watch ID: 'w_' plus 32 lowercase hexadecimal characters. Obtain it with free fresh402_register or POST /v1/register using the public JSON OpenAPI 3.0/3.1 URL and no selector or ignore rules. Reuses the saved URL; do not pass url here. YAML, non-OpenAPI documents and scoped/filtered watches are unsupported. Illustrative IDs must be replaced."
+                    "pattern": "^w_[a-f0-9]{32}$"
+                  },
+                  "contracts": {
+                    "type": "object",
+                    "properties": {
+                      "before": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 24000,
+                        "description": "Old complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. No YAML, URLs, executed code or remote-reference fetching."
+                      },
+                      "after": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 24000,
+                        "description": "New complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. Direction is before to after; source authenticity and deployed API behavior are not verified."
+                      }
+                    },
+                    "required": [
+                      "before",
+                      "after"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=48,000 UTF-8 bytes; the complete HTTP/MCP envelope still has its existing 65,536-byte ceiling. References are resolved locally only. Zero source fetches and no saved watch/observation; the original authorized operation remains durably recoverable."
                   },
                   "compare_to": {
                     "default": "previous",
@@ -4109,11 +4313,44 @@
                     "pattern": "^[a-fA-F0-9]{64}$"
                   }
                 },
-                "required": [
-                  "watch_id"
-                ],
                 "additionalProperties": false,
-                "description": "Compare a registered, unfiltered public JSON OpenAPI 3.0/3.1 contract; watch_id is required, compare_to defaults to previous, and optional previous_hash overrides it. Bounded structural analysis, not a complete compatibility proof; no YAML, external reference fetching or execution of described API operations. Unknown fields are rejected."
+                "description": "Compare exactly one registered watch or an explicit contracts:{before,after} pair. Stored mode preserves previous/baseline/hash behavior. Supplied mode uses before to after, no fetch, no watch mutation or saved observation; omit comparison overrides. Same existing fixed price and original-operation recovery. Bounded document evidence, not live compatibility proof.",
+                "oneOf": [
+                  {
+                    "required": [
+                      "watch_id"
+                    ],
+                    "not": {
+                      "required": [
+                        "contracts"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "contracts"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "previous_hash"
+                          ]
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "compare_to": {
+                        "const": "previous"
+                      }
+                    }
+                  }
+                ]
               },
               "example": {
                 "watch_id": "w_0123456789abcdef0123456789abcdef",
@@ -4384,9 +4621,32 @@
                 "type": "object",
                 "properties": {
                   "watch_id": {
+                    "description": "Existing watch ID: 'w_' plus 32 lowercase hexadecimal characters. Required unless contracts is supplied; these inputs are exclusive. Obtain it with free Register using the public JSON OpenAPI 3.0/3.1 URL and no selector or ignore rules. Reuses the saved URL. No URL override, YAML or scoped/filtered watches.",
                     "type": "string",
-                    "pattern": "^w_[a-f0-9]{32}$",
-                    "description": "Required existing watch ID: 'w_' plus 32 lowercase hexadecimal characters. Obtain it with free fresh402_register or POST /v1/register using the public JSON OpenAPI 3.0/3.1 URL and no selector or ignore rules. Reuses the saved URL; do not pass url here. YAML, non-OpenAPI documents and scoped/filtered watches are unsupported. Illustrative IDs must be replaced."
+                    "pattern": "^w_[a-f0-9]{32}$"
+                  },
+                  "contracts": {
+                    "type": "object",
+                    "properties": {
+                      "before": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 24000,
+                        "description": "Old complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. No YAML, URLs, executed code or remote-reference fetching."
+                      },
+                      "after": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 24000,
+                        "description": "New complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. Direction is before to after; source authenticity and deployed API behavior are not verified."
+                      }
+                    },
+                    "required": [
+                      "before",
+                      "after"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=48,000 UTF-8 bytes; the complete HTTP/MCP envelope still has its existing 65,536-byte ceiling. References are resolved locally only. Zero source fetches and no saved watch/observation; the original authorized operation remains durably recoverable."
                   },
                   "compare_to": {
                     "default": "previous",
@@ -4403,11 +4663,44 @@
                     "pattern": "^[a-fA-F0-9]{64}$"
                   }
                 },
-                "required": [
-                  "watch_id"
-                ],
                 "additionalProperties": false,
-                "description": "Compare a registered, unfiltered public JSON OpenAPI 3.0/3.1 contract; watch_id is required, compare_to defaults to previous, and optional previous_hash overrides it. Bounded structural analysis, not a complete compatibility proof; no YAML, external reference fetching or execution of described API operations. Unknown fields are rejected."
+                "description": "Compare exactly one registered watch or an explicit contracts:{before,after} pair. Stored mode preserves previous/baseline/hash behavior. Supplied mode uses before to after, no fetch, no watch mutation or saved observation; omit comparison overrides. Same existing fixed price and original-operation recovery. Bounded document evidence, not live compatibility proof.",
+                "oneOf": [
+                  {
+                    "required": [
+                      "watch_id"
+                    ],
+                    "not": {
+                      "required": [
+                        "contracts"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "contracts"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "previous_hash"
+                          ]
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "compare_to": {
+                        "const": "previous"
+                      }
+                    }
+                  }
+                ]
               },
               "example": {
                 "watch_id": "w_0123456789abcdef0123456789abcdef",
@@ -8440,8 +8733,8 @@
     "/v4/workflows/api-compatibility-review": {
       "post": {
         "operationId": "fresh402_api_compatibility_review",
-        "summary": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof. One fixed workflow charge; internal steps never create separate customer charges. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
+        "summary": "Compare explicit contracts:{before,after} JSON strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; no YAML, external-ref crawling or live API proof. One fixed workflow charge; internal steps never create separate customer charges. Explicit API contracts pairs compare immediately without fetching or saved observation state; supplied before/after URNs identify canonical input hashes, not fetched URLs. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "description": "Compare explicit contracts:{before,after} JSON strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; no YAML, external-ref crawling or live API proof. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "api_compatibility_review"
         ],
@@ -8474,7 +8767,7 @@
             {
               "amount": "10000",
               "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-              "description": "Seed or review a public JSON OpenAPI 3.0/3.1 contract against its saved baseline/latest observation; return directional compatibility/security findings and explicit uncertainty. No YAML, external-ref crawling or runtime compatibility proof.",
+              "description": "Compare explicit contracts:{before,after} JSON strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; no YAML, external-ref crawling or live API proof.",
               "intent": "charge",
               "method": "evm"
             }
@@ -8595,6 +8888,29 @@
                       "compact",
                       "expanded"
                     ]
+                  },
+                  "contracts": {
+                    "type": "object",
+                    "properties": {
+                      "before": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 24000,
+                        "description": "Old complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. No YAML, URLs, executed code or remote-reference fetching."
+                      },
+                      "after": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 24000,
+                        "description": "New complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. Direction is before to after; source authenticity and deployed API behavior are not verified."
+                      }
+                    },
+                    "required": [
+                      "before",
+                      "after"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=48,000 UTF-8 bytes; the complete HTTP/MCP envelope still has its existing 65,536-byte ceiling. References are resolved locally only. Zero source fetches and no saved watch/observation; the original authorized operation remains durably recoverable."
                   }
                 },
                 "additionalProperties": false,
@@ -8613,6 +8929,11 @@
                         {
                           "required": [
                             "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "contracts"
                           ]
                         }
                       ]
@@ -8638,6 +8959,11 @@
                           "required": [
                             "scope"
                           ]
+                        },
+                        {
+                          "required": [
+                            "contracts"
+                          ]
                         }
                       ]
                     }
@@ -8662,8 +8988,42 @@
                           "required": [
                             "scope"
                           ]
+                        },
+                        {
+                          "required": [
+                            "contracts"
+                          ]
                         }
                       ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "contracts"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "compare_to": {
+                        "const": "previous"
+                      }
                     }
                   }
                 ]
@@ -8963,6 +9323,29 @@
                       "compact",
                       "expanded"
                     ]
+                  },
+                  "contracts": {
+                    "type": "object",
+                    "properties": {
+                      "before": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 24000,
+                        "description": "Old complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. No YAML, URLs, executed code or remote-reference fetching."
+                      },
+                      "after": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 24000,
+                        "description": "New complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. Direction is before to after; source authenticity and deployed API behavior are not verified."
+                      }
+                    },
+                    "required": [
+                      "before",
+                      "after"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=48,000 UTF-8 bytes; the complete HTTP/MCP envelope still has its existing 65,536-byte ceiling. References are resolved locally only. Zero source fetches and no saved watch/observation; the original authorized operation remains durably recoverable."
                   }
                 },
                 "additionalProperties": false,
@@ -8981,6 +9364,11 @@
                         {
                           "required": [
                             "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "contracts"
                           ]
                         }
                       ]
@@ -9006,6 +9394,11 @@
                           "required": [
                             "scope"
                           ]
+                        },
+                        {
+                          "required": [
+                            "contracts"
+                          ]
                         }
                       ]
                     }
@@ -9030,8 +9423,42 @@
                           "required": [
                             "scope"
                           ]
+                        },
+                        {
+                          "required": [
+                            "contracts"
+                          ]
                         }
                       ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "contracts"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "compare_to": {
+                        "const": "previous"
+                      }
                     }
                   }
                 ]
@@ -14528,6 +14955,41 @@
                         }
                       }
                     },
+                    "agent_feedback": {
+                      "type": "object",
+                      "properties": {
+                        "endpoint": {
+                          "type": "string"
+                        },
+                        "method": {
+                          "type": "string"
+                        },
+                        "voluntary": {
+                          "type": "boolean"
+                        },
+                        "payment_required": {
+                          "type": "boolean"
+                        },
+                        "free_text_supported": {
+                          "type": "boolean"
+                        },
+                        "max_body_bytes": {
+                          "type": "integer"
+                        },
+                        "accepted_per_utc_day": {
+                          "type": "integer"
+                        },
+                        "retention_days": {
+                          "type": "integer"
+                        },
+                        "schema": {
+                          "type": "string"
+                        },
+                        "bias": {
+                          "type": "string"
+                        }
+                      }
+                    },
                     "prepaid_packages": {
                       "type": "object",
                       "properties": {
@@ -15020,6 +15482,42 @@
       "OpenApiDiffResult": {
         "type": "object",
         "properties": {
+          "input_source": {
+            "const": "supplied_contracts"
+          },
+          "verdict": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "enum": [
+                  "breaking",
+                  "review_required",
+                  "no_breaking_change_observed"
+                ]
+              },
+              "ci_exit_code": {
+                "type": "integer"
+              },
+              "scope": {
+                "type": "string"
+              },
+              "live_api_verified": {
+                "type": "boolean"
+              },
+              "unsupported_features_require_review": {
+                "type": "boolean"
+              }
+            }
+          },
+          "compared_at": {
+            "type": "string"
+          },
+          "source_fetches": {
+            "type": "integer"
+          },
+          "observation_saved": {
+            "type": "boolean"
+          },
           "watch_id": {
             "type": "string"
           },
@@ -15120,6 +15618,18 @@
           "source_provenance": {
             "type": "object",
             "properties": {
+              "input_source": {
+                "type": "string"
+              },
+              "before_sha256": {
+                "type": "string"
+              },
+              "after_sha256": {
+                "type": "string"
+              },
+              "source_authenticity": {
+                "type": "string"
+              },
               "baseline_url": {
                 "type": "string"
               },
@@ -15144,7 +15654,8 @@
             "enum": [
               "previous",
               "baseline",
-              "hash"
+              "hash",
+              "supplied"
             ]
           },
           "comparison_source": {
@@ -15238,7 +15749,6 @@
           }
         },
         "required": [
-          "watch_id",
           "hash",
           "previous_hash",
           "changed",
@@ -15246,6 +15756,37 @@
           "counts",
           "source_provenance",
           "rules_version"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "watch_id"
+            ],
+            "not": {
+              "required": [
+                "input_source"
+              ]
+            }
+          },
+          {
+            "required": [
+              "input_source",
+              "verdict",
+              "compared_at",
+              "source_fetches",
+              "observation_saved"
+            ],
+            "properties": {
+              "input_source": {
+                "const": "supplied_contracts"
+              }
+            },
+            "not": {
+              "required": [
+                "watch_id"
+              ]
+            }
+          }
         ]
       },
       "Error": {
@@ -15427,6 +15968,10 @@
       "CheckResult": {
         "type": "object",
         "properties": {
+          "observation": {
+            "type": "object",
+            "description": "Scoped observation status, exact observation time and live-versus-retained execution; no claim about excluded fields or runtime API behavior."
+          },
           "html_attributes": {
             "type": "array",
             "items": {
@@ -15548,6 +16093,97 @@
       "ExtractResult": {
         "type": "object",
         "properties": {
+          "structured": {
+            "type": "object",
+            "properties": {
+              "schema": {
+                "const": "fresh402-typed-projection-v1"
+              },
+              "complete": {
+                "type": "boolean"
+              },
+              "partial": {
+                "type": "boolean"
+              },
+              "data": {
+                "type": "object"
+              },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": [
+                        "ok",
+                        "missing",
+                        "invalid_type",
+                        "omitted_budget"
+                      ]
+                    },
+                    "value": {},
+                    "source": {
+                      "type": "object",
+                      "properties": {
+                        "json_pointer": {
+                          "type": "string"
+                        },
+                        "representation": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "required",
+                    "type",
+                    "status",
+                    "source"
+                  ]
+                }
+              },
+              "missing_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "invalid_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "omitted_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "value_bytes": {
+                "type": "integer"
+              },
+              "source_authenticity": {
+                "type": "string"
+              },
+              "semantic_model_used": {
+                "type": "boolean"
+              }
+            }
+          },
+          "structured_hash": {
+            "type": "string"
+          },
           "url": {
             "type": "string"
           },
@@ -15846,6 +16482,10 @@
       "SmartDiffResult": {
         "type": "object",
         "properties": {
+          "evidence_assessment": {
+            "type": "object",
+            "description": "At most20 deduplicated mechanical inspection targets with explicit omissions; no inferred causality or semantic certainty."
+          },
           "html_attributes": {
             "type": "array",
             "items": {
@@ -17700,7 +18340,8 @@
                 "enum": [
                   "seeded",
                   "previous",
-                  "baseline"
+                  "baseline",
+                  "supplied"
                 ]
               },
               "findings": {
@@ -17895,6 +18536,13 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "supplied_contracts": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
               }
             },
             "required": [
@@ -18033,7 +18681,8 @@
                 "enum": [
                   "seeded",
                   "previous",
-                  "baseline"
+                  "baseline",
+                  "supplied"
                 ]
               },
               "findings": {
@@ -18228,6 +18877,13 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "supplied_contracts": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
               }
             },
             "required": [
@@ -18366,7 +19022,8 @@
                 "enum": [
                   "seeded",
                   "previous",
-                  "baseline"
+                  "baseline",
+                  "supplied"
                 ]
               },
               "findings": {
@@ -18580,7 +19237,8 @@
                 "enum": [
                   "seeded",
                   "previous",
-                  "baseline"
+                  "baseline",
+                  "supplied"
                 ]
               },
               "findings": {
@@ -18924,6 +19582,13 @@
                 "additionalProperties": {}
               },
               "register_baseline": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "supplied_contracts": {
                 "type": "object",
                 "propertyNames": {
                   "type": "string"

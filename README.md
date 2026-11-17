@@ -82,3 +82,5 @@ Four [server-executed workflows](docs/SERVER_WORKFLOWS.md) complement the seven 
 Live discovery determines availability. Eligible prepaid workflows use exact authenticated tariff-5 quotes and existing constituent rights; purchased package/funding terms and the original seven prices remain unchanged. Use the exact published SDK version listed above; verify npm version and integrity before installation. The older client-orchestrated `runFlagship` is still distinct and bills its underlying operations separately.
 
 [Agent framework integrations](docs/INTEGRATIONS.md): tested MCP connectivity for OpenAI Agents, LangChain/LangGraph, CrewAI and Vercel. Payment authority is separate. [Explicit CI contracts and typed Extract projection](docs/API.md#explicit-contracts-typed-extraction-and-voluntary-feedback) use existing prices and bounded execution.
+
+[Bounded structured evidence](docs/DEEP_CAPABILITIES.md): repeated static HTML/JSON records, Release Guardian CI findings, explicit JSON record identity and private caller-retained Website/API context. Existing tools and prices; no browser or automatic payment.

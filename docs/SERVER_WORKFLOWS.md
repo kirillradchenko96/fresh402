@@ -80,3 +80,7 @@ Workflow `status` describes observation/change state, not a CI pass/fail decisio
 API Compatibility Review also accepts `contracts:{before,after}` (serialized JSON strings), exclusive with url/source_watch_id/observation_id. Each string is at most24,000 characters; combined UTF-8 text at most48,000bytes, within the unchanged65,536-byte total request ceiling. Omit comparison overrides. It compares immediately at the same $0.010/4credit price, fetches no source and creates no observation state. Original financial recovery still applies. `summary.findings.verdict` provides conservative `breaking`(CI exit1), `review_required`(2) or `no_breaking_change_observed`(0); none proves live API compatibility. Inert `urn:sha256` provenance references identify supplied canonical contract bytes, not fetched URLs.
 
 Website evidence reports raw-byte versus normalized-evidence change and bounded mechanical inspection targets. On-chain summaries index returned finalized block/event identities without extra RPC or full-history claims. Cross-domain timelines distinguish source-observation time from chain-block time and do not assert causation. Seven-day non-sliding source state retention is unchanged; explicitly supplied pairs do not create source state.
+
+## Bounded structured evidence update
+
+See [structured records, Release Guardian, record identity and portable observation context](DEEP_CAPABILITIES.md) for exact optional inputs, limits, CI semantics and original recovery boundaries. The existing tool identities and tariffs are unchanged.

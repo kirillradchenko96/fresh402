@@ -5,13 +5,15 @@ export const isServerWorkflow=(id:string):id is ServerWorkflow=>(SERVER_WORKFLOW
 export const serverWorkflowPath=(id:ServerWorkflow)=>'/v4/workflows/'+id.replaceAll('_','-');
 export const serverWorkflowPrepaidPath=(id:ServerWorkflow)=>'/v4/prepaid/workflows/'+id.replaceAll('_','-');
 export interface WorkflowScope {selector?:string;ignore_selectors?:string[];ignore_json_paths?:string[];html_attributes?:Array<'href'|'title'|'alt'|'aria-label'>}
-type Selection={url:string;source_watch_id?:never;observation_id?:never;scope?:WorkflowScope}|{source_watch_id:string;url?:never;observation_id?:never;scope?:never}|{observation_id:string;url?:never;source_watch_id?:never;scope?:never};
+type Selection={url:string;source_watch_id?:never;observation_id?:never;baseline_snapshot?:never;scope?:WorkflowScope}|{source_watch_id:string;url?:never;observation_id?:never;baseline_snapshot?:never;scope?:never}|{observation_id:string;url?:never;source_watch_id?:never;baseline_snapshot?:never;scope?:never};
+type PortableSelection={baseline_snapshot:string;url?:never;source_watch_id?:never;observation_id?:never;scope?:never;compare_to?:'previous'};
+type RecordIdentity={json_array_keys?:Array<{path:string;key:string}>};
 type Comparison={compare_to?:'previous'|'baseline';detail?:'compact'|'expanded'};
 export interface WorkflowChainSelection {chain_id:8453;contract_address:string;wallet_address:string}
 export interface ServerWorkflowInputs {
- website_change_intelligence:Selection&Comparison;
- api_compatibility_review:({contracts:{before:string;after:string};url?:never;source_watch_id?:never;observation_id?:never;compare_to?:'previous'}|{url:string;source_watch_id?:never;observation_id?:never}|{source_watch_id:string;url?:never;observation_id?:never}|{observation_id:string;url?:never;source_watch_id?:never})&Comparison;
+ website_change_intelligence:((Selection&Comparison)|PortableSelection)&RecordIdentity&{detail?:'compact'|'expanded';export_snapshot?:boolean};
+ api_compatibility_review:({contracts:{before:string;after:string};url?:never;source_watch_id?:never;observation_id?:never;baseline_snapshot?:never;compare_to?:'previous';export_snapshot?:false}|((Selection&Comparison)|PortableSelection)&{contracts?:never;export_snapshot?:boolean})&{detail?:'compact'|'expanded'};
  onchain_evidence_brief:WorkflowChainSelection&{previous_contract_snapshot?:string;detail?:'compact'|'expanded'};
- cross_domain_release_evidence:Comparison&{release_label:string}&({url:string;source_watch_id?:never;scope?:WorkflowScope;api_url?:string;onchain:WorkflowChainSelection;observation_id?:never}|{source_watch_id:string;url?:never;scope?:never;api_url?:string;onchain:WorkflowChainSelection;observation_id?:never}|{observation_id:string;url?:never;source_watch_id?:never;scope?:never;api_url?:never;onchain?:never});
+ cross_domain_release_evidence:Comparison&RecordIdentity&{release_label:string}&({url:string;source_watch_id?:never;scope?:WorkflowScope;api_url?:string;onchain:WorkflowChainSelection;observation_id?:never}|{source_watch_id:string;url?:never;scope?:never;api_url?:string;onchain:WorkflowChainSelection;observation_id?:never}|{observation_id:string;url?:never;source_watch_id?:never;scope?:never;api_url?:never;onchain?:never});
 }
 export interface ServerWorkflowResult {workflow:ServerWorkflow;version:1;status:string;observed_at:string;summary:Record<string,unknown>;evidence:Record<string,unknown>;provenance:Record<string,unknown>;completeness:Record<string,unknown>;warnings:string[];accounting:Record<string,unknown>;billing:{one_financial_operation:true;internal_charges:0;tariff_version:5;credits:number;atomic_usdc:string};observation_id?:string;state_expires_at?:string;workflow_state_saved?:boolean;persistence_error?:string}

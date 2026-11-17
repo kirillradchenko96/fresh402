@@ -35,3 +35,7 @@ Use20-second discovery deadlines, no automatic new paid attempts, and applicatio
 CrewAI1.15.41 / Python3.13.12 / MCP1.30.0 was independently connected using the actual `crewai.mcp.client.MCPClient` and `HTTPTransport`. Install `crewai==1.15.41` in your own Python environment and run `python examples/integrations/crewai_mcp.py`; optional `FRESH402_REGISTER_EXAMPLE=1` enables the free example. `max_retries=1` means one total attempt in this release. Use `call_tool_result` to retain the `is_error` flag; `call_tool` drops it. SDK telemetry is disabled in the example. The isolated QA installation included138 Python packages, but none were added to the Fresh402 backend or deployed infrastructure. No model, embedding download or inference ran. Google ADK, Pydantic AI and Microsoft Agent Framework are not claimed tested. Any ordinary standards-compatible MCP client may still initialize without payment credentials.
 
 Sources: [LangChain MCP](https://docs.langchain.com/oss/python/langchain/mcp), [OpenAI Agents integration](https://developers.openai.com/api/docs/guides/agents/integrations-observability), [Vercel MCP](https://ai-sdk.dev/docs/ai-sdk-core/mcp-tools), [CrewAI MCP](https://docs.crewai.com/en/mcp/overview).
+
+## Bounded structured evidence update
+
+See [structured records, Release Guardian, record identity and portable observation context](DEEP_CAPABILITIES.md) for exact optional inputs, limits, CI semantics and original recovery boundaries. The existing tool identities and tariffs are unchanged.

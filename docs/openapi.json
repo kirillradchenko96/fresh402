@@ -3,8 +3,8 @@
     "schema": "fresh402-release-definition-v1",
     "product_version": "3.1.0",
     "mcp_server_version": "3.1.0",
-    "api_contract_revision": "2026-11-16.2",
-    "tool_catalog_revision": "12-tools-ci-contracts-typed-extraction-v1",
+    "api_contract_revision": "2026-11-16.3",
+    "tool_catalog_revision": "12-tools-bounded-records-guardian-portable-v2",
     "registry_metadata_version": "3.1.2",
     "sdk": {
       "recommended": "0.6.1-rc.1",
@@ -1617,10 +1617,10 @@
     "/v4/demos/website-change": {
       "get": {
         "operationId": "fresh402_fixture_website_change",
-        "summary": "Fixed embedded fixtures evaluated by production normalization and comparison code; no live source, customer state or payment",
+        "summary": "Fixed embedded fixtures evaluated by production normalization, comparison or extraction code; no live source, customer state or payment",
         "responses": {
           "200": {
-            "description": "Seed/change/unchanged fixture evidence with explicit provenance. No arbitrary inputs or workflow execution.",
+            "description": "Fixed fixture evidence with explicit provenance. No arbitrary inputs or workflow execution.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1659,10 +1659,52 @@
     "/v4/demos/api-compatibility": {
       "get": {
         "operationId": "fresh402_fixture_api_compatibility",
-        "summary": "Fixed embedded fixtures evaluated by production normalization and comparison code; no live source, customer state or payment",
+        "summary": "Fixed embedded fixtures evaluated by production normalization, comparison or extraction code; no live source, customer state or payment",
         "responses": {
           "200": {
-            "description": "Seed/change/unchanged fixture evidence with explicit provenance. No arbitrary inputs or workflow execution.",
+            "description": "Fixed fixture evidence with explicit provenance. No arbitrary inputs or workflow execution.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "fixture": {
+                      "const": true
+                    },
+                    "live_source": {
+                      "const": false
+                    },
+                    "payment": {
+                      "const": false
+                    },
+                    "source_fetches": {
+                      "const": 0
+                    },
+                    "steps": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Query input is not accepted"
+          }
+        }
+      }
+    },
+    "/v4/demos/structured-extraction": {
+      "get": {
+        "operationId": "fresh402_fixture_structured_extraction",
+        "summary": "Fixed embedded fixtures evaluated by production normalization, comparison or extraction code; no live source, customer state or payment",
+        "responses": {
+          "200": {
+            "description": "Fixed fixture evidence with explicit provenance. No arbitrary inputs or workflow execution.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2525,8 +2567,8 @@
     "/v2/extract": {
       "post": {
         "operationId": "fresh402_extract",
-        "summary": "Use Extract for text, metadata, headings, links, JSON-LD and content hash from one public document; no watch required. No comparison, crawl or JavaScript. CSS scopes HTML; json_pointer selects one JSON value, json_pointers selects1-8 ordered fields; missing selections fail422. feed_mode:entries projects bounded RSS2/Atom; omit for XML-as-text. max_chars defaults20000, clips text but not the full hash; clipped structured data is omitted. For repeat observations use Check, then separately authorize Extract if needed. Use the retained source identity and scoped output to keep agent evidence consistent across sessions. $0.01 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch; opt-in feed_mode:entries projects RSS2/Atom. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "summary": "Use Extract for text, metadata, headings, links, JSON-LD and content hash from one public document; no watch required. No comparison, crawl or JavaScript. CSS scopes HTML; json_pointer selects one JSON value, json_pointers selects1-8 ordered fields; missing selections fail422. feed_mode:entries projects bounded RSS2/Atom; omit for XML-as-text. max_chars defaults20000, clips text but not the full hash; clipped structured data is omitted. For repeat observations use Check, then separately authorize Extract if needed. Use the retained source identity and scoped output to keep agent evidence consistent across sessions. Optional records extracts 1-25 repeated JSON objects or static HTML/table rows with 1-12 named typed fields, per-field status and source pointers. It is exclusive with fields/json_pointer/json_pointers/feed_mode. Default record limit20, shared16,384 selected-value bytes; no schema inference, currency coercion, pagination or browser. Missing/invalid/ambiguous/truncated/unsupported values are reported explicitly. The existing fields mode projects one JSON object. Price and one-source-fetch limit are unchanged. $0.01 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Extract static content and records. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "extract"
         ],
@@ -2559,7 +2601,7 @@
             {
               "amount": "10000",
               "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-              "description": "Use Extract to read one static public HTML, JSON or text URL without registering a watch; opt-in feed_mode:entries projects RSS2/Atom. Scope HTML with CSS, exclude noisy fields and bound returned text; no JavaScript rendering or linked-page crawling. Version comparisons belong to Check or Smart Diff. x402 $0.010 USDC on Base.",
+              "description": "Extract static content and records.",
               "intent": "charge",
               "method": "evm"
             }
@@ -2705,6 +2747,169 @@
                     "uniqueItems": true,
                     "description": "Optional 1-12 named typed fields for JSON sources only, exclusive with json_pointer/json_pointers/feed_mode. Every name must be distinct across the array, even when pointers or types differ; this runtime rule is stricter than whole-object uniqueItems. Uses one existing fetch/parse after ignore_json_paths. Missing/type-mismatched fields are reported individually, never silently coerced. Each selected value <=4,096 UTF-8 bytes; total values <=16,384 bytes/2,000 nodes. Over-budget fields are omitted explicitly. HTML/text retain ordinary extraction; no semantic or browser extraction."
                   },
+                  "records": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "source": {
+                            "type": "string",
+                            "const": "json",
+                            "description": "Select already parsed JSON after ignore_json_paths; no additional fetch or parse."
+                          },
+                          "pointer": {
+                            "type": "string",
+                            "maxLength": 256,
+                            "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                            "description": "Required exact RFC6901 pointer selecting an array after exclusions; empty string selects root. At most256 characters/64 segments, ~0/~1 escaping, no wildcard. Each field pointer is relative to an individual array item."
+                          },
+                          "fields": {
+                            "minItems": 1,
+                            "maxItems": 12,
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z][A-Za-z0-9_]{0,47}$",
+                                  "description": "Unique output property name, 1-48 ASCII letters/digits/underscores, starting with a letter."
+                                },
+                                "pointer": {
+                                  "type": "string",
+                                  "maxLength": 256,
+                                  "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                                  "description": "Exact RFC6901 JSON Pointer after exclusions; empty string selects root, ~0/~1 escape ~ and /. No wildcards, inference or linked-source fetching."
+                                },
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "string",
+                                    "number",
+                                    "integer",
+                                    "boolean",
+                                    "object",
+                                    "array",
+                                    "null"
+                                  ],
+                                  "description": "Required exact JSON value type. No string-to-number coercion; integer requires a safe integer. object excludes arrays/null."
+                                },
+                                "required": {
+                                  "default": true,
+                                  "description": "Default true. A missing required value makes complete:false; optional missing values are still reported. No invented default or placeholder value.",
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "pointer",
+                                "type"
+                              ],
+                              "additionalProperties": false,
+                              "description": "One named typed field: exact source pointer, accepted JSON type and explicit requiredness. Missing/type-mismatched/over-budget values are reported, never invented or coerced."
+                            },
+                            "uniqueItems": true,
+                            "description": "Required 1-12 distinct named typed fields. Each exact RFC6901 pointer is relative to a single selected array item. Required defaults true; no coercion. One shared 16,384-byte/2,000-node value budget across all records."
+                          },
+                          "limit": {
+                            "default": 20,
+                            "description": "Maximum returned records, 1-25, default20. Excess records are counted as omitted; no automatic pagination, crawling or larger output budget. A shared16,384 selected-value byte/2,000-node budget applies across every record.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 25
+                          }
+                        },
+                        "required": [
+                          "source",
+                          "pointer",
+                          "fields"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "source": {
+                            "type": "string",
+                            "const": "html",
+                            "description": "Select static HTML after the same normal exclusions and scope as ordinary Extract; JavaScript is never run."
+                          },
+                          "row_selector": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256,
+                            "description": "Required selector for repeated record elements, e.g. .product or tbody tr. No comma groups/:scope. Nested matching records and table rowspan/colspan other than1 are unsupported, never silently flattened."
+                          },
+                          "fields": {
+                            "minItems": 1,
+                            "maxItems": 12,
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z][A-Za-z0-9_]{0,47}$",
+                                  "description": "Unique output property name, 1-48 ASCII letters/digits/underscores, starting with a letter."
+                                },
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "string",
+                                    "number",
+                                    "integer",
+                                    "boolean",
+                                    "object",
+                                    "array",
+                                    "null"
+                                  ],
+                                  "description": "Required exact JSON value type. No string-to-number coercion; integer requires a safe integer. object excludes arrays/null."
+                                },
+                                "required": {
+                                  "default": true,
+                                  "description": "Default true. A missing required value makes complete:false; optional missing values are still reported. No invented default or placeholder value.",
+                                  "type": "boolean"
+                                },
+                                "selector": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 256,
+                                  "description": "One supported CSS selector, 1-256 characters, without comma groups or :scope. Matches static descendants only; no XPath, scripts, browser layout or linked-source fetching. Example: td:nth-child(2)."
+                                },
+                                "attribute": {
+                                  "description": "Optional explicitly selected inert attribute. Allowed: href/src/alt/title/content/value/aria-label or data-* (1-48 lowercase letters/digits/underscores/hyphens). Omit for normalized descendant text. URLs are returned as untrusted strings, never fetched.",
+                                  "type": "string",
+                                  "pattern": "^(?:data-[a-z0-9_-]{1,48}|href|src|alt|title|content|value|aria-label)$"
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "type",
+                                "selector"
+                              ],
+                              "additionalProperties": false,
+                              "description": "One named HTML field within each record. Exactly one matching descendant is required for a value; multiple matches are ambiguous, missing attributes/text nodes are not invented. The explicit type parses only an exact JSON scalar/object/array literal for non-string types; no currency stripping or locale coercion."
+                            },
+                            "description": "1-12 fields with distinct names. CSS selectors are relative descendant queries inside a record. String types return normalized text; other types require exact JSON literals and existing safe-integer/finite-number validation. Required defaults true; unsupported features are rejected."
+                          },
+                          "limit": {
+                            "default": 20,
+                            "description": "Maximum returned records, 1-25, default20. Excess records are counted as omitted; no automatic pagination, crawling or larger output budget. A shared16,384 selected-value byte/2,000-node budget applies across every record.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 25
+                          }
+                        },
+                        "required": [
+                          "source",
+                          "row_selector",
+                          "fields"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ],
+                    "description": "Optional bounded repeated-record extraction, exclusive with fields/json_pointer/json_pointers/feed_mode. JSON arrays or static HTML records/tables only, one original source fetch. Up to25 records and12 fields, globally16,384 selected-value bytes/2,000nodes. Every field has a source reference and explicit missing/invalid/ambiguous/truncated/unsupported status. No inferred table headers, currency conversion, browser, linked-page crawl or semantic model."
+                  },
                   "url": {
                     "type": "string",
                     "maxLength": 4096,
@@ -2795,6 +3000,35 @@
                   ]
                 },
                 "allOf": [
+                  {
+                    "not": {
+                      "required": [
+                        "records"
+                      ],
+                      "anyOf": [
+                        {
+                          "required": [
+                            "fields"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "json_pointer"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "json_pointers"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "feed_mode"
+                          ]
+                        }
+                      ]
+                    }
+                  },
                   {
                     "not": {
                       "required": [
@@ -3170,6 +3404,169 @@
                     "uniqueItems": true,
                     "description": "Optional 1-12 named typed fields for JSON sources only, exclusive with json_pointer/json_pointers/feed_mode. Every name must be distinct across the array, even when pointers or types differ; this runtime rule is stricter than whole-object uniqueItems. Uses one existing fetch/parse after ignore_json_paths. Missing/type-mismatched fields are reported individually, never silently coerced. Each selected value <=4,096 UTF-8 bytes; total values <=16,384 bytes/2,000 nodes. Over-budget fields are omitted explicitly. HTML/text retain ordinary extraction; no semantic or browser extraction."
                   },
+                  "records": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "source": {
+                            "type": "string",
+                            "const": "json",
+                            "description": "Select already parsed JSON after ignore_json_paths; no additional fetch or parse."
+                          },
+                          "pointer": {
+                            "type": "string",
+                            "maxLength": 256,
+                            "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                            "description": "Required exact RFC6901 pointer selecting an array after exclusions; empty string selects root. At most256 characters/64 segments, ~0/~1 escaping, no wildcard. Each field pointer is relative to an individual array item."
+                          },
+                          "fields": {
+                            "minItems": 1,
+                            "maxItems": 12,
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z][A-Za-z0-9_]{0,47}$",
+                                  "description": "Unique output property name, 1-48 ASCII letters/digits/underscores, starting with a letter."
+                                },
+                                "pointer": {
+                                  "type": "string",
+                                  "maxLength": 256,
+                                  "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                                  "description": "Exact RFC6901 JSON Pointer after exclusions; empty string selects root, ~0/~1 escape ~ and /. No wildcards, inference or linked-source fetching."
+                                },
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "string",
+                                    "number",
+                                    "integer",
+                                    "boolean",
+                                    "object",
+                                    "array",
+                                    "null"
+                                  ],
+                                  "description": "Required exact JSON value type. No string-to-number coercion; integer requires a safe integer. object excludes arrays/null."
+                                },
+                                "required": {
+                                  "default": true,
+                                  "description": "Default true. A missing required value makes complete:false; optional missing values are still reported. No invented default or placeholder value.",
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "pointer",
+                                "type"
+                              ],
+                              "additionalProperties": false,
+                              "description": "One named typed field: exact source pointer, accepted JSON type and explicit requiredness. Missing/type-mismatched/over-budget values are reported, never invented or coerced."
+                            },
+                            "uniqueItems": true,
+                            "description": "Required 1-12 distinct named typed fields. Each exact RFC6901 pointer is relative to a single selected array item. Required defaults true; no coercion. One shared 16,384-byte/2,000-node value budget across all records."
+                          },
+                          "limit": {
+                            "default": 20,
+                            "description": "Maximum returned records, 1-25, default20. Excess records are counted as omitted; no automatic pagination, crawling or larger output budget. A shared16,384 selected-value byte/2,000-node budget applies across every record.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 25
+                          }
+                        },
+                        "required": [
+                          "source",
+                          "pointer",
+                          "fields"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "source": {
+                            "type": "string",
+                            "const": "html",
+                            "description": "Select static HTML after the same normal exclusions and scope as ordinary Extract; JavaScript is never run."
+                          },
+                          "row_selector": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 256,
+                            "description": "Required selector for repeated record elements, e.g. .product or tbody tr. No comma groups/:scope. Nested matching records and table rowspan/colspan other than1 are unsupported, never silently flattened."
+                          },
+                          "fields": {
+                            "minItems": 1,
+                            "maxItems": 12,
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "pattern": "^[A-Za-z][A-Za-z0-9_]{0,47}$",
+                                  "description": "Unique output property name, 1-48 ASCII letters/digits/underscores, starting with a letter."
+                                },
+                                "type": {
+                                  "type": "string",
+                                  "enum": [
+                                    "string",
+                                    "number",
+                                    "integer",
+                                    "boolean",
+                                    "object",
+                                    "array",
+                                    "null"
+                                  ],
+                                  "description": "Required exact JSON value type. No string-to-number coercion; integer requires a safe integer. object excludes arrays/null."
+                                },
+                                "required": {
+                                  "default": true,
+                                  "description": "Default true. A missing required value makes complete:false; optional missing values are still reported. No invented default or placeholder value.",
+                                  "type": "boolean"
+                                },
+                                "selector": {
+                                  "type": "string",
+                                  "minLength": 1,
+                                  "maxLength": 256,
+                                  "description": "One supported CSS selector, 1-256 characters, without comma groups or :scope. Matches static descendants only; no XPath, scripts, browser layout or linked-source fetching. Example: td:nth-child(2)."
+                                },
+                                "attribute": {
+                                  "description": "Optional explicitly selected inert attribute. Allowed: href/src/alt/title/content/value/aria-label or data-* (1-48 lowercase letters/digits/underscores/hyphens). Omit for normalized descendant text. URLs are returned as untrusted strings, never fetched.",
+                                  "type": "string",
+                                  "pattern": "^(?:data-[a-z0-9_-]{1,48}|href|src|alt|title|content|value|aria-label)$"
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "type",
+                                "selector"
+                              ],
+                              "additionalProperties": false,
+                              "description": "One named HTML field within each record. Exactly one matching descendant is required for a value; multiple matches are ambiguous, missing attributes/text nodes are not invented. The explicit type parses only an exact JSON scalar/object/array literal for non-string types; no currency stripping or locale coercion."
+                            },
+                            "description": "1-12 fields with distinct names. CSS selectors are relative descendant queries inside a record. String types return normalized text; other types require exact JSON literals and existing safe-integer/finite-number validation. Required defaults true; unsupported features are rejected."
+                          },
+                          "limit": {
+                            "default": 20,
+                            "description": "Maximum returned records, 1-25, default20. Excess records are counted as omitted; no automatic pagination, crawling or larger output budget. A shared16,384 selected-value byte/2,000-node budget applies across every record.",
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 25
+                          }
+                        },
+                        "required": [
+                          "source",
+                          "row_selector",
+                          "fields"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ],
+                    "description": "Optional bounded repeated-record extraction, exclusive with fields/json_pointer/json_pointers/feed_mode. JSON arrays or static HTML records/tables only, one original source fetch. Up to25 records and12 fields, globally16,384 selected-value bytes/2,000nodes. Every field has a source reference and explicit missing/invalid/ambiguous/truncated/unsupported status. No inferred table headers, currency conversion, browser, linked-page crawl or semantic model."
+                  },
                   "url": {
                     "type": "string",
                     "maxLength": 4096,
@@ -3260,6 +3657,35 @@
                   ]
                 },
                 "allOf": [
+                  {
+                    "not": {
+                      "required": [
+                        "records"
+                      ],
+                      "anyOf": [
+                        {
+                          "required": [
+                            "fields"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "json_pointer"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "json_pointers"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "feed_mode"
+                          ]
+                        }
+                      ]
+                    }
+                  },
                   {
                     "not": {
                       "required": [
@@ -3499,7 +3925,7 @@
     "/v2/smart-diff": {
       "post": {
         "operationId": "fresh402_smart_diff",
-        "summary": "Use Smart Diff for bounded JSON Pointer/HTML block changes and deterministic significance evidence across sessions. Requires real registered watch_id; fetches using saved rules. compare_to: previous(default) or baseline; previous_hash overrides with compatible retained same-watch evidence. json_array_keys explicitly matches unique typed identities; ambiguity fails. No cache-age option or scheduler. Missing history404; truncated/incompatible baseline409. Not complete semantic proof. Use Check for a focused changed/unchanged signal; choose the advertised Website Change Intelligence workflow for combined supported observation and comparison. $0.015 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "summary": "Use Smart Diff for bounded JSON Pointer/HTML block changes and deterministic significance evidence across sessions. Requires real registered watch_id; fetches using saved rules. compare_to: previous(default) or baseline; previous_hash overrides with compatible retained same-watch evidence. json_array_keys explicitly matches unique typed identities; ambiguity fails. No cache-age option or scheduler. Missing history404; truncated/incompatible baseline409. Not complete semantic proof. Use Check for a focused changed/unchanged signal; choose the advertised Website Change Intelligence workflow for combined supported observation and comparison. change_evidence supplies bounded stable mechanical change IDs and pointers; these are not a business-impact or authenticity assessment. $0.015 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "smart_diff"
@@ -4171,7 +4597,7 @@
     "/v2/openapi-contract-diff": {
       "post": {
         "operationId": "fresh402_openapi_contract_diff",
-        "summary": "Use for bounded directional OpenAPI3.0/3.1 JSON contract-change evidence, including supported paths/operations, required fields, types/enums/null and authentication. Use exactly one real watch_id from free unfiltered registration or contracts:{before,after} serialized JSON strings (24,000 characters each/48,000 combined UTF-8 bytes). Supplied pairs compare before to after without a fetch or saved watch; omit comparison overrides. Same price and original-operation recovery. Stored mode has no URL override. compare_to: previous(default) or baseline; previous_hash overrides with supported retained evidence. First stored-watch call seeds contract history; explicit pairs compare immediately and return a conservative CI verdict. No YAML, external-reference fetch or endpoint execution; uncertainty requires review, not a complete compatibility proof. Save and reuse watch IDs across sessions. For a complete single-charge server workflow, use API Compatibility Review when advertised. $0.020 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "summary": "Use for bounded directional OpenAPI3.0/3.1 JSON contract-change evidence, including supported paths/operations, required fields, types/enums/null and authentication. Use exactly one real watch_id from free unfiltered registration or contracts:{before,after} serialized JSON strings (24,000 characters each/48,000 combined UTF-8 bytes). Supplied pairs compare before to after without a fetch or saved watch; omit comparison overrides. Same price and original-operation recovery. Stored mode has no URL override. compare_to: previous(default) or baseline; previous_hash overrides with supported retained evidence. First stored-watch call seeds contract history; explicit pairs compare immediately and return a conservative CI verdict. No YAML, external-reference fetch or endpoint execution; uncertainty requires review, not a complete compatibility proof. Save and reuse watch IDs across sessions. For a complete single-charge server workflow, use API Compatibility Review when advertised. Rules v3 adds finite numeric/exclusive integer bounds, scalar const in3.1, scalar-item array cardinality and otherwise-identical boolean object closure. Unsupported constraint interactions remain review_required. Optional review contains stable finding IDs, affected operations, bounded excerpts and CI0/1/2; no customer-code inspection or release-safety guarantee. $0.020 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence. Supply an explicit contracts:{before,after} serialized JSON pair without registration, or an existing watch from unfiltered free registration. In watch mode compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "openapi_diff"
@@ -7721,8 +8147,8 @@
     "/v4/workflows/website-change-intelligence": {
       "post": {
         "operationId": "fresh402_website_change_intelligence",
-        "summary": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch. One fixed workflow charge; internal steps never create separate customer charges. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.005 USDC or 2 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
+        "summary": "Seed or compare one owned scoped public document with one validated fetch and bounded structural evidence. Optional JSON record identities; optional private portable source snapshot, same principal/workflow/scope/environment,30day expiry. Server state remains seven days. Mechanical findings are not business-impact or freshness certification. One fixed workflow charge; internal steps never create separate customer charges. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.005 USDC or 2 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "description": "Seed or compare one owned scoped public document with one validated fetch and bounded structural evidence. Optional JSON record identities; optional private portable source snapshot, same principal/workflow/scope/environment,30day expiry. Server state remains seven days. Mechanical findings are not business-impact or freshness certification. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "website_change_intelligence"
         ],
@@ -7755,7 +8181,7 @@
             {
               "amount": "5000",
               "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-              "description": "Seed or compare one owned, scoped public document; return meaningful structural/attribute changes, compact evidence and retained comparison identity from one validated fetch.",
+              "description": "Seed or compare one owned scoped public document with one validated fetch and bounded structural evidence. Optional JSON record identities; optional private portable source snapshot, same principal/workflow/scope/environment,30day expiry. Server state remains seven days. Mechanical findings are not business-impact or freshness certification.",
               "intent": "charge",
               "method": "evm"
             }
@@ -7877,6 +8303,47 @@
                       "expanded"
                     ]
                   },
+                  "baseline_snapshot": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 44000,
+                    "pattern": "^fs1\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]{43}$",
+                    "description": "Optional private caller-retained Fresh402 snapshot token, at most44,000 characters, as the sole source identity instead of url/source_watch_id/observation_id/contracts. Same verified billing principal, workflow, environment and immutable scope only; compare_to must be previous. Expires30days after source observation. Contains source evidence, not a payment capability or proof of current freshness. Tampered/foreign/expired tokens fail before fetching; never send them to analytics or public repositories."
+                  },
+                  "export_snapshot": {
+                    "description": "Optional, default false. Request a caller-retained integrity-protected snapshot of this operation's new source observation, within the existing paid workflow price. Supported only for Website Change Intelligence and stored-source API Compatibility Review. At most32,768 payload bytes/44,000 token characters; oversized evidence reports omitted_size without corrupting the main result. Expires30days after observation; seven-day server state and original financial recovery do not extend. Keep the token private.",
+                    "type": "boolean"
+                  },
+                  "json_array_keys": {
+                    "description": "Optional per-comparison JSON array identity rules, same bounds as Smart Diff. JSON source only; duplicate/missing keys fail explicitly. Does not change stored source normalization or hashes. Persist the exact request for financial recovery.",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Exact RFC6901 pointer to an array on both compared JSON documents, up to256 characters/64 segments. Empty string selects a root array. Example:'/items'; no wildcards or automatic ID guessing."
+                        },
+                        "key": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Nonempty exact RFC6901 pointer within each object item, up to256 characters/64 segments; e.g.'/id' or '/product/sku'. Every key must exist and be a unique nonempty string<=256 characters or safe integer; number1 differs from string'1'."
+                        }
+                      },
+                      "required": [
+                        "path",
+                        "key"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Explicit JSON array identity rule. Both paths must resolve; missing/duplicate/invalid identities fail422 without index fallback. Source snapshot ordering/hash is retained."
+                    }
+                  },
                   "scope": {
                     "type": "object",
                     "properties": {
@@ -7946,6 +8413,11 @@
                           "required": [
                             "observation_id"
                           ]
+                        },
+                        {
+                          "required": [
+                            "baseline_snapshot"
+                          ]
                         }
                       ]
                     }
@@ -7969,6 +8441,11 @@
                         {
                           "required": [
                             "scope"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "baseline_snapshot"
                           ]
                         }
                       ]
@@ -7994,8 +8471,47 @@
                           "required": [
                             "scope"
                           ]
+                        },
+                        {
+                          "required": [
+                            "baseline_snapshot"
+                          ]
                         }
                       ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "baseline_snapshot"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "compare_to": {
+                        "const": "previous"
+                      }
                     }
                   }
                 ]
@@ -8296,6 +8812,47 @@
                       "expanded"
                     ]
                   },
+                  "baseline_snapshot": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 44000,
+                    "pattern": "^fs1\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]{43}$",
+                    "description": "Optional private caller-retained Fresh402 snapshot token, at most44,000 characters, as the sole source identity instead of url/source_watch_id/observation_id/contracts. Same verified billing principal, workflow, environment and immutable scope only; compare_to must be previous. Expires30days after source observation. Contains source evidence, not a payment capability or proof of current freshness. Tampered/foreign/expired tokens fail before fetching; never send them to analytics or public repositories."
+                  },
+                  "export_snapshot": {
+                    "description": "Optional, default false. Request a caller-retained integrity-protected snapshot of this operation's new source observation, within the existing paid workflow price. Supported only for Website Change Intelligence and stored-source API Compatibility Review. At most32,768 payload bytes/44,000 token characters; oversized evidence reports omitted_size without corrupting the main result. Expires30days after observation; seven-day server state and original financial recovery do not extend. Keep the token private.",
+                    "type": "boolean"
+                  },
+                  "json_array_keys": {
+                    "description": "Optional per-comparison JSON array identity rules, same bounds as Smart Diff. JSON source only; duplicate/missing keys fail explicitly. Does not change stored source normalization or hashes. Persist the exact request for financial recovery.",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Exact RFC6901 pointer to an array on both compared JSON documents, up to256 characters/64 segments. Empty string selects a root array. Example:'/items'; no wildcards or automatic ID guessing."
+                        },
+                        "key": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Nonempty exact RFC6901 pointer within each object item, up to256 characters/64 segments; e.g.'/id' or '/product/sku'. Every key must exist and be a unique nonempty string<=256 characters or safe integer; number1 differs from string'1'."
+                        }
+                      },
+                      "required": [
+                        "path",
+                        "key"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Explicit JSON array identity rule. Both paths must resolve; missing/duplicate/invalid identities fail422 without index fallback. Source snapshot ordering/hash is retained."
+                    }
+                  },
                   "scope": {
                     "type": "object",
                     "properties": {
@@ -8365,6 +8922,11 @@
                           "required": [
                             "observation_id"
                           ]
+                        },
+                        {
+                          "required": [
+                            "baseline_snapshot"
+                          ]
                         }
                       ]
                     }
@@ -8388,6 +8950,11 @@
                         {
                           "required": [
                             "scope"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "baseline_snapshot"
                           ]
                         }
                       ]
@@ -8413,8 +8980,47 @@
                           "required": [
                             "scope"
                           ]
+                        },
+                        {
+                          "required": [
+                            "baseline_snapshot"
+                          ]
                         }
                       ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "baseline_snapshot"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "compare_to": {
+                        "const": "previous"
+                      }
                     }
                   }
                 ]
@@ -8781,7 +9387,7 @@
     "/v4/workflows/api-compatibility-review": {
       "post": {
         "operationId": "fresh402_api_compatibility_review",
-        "summary": "Compare explicit contracts:{before,after} JSON strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; no YAML, external-ref crawling or live API proof. One fixed workflow charge; internal steps never create separate customer charges. Explicit API contracts pairs compare immediately without fetching or saved observation state; supplied before/after URNs identify canonical input hashes, not fetched URLs. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "summary": "Compare explicit contracts:{before,after} JSON strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; no YAML, external-ref crawling or live API proof. Release Guardian review exposes stable finding/result IDs, directional rules, affected operations, bounded before/after excerpts, grouped evidence and conservative CI0/1/2. Seed/hash-unchanged observations explicitly report not_compared (CI2). Optional stored-source export_snapshot/baseline_snapshot carries private source context across sessions for the same principal/workflow/environment/scope,30days from observation; not financial authority. One fixed workflow charge; internal steps never create separate customer charges. Explicit API contracts pairs compare immediately without fetching or saved observation state; supplied before/after URNs identify canonical input hashes, not fetched URLs. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
         "description": "Compare explicit contracts:{before,after} JSON strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; no YAML, external-ref crawling or live API proof. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "api_compatibility_review"
@@ -8937,6 +9543,17 @@
                       "expanded"
                     ]
                   },
+                  "baseline_snapshot": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 44000,
+                    "pattern": "^fs1\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]{43}$",
+                    "description": "Optional private caller-retained Fresh402 snapshot token, at most44,000 characters, as the sole source identity instead of url/source_watch_id/observation_id/contracts. Same verified billing principal, workflow, environment and immutable scope only; compare_to must be previous. Expires30days after source observation. Contains source evidence, not a payment capability or proof of current freshness. Tampered/foreign/expired tokens fail before fetching; never send them to analytics or public repositories."
+                  },
+                  "export_snapshot": {
+                    "description": "Optional, default false. Request a caller-retained integrity-protected snapshot of this operation's new source observation, within the existing paid workflow price. Supported only for Website Change Intelligence and stored-source API Compatibility Review. At most32,768 payload bytes/44,000 token characters; oversized evidence reports omitted_size without corrupting the main result. Expires30days after observation; seven-day server state and original financial recovery do not extend. Keep the token private.",
+                    "type": "boolean"
+                  },
                   "contracts": {
                     "type": "object",
                     "properties": {
@@ -8981,6 +9598,11 @@
                         },
                         {
                           "required": [
+                            "baseline_snapshot"
+                          ]
+                        },
+                        {
+                          "required": [
                             "contracts"
                           ]
                         }
@@ -9006,6 +9628,11 @@
                         {
                           "required": [
                             "scope"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "baseline_snapshot"
                           ]
                         },
                         {
@@ -9039,10 +9666,54 @@
                         },
                         {
                           "required": [
+                            "baseline_snapshot"
+                          ]
+                        },
+                        {
+                          "required": [
                             "contracts"
                           ]
                         }
                       ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "baseline_snapshot"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "contracts"
+                          ]
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "compare_to": {
+                        "const": "previous"
+                      }
                     }
                   },
                   {
@@ -9065,12 +9736,20 @@
                           "required": [
                             "observation_id"
                           ]
+                        },
+                        {
+                          "required": [
+                            "baseline_snapshot"
+                          ]
                         }
                       ]
                     },
                     "properties": {
                       "compare_to": {
                         "const": "previous"
+                      },
+                      "export_snapshot": {
+                        "const": false
                       }
                     }
                   }
@@ -9372,6 +10051,17 @@
                       "expanded"
                     ]
                   },
+                  "baseline_snapshot": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 44000,
+                    "pattern": "^fs1\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]{43}$",
+                    "description": "Optional private caller-retained Fresh402 snapshot token, at most44,000 characters, as the sole source identity instead of url/source_watch_id/observation_id/contracts. Same verified billing principal, workflow, environment and immutable scope only; compare_to must be previous. Expires30days after source observation. Contains source evidence, not a payment capability or proof of current freshness. Tampered/foreign/expired tokens fail before fetching; never send them to analytics or public repositories."
+                  },
+                  "export_snapshot": {
+                    "description": "Optional, default false. Request a caller-retained integrity-protected snapshot of this operation's new source observation, within the existing paid workflow price. Supported only for Website Change Intelligence and stored-source API Compatibility Review. At most32,768 payload bytes/44,000 token characters; oversized evidence reports omitted_size without corrupting the main result. Expires30days after observation; seven-day server state and original financial recovery do not extend. Keep the token private.",
+                    "type": "boolean"
+                  },
                   "contracts": {
                     "type": "object",
                     "properties": {
@@ -9416,6 +10106,11 @@
                         },
                         {
                           "required": [
+                            "baseline_snapshot"
+                          ]
+                        },
+                        {
+                          "required": [
                             "contracts"
                           ]
                         }
@@ -9441,6 +10136,11 @@
                         {
                           "required": [
                             "scope"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "baseline_snapshot"
                           ]
                         },
                         {
@@ -9474,10 +10174,54 @@
                         },
                         {
                           "required": [
+                            "baseline_snapshot"
+                          ]
+                        },
+                        {
+                          "required": [
                             "contracts"
                           ]
                         }
                       ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "baseline_snapshot"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "url"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "source_watch_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "observation_id"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "scope"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "contracts"
+                          ]
+                        }
+                      ]
+                    },
+                    "properties": {
+                      "compare_to": {
+                        "const": "previous"
+                      }
                     }
                   },
                   {
@@ -9500,12 +10244,20 @@
                           "required": [
                             "observation_id"
                           ]
+                        },
+                        {
+                          "required": [
+                            "baseline_snapshot"
+                          ]
                         }
                       ]
                     },
                     "properties": {
                       "compare_to": {
                         "const": "previous"
+                      },
+                      "export_snapshot": {
+                        "const": false
                       }
                     }
                   }
@@ -10861,6 +11613,36 @@
                       "expanded"
                     ]
                   },
+                  "json_array_keys": {
+                    "description": "Optional bounded explicit JSON record identities for the website/JSON component only; not API or chain data. Same validation as Smart Diff; omit for index comparison. Comparison policy does not alter source ownership, saved hashes or paid recovery identity.",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Exact RFC6901 pointer to an array on both compared JSON documents, up to256 characters/64 segments. Empty string selects a root array. Example:'/items'; no wildcards or automatic ID guessing."
+                        },
+                        "key": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Nonempty exact RFC6901 pointer within each object item, up to256 characters/64 segments; e.g.'/id' or '/product/sku'. Every key must exist and be a unique nonempty string<=256 characters or safe integer; number1 differs from string'1'."
+                        }
+                      },
+                      "required": [
+                        "path",
+                        "key"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Explicit JSON array identity rule. Both paths must resolve; missing/duplicate/invalid identities fail422 without index fallback. Source snapshot ordering/hash is retained."
+                    }
+                  },
                   "scope": {
                     "type": "object",
                     "properties": {
@@ -11344,6 +12126,36 @@
                       "compact",
                       "expanded"
                     ]
+                  },
+                  "json_array_keys": {
+                    "description": "Optional bounded explicit JSON record identities for the website/JSON component only; not API or chain data. Same validation as Smart Diff; omit for index comparison. Comparison policy does not alter source ownership, saved hashes or paid recovery identity.",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Exact RFC6901 pointer to an array on both compared JSON documents, up to256 characters/64 segments. Empty string selects a root array. Example:'/items'; no wildcards or automatic ID guessing."
+                        },
+                        "key": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256,
+                          "pattern": "^(?:\\/(?:[^~]|~[01])*)?$",
+                          "description": "Nonempty exact RFC6901 pointer within each object item, up to256 characters/64 segments; e.g.'/id' or '/product/sku'. Every key must exist and be a unique nonempty string<=256 characters or safe integer; number1 differs from string'1'."
+                        }
+                      },
+                      "required": [
+                        "path",
+                        "key"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Explicit JSON array identity rule. Both paths must resolve; missing/duplicate/invalid identities fail422 without index fallback. Source snapshot ordering/hash is retained."
+                    }
                   },
                   "scope": {
                     "type": "object",
@@ -15530,6 +16342,268 @@
       "OpenApiDiffResult": {
         "type": "object",
         "properties": {
+          "review": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string",
+                "const": "fresh402-contract-review-v1"
+              },
+              "result_id": {
+                "type": "string",
+                "pattern": "^review_[a-f0-9]{64}$"
+              },
+              "comparison_performed": {
+                "type": "boolean"
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "baseline_seeded",
+                  "hash_unchanged"
+                ]
+              },
+              "verdict": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "breaking",
+                      "review_required",
+                      "no_breaking_change_observed",
+                      "not_compared"
+                    ]
+                  },
+                  "ci_exit_code": {
+                    "anyOf": [
+                      {
+                        "type": "number",
+                        "const": 0
+                      },
+                      {
+                        "type": "number",
+                        "const": 1
+                      },
+                      {
+                        "type": "number",
+                        "const": 2
+                      }
+                    ]
+                  },
+                  "scope": {
+                    "type": "string"
+                  },
+                  "live_api_verified": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "unsupported_features_require_review": {
+                    "type": "boolean",
+                    "const": true
+                  }
+                },
+                "required": [
+                  "status",
+                  "ci_exit_code",
+                  "live_api_verified"
+                ],
+                "additionalProperties": false
+              },
+              "input_fingerprints": {
+                "type": "object",
+                "properties": {
+                  "before_sha256": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "after_sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "before_sha256",
+                  "after_sha256"
+                ],
+                "additionalProperties": false
+              },
+              "findings": {
+                "maxItems": 20,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "finding_id": {
+                      "type": "string",
+                      "pattern": "^cf_[a-f0-9]{64}$"
+                    },
+                    "rule_id": {
+                      "type": "string"
+                    },
+                    "severity": {
+                      "type": "string",
+                      "enum": [
+                        "error",
+                        "warning",
+                        "info"
+                      ]
+                    },
+                    "compatibility_direction": {
+                      "type": "string",
+                      "enum": [
+                        "request",
+                        "response",
+                        "authentication",
+                        "operation_or_shared"
+                      ]
+                    },
+                    "affected_path": {
+                      "type": "string"
+                    },
+                    "operations": {
+                      "maxItems": 8,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "complete": {
+                      "type": "boolean"
+                    },
+                    "before": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "after": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "explanation": {
+                      "type": "string"
+                    },
+                    "evidence": {
+                      "type": "object",
+                      "properties": {
+                        "change_pointer": {
+                          "type": "string"
+                        },
+                        "change_pointer_scope": {
+                          "type": "string",
+                          "const": "full_original_result"
+                        },
+                        "before_sha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "after_sha256": {
+                          "type": "string",
+                          "pattern": "^[a-f0-9]{64}$"
+                        },
+                        "excerpts_may_be_truncated": {
+                          "type": "boolean",
+                          "const": true
+                        }
+                      },
+                      "required": [
+                        "change_pointer",
+                        "change_pointer_scope",
+                        "before_sha256",
+                        "after_sha256",
+                        "excerpts_may_be_truncated"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "confidence": {
+                      "type": "string",
+                      "enum": [
+                        "supported_rule",
+                        "requires_review"
+                      ]
+                    },
+                    "recommended_action": {
+                      "type": "string",
+                      "enum": [
+                        "block_and_review",
+                        "inspect_with_other_findings",
+                        "manual_review"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "finding_id",
+                    "rule_id",
+                    "severity",
+                    "compatibility_direction",
+                    "affected_path",
+                    "operations",
+                    "complete",
+                    "before",
+                    "after",
+                    "explanation",
+                    "evidence",
+                    "confidence",
+                    "recommended_action"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "findings_total": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "findings_omitted": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "groups": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "maxItems": 20,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "complete": {
+                "type": "boolean"
+              },
+              "scope": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "schema",
+              "comparison_performed",
+              "verdict",
+              "input_fingerprints",
+              "findings",
+              "findings_total",
+              "findings_omitted",
+              "groups",
+              "complete"
+            ],
+            "additionalProperties": false,
+            "description": "Versioned Release Guardian evidence. Findings and excerpts are bounded; pointers refer to the full original result. A skipped comparator reports not_compared/CI2, never automatic approval. No customer code, live API behavior or deployment safety is established."
+          },
           "input_source": {
             "const": "supplied_contracts"
           },
@@ -16141,6 +17215,182 @@
       "ExtractResult": {
         "type": "object",
         "properties": {
+          "records": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "schema": {
+                "type": "string",
+                "const": "fresh402-records-v1"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "html",
+                  "json"
+                ]
+              },
+              "records": {
+                "maxItems": 25,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "index": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "data": {
+                      "type": "object",
+                      "propertyNames": {
+                        "type": "string"
+                      },
+                      "additionalProperties": {}
+                    },
+                    "fields": {
+                      "maxItems": 12,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "required": {
+                            "type": "boolean"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "ok",
+                              "missing",
+                              "invalid_type",
+                              "omitted_budget",
+                              "ambiguous",
+                              "truncated",
+                              "unsupported"
+                            ]
+                          },
+                          "value": {},
+                          "source": {
+                            "type": "object",
+                            "properties": {
+                              "json_pointer": {
+                                "type": "string"
+                              },
+                              "record_index": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              "row_selector": {
+                                "type": "string"
+                              },
+                              "selector": {
+                                "type": "string"
+                              },
+                              "attribute": {
+                                "type": "string"
+                              },
+                              "representation": {
+                                "type": "string",
+                                "enum": [
+                                  "normalized_json_after_exclusions",
+                                  "static_html_after_exclusions"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "representation"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "required": [
+                          "name",
+                          "required",
+                          "type",
+                          "status",
+                          "source"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "complete": {
+                      "type": "boolean"
+                    },
+                    "partial": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "index",
+                    "data",
+                    "fields",
+                    "complete",
+                    "partial"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "records_seen": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "records_omitted": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 25
+              },
+              "complete": {
+                "type": "boolean"
+              },
+              "partial": {
+                "type": "boolean"
+              },
+              "value_bytes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 16384
+              },
+              "semantic_model_used": {
+                "type": "boolean",
+                "const": false
+              },
+              "source_authenticity": {
+                "type": "string",
+                "const": "not_verified"
+              }
+            },
+            "required": [
+              "schema",
+              "source",
+              "records",
+              "records_seen",
+              "records_omitted",
+              "limit",
+              "complete",
+              "partial",
+              "value_bytes",
+              "semantic_model_used",
+              "source_authenticity"
+            ],
+            "additionalProperties": false,
+            "description": "Typed repeated records from the one original JSON/static-HTML source. Every field has source evidence/status; global value budget and omitted-record counts are explicit. No browser, linked fetch, fabricated values or inferred business meaning."
+          },
+          "records_hash": {
+            "type": "string"
+          },
           "structured": {
             "type": "object",
             "properties": {
@@ -16530,6 +17780,10 @@
       "SmartDiffResult": {
         "type": "object",
         "properties": {
+          "change_evidence": {
+            "type": "object",
+            "description": "fresh402-mechanical-change-index-v1: up to20 stable change IDs and original /changes list pointers, kinds and omissions. Content identifiers are neither access capabilities nor assessed business impact."
+          },
           "evidence_assessment": {
             "type": "object",
             "description": "At most20 deduplicated mechanical inspection targets with explicit omissions; no inferred causality or semantic certainty."
@@ -18389,7 +19643,8 @@
                   "seeded",
                   "previous",
                   "baseline",
-                  "supplied"
+                  "supplied",
+                  "portable"
                 ]
               },
               "findings": {
@@ -18423,6 +19678,267 @@
               "website": {
                 "type": "object",
                 "properties": {
+                  "review": {
+                    "type": "object",
+                    "properties": {
+                      "schema": {
+                        "type": "string",
+                        "const": "fresh402-contract-review-v1"
+                      },
+                      "result_id": {
+                        "type": "string",
+                        "pattern": "^review_[a-f0-9]{64}$"
+                      },
+                      "comparison_performed": {
+                        "type": "boolean"
+                      },
+                      "reason": {
+                        "type": "string",
+                        "enum": [
+                          "baseline_seeded",
+                          "hash_unchanged"
+                        ]
+                      },
+                      "verdict": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "breaking",
+                              "review_required",
+                              "no_breaking_change_observed",
+                              "not_compared"
+                            ]
+                          },
+                          "ci_exit_code": {
+                            "anyOf": [
+                              {
+                                "type": "number",
+                                "const": 0
+                              },
+                              {
+                                "type": "number",
+                                "const": 1
+                              },
+                              {
+                                "type": "number",
+                                "const": 2
+                              }
+                            ]
+                          },
+                          "scope": {
+                            "type": "string"
+                          },
+                          "live_api_verified": {
+                            "type": "boolean",
+                            "const": false
+                          },
+                          "unsupported_features_require_review": {
+                            "type": "boolean",
+                            "const": true
+                          }
+                        },
+                        "required": [
+                          "status",
+                          "ci_exit_code",
+                          "live_api_verified"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "input_fingerprints": {
+                        "type": "object",
+                        "properties": {
+                          "before_sha256": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[a-f0-9]{64}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "after_sha256": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          }
+                        },
+                        "required": [
+                          "before_sha256",
+                          "after_sha256"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "findings": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "finding_id": {
+                              "type": "string",
+                              "pattern": "^cf_[a-f0-9]{64}$"
+                            },
+                            "rule_id": {
+                              "type": "string"
+                            },
+                            "severity": {
+                              "type": "string",
+                              "enum": [
+                                "error",
+                                "warning",
+                                "info"
+                              ]
+                            },
+                            "compatibility_direction": {
+                              "type": "string",
+                              "enum": [
+                                "request",
+                                "response",
+                                "authentication",
+                                "operation_or_shared"
+                              ]
+                            },
+                            "affected_path": {
+                              "type": "string"
+                            },
+                            "operations": {
+                              "maxItems": 8,
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "complete": {
+                              "type": "boolean"
+                            },
+                            "before": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "after": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "explanation": {
+                              "type": "string"
+                            },
+                            "evidence": {
+                              "type": "object",
+                              "properties": {
+                                "change_pointer": {
+                                  "type": "string"
+                                },
+                                "change_pointer_scope": {
+                                  "type": "string",
+                                  "const": "full_original_result"
+                                },
+                                "before_sha256": {
+                                  "type": "string",
+                                  "pattern": "^[a-f0-9]{64}$"
+                                },
+                                "after_sha256": {
+                                  "type": "string",
+                                  "pattern": "^[a-f0-9]{64}$"
+                                },
+                                "excerpts_may_be_truncated": {
+                                  "type": "boolean",
+                                  "const": true
+                                }
+                              },
+                              "required": [
+                                "change_pointer",
+                                "change_pointer_scope",
+                                "before_sha256",
+                                "after_sha256",
+                                "excerpts_may_be_truncated"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "confidence": {
+                              "type": "string",
+                              "enum": [
+                                "supported_rule",
+                                "requires_review"
+                              ]
+                            },
+                            "recommended_action": {
+                              "type": "string",
+                              "enum": [
+                                "block_and_review",
+                                "inspect_with_other_findings",
+                                "manual_review"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "finding_id",
+                            "rule_id",
+                            "severity",
+                            "compatibility_direction",
+                            "affected_path",
+                            "operations",
+                            "complete",
+                            "before",
+                            "after",
+                            "explanation",
+                            "evidence",
+                            "confidence",
+                            "recommended_action"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "findings_total": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "findings_omitted": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "groups": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "maxItems": 20,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "complete": {
+                        "type": "boolean"
+                      },
+                      "scope": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "schema",
+                      "comparison_performed",
+                      "verdict",
+                      "input_fingerprints",
+                      "findings",
+                      "findings_total",
+                      "findings_omitted",
+                      "groups",
+                      "complete"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Versioned Release Guardian evidence. Findings and excerpts are bounded; pointers refer to the full original result. A skipped comparator reports not_compared/CI2, never automatic approval. No customer code, live API behavior or deployment safety is established."
+                  },
                   "status": {
                     "type": "string",
                     "enum": [
@@ -18591,6 +20107,13 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "portable_baseline": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
               }
             },
             "required": [
@@ -18655,6 +20178,91 @@
               "atomic_usdc"
             ],
             "additionalProperties": false
+          },
+          "portable_state": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "available"
+                  },
+                  "token": {
+                    "type": "string",
+                    "maxLength": 44000
+                  },
+                  "expires_at": {
+                    "type": "string"
+                  },
+                  "observed_at": {
+                    "type": "string"
+                  },
+                  "payload_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 32768
+                  },
+                  "server_retention_days": {
+                    "type": "number",
+                    "const": 7
+                  },
+                  "caller_retention_days": {
+                    "type": "number",
+                    "const": 30
+                  },
+                  "retention_extended": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "payment_authority": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "source_freshness_verified": {
+                    "type": "boolean",
+                    "const": false
+                  }
+                },
+                "required": [
+                  "status",
+                  "token",
+                  "expires_at",
+                  "observed_at",
+                  "payload_bytes",
+                  "server_retention_days",
+                  "caller_retention_days",
+                  "retention_extended",
+                  "payment_authority",
+                  "source_freshness_verified"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "omitted_size"
+                  },
+                  "max_payload_bytes": {
+                    "type": "number",
+                    "const": 32768
+                  },
+                  "retention_extended": {
+                    "type": "boolean",
+                    "const": false
+                  }
+                },
+                "required": [
+                  "status",
+                  "max_payload_bytes",
+                  "retention_extended"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "description": "Opt-in private caller-retained source evidence, independently integrity-protected and bound to principal/workflow/environment/scope. Not encryption, payment authority, current freshness or an extension of original-result/server retention."
           },
           "observation_id": {
             "type": "string",
@@ -18730,7 +20338,8 @@
                   "seeded",
                   "previous",
                   "baseline",
-                  "supplied"
+                  "supplied",
+                  "portable"
                 ]
               },
               "findings": {
@@ -18764,6 +20373,267 @@
               "api": {
                 "type": "object",
                 "properties": {
+                  "review": {
+                    "type": "object",
+                    "properties": {
+                      "schema": {
+                        "type": "string",
+                        "const": "fresh402-contract-review-v1"
+                      },
+                      "result_id": {
+                        "type": "string",
+                        "pattern": "^review_[a-f0-9]{64}$"
+                      },
+                      "comparison_performed": {
+                        "type": "boolean"
+                      },
+                      "reason": {
+                        "type": "string",
+                        "enum": [
+                          "baseline_seeded",
+                          "hash_unchanged"
+                        ]
+                      },
+                      "verdict": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "breaking",
+                              "review_required",
+                              "no_breaking_change_observed",
+                              "not_compared"
+                            ]
+                          },
+                          "ci_exit_code": {
+                            "anyOf": [
+                              {
+                                "type": "number",
+                                "const": 0
+                              },
+                              {
+                                "type": "number",
+                                "const": 1
+                              },
+                              {
+                                "type": "number",
+                                "const": 2
+                              }
+                            ]
+                          },
+                          "scope": {
+                            "type": "string"
+                          },
+                          "live_api_verified": {
+                            "type": "boolean",
+                            "const": false
+                          },
+                          "unsupported_features_require_review": {
+                            "type": "boolean",
+                            "const": true
+                          }
+                        },
+                        "required": [
+                          "status",
+                          "ci_exit_code",
+                          "live_api_verified"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "input_fingerprints": {
+                        "type": "object",
+                        "properties": {
+                          "before_sha256": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[a-f0-9]{64}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "after_sha256": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          }
+                        },
+                        "required": [
+                          "before_sha256",
+                          "after_sha256"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "findings": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "finding_id": {
+                              "type": "string",
+                              "pattern": "^cf_[a-f0-9]{64}$"
+                            },
+                            "rule_id": {
+                              "type": "string"
+                            },
+                            "severity": {
+                              "type": "string",
+                              "enum": [
+                                "error",
+                                "warning",
+                                "info"
+                              ]
+                            },
+                            "compatibility_direction": {
+                              "type": "string",
+                              "enum": [
+                                "request",
+                                "response",
+                                "authentication",
+                                "operation_or_shared"
+                              ]
+                            },
+                            "affected_path": {
+                              "type": "string"
+                            },
+                            "operations": {
+                              "maxItems": 8,
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "complete": {
+                              "type": "boolean"
+                            },
+                            "before": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "after": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "explanation": {
+                              "type": "string"
+                            },
+                            "evidence": {
+                              "type": "object",
+                              "properties": {
+                                "change_pointer": {
+                                  "type": "string"
+                                },
+                                "change_pointer_scope": {
+                                  "type": "string",
+                                  "const": "full_original_result"
+                                },
+                                "before_sha256": {
+                                  "type": "string",
+                                  "pattern": "^[a-f0-9]{64}$"
+                                },
+                                "after_sha256": {
+                                  "type": "string",
+                                  "pattern": "^[a-f0-9]{64}$"
+                                },
+                                "excerpts_may_be_truncated": {
+                                  "type": "boolean",
+                                  "const": true
+                                }
+                              },
+                              "required": [
+                                "change_pointer",
+                                "change_pointer_scope",
+                                "before_sha256",
+                                "after_sha256",
+                                "excerpts_may_be_truncated"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "confidence": {
+                              "type": "string",
+                              "enum": [
+                                "supported_rule",
+                                "requires_review"
+                              ]
+                            },
+                            "recommended_action": {
+                              "type": "string",
+                              "enum": [
+                                "block_and_review",
+                                "inspect_with_other_findings",
+                                "manual_review"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "finding_id",
+                            "rule_id",
+                            "severity",
+                            "compatibility_direction",
+                            "affected_path",
+                            "operations",
+                            "complete",
+                            "before",
+                            "after",
+                            "explanation",
+                            "evidence",
+                            "confidence",
+                            "recommended_action"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "findings_total": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "findings_omitted": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "groups": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "maxItems": 20,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "complete": {
+                        "type": "boolean"
+                      },
+                      "scope": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "schema",
+                      "comparison_performed",
+                      "verdict",
+                      "input_fingerprints",
+                      "findings",
+                      "findings_total",
+                      "findings_omitted",
+                      "groups",
+                      "complete"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Versioned Release Guardian evidence. Findings and excerpts are bounded; pointers refer to the full original result. A skipped comparator reports not_compared/CI2, never automatic approval. No customer code, live API behavior or deployment safety is established."
+                  },
                   "status": {
                     "type": "string",
                     "enum": [
@@ -18932,6 +20802,13 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "portable_baseline": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
               }
             },
             "required": [
@@ -18996,6 +20873,91 @@
               "atomic_usdc"
             ],
             "additionalProperties": false
+          },
+          "portable_state": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "available"
+                  },
+                  "token": {
+                    "type": "string",
+                    "maxLength": 44000
+                  },
+                  "expires_at": {
+                    "type": "string"
+                  },
+                  "observed_at": {
+                    "type": "string"
+                  },
+                  "payload_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 32768
+                  },
+                  "server_retention_days": {
+                    "type": "number",
+                    "const": 7
+                  },
+                  "caller_retention_days": {
+                    "type": "number",
+                    "const": 30
+                  },
+                  "retention_extended": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "payment_authority": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "source_freshness_verified": {
+                    "type": "boolean",
+                    "const": false
+                  }
+                },
+                "required": [
+                  "status",
+                  "token",
+                  "expires_at",
+                  "observed_at",
+                  "payload_bytes",
+                  "server_retention_days",
+                  "caller_retention_days",
+                  "retention_extended",
+                  "payment_authority",
+                  "source_freshness_verified"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "omitted_size"
+                  },
+                  "max_payload_bytes": {
+                    "type": "number",
+                    "const": 32768
+                  },
+                  "retention_extended": {
+                    "type": "boolean",
+                    "const": false
+                  }
+                },
+                "required": [
+                  "status",
+                  "max_payload_bytes",
+                  "retention_extended"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "description": "Opt-in private caller-retained source evidence, independently integrity-protected and bound to principal/workflow/environment/scope. Not encryption, payment authority, current freshness or an extension of original-result/server retention."
           },
           "observation_id": {
             "type": "string",
@@ -19071,7 +21033,8 @@
                   "seeded",
                   "previous",
                   "baseline",
-                  "supplied"
+                  "supplied",
+                  "portable"
                 ]
               },
               "findings": {
@@ -19212,6 +21175,91 @@
             ],
             "additionalProperties": false
           },
+          "portable_state": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "available"
+                  },
+                  "token": {
+                    "type": "string",
+                    "maxLength": 44000
+                  },
+                  "expires_at": {
+                    "type": "string"
+                  },
+                  "observed_at": {
+                    "type": "string"
+                  },
+                  "payload_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 32768
+                  },
+                  "server_retention_days": {
+                    "type": "number",
+                    "const": 7
+                  },
+                  "caller_retention_days": {
+                    "type": "number",
+                    "const": 30
+                  },
+                  "retention_extended": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "payment_authority": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "source_freshness_verified": {
+                    "type": "boolean",
+                    "const": false
+                  }
+                },
+                "required": [
+                  "status",
+                  "token",
+                  "expires_at",
+                  "observed_at",
+                  "payload_bytes",
+                  "server_retention_days",
+                  "caller_retention_days",
+                  "retention_extended",
+                  "payment_authority",
+                  "source_freshness_verified"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "omitted_size"
+                  },
+                  "max_payload_bytes": {
+                    "type": "number",
+                    "const": 32768
+                  },
+                  "retention_extended": {
+                    "type": "boolean",
+                    "const": false
+                  }
+                },
+                "required": [
+                  "status",
+                  "max_payload_bytes",
+                  "retention_extended"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "description": "Opt-in private caller-retained source evidence, independently integrity-protected and bound to principal/workflow/environment/scope. Not encryption, payment authority, current freshness or an extension of original-result/server retention."
+          },
           "observation_id": {
             "type": "string",
             "pattern": "^wf_[a-f0-9]{64}$"
@@ -19286,7 +21334,8 @@
                   "seeded",
                   "previous",
                   "baseline",
-                  "supplied"
+                  "supplied",
+                  "portable"
                 ]
               },
               "findings": {
@@ -19320,6 +21369,267 @@
               "website": {
                 "type": "object",
                 "properties": {
+                  "review": {
+                    "type": "object",
+                    "properties": {
+                      "schema": {
+                        "type": "string",
+                        "const": "fresh402-contract-review-v1"
+                      },
+                      "result_id": {
+                        "type": "string",
+                        "pattern": "^review_[a-f0-9]{64}$"
+                      },
+                      "comparison_performed": {
+                        "type": "boolean"
+                      },
+                      "reason": {
+                        "type": "string",
+                        "enum": [
+                          "baseline_seeded",
+                          "hash_unchanged"
+                        ]
+                      },
+                      "verdict": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "breaking",
+                              "review_required",
+                              "no_breaking_change_observed",
+                              "not_compared"
+                            ]
+                          },
+                          "ci_exit_code": {
+                            "anyOf": [
+                              {
+                                "type": "number",
+                                "const": 0
+                              },
+                              {
+                                "type": "number",
+                                "const": 1
+                              },
+                              {
+                                "type": "number",
+                                "const": 2
+                              }
+                            ]
+                          },
+                          "scope": {
+                            "type": "string"
+                          },
+                          "live_api_verified": {
+                            "type": "boolean",
+                            "const": false
+                          },
+                          "unsupported_features_require_review": {
+                            "type": "boolean",
+                            "const": true
+                          }
+                        },
+                        "required": [
+                          "status",
+                          "ci_exit_code",
+                          "live_api_verified"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "input_fingerprints": {
+                        "type": "object",
+                        "properties": {
+                          "before_sha256": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[a-f0-9]{64}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "after_sha256": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          }
+                        },
+                        "required": [
+                          "before_sha256",
+                          "after_sha256"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "findings": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "finding_id": {
+                              "type": "string",
+                              "pattern": "^cf_[a-f0-9]{64}$"
+                            },
+                            "rule_id": {
+                              "type": "string"
+                            },
+                            "severity": {
+                              "type": "string",
+                              "enum": [
+                                "error",
+                                "warning",
+                                "info"
+                              ]
+                            },
+                            "compatibility_direction": {
+                              "type": "string",
+                              "enum": [
+                                "request",
+                                "response",
+                                "authentication",
+                                "operation_or_shared"
+                              ]
+                            },
+                            "affected_path": {
+                              "type": "string"
+                            },
+                            "operations": {
+                              "maxItems": 8,
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "complete": {
+                              "type": "boolean"
+                            },
+                            "before": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "after": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "explanation": {
+                              "type": "string"
+                            },
+                            "evidence": {
+                              "type": "object",
+                              "properties": {
+                                "change_pointer": {
+                                  "type": "string"
+                                },
+                                "change_pointer_scope": {
+                                  "type": "string",
+                                  "const": "full_original_result"
+                                },
+                                "before_sha256": {
+                                  "type": "string",
+                                  "pattern": "^[a-f0-9]{64}$"
+                                },
+                                "after_sha256": {
+                                  "type": "string",
+                                  "pattern": "^[a-f0-9]{64}$"
+                                },
+                                "excerpts_may_be_truncated": {
+                                  "type": "boolean",
+                                  "const": true
+                                }
+                              },
+                              "required": [
+                                "change_pointer",
+                                "change_pointer_scope",
+                                "before_sha256",
+                                "after_sha256",
+                                "excerpts_may_be_truncated"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "confidence": {
+                              "type": "string",
+                              "enum": [
+                                "supported_rule",
+                                "requires_review"
+                              ]
+                            },
+                            "recommended_action": {
+                              "type": "string",
+                              "enum": [
+                                "block_and_review",
+                                "inspect_with_other_findings",
+                                "manual_review"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "finding_id",
+                            "rule_id",
+                            "severity",
+                            "compatibility_direction",
+                            "affected_path",
+                            "operations",
+                            "complete",
+                            "before",
+                            "after",
+                            "explanation",
+                            "evidence",
+                            "confidence",
+                            "recommended_action"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "findings_total": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "findings_omitted": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "groups": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "maxItems": 20,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "complete": {
+                        "type": "boolean"
+                      },
+                      "scope": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "schema",
+                      "comparison_performed",
+                      "verdict",
+                      "input_fingerprints",
+                      "findings",
+                      "findings_total",
+                      "findings_omitted",
+                      "groups",
+                      "complete"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Versioned Release Guardian evidence. Findings and excerpts are bounded; pointers refer to the full original result. A skipped comparator reports not_compared/CI2, never automatic approval. No customer code, live API behavior or deployment safety is established."
+                  },
                   "status": {
                     "type": "string",
                     "enum": [
@@ -19428,6 +21738,267 @@
               "api": {
                 "type": "object",
                 "properties": {
+                  "review": {
+                    "type": "object",
+                    "properties": {
+                      "schema": {
+                        "type": "string",
+                        "const": "fresh402-contract-review-v1"
+                      },
+                      "result_id": {
+                        "type": "string",
+                        "pattern": "^review_[a-f0-9]{64}$"
+                      },
+                      "comparison_performed": {
+                        "type": "boolean"
+                      },
+                      "reason": {
+                        "type": "string",
+                        "enum": [
+                          "baseline_seeded",
+                          "hash_unchanged"
+                        ]
+                      },
+                      "verdict": {
+                        "type": "object",
+                        "properties": {
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "breaking",
+                              "review_required",
+                              "no_breaking_change_observed",
+                              "not_compared"
+                            ]
+                          },
+                          "ci_exit_code": {
+                            "anyOf": [
+                              {
+                                "type": "number",
+                                "const": 0
+                              },
+                              {
+                                "type": "number",
+                                "const": 1
+                              },
+                              {
+                                "type": "number",
+                                "const": 2
+                              }
+                            ]
+                          },
+                          "scope": {
+                            "type": "string"
+                          },
+                          "live_api_verified": {
+                            "type": "boolean",
+                            "const": false
+                          },
+                          "unsupported_features_require_review": {
+                            "type": "boolean",
+                            "const": true
+                          }
+                        },
+                        "required": [
+                          "status",
+                          "ci_exit_code",
+                          "live_api_verified"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "input_fingerprints": {
+                        "type": "object",
+                        "properties": {
+                          "before_sha256": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[a-f0-9]{64}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "after_sha256": {
+                            "type": "string",
+                            "pattern": "^[a-f0-9]{64}$"
+                          }
+                        },
+                        "required": [
+                          "before_sha256",
+                          "after_sha256"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "findings": {
+                        "maxItems": 20,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "finding_id": {
+                              "type": "string",
+                              "pattern": "^cf_[a-f0-9]{64}$"
+                            },
+                            "rule_id": {
+                              "type": "string"
+                            },
+                            "severity": {
+                              "type": "string",
+                              "enum": [
+                                "error",
+                                "warning",
+                                "info"
+                              ]
+                            },
+                            "compatibility_direction": {
+                              "type": "string",
+                              "enum": [
+                                "request",
+                                "response",
+                                "authentication",
+                                "operation_or_shared"
+                              ]
+                            },
+                            "affected_path": {
+                              "type": "string"
+                            },
+                            "operations": {
+                              "maxItems": 8,
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "complete": {
+                              "type": "boolean"
+                            },
+                            "before": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "after": {
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "explanation": {
+                              "type": "string"
+                            },
+                            "evidence": {
+                              "type": "object",
+                              "properties": {
+                                "change_pointer": {
+                                  "type": "string"
+                                },
+                                "change_pointer_scope": {
+                                  "type": "string",
+                                  "const": "full_original_result"
+                                },
+                                "before_sha256": {
+                                  "type": "string",
+                                  "pattern": "^[a-f0-9]{64}$"
+                                },
+                                "after_sha256": {
+                                  "type": "string",
+                                  "pattern": "^[a-f0-9]{64}$"
+                                },
+                                "excerpts_may_be_truncated": {
+                                  "type": "boolean",
+                                  "const": true
+                                }
+                              },
+                              "required": [
+                                "change_pointer",
+                                "change_pointer_scope",
+                                "before_sha256",
+                                "after_sha256",
+                                "excerpts_may_be_truncated"
+                              ],
+                              "additionalProperties": false
+                            },
+                            "confidence": {
+                              "type": "string",
+                              "enum": [
+                                "supported_rule",
+                                "requires_review"
+                              ]
+                            },
+                            "recommended_action": {
+                              "type": "string",
+                              "enum": [
+                                "block_and_review",
+                                "inspect_with_other_findings",
+                                "manual_review"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "finding_id",
+                            "rule_id",
+                            "severity",
+                            "compatibility_direction",
+                            "affected_path",
+                            "operations",
+                            "complete",
+                            "before",
+                            "after",
+                            "explanation",
+                            "evidence",
+                            "confidence",
+                            "recommended_action"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "findings_total": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "findings_omitted": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "groups": {
+                        "type": "object",
+                        "propertyNames": {
+                          "type": "string"
+                        },
+                        "additionalProperties": {
+                          "maxItems": 20,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "complete": {
+                        "type": "boolean"
+                      },
+                      "scope": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "schema",
+                      "comparison_performed",
+                      "verdict",
+                      "input_fingerprints",
+                      "findings",
+                      "findings_total",
+                      "findings_omitted",
+                      "groups",
+                      "complete"
+                    ],
+                    "additionalProperties": false,
+                    "description": "Versioned Release Guardian evidence. Findings and excerpts are bounded; pointers refer to the full original result. A skipped comparator reports not_compared/CI2, never automatic approval. No customer code, live API behavior or deployment safety is established."
+                  },
                   "status": {
                     "type": "string",
                     "enum": [
@@ -19642,6 +22213,13 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "portable_baseline": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
               }
             },
             "required": [
@@ -19707,6 +22285,91 @@
               "atomic_usdc"
             ],
             "additionalProperties": false
+          },
+          "portable_state": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "available"
+                  },
+                  "token": {
+                    "type": "string",
+                    "maxLength": 44000
+                  },
+                  "expires_at": {
+                    "type": "string"
+                  },
+                  "observed_at": {
+                    "type": "string"
+                  },
+                  "payload_bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 32768
+                  },
+                  "server_retention_days": {
+                    "type": "number",
+                    "const": 7
+                  },
+                  "caller_retention_days": {
+                    "type": "number",
+                    "const": 30
+                  },
+                  "retention_extended": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "payment_authority": {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  "source_freshness_verified": {
+                    "type": "boolean",
+                    "const": false
+                  }
+                },
+                "required": [
+                  "status",
+                  "token",
+                  "expires_at",
+                  "observed_at",
+                  "payload_bytes",
+                  "server_retention_days",
+                  "caller_retention_days",
+                  "retention_extended",
+                  "payment_authority",
+                  "source_freshness_verified"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "const": "omitted_size"
+                  },
+                  "max_payload_bytes": {
+                    "type": "number",
+                    "const": 32768
+                  },
+                  "retention_extended": {
+                    "type": "boolean",
+                    "const": false
+                  }
+                },
+                "required": [
+                  "status",
+                  "max_payload_bytes",
+                  "retention_extended"
+                ],
+                "additionalProperties": false
+              }
+            ],
+            "description": "Opt-in private caller-retained source evidence, independently integrity-protected and bound to principal/workflow/environment/scope. Not encryption, payment authority, current freshness or an extension of original-result/server retention."
           },
           "observation_id": {
             "type": "string",

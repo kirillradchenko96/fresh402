@@ -2703,7 +2703,7 @@
                       "description": "One named typed field: exact source pointer, accepted JSON type and explicit requiredness. Missing/type-mismatched/over-budget values are reported, never invented or coerced."
                     },
                     "uniqueItems": true,
-                    "description": "Optional 1-12 named typed fields for JSON sources only, exclusive with json_pointer/json_pointers/feed_mode. Uses one existing fetch/parse after ignore_json_paths. Missing/type-mismatched fields are reported individually, never silently coerced. Each selected value <=4,096 UTF-8 bytes; total values <=16,384 bytes/2,000 nodes. Over-budget fields are omitted explicitly. HTML/text retain ordinary extraction; no semantic or browser extraction."
+                    "description": "Optional 1-12 named typed fields for JSON sources only, exclusive with json_pointer/json_pointers/feed_mode. Every name must be distinct across the array, even when pointers or types differ; this runtime rule is stricter than whole-object uniqueItems. Uses one existing fetch/parse after ignore_json_paths. Missing/type-mismatched fields are reported individually, never silently coerced. Each selected value <=4,096 UTF-8 bytes; total values <=16,384 bytes/2,000 nodes. Over-budget fields are omitted explicitly. HTML/text retain ordinary extraction; no semantic or browser extraction."
                   },
                   "url": {
                     "type": "string",
@@ -2824,6 +2824,30 @@
                         {
                           "required": [
                             "json_pointers"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "required": [
+                        "fields"
+                      ],
+                      "anyOf": [
+                        {
+                          "required": [
+                            "json_pointer"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "json_pointers"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "feed_mode"
                           ]
                         }
                       ]
@@ -3144,7 +3168,7 @@
                       "description": "One named typed field: exact source pointer, accepted JSON type and explicit requiredness. Missing/type-mismatched/over-budget values are reported, never invented or coerced."
                     },
                     "uniqueItems": true,
-                    "description": "Optional 1-12 named typed fields for JSON sources only, exclusive with json_pointer/json_pointers/feed_mode. Uses one existing fetch/parse after ignore_json_paths. Missing/type-mismatched fields are reported individually, never silently coerced. Each selected value <=4,096 UTF-8 bytes; total values <=16,384 bytes/2,000 nodes. Over-budget fields are omitted explicitly. HTML/text retain ordinary extraction; no semantic or browser extraction."
+                    "description": "Optional 1-12 named typed fields for JSON sources only, exclusive with json_pointer/json_pointers/feed_mode. Every name must be distinct across the array, even when pointers or types differ; this runtime rule is stricter than whole-object uniqueItems. Uses one existing fetch/parse after ignore_json_paths. Missing/type-mismatched fields are reported individually, never silently coerced. Each selected value <=4,096 UTF-8 bytes; total values <=16,384 bytes/2,000 nodes. Over-budget fields are omitted explicitly. HTML/text retain ordinary extraction; no semantic or browser extraction."
                   },
                   "url": {
                     "type": "string",
@@ -3265,6 +3289,30 @@
                         {
                           "required": [
                             "json_pointers"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "required": [
+                        "fields"
+                      ],
+                      "anyOf": [
+                        {
+                          "required": [
+                            "json_pointer"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "json_pointers"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "feed_mode"
                           ]
                         }
                       ]
@@ -4124,7 +4172,7 @@
       "post": {
         "operationId": "fresh402_openapi_contract_diff",
         "summary": "Use for bounded directional OpenAPI3.0/3.1 JSON contract-change evidence, including supported paths/operations, required fields, types/enums/null and authentication. Use exactly one real watch_id from free unfiltered registration or contracts:{before,after} serialized JSON strings (24,000 characters each/48,000 combined UTF-8 bytes). Supplied pairs compare before to after without a fetch or saved watch; omit comparison overrides. Same price and original-operation recovery. Stored mode has no URL override. compare_to: previous(default) or baseline; previous_hash overrides with supported retained evidence. First stored-watch call seeds contract history; explicit pairs compare immediately and return a conservative CI verdict. No YAML, external-reference fetch or endpoint execution; uncertainty requires review, not a complete compatibility proof. Save and reuse watch IDs across sessions. For a complete single-charge server workflow, use API Compatibility Review when advertised. $0.020 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence after unfiltered free registration. Compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence. Supply an explicit contracts:{before,after} serialized JSON pair without registration, or an existing watch from unfiltered free registration. In watch mode compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "openapi_diff"
         ],
@@ -4157,7 +4205,7 @@
             {
               "amount": "20000",
               "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-              "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence after unfiltered free registration. Compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base.",
+              "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence. Supply an explicit contracts:{before,after} serialized JSON pair without registration, or an existing watch from unfiltered free registration. In watch mode compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base.",
               "intent": "charge",
               "method": "evm"
             }

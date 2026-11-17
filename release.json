@@ -2,7 +2,7 @@
   "schema": "fresh402-release-definition-v1",
   "product_version": "3.1.0",
   "mcp_server_version": "3.1.0",
-  "api_contract_revision": "2026-11-16.3",
+  "api_contract_revision": "2026-11-17.1",
   "tool_catalog_revision": "12-tools-bounded-records-guardian-portable-v2",
   "registry_metadata_version": "3.1.2",
   "sdk": {

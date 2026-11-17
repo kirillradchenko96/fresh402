@@ -3,7 +3,7 @@
     "schema": "fresh402-release-definition-v1",
     "product_version": "3.1.0",
     "mcp_server_version": "3.1.0",
-    "api_contract_revision": "2026-11-16.3",
+    "api_contract_revision": "2026-11-17.1",
     "tool_catalog_revision": "12-tools-bounded-records-guardian-portable-v2",
     "registry_metadata_version": "3.1.2",
     "sdk": {
@@ -4597,8 +4597,8 @@
     "/v2/openapi-contract-diff": {
       "post": {
         "operationId": "fresh402_openapi_contract_diff",
-        "summary": "Use for bounded directional OpenAPI3.0/3.1 JSON contract-change evidence, including supported paths/operations, required fields, types/enums/null and authentication. Use exactly one real watch_id from free unfiltered registration or contracts:{before,after} serialized JSON strings (24,000 characters each/48,000 combined UTF-8 bytes). Supplied pairs compare before to after without a fetch or saved watch; omit comparison overrides. Same price and original-operation recovery. Stored mode has no URL override. compare_to: previous(default) or baseline; previous_hash overrides with supported retained evidence. First stored-watch call seeds contract history; explicit pairs compare immediately and return a conservative CI verdict. No YAML, external-reference fetch or endpoint execution; uncertainty requires review, not a complete compatibility proof. Save and reuse watch IDs across sessions. For a complete single-charge server workflow, use API Compatibility Review when advertised. Rules v3 adds finite numeric/exclusive integer bounds, scalar const in3.1, scalar-item array cardinality and otherwise-identical boolean object closure. Unsupported constraint interactions remain review_required. Optional review contains stable finding IDs, affected operations, bounded excerpts and CI0/1/2; no customer-code inspection or release-safety guarantee. $0.020 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence. Supply an explicit contracts:{before,after} serialized JSON pair without registration, or an existing watch from unfiltered free registration. In watch mode compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "summary": "Use for bounded directional OpenAPI3.0/3.1 JSON contract-change evidence, including supported paths/operations, required fields, types/enums/null and authentication. Use exactly one real watch_id from free unfiltered registration or contracts:{before,after} serialized JSON or bounded YAML 1.2 strings (24,000 characters each/48,000 combined UTF-8 bytes). Supplied pairs compare before to after without a fetch or saved watch; omit comparison overrides. Same price and original-operation recovery. Stored mode has no URL override. compare_to: previous(default) or baseline; previous_hash overrides with supported retained evidence. First stored-watch call seeds contract history; explicit pairs compare immediately and return a conservative CI verdict. No YAML watch sources, external-reference fetch or endpoint execution; bounded YAML is supplied-pair only; uncertainty requires review, not a complete compatibility proof. Save and reuse watch IDs across sessions. For a complete single-charge server workflow, use API Compatibility Review when advertised. Rules v3 adds finite numeric/exclusive integer bounds, scalar const in3.1, scalar-item array cardinality and otherwise-identical boolean object closure. Unsupported constraint interactions remain review_required. Optional review contains stable finding IDs, affected operations, bounded excerpts and CI0/1/2; no customer-code inspection or release-safety guarantee. $0.020 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Bounded directional OpenAPI 3.0/3.1 comparison with conservative CI verdicts. Supply contracts:{before,after} as JSON or restricted YAML 1.2 strings without registration, or a watch from unfiltered JSON registration. Watch mode supports previous, baseline and retained hashes. YAML pairs only; no external-reference fetch or live API proof. Unsupported semantics require review. x402 $0.020 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "openapi_diff"
         ],
@@ -4631,7 +4631,7 @@
             {
               "amount": "20000",
               "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-              "description": "Use for conservative OpenAPI 3.0/3.1 JSON compatibility evidence. Supply an explicit contracts:{before,after} serialized JSON pair without registration, or an existing watch from unfiltered free registration. In watch mode compare previous or fixed baseline, or override with an available same-watch hash. Bounded path/operation analysis with uncertainty warnings; no YAML, external reference fetch or execution of described operations. x402 $0.020 USDC on Base.",
+              "description": "Bounded directional OpenAPI 3.0/3.1 comparison with conservative CI verdicts. Supply contracts:{before,after} as JSON or restricted YAML 1.2 strings without registration, or a watch from unfiltered JSON registration. Watch mode supports previous, baseline and retained hashes. YAML pairs only; no external-reference fetch or live API proof. Unsupported semantics require review. x402 $0.020 USDC on Base.",
               "intent": "charge",
               "method": "evm"
             }
@@ -4756,13 +4756,13 @@
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 24000,
-                        "description": "Old complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. No YAML, URLs, executed code or remote-reference fetching."
+                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as a JSON or bounded YAML 1.2 string; at most 24,000 characters. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No URLs, executed code or remote-reference fetching."
                       },
                       "after": {
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 24000,
-                        "description": "New complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. Direction is before to after; source authenticity and deployed API behavior are not verified."
+                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as a JSON or bounded YAML 1.2 string; at most 24,000 characters, same YAML restrictions as before. Direction is before to after; source authenticity and deployed API behavior are not verified."
                       }
                     },
                     "required": [
@@ -5106,13 +5106,13 @@
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 24000,
-                        "description": "Old complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. No YAML, URLs, executed code or remote-reference fetching."
+                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as a JSON or bounded YAML 1.2 string; at most 24,000 characters. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No URLs, executed code or remote-reference fetching."
                       },
                       "after": {
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 24000,
-                        "description": "New complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. Direction is before to after; source authenticity and deployed API behavior are not verified."
+                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as a JSON or bounded YAML 1.2 string; at most 24,000 characters, same YAML restrictions as before. Direction is before to after; source authenticity and deployed API behavior are not verified."
                       }
                     },
                     "required": [
@@ -9387,8 +9387,8 @@
     "/v4/workflows/api-compatibility-review": {
       "post": {
         "operationId": "fresh402_api_compatibility_review",
-        "summary": "Compare explicit contracts:{before,after} JSON strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; no YAML, external-ref crawling or live API proof. Release Guardian review exposes stable finding/result IDs, directional rules, affected operations, bounded before/after excerpts, grouped evidence and conservative CI0/1/2. Seed/hash-unchanged observations explicitly report not_compared (CI2). Optional stored-source export_snapshot/baseline_snapshot carries private source context across sessions for the same principal/workflow/environment/scope,30days from observation; not financial authority. One fixed workflow charge; internal steps never create separate customer charges. Explicit API contracts pairs compare immediately without fetching or saved observation state; supplied before/after URNs identify canonical input hashes, not fetched URLs. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Compare explicit contracts:{before,after} JSON strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; no YAML, external-ref crawling or live API proof. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
+        "summary": "Compare explicit contracts:{before,after} JSON or bounded YAML 1.2 strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; YAML is supplied-pair only; no external-ref crawling or live API proof. Release Guardian review exposes stable finding/result IDs, directional rules, affected operations, bounded before/after excerpts, grouped evidence and conservative CI0/1/2. Seed/hash-unchanged observations explicitly report not_compared (CI2). Optional stored-source export_snapshot/baseline_snapshot carries private source context across sessions for the same principal/workflow/environment/scope,30days from observation; not financial authority. One fixed workflow charge; internal steps never create separate customer charges. Explicit API contracts pairs compare immediately without fetching or saved observation state; supplied before/after URNs identify canonical input hashes, not fetched URLs. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "description": "Compare explicit contracts:{before,after} JSON or bounded YAML 1.2 strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; YAML is supplied-pair only; no external-ref crawling or live API proof. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "api_compatibility_review"
         ],
@@ -9421,7 +9421,7 @@
             {
               "amount": "10000",
               "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-              "description": "Compare explicit contracts:{before,after} JSON strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; no YAML, external-ref crawling or live API proof.",
+              "description": "Compare explicit contracts:{before,after} JSON or bounded YAML 1.2 strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; YAML is supplied-pair only; no external-ref crawling or live API proof.",
               "intent": "charge",
               "method": "evm"
             }
@@ -9561,13 +9561,13 @@
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 24000,
-                        "description": "Old complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. No YAML, URLs, executed code or remote-reference fetching."
+                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as a JSON or bounded YAML 1.2 string; at most 24,000 characters. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No URLs, executed code or remote-reference fetching."
                       },
                       "after": {
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 24000,
-                        "description": "New complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. Direction is before to after; source authenticity and deployed API behavior are not verified."
+                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as a JSON or bounded YAML 1.2 string; at most 24,000 characters, same YAML restrictions as before. Direction is before to after; source authenticity and deployed API behavior are not verified."
                       }
                     },
                     "required": [
@@ -10069,13 +10069,13 @@
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 24000,
-                        "description": "Old complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. No YAML, URLs, executed code or remote-reference fetching."
+                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as a JSON or bounded YAML 1.2 string; at most 24,000 characters. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No URLs, executed code or remote-reference fetching."
                       },
                       "after": {
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 24000,
-                        "description": "New complete JSON OpenAPI 3.0/3.1 contract serialized as a string; at most 24,000 characters. Direction is before to after; source authenticity and deployed API behavior are not verified."
+                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as a JSON or bounded YAML 1.2 string; at most 24,000 characters, same YAML restrictions as before. Direction is before to after; source authenticity and deployed API behavior are not verified."
                       }
                     },
                     "required": [

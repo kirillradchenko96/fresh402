@@ -3,8 +3,8 @@
     "schema": "fresh402-release-definition-v1",
     "product_version": "3.1.0",
     "mcp_server_version": "3.1.0",
-    "api_contract_revision": "2026-11-17.3",
-    "tool_catalog_revision": "12-tools-openapi-rules4-guardian-v3",
+    "api_contract_revision": "2026-11-18.1",
+    "tool_catalog_revision": "12-tools-openapi-rules5-guardian-v3",
     "registry_metadata_version": "3.1.2",
     "sdk": {
       "recommended": "0.6.1-rc.1",
@@ -4677,7 +4677,7 @@
     "/v2/openapi-contract-diff": {
       "post": {
         "operationId": "fresh402_openapi_contract_diff",
-        "summary": "Use for bounded directional OpenAPI3.0/3.1 JSON contract-change evidence, including supported paths/operations, required fields, types/enums/null and authentication. Use exactly one real watch_id from free unfiltered registration or contracts:{before,after} serialized JSON or bounded YAML 1.2 strings (256,000 characters and UTF-8 bytes each/512,000 combined bytes; only supplied-OpenAPI requests allow a 786,432-byte total envelope). Supplied pairs compare before to after without a fetch or saved watch; omit comparison overrides. Same price and original-operation recovery. Stored mode has no URL override. compare_to: previous(default) or baseline; previous_hash overrides with supported retained evidence. First stored-watch call seeds contract history; explicit pairs compare immediately and return a conservative CI verdict. No YAML watch sources, external-reference fetch or endpoint execution; bounded YAML is supplied-pair only; uncertainty requires review, not a complete compatibility proof. Save and reuse watch IDs across sessions. For a complete single-charge server workflow, use API Compatibility Review when advertised. Rules v3 adds finite numeric/exclusive integer bounds, scalar const in3.1, scalar-item array cardinality and otherwise-identical boolean object closure. Unsupported constraint interactions remain review_required. Optional review contains stable finding IDs, affected operations, bounded excerpts and CI0/1/2; no customer-code inspection or release-safety guarantee. $0.020 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "summary": "Use for bounded directional OpenAPI3.0/3.1 JSON contract-change evidence, including supported paths/operations, required fields, types/enums/null and authentication. Use exactly one real watch_id from free unfiltered registration or contracts:{before,after} serialized JSON or bounded YAML 1.2 strings (1,200,000 characters and UTF-8 bytes each/2,400,000 combined bytes; only supplied-OpenAPI requests allow a 3,600,000-byte total envelope). Supplied pairs compare before to after without a fetch or saved watch; omit comparison overrides. Same price and original-operation recovery. Stored mode has no URL override. compare_to: previous(default) or baseline; previous_hash overrides with supported retained evidence. First stored-watch call seeds contract history; explicit pairs compare immediately and return a conservative CI verdict. No YAML watch sources, external-reference fetch or endpoint execution; bounded YAML is supplied-pair only; uncertainty requires review, not a complete compatibility proof. Save and reuse watch IDs across sessions. For a complete single-charge server workflow, use API Compatibility Review when advertised. Rules v3 adds finite numeric/exclusive integer bounds, scalar const in3.1, scalar-item array cardinality and otherwise-identical boolean object closure. Unsupported constraint interactions remain review_required. Optional review contains stable finding IDs, affected operations, bounded excerpts and CI0/1/2; no customer-code inspection or release-safety guarantee. $0.020 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "description": "Bounded directional OpenAPI 3.0/3.1 comparison with conservative CI verdicts. Supply contracts:{before,after} as JSON or restricted YAML 1.2 strings without registration, or a watch from unfiltered JSON registration. Watch mode supports previous, baseline and retained hashes. YAML pairs only; no external-reference fetch or live API proof. Unsupported semantics require review. x402 $0.020 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "openapi_diff"
@@ -4788,12 +4788,13 @@
             "output_bytes": 131072,
             "parser_characters": 256000,
             "gateway_timeout_ms": 10000,
-            "document_bytes": 256000,
-            "paths": 100,
-            "operations": 500,
-            "work": 20000,
+            "document_bytes": 1200000,
+            "nodes": 40000,
+            "paths": 512,
+            "operations": 2048,
+            "work": 120000,
             "ref_hops": 32,
-            "ref_resolutions": 2048,
+            "ref_resolutions": 8192,
             "changes": 200
           },
           "prepaid_credits": {
@@ -4857,14 +4858,14 @@
                       "before": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 256000,
-                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 256,000 characters and 256,000 UTF-8 bytes. Duplicate JSON names are rejected. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No executed code or remote-reference fetching."
+                        "maxLength": 1200000,
+                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 1,200,000 characters and 1,200,000 UTF-8 bytes. Duplicate JSON names are rejected. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No executed code or remote-reference fetching."
                       },
                       "after": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 256000,
-                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 256,000 characters and 256,000 UTF-8 bytes, same restrictions as before. Direction is before to after; source authenticity and deployed behavior are not verified."
+                        "maxLength": 1200000,
+                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 1,200,000 characters and 1,200,000 UTF-8 bytes, same restrictions as before. Direction is before to after; source authenticity and deployed behavior are not verified."
                       }
                     },
                     "required": [
@@ -4872,7 +4873,7 @@
                       "after"
                     ],
                     "additionalProperties": false,
-                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=512,000 UTF-8 bytes; only these two supplied-OpenAPI products allow a complete HTTP/MCP envelope <=786,432 bytes, including JSON escaping and payment metadata. All parser, reference, work and output budgets still apply. No source fetches or saved observation; the original authorized operation remains durably recoverable."
+                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=2,400,000 UTF-8 bytes; only these two supplied-OpenAPI products allow a complete HTTP/MCP envelope <=3,600,000 bytes, including JSON escaping and payment metadata. All parser, reference, work and output budgets still apply. No source fetches or saved observation; the original authorized operation remains durably recoverable."
                   },
                   "compare_to": {
                     "default": "previous",
@@ -5207,14 +5208,14 @@
                       "before": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 256000,
-                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 256,000 characters and 256,000 UTF-8 bytes. Duplicate JSON names are rejected. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No executed code or remote-reference fetching."
+                        "maxLength": 1200000,
+                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 1,200,000 characters and 1,200,000 UTF-8 bytes. Duplicate JSON names are rejected. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No executed code or remote-reference fetching."
                       },
                       "after": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 256000,
-                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 256,000 characters and 256,000 UTF-8 bytes, same restrictions as before. Direction is before to after; source authenticity and deployed behavior are not verified."
+                        "maxLength": 1200000,
+                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 1,200,000 characters and 1,200,000 UTF-8 bytes, same restrictions as before. Direction is before to after; source authenticity and deployed behavior are not verified."
                       }
                     },
                     "required": [
@@ -5222,7 +5223,7 @@
                       "after"
                     ],
                     "additionalProperties": false,
-                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=512,000 UTF-8 bytes; only these two supplied-OpenAPI products allow a complete HTTP/MCP envelope <=786,432 bytes, including JSON escaping and payment metadata. All parser, reference, work and output budgets still apply. No source fetches or saved observation; the original authorized operation remains durably recoverable."
+                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=2,400,000 UTF-8 bytes; only these two supplied-OpenAPI products allow a complete HTTP/MCP envelope <=3,600,000 bytes, including JSON escaping and payment metadata. All parser, reference, work and output budgets still apply. No source fetches or saved observation; the original authorized operation remains durably recoverable."
                   },
                   "compare_to": {
                     "default": "previous",
@@ -9772,14 +9773,14 @@
                       "before": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 256000,
-                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 256,000 characters and 256,000 UTF-8 bytes. Duplicate JSON names are rejected. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No executed code or remote-reference fetching."
+                        "maxLength": 1200000,
+                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 1,200,000 characters and 1,200,000 UTF-8 bytes. Duplicate JSON names are rejected. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No executed code or remote-reference fetching."
                       },
                       "after": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 256000,
-                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 256,000 characters and 256,000 UTF-8 bytes, same restrictions as before. Direction is before to after; source authenticity and deployed behavior are not verified."
+                        "maxLength": 1200000,
+                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 1,200,000 characters and 1,200,000 UTF-8 bytes, same restrictions as before. Direction is before to after; source authenticity and deployed behavior are not verified."
                       }
                     },
                     "required": [
@@ -9787,7 +9788,7 @@
                       "after"
                     ],
                     "additionalProperties": false,
-                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=512,000 UTF-8 bytes; only these two supplied-OpenAPI products allow a complete HTTP/MCP envelope <=786,432 bytes, including JSON escaping and payment metadata. All parser, reference, work and output budgets still apply. No source fetches or saved observation; the original authorized operation remains durably recoverable."
+                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=2,400,000 UTF-8 bytes; only these two supplied-OpenAPI products allow a complete HTTP/MCP envelope <=3,600,000 bytes, including JSON escaping and payment metadata. All parser, reference, work and output budgets still apply. No source fetches or saved observation; the original authorized operation remains durably recoverable."
                   }
                 },
                 "additionalProperties": false,
@@ -10280,14 +10281,14 @@
                       "before": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 256000,
-                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 256,000 characters and 256,000 UTF-8 bytes. Duplicate JSON names are rejected. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No executed code or remote-reference fetching."
+                        "maxLength": 1200000,
+                        "description": "Old complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 1,200,000 characters and 1,200,000 UTF-8 bytes. Duplicate JSON names are rejected. YAML rejects anchors/aliases, tags, merges, duplicate or complex keys and nonfinite values. No executed code or remote-reference fetching."
                       },
                       "after": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 256000,
-                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 256,000 characters and 256,000 UTF-8 bytes, same restrictions as before. Direction is before to after; source authenticity and deployed behavior are not verified."
+                        "maxLength": 1200000,
+                        "description": "New complete OpenAPI 3.0/3.1 contract serialized as JSON or bounded YAML 1.2; at most 1,200,000 characters and 1,200,000 UTF-8 bytes, same restrictions as before. Direction is before to after; source authenticity and deployed behavior are not verified."
                       }
                     },
                     "required": [
@@ -10295,7 +10296,7 @@
                       "after"
                     ],
                     "additionalProperties": false,
-                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=512,000 UTF-8 bytes; only these two supplied-OpenAPI products allow a complete HTTP/MCP envelope <=786,432 bytes, including JSON escaping and payment metadata. All parser, reference, work and output budgets still apply. No source fetches or saved observation; the original authorized operation remains durably recoverable."
+                    "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=2,400,000 UTF-8 bytes; only these two supplied-OpenAPI products allow a complete HTTP/MCP envelope <=3,600,000 bytes, including JSON escaping and payment metadata. All parser, reference, work and output budgets still apply. No source fetches or saved observation; the original authorized operation remains durably recoverable."
                   }
                 },
                 "additionalProperties": false,

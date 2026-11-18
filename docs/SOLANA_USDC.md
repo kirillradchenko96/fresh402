@@ -54,3 +54,7 @@ Uncertain Solana settlement is reconciled against finalized Mainnet evidence for
 Rate limits, source security, provider quotas, capacity limits and finite operating budgets still apply. Solana payment support does not add Solana-chain intelligence, JavaScript rendering, background monitoring, an unlimited service guarantee or a new credit entitlement.
 
 The legacy `tools` cost map in `/v2/prepaid/plans` lists the original Web tariff projection; it is not the complete All-Services entitlement inventory. `/v3/prepaid/all-services` describes the seven primitive costs. The four server workflows publish their own tariff and eligibility in live discovery and authenticated SDK `quote(product, input)` responses. Use those current quotes for exact workflow credits and the maximum you authorize; do not infer that a shorter legacy map disables a published workflow. The shared provisional-credit availability object applies to Base purchases only; Solana funding always requires finalized settlement.
+
+## Native MPP standalone option
+
+Standalone Solana MPP is separately available when root `mpp_payments.additional_methods` and the live unpaid challenge advertise `solana/charge`. It uses the same native USDC mint, existing merchant and per-tool amounts, but the client pays an explicitly authorized SOL fee; this is not the x402 sponsored-fee flow. Prepaid MPP funding remains Base-only. See [official-client requirements and original recovery](MPP.md#native-solana-mpp-standalone-charges).

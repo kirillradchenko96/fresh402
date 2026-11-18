@@ -113,7 +113,7 @@ OpenAPI analysis uses `rules_version:2` / `openapi-directional-v2`. Supported lo
 
 ## Payment and recovery
 
-Payment is **x402 v2**, scheme **exact**, native **USDC on Base or Solana Mainnet** when the selected network is advertised by the current challenge. Base (`eip155:8453`, chain ID 8453) remains the first offer and default. [Solana mint, merchant, fee payer, ownership and original recovery](SOLANA_USDC.md). MPP remains Base-only; Solana billing does not change the Base chain observed by blockchain products. The asset is `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`; the current receiving Safe is `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Always validate the current challenge before signing. Historical EOA-bound operations retain their original recipient, resource, proof and recovery identity; this documentation does not retarget an old authorization.
+Payment is **x402 v2**, scheme **exact**, native **USDC on Base or Solana Mainnet** when the selected network is advertised by the current challenge. Base (`eip155:8453`, chain ID 8453) remains the first offer and default. [Solana mint, merchant, fee payer, ownership and original recovery](SOLANA_USDC.md). Standalone native Solana MPP `solana/charge` is available when root `mpp_payments.additional_methods` advertises it; the client pays a separately authorized SOL network fee, without sponsorship. Prepaid MPP funding remains Base-only; Solana billing does not change the Base chain observed by blockchain products. The asset is `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`; the current receiving Safe is `0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3`. Always validate the current challenge before signing. Historical EOA-bound operations retain their original recipient, resource, proof and recovery identity; this documentation does not retarget an old authorization.
 
 An empty unsigned POST to any of the four paid Web REST resources returns a discovery challenge without executing the operation. The challenge's schema still requires the actual application input. Supplied malformed or unsafe input can be rejected before payment. A signed request requires valid input and existing watch/comparison prerequisites before settlement; completed private recovery retains its original result semantics. Smart Diff clients must register first and use the returned watch ID.
 
@@ -214,7 +214,7 @@ Extract optionally accepts `fields:[{name,pointer,type,required}]`,1-12 uniquely
 
 POST `/v1/agent-feedback` accepts voluntary enums: task website_change/api_upgrade/extraction/ci/blockchain/cross_domain/integration/other; outcome solved/partial/blocked/not_evaluated; obstacle none/capability/documentation/payment/integration/capacity/quality/other; optional alternative none/local_code/another_service/abandoned/undisclosed(default). No extra keys or free text;1,024bytes, global100/day plus existing request limiter,30day aggregate retention. Never required for service. Responses202accepted,400invalid,413oversize,429capacity; feedback does not authenticate identity or demonstrate demand.
 
-[Framework examples](INTEGRATIONS.md). Native Solana MPP is still disabled; existing payment methods and prices are unchanged.
+[Framework examples](INTEGRATIONS.md). Native Solana MPP passed one official-client mainnet API Compatibility Review acceptance with finalized delivery and original replay. Live root flags and unpaid challenges govern availability. Existing payment methods and prices are unchanged; prepaid MPP funding remains Base-only.
 
 ## Bounded structured evidence update
 

@@ -3,7 +3,7 @@
     "schema": "fresh402-release-definition-v1",
     "product_version": "3.1.0",
     "mcp_server_version": "3.1.0",
-    "api_contract_revision": "2026-11-17.1",
+    "api_contract_revision": "2026-11-17.2",
     "tool_catalog_revision": "12-tools-bounded-records-guardian-portable-v2",
     "registry_metadata_version": "3.1.2",
     "sdk": {
@@ -22,7 +22,7 @@
       "ownership_from_public_watch": false
     },
     "workflow_retention_days": 7,
-    "solana_mpp_mainnet_accepted": false,
+    "solana_mpp_mainnet_accepted": true,
     "solana_mpp_default": "disabled",
     "canonical_origin": "https://api.fresh402.com",
     "legacy_origin": "https://fresh402.kirilllabs.workers.dev",
@@ -139,6 +139,20 @@
     "network": "eip155:8453",
     "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
     "credential_type": "authorization",
+    "additional_methods": [
+      {
+        "method": "solana",
+        "intent": "charge",
+        "network": "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
+        "asset": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+        "credential_type": "transaction",
+        "mode": "pull",
+        "fee_payer": "client",
+        "server_fee_sponsorship": false,
+        "mainnet_validated": true
+      }
+    ],
     "prepaid_purchases": true,
     "guide": "https://github.com/kirillradchenko96/fresh402/blob/main/docs/MPP.md",
     "mainnet_settlement_newly_validated": false
@@ -1744,7 +1758,7 @@
       "post": {
         "operationId": "fresh402_check",
         "summary": "Use Check for on-demand changed/unchanged, hash, cache status and optional text diff across sessions. Exactly one url or real watch_id; URL/rules can create a watch, while watch_id reuses rules and forbids overrides. Save returned ID/hash. First URL observation may return changed:null. max_age_seconds defaults0 (conditional revalidation); positive age permits cached evidence. html_attributes observes selected same-text attribute changes. Public HTTPS, no JavaScript or scheduler. Use Smart Diff for structured changes; when advertised, Website Change Intelligence combines observation and supported evidence in one charge. Walletless first Check: require root instant_evaluation.enabled, then set evaluation:true with valid URL/watch input. One attempt per verified network prefix per approved period, sharing finite capacity; no wallet, key, custom header or proprietary SDK. Exact replay returns retained evidence, not a new fetch;429 never authorizes payment. $0.005 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "check"
         ],
@@ -1766,6 +1780,12 @@
                 "method": "evm",
                 "intent": "charge"
               }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -1780,6 +1800,22 @@
               "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits.",
               "intent": "charge",
               "method": "evm"
+            },
+            {
+              "amount": "5000",
+              "currency": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+              "intent": "charge",
+              "method": "solana",
+              "methodDetails": {
+                "network": "mainnet",
+                "decimals": 6,
+                "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "feePayer": false,
+                "transactionVersions": [
+                  0
+                ]
+              }
             }
           ]
         },
@@ -2568,7 +2604,7 @@
       "post": {
         "operationId": "fresh402_extract",
         "summary": "Use Extract for text, metadata, headings, links, JSON-LD and content hash from one public document; no watch required. No comparison, crawl or JavaScript. CSS scopes HTML; json_pointer selects one JSON value, json_pointers selects1-8 ordered fields; missing selections fail422. feed_mode:entries projects bounded RSS2/Atom; omit for XML-as-text. max_chars defaults20000, clips text but not the full hash; clipped structured data is omitted. For repeat observations use Check, then separately authorize Extract if needed. Use the retained source identity and scoped output to keep agent evidence consistent across sessions. Optional records extracts 1-25 repeated JSON objects or static HTML/table rows with 1-12 named typed fields, per-field status and source pointers. It is exclusive with fields/json_pointer/json_pointers/feed_mode. Default record limit20, shared16,384 selected-value bytes; no schema inference, currency coercion, pagination or browser. Missing/invalid/ambiguous/truncated/unsupported values are reported explicitly. The existing fields mode projects one JSON object. Price and one-source-fetch limit are unchanged. $0.01 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Extract static content and records. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Extract static content and records. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "extract"
         ],
@@ -2590,6 +2626,12 @@
                 "method": "evm",
                 "intent": "charge"
               }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -2604,6 +2646,22 @@
               "description": "Extract static content and records.",
               "intent": "charge",
               "method": "evm"
+            },
+            {
+              "amount": "10000",
+              "currency": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+              "intent": "charge",
+              "method": "solana",
+              "methodDetails": {
+                "network": "mainnet",
+                "decimals": 6,
+                "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "feePayer": false,
+                "transactionVersions": [
+                  0
+                ]
+              }
             }
           ]
         },
@@ -3926,7 +3984,7 @@
       "post": {
         "operationId": "fresh402_smart_diff",
         "summary": "Use Smart Diff for bounded JSON Pointer/HTML block changes and deterministic significance evidence across sessions. Requires real registered watch_id; fetches using saved rules. compare_to: previous(default) or baseline; previous_hash overrides with compatible retained same-watch evidence. json_array_keys explicitly matches unique typed identities; ambiguity fails. No cache-age option or scheduler. Missing history404; truncated/incompatible baseline409. Not complete semantic proof. Use Check for a focused changed/unchanged signal; choose the advertised Website Change Intelligence workflow for combined supported observation and comparison. change_evidence supplies bounded stable mechanical change IDs and pointers; these are not a business-impact or authenticity assessment. $0.015 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "smart_diff"
         ],
@@ -3948,6 +4006,12 @@
                 "method": "evm",
                 "intent": "charge"
               }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -3962,6 +4026,22 @@
               "description": "Use Smart Diff for structured document changes and rule-based significance evidence after free registration. Compare against the previous snapshot, fixed baseline or an available same-watch hash. Saved scope is reused; legacy HTML can lack structure. Not an API compatibility proof. x402 $0.015 USDC on Base.",
               "intent": "charge",
               "method": "evm"
+            },
+            {
+              "amount": "15000",
+              "currency": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+              "intent": "charge",
+              "method": "solana",
+              "methodDetails": {
+                "network": "mainnet",
+                "decimals": 6,
+                "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "feePayer": false,
+                "transactionVersions": [
+                  0
+                ]
+              }
             }
           ]
         },
@@ -4598,7 +4678,7 @@
       "post": {
         "operationId": "fresh402_openapi_contract_diff",
         "summary": "Use for bounded directional OpenAPI3.0/3.1 JSON contract-change evidence, including supported paths/operations, required fields, types/enums/null and authentication. Use exactly one real watch_id from free unfiltered registration or contracts:{before,after} serialized JSON or bounded YAML 1.2 strings (24,000 characters each/48,000 combined UTF-8 bytes). Supplied pairs compare before to after without a fetch or saved watch; omit comparison overrides. Same price and original-operation recovery. Stored mode has no URL override. compare_to: previous(default) or baseline; previous_hash overrides with supported retained evidence. First stored-watch call seeds contract history; explicit pairs compare immediately and return a conservative CI verdict. No YAML watch sources, external-reference fetch or endpoint execution; bounded YAML is supplied-pair only; uncertainty requires review, not a complete compatibility proof. Save and reuse watch IDs across sessions. For a complete single-charge server workflow, use API Compatibility Review when advertised. Rules v3 adds finite numeric/exclusive integer bounds, scalar const in3.1, scalar-item array cardinality and otherwise-identical boolean object closure. Unsupported constraint interactions remain review_required. Optional review contains stable finding IDs, affected operations, bounded excerpts and CI0/1/2; no customer-code inspection or release-safety guarantee. $0.020 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Bounded directional OpenAPI 3.0/3.1 comparison with conservative CI verdicts. Supply contracts:{before,after} as JSON or restricted YAML 1.2 strings without registration, or a watch from unfiltered JSON registration. Watch mode supports previous, baseline and retained hashes. YAML pairs only; no external-reference fetch or live API proof. Unsupported semantics require review. x402 $0.020 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Bounded directional OpenAPI 3.0/3.1 comparison with conservative CI verdicts. Supply contracts:{before,after} as JSON or restricted YAML 1.2 strings without registration, or a watch from unfiltered JSON registration. Watch mode supports previous, baseline and retained hashes. YAML pairs only; no external-reference fetch or live API proof. Unsupported semantics require review. x402 $0.020 USDC on Base. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "openapi_diff"
         ],
@@ -4620,6 +4700,12 @@
                 "method": "evm",
                 "intent": "charge"
               }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -4634,6 +4720,22 @@
               "description": "Bounded directional OpenAPI 3.0/3.1 comparison with conservative CI verdicts. Supply contracts:{before,after} as JSON or restricted YAML 1.2 strings without registration, or a watch from unfiltered JSON registration. Watch mode supports previous, baseline and retained hashes. YAML pairs only; no external-reference fetch or live API proof. Unsupported semantics require review. x402 $0.020 USDC on Base.",
               "intent": "charge",
               "method": "evm"
+            },
+            {
+              "amount": "20000",
+              "currency": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+              "intent": "charge",
+              "method": "solana",
+              "methodDetails": {
+                "network": "mainnet",
+                "decimals": 6,
+                "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "feePayer": false,
+                "transactionVersions": [
+                  0
+                ]
+              }
             }
           ]
         },
@@ -5347,7 +5449,7 @@
       "post": {
         "operationId": "fresh402_contract_watch",
         "summary": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. $0.010000 native USDC/call on Base (eip155:8453); compatible x402 or enabled native MPP client required, no Fresh402 token for first purchase. Save proof/input and private recovery token BEFORE paying for full-response-loss protection: REST X-Fresh402-Recovery-Token; MCP params._meta['fresh402/recovery-token']. Recover originals without new RPC/debit; foreign snapshot/cursor forbidden. Provider failure/partial scan is not paid success. observation_saved=false/persistence_error: recover only, never use unsaved IDs. Prepaid needs eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect /v3/prepaid/quote/contract_watch and /v3/prepaid/all-services. Historical Web rights unchanged; paying agents do not need their own RPC credentials. Observations30days, private financial recovery7days. Not full history, financial advice or security audit. Clients: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "contract_watch"
         ],
@@ -5369,6 +5471,12 @@
                 "method": "evm",
                 "intent": "charge"
               }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -5383,6 +5491,22 @@
               "description": "Observe code, standard proxy slots, common getters, explicitly selected storage/ABI and bounded selected events at one finalized Base address; optionally compare an owned prior snapshot. Selected single-provider evidence only; unknown controls remain unknown.",
               "intent": "charge",
               "method": "evm"
+            },
+            {
+              "amount": "10000",
+              "currency": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+              "intent": "charge",
+              "method": "solana",
+              "methodDetails": {
+                "network": "mainnet",
+                "decimals": 6,
+                "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "feePayer": false,
+                "transactionVersions": [
+                  0
+                ]
+              }
             }
           ]
         },
@@ -6364,7 +6488,7 @@
       "post": {
         "operationId": "fresh402_wallet_watch",
         "summary": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. $0.020000 native USDC/call on Base (eip155:8453); compatible x402 or enabled native MPP client required, no Fresh402 token for first purchase. Save proof/input and private recovery token BEFORE paying for full-response-loss protection: REST X-Fresh402-Recovery-Token; MCP params._meta['fresh402/recovery-token']. Recover originals without new RPC/debit; foreign snapshot/cursor forbidden. Provider failure/partial scan is not paid success. observation_saved=false/persistence_error: recover only, never use unsaved IDs. Prepaid needs eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect /v3/prepaid/quote/wallet_watch and /v3/prepaid/all-services. Historical Web rights unchanged; paying agents do not need their own RPC credentials. Observations30days, private financial recovery7days. Not full history, financial advice or security audit. Clients: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "wallet_watch"
         ],
@@ -6386,6 +6510,12 @@
                 "method": "evm",
                 "intent": "charge"
               }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -6400,6 +6530,22 @@
               "description": "Read ETH balance snapshots and selected ERC-20-shaped Transfer events for one wallet in a completed bounded finalized page. Save the owned cursor and use a new paid operation for the next page. Not full native/internal/NFT/transaction history; provider-reported logs cannot prove completeness.",
               "intent": "charge",
               "method": "evm"
+            },
+            {
+              "amount": "20000",
+              "currency": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+              "intent": "charge",
+              "method": "solana",
+              "methodDetails": {
+                "network": "mainnet",
+                "decimals": 6,
+                "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "feePayer": false,
+                "transactionVersions": [
+                  0
+                ]
+              }
             }
           ]
         },
@@ -7281,7 +7427,7 @@
       "post": {
         "operationId": "fresh402_token_facts",
         "summary": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. $0.010000 native USDC/call on Base (eip155:8453); compatible x402 or enabled native MPP client required, no Fresh402 token for first purchase. Save proof/input and private recovery token BEFORE paying for full-response-loss protection: REST X-Fresh402-Recovery-Token; MCP params._meta['fresh402/recovery-token']. Recover originals without new RPC/debit; foreign snapshot/cursor forbidden. Provider failure/partial scan is not paid success. observation_saved=false/persistence_error: recover only, never use unsaved IDs. Prepaid needs eligible finalized all-service credits or an original explicit service-specific tariff4 grant; inspect /v3/prepaid/quote/token_facts and /v3/prepaid/all-services. Historical Web rights unchanged; paying agents do not need their own RPC credentials. Observations30days, private financial recovery7days. Not full history, financial advice or security audit. Clients: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
         "tags": [
           "token_facts"
         ],
@@ -7303,6 +7449,12 @@
                 "method": "evm",
                 "intent": "charge"
               }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -7317,6 +7469,22 @@
               "description": "Read contract-reported token identity, metadata, supply and limited control facts at one pinned finalized Base block. No safety score, honeypot/trading simulation, verified-source claim or inferred absence of privileges. Missing or deceptive getter evidence remains unknown/not_assessed.",
               "intent": "charge",
               "method": "evm"
+            },
+            {
+              "amount": "10000",
+              "currency": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+              "intent": "charge",
+              "method": "solana",
+              "methodDetails": {
+                "network": "mainnet",
+                "decimals": 6,
+                "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "feePayer": false,
+                "transactionVersions": [
+                  0
+                ]
+              }
             }
           ]
         },
@@ -8148,7 +8316,7 @@
       "post": {
         "operationId": "fresh402_website_change_intelligence",
         "summary": "Seed or compare one owned scoped public document with one validated fetch and bounded structural evidence. Optional JSON record identities; optional private portable source snapshot, same principal/workflow/scope/environment,30day expiry. Server state remains seven days. Mechanical findings are not business-impact or freshness certification. One fixed workflow charge; internal steps never create separate customer charges. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.005 USDC or 2 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Seed or compare one owned scoped public document with one validated fetch and bounded structural evidence. Optional JSON record identities; optional private portable source snapshot, same principal/workflow/scope/environment,30day expiry. Server state remains seven days. Mechanical findings are not business-impact or freshness certification. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
+        "description": "Seed or compare one owned scoped public document with one validated fetch and bounded structural evidence. Optional JSON record identities; optional private portable source snapshot, same principal/workflow/scope/environment,30day expiry. Server state remains seven days. Mechanical findings are not business-impact or freshness certification. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "website_change_intelligence"
         ],
@@ -8170,6 +8338,12 @@
                 "method": "evm",
                 "intent": "charge"
               }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -8184,6 +8358,22 @@
               "description": "Seed or compare one owned scoped public document with one validated fetch and bounded structural evidence. Optional JSON record identities; optional private portable source snapshot, same principal/workflow/scope/environment,30day expiry. Server state remains seven days. Mechanical findings are not business-impact or freshness certification.",
               "intent": "charge",
               "method": "evm"
+            },
+            {
+              "amount": "5000",
+              "currency": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+              "intent": "charge",
+              "method": "solana",
+              "methodDetails": {
+                "network": "mainnet",
+                "decimals": 6,
+                "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "feePayer": false,
+                "transactionVersions": [
+                  0
+                ]
+              }
             }
           ]
         },
@@ -9388,7 +9578,7 @@
       "post": {
         "operationId": "fresh402_api_compatibility_review",
         "summary": "Compare explicit contracts:{before,after} JSON or bounded YAML 1.2 strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; YAML is supplied-pair only; no external-ref crawling or live API proof. Release Guardian review exposes stable finding/result IDs, directional rules, affected operations, bounded before/after excerpts, grouped evidence and conservative CI0/1/2. Seed/hash-unchanged observations explicitly report not_compared (CI2). Optional stored-source export_snapshot/baseline_snapshot carries private source context across sessions for the same principal/workflow/environment/scope,30days from observation; not financial authority. One fixed workflow charge; internal steps never create separate customer charges. Explicit API contracts pairs compare immediately without fetching or saved observation state; supplied before/after URNs identify canonical input hashes, not fetched URLs. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Compare explicit contracts:{before,after} JSON or bounded YAML 1.2 strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; YAML is supplied-pair only; no external-ref crawling or live API proof. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
+        "description": "Compare explicit contracts:{before,after} JSON or bounded YAML 1.2 strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; YAML is supplied-pair only; no external-ref crawling or live API proof. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "api_compatibility_review"
         ],
@@ -9410,6 +9600,12 @@
                 "method": "evm",
                 "intent": "charge"
               }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -9424,6 +9620,22 @@
               "description": "Compare explicit contracts:{before,after} JSON or bounded YAML 1.2 strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; YAML is supplied-pair only; no external-ref crawling or live API proof.",
               "intent": "charge",
               "method": "evm"
+            },
+            {
+              "amount": "10000",
+              "currency": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+              "intent": "charge",
+              "method": "solana",
+              "methodDetails": {
+                "network": "mainnet",
+                "decimals": 6,
+                "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "feePayer": false,
+                "transactionVersions": [
+                  0
+                ]
+              }
             }
           ]
         },
@@ -10626,7 +10838,7 @@
       "post": {
         "operationId": "fresh402_onchain_evidence_brief",
         "summary": "Combine selected code/proxy observations, contract-reported token facts and one wallet's single-block ETH/Transfer evidence at one finalized Base block. Shared RPC cache; at most 18 reads. Wallet scope remains a restricted pilot; no complete history or security score. One fixed workflow charge; internal steps never create separate customer charges. Each call selects one finalized Base block. Reuse its contract_snapshot_id only as previous_contract_snapshot for compatible contract comparison; this workflow accepts no observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.025 USDC or 10 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Combine selected code/proxy observations, contract-reported token facts and one wallet's single-block ETH/Transfer evidence at one finalized Base block. Shared RPC cache; at most 18 reads. Wallet scope remains a restricted pilot; no complete history or security score. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
+        "description": "Combine selected code/proxy observations, contract-reported token facts and one wallet's single-block ETH/Transfer evidence at one finalized Base block. Shared RPC cache; at most 18 reads. Wallet scope remains a restricted pilot; no complete history or security score. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "onchain_evidence_brief"
         ],
@@ -10648,6 +10860,12 @@
                 "method": "evm",
                 "intent": "charge"
               }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -10662,6 +10880,22 @@
               "description": "Combine selected code/proxy observations, contract-reported token facts and one wallet's single-block ETH/Transfer evidence at one finalized Base block. Shared RPC cache; at most 18 reads. Wallet scope remains a restricted pilot; no complete history or security score.",
               "intent": "charge",
               "method": "evm"
+            },
+            {
+              "amount": "25000",
+              "currency": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+              "intent": "charge",
+              "method": "solana",
+              "methodDetails": {
+                "network": "mainnet",
+                "decimals": 6,
+                "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "feePayer": false,
+                "transactionVersions": [
+                  0
+                ]
+              }
             }
           ]
         },
@@ -11457,7 +11691,7 @@
       "post": {
         "operationId": "fresh402_cross_domain_release_evidence",
         "summary": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality. One fixed workflow charge; internal steps never create separate customer charges. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.040 USDC or 16 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; MPP remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
+        "description": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "cross_domain_release_evidence"
         ],
@@ -11479,6 +11713,12 @@
                 "method": "evm",
                 "intent": "charge"
               }
+            },
+            {
+              "mpp": {
+                "method": "solana",
+                "intent": "charge"
+              }
             }
           ],
           "price": {
@@ -11493,6 +11733,22 @@
               "description": "Combine one scoped website, an optional JSON OpenAPI comparison and selected finalized Base evidence into one bounded release brief. Separate provenance and missing/conflicting evidence; a release-label mention never proves deployment or causality.",
               "intent": "charge",
               "method": "evm"
+            },
+            {
+              "amount": "40000",
+              "currency": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+              "recipient": "9apNBNbDHZZ2isBEq9ZCnipvRdxAh6ZCBRJPqWQ5Rwuj",
+              "intent": "charge",
+              "method": "solana",
+              "methodDetails": {
+                "network": "mainnet",
+                "decimals": 6,
+                "tokenProgram": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+                "feePayer": false,
+                "transactionVersions": [
+                  0
+                ]
+              }
             }
           ]
         },
@@ -16335,7 +16591,7 @@
         "type": "apiKey",
         "in": "header",
         "name": "PAYMENT-SIGNATURE",
-        "description": "x402 v2 exact native Circle USDC on Base or Solana Mainnet. Select one PAYMENT-REQUIRED offer; pin its network, contract/mint, recipient, amount and fee payer. MPP is Base-only. Never rewrite an original signed resource or switch networks during recovery."
+        "description": "x402 v2 exact native Circle USDC on Base or Solana Mainnet. Select one PAYMENT-REQUIRED offer; pin its network, contract/mint, recipient, amount and fee payer. Prepaid MPP funding is Base-only. Standalone native Solana MPP is available only when root mpp_payments.additional_methods advertises it; its client pays the authorized SOL fee. Never rewrite an original signed resource or switch networks during recovery."
       }
     },
     "schemas": {

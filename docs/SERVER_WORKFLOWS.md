@@ -63,17 +63,17 @@ Required inputs are `chain_id:8453`, one `contract_address`, and one `wallet_add
 {"chain_id":8453,"contract_address":"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913","wallet_address":"0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"}
 ```
 
-Wallet coverage remains a restricted pilot: provider-reported selected-contract logs at one block, not complete wallet/native-transaction history. A single provider's finalized/canonical evidence is not independent consensus. Standard proxy slots do not prove delegatecall or authority; owner/paused controls are not assessed here. Token getters/log shapes do not establish token compliance, circulating supply, investment quality or safety. Provider limits, invalid/dense logs and ambiguous evidence can fail closed before settlement.
+The workflow selects state by canonical block hash (EIP-1898) and both directions of the wallet Transfer filter by the same block hash (EIP-234). It rechecks the selected block header before delivery. Use `summary.evidence_index` to resolve block, field and event pointers. A previous snapshot whose header disagrees with the current provider yields an unknown comparison. Wallet coverage is limited to provider-reported events for the selected contract at that one block. Independent consensus, receipts, full wallet history, actual delegatecall, authority, ERC-20 compliance, circulating supply and safety are outside this evidence scope. Unsupported pinning, invalid or excessive logs and provider errors can stop delivery before settlement.
 
 ## Cross-domain Release Evidence
 
 With a new `url`, also provide required `onchain` (the three Base inputs above), required `release_label` (1–128 characters) and optional explicit `api_url`. No link discovery occurs. The optional `scope` applies to the website only. Reusing `observation_id` freezes website, API, addresses and scope: omit `url`, `api_url`, `onchain` and `scope`; continue to provide `release_label`. The label may change without changing observation identity.
 
-Web and Base provenance remain separate. Website/API fetches are distinct observations, not an atomic cross-source snapshot. Source mentions, timestamps and coincident contract changes never prove a deployed release or causation. Inspect missing/conflicting evidence and completeness. This is bounded deterministic evidence assembly, not an open-ended investigation or LLM analysis.
+Read `summary.findings` for each source's status, evidence pointer, previous observation when available and the caller label with any literal mention in the selected website projection. `summary.timeline` separates document acquisition, provider block selection and block time. The release relationship remains unverified. Partial HTTP responses stop execution before a paid result or baseline update. Omitting `api_url` records the API as unselected. An explicitly selected API source must return a supported, complete JSON OpenAPI document. The website and API each retain their 256,000-byte limit.
 
 ## Payment, eligibility and recovery
 
-Direct resources require explicitly authorized native-USDC x402 v2 on Base or Solana Mainnet as advertised by the live challenge, or enabled compatible MPP on Base. An ordinary unsigned call returns requirements and does not execute. Verify exact origin/resource, recipient, native USDC, amount and deadline before signing. The original seven prices and package prices are unchanged; Circle Gateway stays disabled.
+Direct resources advertise supported native-USDC x402 v2 and MPP methods in the live challenge. An unsigned call returns requirements without execution. Verify exact origin/resource, recipient, native USDC, amount and deadline before signing.
 
 Eligible finalized prepaid credits use tariff **5**, exact authenticated quotes at `GET /v4/prepaid/workflows/quote/{underscored_workflow_id}`, `Idempotency-Key`, `X-Fresh402-Tariff-Version: 5` and `X-Fresh402-Max-Credits`. Existing Web product rights must cover the workflow's constituent scope. Chain workflows additionally require existing accepted finalized All-Services rights or the three original explicit Base grants. No grant, balance, funding terms or credential is minted by a workflow quote. Provisional credits and free trials cannot execute these workflows. A 403/429/503 never authorizes a paid fallback.
 
@@ -89,7 +89,7 @@ Compare equivalent source scope, retained history, output detail and failure rec
 
 ## Native USDC on Solana
 
-The existing paid resources also support explicitly selected native Circle USDC on Solana Mainnet where the live unpaid challenge advertises it. Base stays first, all current service prices/credit costs stay the same, and MPP remains Base-only. Payment network does not change the chain observed by the product. Solana package funding requires matching Solana wallet ownership, network-specific terms and finalized native-USDC evidence, with no provisional credits. Distinct chain wallets are not automatically linked. Existing credentials retain their accepted rights. [Network selection, compatible client requirements and original recovery](SOLANA_USDC.md).
+The existing paid resources support native Circle USDC on Solana Mainnet where the live unpaid challenge advertises it. Native Solana MPP is available for advertised standalone charges. Prepaid MPP funding uses Base. The observation chain for these two workflows is Base regardless of the payment network. Solana package funding requires matching Solana wallet ownership, network-specific terms and finalized native-USDC evidence. [Network selection, compatible client requirements and original recovery](SOLANA_USDC.md).
 
 ## Explicit CI contracts and stronger evidence
 

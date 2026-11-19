@@ -25,6 +25,8 @@ Website Change Intelligence provides [versioned static-HTML record context, JSON
 
 Standalone URL-based Website Change supports up to 448,000 decoded UTF-8 bytes of supported text and 320,000 bytes of HTML, subject to the existing structural, state and output ceilings. For longer text it can compare the entire normalized source and return an enclosing changed range with explicit preview limits. See [comparison evidence and limits](SERVER_WORKFLOWS.md#website-comparison-evidence-and-limits).
 
+On-chain Evidence Brief pins state and selected Transfer logs to the same provider-finalized Base block hash and exposes pointers into the returned evidence. Cross-domain Release Evidence adds source-specific findings, separate acquisition times and the exact previous sources where available. A caller label remains an unverified claim. See [On-chain Evidence Brief](SERVER_WORKFLOWS.md#on-chain-evidence-brief) and [Cross-domain Release Evidence](SERVER_WORKFLOWS.md#cross-domain-release-evidence).
+
 ## Register
 
 ```json

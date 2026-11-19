@@ -21,6 +21,8 @@ The hosted service reports version **3.1.0**. [Live OpenAPI](https://api.fresh40
 
 The four [server workflows](SERVER_WORKFLOWS.md) each have one fixed financial charge, retained scoped evidence and eligible tariff-5 prepaid access (2/4/10/16 credits). Original seven prices, purchased rights and package terms are unchanged. A source's first workflow observation seeds within that paid operation; it is not free Register or a primitive watch. Check live discovery/availability before authorization. No free-trial entitlement or automatic payment fallback is implied.
 
+Website Change Intelligence provides [versioned static-HTML record context, JSON literal-integrity checks and normalized before/after evidence pointers](SERVER_WORKFLOWS.md#website-comparison-evidence-and-limits). Ambiguous legacy evidence can require review with `changed:null`; it is never silently replaced by a new baseline. This remains an on-demand observation, not scheduled monitoring or browser rendering.
+
 ## Register
 
 ```json

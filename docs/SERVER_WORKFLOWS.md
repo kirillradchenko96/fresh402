@@ -29,6 +29,20 @@ This Website Change Intelligence example fetches static public HTTPS content onc
 
 `detail` defaults to `compact` (at most 20 evidence items per section). `expanded` permits at most 200 document findings or 100 Base events within the same output/work ceiling. Findings counts, omissions and uncertainty remain explicit. Identical normalized evidence skips downstream comparison, not fetching or the fixed charge.
 
+## Website comparison evidence and limits
+
+Website observations are on demand. They do not schedule monitoring or send alerts. The first observation is `baseline_seeded` with `changed:null`; an unchanged new observation still costs the quoted 2 eligible credits or $0.005 USDC. Exact original-operation replay performs no new fetch or charge, even when the source has since changed.
+
+New static HTML observations report `scope.normalizer:structural-v2-html-context`. Retained unique block IDs take precedence over equal text in another record. For nested blocks without their own IDs, bounded `div`, `section` and `article` container IDs plus per-tag ordinals provide versioned context. Whole records can move without exchanging their values. This does not infer product identities for arbitrary unkeyed markup or guarantee matching after layout changes. Repeated container contexts fail explicitly; narrow the CSS scope rather than accepting ambiguous record matching.
+
+Text-only record movement can be suppressed. Selected attribute arrays retain positional semantics: moving different links can still report attribute changes. A container ID is source evidence, not proof that its publisher kept the same real-world product identity.
+
+`before_path` and `after_path` locate each side in normalized evidence: JSON value pointers, `/blocks/N` text or `/html_attributes/N/...` attributes. They are not raw HTML selectors or source line numbers. JSON root pointers are the empty string; legacy `path` remains `/` for root changes. Excerpts may be truncated, and compact output returns at most 20 findings. Inspect omitted counts and completeness. Rule-based significance describes mechanical features, not business importance.
+
+Website JSON rejects duplicate object names (including escaped aliases), unsafe integers, nonfinite numbers and numeric spellings that lose decimal identity during parsing. Encode large exact numeric identifiers as strings. Ordinary equivalent decimal spellings remain supported. These restrictions apply to fetched website evidence, not payment credentials. Existing source state is preserved. If a legacy JSON baseline lacks original literal validation, or legacy HTML lacks container context, ambiguous equality can return `review_required` with `changed:null` instead of claiming unchanged. The next validated observation becomes the previous observation without resetting the original baseline or extending retention.
+
+Sources remain limited to 256,000 decoded bytes, 1,000 retained content blocks, 10,000 HTML elements and the existing bounded comparison work. Over-limit inputs and missing selectors fail explicitly; they are not unchanged results. HTML attributes default to the four documented attributes. Tracking parameters, counters and timestamps remain material unless excluded by your immutable scope. Plain-text whitespace and line wrapping alone do not establish a content change.
+
 ## API Compatibility Review
 
 Supply a public unfiltered JSON OpenAPI 3.0/3.1 URL, then reuse its returned observation ID. There is no `scope` parameter for this product. The report identifies supported operation, request/response and effective authentication changes, with operation identities, evidence pointers and directional classifications. Counts can exceed returned evidence; check omissions. YAML, arbitrary external-reference fetching and complete JSON Schema semantic analysis are unsupported. A contract-level breaking classification is not proof of deployed enforcement or a failing consumer.

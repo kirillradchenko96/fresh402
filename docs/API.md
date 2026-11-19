@@ -23,6 +23,8 @@ The four [server workflows](SERVER_WORKFLOWS.md) each have one fixed financial c
 
 Website Change Intelligence provides [versioned static-HTML record context, JSON literal-integrity checks and normalized before/after evidence pointers](SERVER_WORKFLOWS.md#website-comparison-evidence-and-limits). Ambiguous legacy evidence can require review with `changed:null`; it is never silently replaced by a new baseline. This remains an on-demand observation, not scheduled monitoring or browser rendering.
 
+Standalone URL-based Website Change supports up to 448,000 decoded UTF-8 bytes of supported text and 320,000 bytes of HTML, subject to the existing structural, state and output ceilings. For longer text it can compare the entire normalized source and return an enclosing changed range with explicit preview limits. See [comparison evidence and limits](SERVER_WORKFLOWS.md#website-comparison-evidence-and-limits).
+
 ## Register
 
 ```json

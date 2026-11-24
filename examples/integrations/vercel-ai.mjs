@@ -3,7 +3,7 @@ import {createMCPClient} from '@ai-sdk/mcp';
 import {pathToFileURL} from 'node:url';
 export async function connectFresh402(){
  const client=await createMCPClient({transport:{type:'http',url:'https://api.fresh402.com/mcp'}});
- return{tools:async()=>(await client.listTools()).tools,call:(name,args)=>client.callTool({name,arguments:args}),close:()=>client.close()};
+ return{tools:async()=>(await client.listTools()).tools,definitions:()=>client.tools(),call:(name,args)=>client.callTool({name,arguments:args}),close:()=>client.close()};
 }
 if(process.argv[1]&&pathToFileURL(process.argv[1]).href===import.meta.url){
  const client=await connectFresh402();try{

@@ -51,3 +51,5 @@ On-chain evidence still observes Base8453 only, one selected provider-finalized 
 The published SDK version in `/release` remains supported for its existing API. Generic JSON REST/MCP clients can send these optional parameters. Updated source TypeScript workflow contracts are included in this repository; do not assume an older installed package has every new declaration. Framework examples offer `--advanced` (CrewAI: `FRESH402_ADVANCED_EXAMPLE=1`) for unsigned record/API-review challenges only, no model or wallet authority. Connecting, quoting and fixture demos do not demonstrate paid delivery or organic adoption.
 
 Current finite resource ceilings, payment requirements, merchants, finalized-only settlement and original recovery apply. No new tariff, inference provider, browser, additional Container, longer server history or recurring monitoring is introduced.
+
+Decision policies evaluate already collected evidence in the same operation. At most eight conditions or scoped API operations apply. Unavailable evidence remains unknown. See [supported fact types and pointers](SERVER_WORKFLOWS.md#evidence-linked-decisions).

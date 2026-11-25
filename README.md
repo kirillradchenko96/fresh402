@@ -57,7 +57,7 @@ After uncertain delivery, recover the original input, operation key and payment 
 
 ## Source SDK and documentation
 
-The compiled prerelease [fresh402-sdk@0.6.1-rc.1](https://www.npmjs.com/package/fresh402-sdk/v/0.6.1-rc.1) is published under MIT for the public client SDK only. Install explicitly with `npm install fresh402-sdk@0.6.1-rc.1` or select `@next`; `latest` remains `0.4.0-rc.1`. Version 0.5.0-rc.1 adds four server workflow bindings, exact tariff-5 quotes and original-operation recovery alongside seven-service prepaid execution. Node 24+, ESM, declarations, zero runtime dependencies; no automatic wallet/signing or spending. The separately versioned source-client compatibility version remains 0.3.6. [Package guide](docs/SDK_PACKAGE.md).
+The compiled prerelease [fresh402-sdk@0.7.0](https://www.npmjs.com/package/fresh402-sdk/v/0.7.0) is published under MIT for the public client SDK only. Install explicitly with `npm install fresh402-sdk@0.7.0` or select `@next`; `latest` remains `0.4.0-rc.1`. Version 0.5.0-rc.1 adds four server workflow bindings, exact tariff-5 quotes and original-operation recovery alongside seven-service prepaid execution. Node 24+, ESM, declarations, zero runtime dependencies; no automatic wallet/signing or spending. The separately versioned source-client compatibility version remains 0.3.6. [Package guide](docs/SDK_PACKAGE.md).
 
 [Documentation index](docs/README.md) · [API](docs/API.md) · [MCP](docs/MCP.md) · [Examples](examples/README.md) · [Version relationships](docs/VERSIONS.md) · [Changelog](CHANGELOG.md) · [Website](https://fresh402.com/docs).
 
@@ -84,3 +84,5 @@ Live discovery determines availability. Eligible prepaid workflows use exact aut
 [Agent framework integrations](docs/INTEGRATIONS.md): tested MCP connectivity for OpenAI Agents, LangChain/LangGraph, CrewAI and Vercel. Payment authority is separate. [Explicit CI contracts and typed Extract projection](docs/API.md#explicit-contracts-typed-extraction-and-voluntary-feedback) use existing prices and bounded execution.
 
 [Bounded structured evidence](docs/DEEP_CAPABILITIES.md): repeated static HTML/JSON records, Release Guardian CI findings, explicit JSON record identity and private caller-retained Website/API context. Existing tools and prices; no browser or automatic payment.
+
+Use the four workflows to check JSON thresholds, scope API breaks to methods your client uses, verify expected Base facts and find cross-source contradictions. The [workflow contract](docs/SERVER_WORKFLOWS.md#evidence-linked-decisions) defines selectors, evidence and limits. Explore engine results in the [Playground](https://fresh402.com/playground).

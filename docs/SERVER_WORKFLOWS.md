@@ -102,3 +102,41 @@ Website evidence reports raw-byte versus normalized-evidence change and bounded 
 ## Bounded structured evidence update
 
 See [structured records, Release Guardian, record identity and portable observation context](DEEP_CAPABILITIES.md) for exact optional inputs, limits, CI semantics and original recovery boundaries. The existing tool identities and tariffs are unchanged.
+
+## Evidence-linked decisions
+
+Website Change Intelligence, On-chain Evidence Brief and Cross-domain Release Evidence accept an optional `conditions` array. Omitting it keeps the ordinary result. One workflow charge covers the observation and up to eight checks using evidence already collected.
+
+| Field | Format and constraints |
+|---|---|
+| `id` | Required, unique in the request. A letter followed by up to 31 ASCII letters, digits, underscores or hyphens. |
+| `fact` | Required field selector, 4–160 characters. See the supported selectors below. |
+| `type` | Required `text`, `decimal` or `boolean`. Text is exact and at most 128 characters. Decimal literals are quoted fixed-point values, at most 78 integer digits and 18 fraction digits, without exponents or a leading plus. Boolean literals use JSON `true` or `false`. |
+| `operator` | `equals` or `not_equals` for typed values. `greater_than` and `less_than` require decimals. `changed` and `unchanged` compare a website field with a compatible prior JSON observation. |
+| `expected` | Required literal of the declared type for the first four operators, unless using `with_fact`. Omit for `changed` and `unchanged`. |
+| `with_fact` | Cross-domain only. A distinct selector of the same type replaces `expected`. Compare values in the same units. Omit for `changed` and `unchanged`. |
+
+Supply one to eight conditions. Malformed conditions return an input error. A valid condition on absent, invalid or unobserved evidence yields `unknown`, including with `not_equals`. An observed false condition makes `assessment.status` `fail`. With no false conditions, unavailable evidence yields `unknown`. `pass` requires every condition to be satisfied. A failure or unknown is an ordinary delivered result under the fixed price. The existing workflow status and billing retain their semantics.
+
+- Website selectors start with `website:` and use an RFC 6901 pointer of at most 16 segments into the normalized JSON. Select one scalar. HTML, text, excluded fields, collections, over-precision values and legacy observations without JSON literal-integrity evidence do not supply facts. A seed can test a present value. To check change, supply compatible retained state. `compare_to` selects the original baseline or the previous observation, which is the default.
+- On-chain selectors are `base:contract_address`, `base:code_present`, `base:code_hash`, `base:implementation_slot`, `base:admin_slot`, `base:token_symbol`, `base:token_decimals`, `base:token_total_supply` and `base:wallet_balance_wei`. Code presence is boolean. Decimals, raw supply and raw wei are decimal. The others are text. Addresses and hashes require full hexadecimal values and compare case-insensitively. Only observed fields at the selected provider-finalized Base block are eligible.
+- Cross-domain accepts website and Base selectors plus `api:version` for `info.version` and `api:GET /items`-style selectors for direct method/path presence. API facts require an explicit eligible API source. Unavailable contracts or unresolved operation declarations cannot prove absence. The assessment concerns the observed facts and carries no claim of release linkage, deployment, authenticity or causation.
+
+```json
+{
+  "url": "https://registry.npmjs.org/fresh402-sdk/0.7.0",
+  "conditions": [
+    {"id": "expected_version", "fact": "website:/version", "type": "text", "operator": "equals", "expected": "0.7.0"}
+  ]
+}
+```
+
+Inspect `assessment.conditions[].observed` and `compared`. `provenance_pointer` locates the source in the result. `source_pointer` locates the normalized JSON or declared OpenAPI field. An absent operation uses its observed parent. `evidence_pointer` resolves a returned Base value. Web and API values carry an observed source digest and timestamp. An unavailable operand has no value.
+
+### Consumer-specific API review
+
+Use `consumer_operations` with `contracts:{before,after}` only. List one to eight distinct uppercase methods followed by one space and the exact declared path. Accepted methods are GET, PUT, POST, DELETE, OPTIONS, HEAD, PATCH and TRACE. A path starts with `/`, is at most 128 characters and contains no whitespace, query or fragment. For example, ` ["GET /items/{id}", "POST /items"] ` selects two operations. Use the literal template from the contract. The option is unavailable in URL, observation ID, public watch ID and portable baseline modes.
+
+`consumer_review` reports each selected operation, its status and next action. A removed operation identifies its exact old method and the observed parent in the new contract. Confirmed scoped breaking findings carry pointers where fields exist. Missing old operations, unresolved scope mapping and incomplete analysis remain unknown unless an independently observed break proves failure. A scoped pass concerns supported rules for the selected operations. The original directional findings and global CI 0/1/2 still apply to the whole contract. Supplied pairs fetch no sources and create no reusable observation ID.
+
+The [Playground](https://fresh402.com/playground) has fixed engine outputs for all four workflows. The [OpenAPI document](https://api.fresh402.com/openapi.json) defines the full inputs and results. Preserve exact conditions and operation scope with the original payment or prepaid idempotency record. A different policy requires an explicitly authorized new operation.

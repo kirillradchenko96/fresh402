@@ -2,13 +2,13 @@
   "schema": "fresh402-release-definition-v1",
   "product_version": "3.1.0",
   "mcp_server_version": "3.1.0",
-  "api_contract_revision": "2026-11-19.1",
-  "tool_catalog_revision": "12-tools-evidence-provenance-v1-website-coverage-v1-openapi-rules5",
-  "registry_metadata_version": "3.1.2",
+  "api_contract_revision": "2026-11-25.1",
+  "tool_catalog_revision": "12-tools-evidence-provenance-v1-website-coverage-v1-openapi-rules5-decisions1",
+  "registry_metadata_version": "3.1.4",
   "sdk": {
-    "recommended": "0.6.1-rc.1",
+    "recommended": "0.7.0",
     "channel": "next",
-    "prerelease": true,
+    "prerelease": false,
     "source_compatibility_version": "0.3.6",
     "node": ">=24",
     "module": "ESM"

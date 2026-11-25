@@ -3,13 +3,13 @@
     "schema": "fresh402-release-definition-v1",
     "product_version": "3.1.0",
     "mcp_server_version": "3.1.0",
-    "api_contract_revision": "2026-11-19.1",
-    "tool_catalog_revision": "12-tools-evidence-provenance-v1-website-coverage-v1-openapi-rules5",
-    "registry_metadata_version": "3.1.2",
+    "api_contract_revision": "2026-11-25.1",
+    "tool_catalog_revision": "12-tools-evidence-provenance-v1-website-coverage-v1-openapi-rules5-decisions1",
+    "registry_metadata_version": "3.1.4",
     "sdk": {
-      "recommended": "0.6.1-rc.1",
+      "recommended": "0.7.0",
       "channel": "next",
-      "prerelease": true,
+      "prerelease": false,
       "source_compatibility_version": "0.3.6",
       "node": ">=24",
       "module": "ESM"
@@ -27,9 +27,9 @@
     "canonical_origin": "https://api.fresh402.com",
     "legacy_origin": "https://fresh402.kirilllabs.workers.dev",
     "documentation_url": "https://github.com/kirillradchenko96/fresh402",
-    "source_commit": null,
-    "worker_version": null,
-    "build_timestamp": null,
+    "source_commit": "cb85709b96ced3743d7d093693a8e91f09d61c2a",
+    "worker_version": "dcbe4403-59e4-4ff0-94f0-95cde89a6fdd",
+    "build_timestamp": "2026-11-25T21:39:41.593049Z",
     "capability_policy": "Live feature flags and exact unpaid requirements are authoritative; the release definition does not enable a payment method or grant capacity."
   },
   "x-payment-networks": [
@@ -55,7 +55,7 @@
     }
   ],
   "x-instant-evaluation": {
-    "enabled": false,
+    "enabled": true,
     "tool": "fresh402_check",
     "endpoint": "/v1/check",
     "eligibility_endpoint": "/v1/check/evaluation-eligibility",
@@ -78,7 +78,7 @@
     "payments_automatic": false
   },
   "x-machine-trial": {
-    "enabled": false,
+    "enabled": true,
     "model": "one-time bounded machine trial; wallet control is not unique-agent identity",
     "allowances": {
       "check": 100,
@@ -1758,7 +1758,7 @@
       "post": {
         "operationId": "fresh402_check",
         "summary": "Use Check for on-demand changed/unchanged, hash, cache status and optional text diff across sessions. Exactly one url or real watch_id; URL/rules can create a watch, while watch_id reuses rules and forbids overrides. Save returned ID/hash. First URL observation may return changed:null. max_age_seconds defaults0 (conditional revalidation); positive age permits cached evidence. html_attributes observes selected same-text attribute changes. Public HTTPS, no JavaScript or scheduler. Use Smart Diff for structured changes; when advertised, Website Change Intelligence combines observation and supported evidence in one charge. Walletless first Check: require root instant_evaluation.enabled, then set evaluation:true with valid URL/watch input. One attempt per verified network prefix per approved period, sharing finite capacity; no wallet, key, custom header or proprietary SDK. Exact replay returns retained evidence, not a new fetch;429 never authorizes payment. $0.005 USDC/call on Base (eip155:8453), including cache hits. Needs an x402-capable MCP payment client and funded native-USDC payer; ordinary MCP returns a payment challenge. Optional MPP (root mpp_payments.enabled): mppx, org.paymentauth/credential. Prepaid: X-Fresh402-API-Key plus params._meta[\"fresh402/prepaid\"] {idempotency_key,tariff_version,max_credits}; inspect authenticated quote. Choose one billing method; never auto-pay. Persist original proof/input/private recovery token; recover originals after uncertainty. Circle only if root circle_gateway.enabled. Clients, limits and recovery: https://fresh402.com/docs#payments. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
-        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge.",
+        "description": "Use Check for a changed/unchanged signal and optional compact text diff. Exactly one URL or existing watch ID; URL plus rules can create a watch, whereas watch_id reuses saved rules and forbids overrides. Use Smart Diff for structured changes. On-demand only; x402 $0.005 USDC on Base, including cache hits. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty. Free signed trial: /v3/agent-trial requires an unfunded EOA ownership signature; human Web trial: /v2/trial. Eligibility/capacity may return429. Use only X-Fresh402-Trial-Key plus persisted Idempotency-Key; replay exact tool/input/key. Exhaustion never authorizes a charge. Explicit evaluation:true selects one bounded walletless Check attempt per verified network prefix per approved period, sharing existing machine-trial budgets. No custom headers, credential or automatic payment; default remains paid. Identical input from the same network replays the retained result for at most seven days; changed input after use returns429. Availability and capacity can deny earlier.",
         "tags": [
           "check"
         ],
@@ -1768,7 +1768,11 @@
           },
           {
             "mppPayment": []
-          }
+          },
+          {
+            "trialKey": []
+          },
+          {}
         ],
         "x-payment-info": {
           "protocols": [
@@ -2614,6 +2618,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -3994,6 +4001,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -4688,6 +4698,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -4785,17 +4798,9 @@
           "limits": {
             "transfer_bytes": 5000000,
             "decoded_bytes": 5000000,
-            "output_bytes": 131072,
+            "output_bytes": 524288,
             "parser_characters": 256000,
-            "gateway_timeout_ms": 10000,
-            "document_bytes": 1200000,
-            "nodes": 40000,
-            "paths": 512,
-            "operations": 2048,
-            "work": 120000,
-            "ref_hops": 32,
-            "ref_resolutions": 8192,
-            "changes": 200
+            "gateway_timeout_ms": 10000
           },
           "prepaid_credits": {
             "3": 5
@@ -5460,6 +5465,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -6499,6 +6507,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -7438,6 +7449,9 @@
           },
           {
             "mppPayment": []
+          },
+          {
+            "trialKey": []
           }
         ],
         "x-payment-info": {
@@ -8316,8 +8330,8 @@
     "/v4/workflows/website-change-intelligence": {
       "post": {
         "operationId": "fresh402_website_change_intelligence",
-        "summary": "On-demand scoped static HTML/text/JSON: seed or compare owned state. Versioned HTML record context; ambiguous JSON fails and legacy uncertainty requires review. Private portable snapshot: same principal/workflow/scope/environment,30days; server state seven days. No polling, browser rendering or business-impact certification. One fixed workflow charge; internal steps never create separate customer charges. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.005 USDC or 2 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "On-demand scoped static HTML/text/JSON: seed or compare owned state. Versioned HTML record context; ambiguous JSON fails and legacy uncertainty requires review. Private portable snapshot: same principal/workflow/scope/environment,30days; server state seven days. No polling, browser rendering or business-impact certification. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
+        "summary": "Observe static HTTPS HTML, text or JSON and compare owned state. For supported JSON, test typed fields, thresholds or change since a prior observation and return evidence-linked pass/fail/unknown. Seven-day saved state or an eligible private portable snapshot. No polling or browser rendering. Optional conditions return evidence-linked pass/fail/unknown for exact scalar assertions. Missing or unsupported evidence yields unknown. A first URL use seeds state. Compatible source_watch_id instead adopts retained public Register evidence for a real comparison. For continuation, later observations use returned owned observation_id. State expires seven days from creation. Private source context exported with export_snapshot has a 30-day observation lifetime and is scoped to the same principal, workflow, environment and source. One fixed workflow charge of 0.005 USDC via enabled x402 v2 or MPP, or 2 eligible credits using tariff 5 and max_credits. An unpaid call quotes only. Choose inputs before authorization. Save the exact input, proof and recovery token privately. Exact replay returns the retained result with no fresh work or extra charge. No free trial or automatic paid fallback.",
+        "description": "Observe static HTTPS HTML, text or JSON and compare owned state. For supported JSON, test typed fields, thresholds or change since a prior observation and return evidence-linked pass/fail/unknown. Seven-day saved state or an eligible private portable snapshot. No polling or browser rendering. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "website_change_intelligence"
         ],
@@ -8356,7 +8370,7 @@
             {
               "amount": "5000",
               "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-              "description": "On-demand scoped static HTML/text/JSON: seed or compare owned state. Versioned HTML record context; ambiguous JSON fails and legacy uncertainty requires review. Private portable snapshot: same principal/workflow/scope/environment,30days; server state seven days. No polling, browser rendering or business-impact certification.",
+              "description": "Observe static HTTPS HTML, text or JSON and compare owned state. For supported JSON, test typed fields, thresholds or change since a prior observation and return evidence-linked pass/fail/unknown. Seven-day saved state or an eligible private portable snapshot. No polling or browser rendering.",
               "intent": "charge",
               "method": "evm"
             },
@@ -8585,6 +8599,74 @@
                     },
                     "additionalProperties": false,
                     "description": "Immutable supported normalization rules. Selected attributes participate in change detection; ignored fields are outside the reported scope. No browser execution or linked-page crawling."
+                  },
+                  "conditions": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                          "description": "Unique label within this request, beginning with a letter and at most 32 ASCII characters."
+                        },
+                        "fact": {
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160,
+                          "description": "Exact observation field. Website uses website: followed by an RFC 6901 JSON Pointer. Base uses a named base: fact. Cross-domain may also select api:version or api: followed by an uppercase method, a space and the declared path."
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "decimal",
+                            "boolean"
+                          ],
+                          "description": "Exact scalar type. Decimal expected values are quoted fixed-point strings, with at most 78 integer and 18 fraction digits."
+                        },
+                        "operator": {
+                          "type": "string",
+                          "enum": [
+                            "equals",
+                            "not_equals",
+                            "greater_than",
+                            "less_than",
+                            "changed",
+                            "unchanged"
+                          ],
+                          "description": "Greater/less require decimal. Changed/unchanged require a website field and a compatible prior JSON observation, and take no comparison operand."
+                        },
+                        "expected": {
+                          "description": "Required for a literal comparison. Text and decimal use strings, boolean uses true or false. Omit for changed/unchanged or when using with_fact.",
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "with_fact": {
+                          "description": "Cross-domain only. Compare with this second field of the same type instead of a literal.",
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fact",
+                        "type",
+                        "operator"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "description": "Optional 1–8 required checks over evidence already collected. Missing or unsupported facts produce unknown. Outcomes concern only the declared conditions. Omit to preserve the ordinary result."
                   }
                 },
                 "additionalProperties": false,
@@ -8708,7 +8790,16 @@
                 ]
               },
               "example": {
-                "url": "https://example.com/docs"
+                "url": "https://example.com/release.json",
+                "conditions": [
+                  {
+                    "id": "batch_limit",
+                    "fact": "website:/batchLimit",
+                    "type": "decimal",
+                    "operator": "greater_than",
+                    "expected": "100"
+                  }
+                ]
               }
             }
           }
@@ -9094,6 +9185,74 @@
                     },
                     "additionalProperties": false,
                     "description": "Immutable supported normalization rules. Selected attributes participate in change detection; ignored fields are outside the reported scope. No browser execution or linked-page crawling."
+                  },
+                  "conditions": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                          "description": "Unique label within this request, beginning with a letter and at most 32 ASCII characters."
+                        },
+                        "fact": {
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160,
+                          "description": "Exact observation field. Website uses website: followed by an RFC 6901 JSON Pointer. Base uses a named base: fact. Cross-domain may also select api:version or api: followed by an uppercase method, a space and the declared path."
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "decimal",
+                            "boolean"
+                          ],
+                          "description": "Exact scalar type. Decimal expected values are quoted fixed-point strings, with at most 78 integer and 18 fraction digits."
+                        },
+                        "operator": {
+                          "type": "string",
+                          "enum": [
+                            "equals",
+                            "not_equals",
+                            "greater_than",
+                            "less_than",
+                            "changed",
+                            "unchanged"
+                          ],
+                          "description": "Greater/less require decimal. Changed/unchanged require a website field and a compatible prior JSON observation, and take no comparison operand."
+                        },
+                        "expected": {
+                          "description": "Required for a literal comparison. Text and decimal use strings, boolean uses true or false. Omit for changed/unchanged or when using with_fact.",
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "with_fact": {
+                          "description": "Cross-domain only. Compare with this second field of the same type instead of a literal.",
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fact",
+                        "type",
+                        "operator"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "description": "Optional 1–8 required checks over evidence already collected. Missing or unsupported facts produce unknown. Outcomes concern only the declared conditions. Omit to preserve the ordinary result."
                   }
                 },
                 "additionalProperties": false,
@@ -9217,7 +9376,16 @@
                 ]
               },
               "example": {
-                "url": "https://example.com/docs"
+                "url": "https://example.com/release.json",
+                "conditions": [
+                  {
+                    "id": "batch_limit",
+                    "fact": "website:/batchLimit",
+                    "type": "decimal",
+                    "operator": "greater_than",
+                    "expected": "100"
+                  }
+                ]
               }
             }
           }
@@ -9578,8 +9746,8 @@
     "/v4/workflows/api-compatibility-review": {
       "post": {
         "operationId": "fresh402_api_compatibility_review",
-        "summary": "Compare explicit contracts:{before,after} JSON or bounded YAML 1.2 strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; YAML is supplied-pair only; no external-ref crawling or live API proof. Release Guardian review exposes stable finding/result IDs, directional rules, affected operations, bounded before/after excerpts, grouped evidence and conservative CI0/1/2. Seed/hash-unchanged observations explicitly report not_compared (CI2). Optional stored-source export_snapshot/baseline_snapshot carries private source context across sessions for the same principal/workflow/environment/scope,30days from observation; not financial authority. One fixed workflow charge; internal steps never create separate customer charges. Explicit API contracts pairs compare immediately without fetching or saved observation state; supplied before/after URNs identify canonical input hashes, not fetched URLs. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.010 USDC or 4 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Compare explicit contracts:{before,after} JSON or bounded YAML 1.2 strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; YAML is supplied-pair only; no external-ref crawling or live API proof. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
+        "summary": "Compare caller-supplied OpenAPI JSON or bounded YAML 1.2 pairs with a global CI verdict and optional method/path consumer assessment. Get a concrete witness for a removed operation. Public JSON URL mode compares saved observations. No network fetch for supplied pairs, external-reference crawl or live API proof. Global Review includes directional rules, evidence witnesses and CI0/1/2. Seed/hash-unchanged observations report not_compared (CI2). On supplied pairs, optional consumer_operations scopes a separate pass/fail/unknown assessment and never changes the global CI exit code. Explicit API contracts pairs compare immediately without a fetch or saved observation. Inert URNs identify canonical inputs. A first URL use seeds state. Compatible source_watch_id instead adopts retained public Register evidence for a real comparison. For continuation, later observations use returned owned observation_id. State expires seven days from creation. Private source context exported with export_snapshot has a 30-day observation lifetime and is scoped to the same principal, workflow, environment and source. One fixed workflow charge of 0.010 USDC via enabled x402 v2 or MPP, or 4 eligible credits using tariff 5 and max_credits. An unpaid call quotes only. Choose inputs before authorization. Save the exact input, proof and recovery token privately. Exact replay returns the retained result with no fresh work or extra charge. No free trial or automatic paid fallback.",
+        "description": "Compare caller-supplied OpenAPI JSON or bounded YAML 1.2 pairs with a global CI verdict and optional method/path consumer assessment. Get a concrete witness for a removed operation. Public JSON URL mode compares saved observations. No network fetch for supplied pairs, external-reference crawl or live API proof. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "api_compatibility_review"
         ],
@@ -9618,7 +9786,7 @@
             {
               "amount": "10000",
               "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-              "description": "Compare explicit contracts:{before,after} JSON or bounded YAML 1.2 strings for CI without fetching or retaining source state, or seed/review a public JSON OpenAPI 3.0/3.1 URL against saved observations. Returns directional findings and a conservative CI verdict; YAML is supplied-pair only; no external-ref crawling or live API proof.",
+              "description": "Compare caller-supplied OpenAPI JSON or bounded YAML 1.2 pairs with a global CI verdict and optional method/path consumer assessment. Get a concrete witness for a removed operation. Public JSON URL mode compares saved observations. No network fetch for supplied pairs, external-reference crawl or live API proof.",
               "intent": "charge",
               "method": "evm"
             },
@@ -9789,6 +9957,18 @@
                     ],
                     "additionalProperties": false,
                     "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=2,400,000 UTF-8 bytes; only these two supplied-OpenAPI products allow a complete HTTP/MCP envelope <=3,600,000 bytes, including JSON escaping and payment metadata. All parser, reference, work and output budgets still apply. No source fetches or saved observation; the original authorized operation remains durably recoverable."
+                  },
+                  "consumer_operations": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 140,
+                      "pattern": "^(?:GET|PUT|POST|DELETE|OPTIONS|HEAD|PATCH|TRACE) \\/[^?#\\s]{0,127}$"
+                    },
+                    "uniqueItems": true,
+                    "description": "Optional for supplied contracts only. List 1–8 exact uppercase method plus space plus declared path identities, such as GET /items/{id}. The scoped assessment leaves the global verdict and CI exit code intact."
                   }
                 },
                 "additionalProperties": false,
@@ -9817,6 +9997,11 @@
                         {
                           "required": [
                             "contracts"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "consumer_operations"
                           ]
                         }
                       ]
@@ -9852,6 +10037,11 @@
                           "required": [
                             "contracts"
                           ]
+                        },
+                        {
+                          "required": [
+                            "consumer_operations"
+                          ]
                         }
                       ]
                     }
@@ -9886,6 +10076,11 @@
                           "required": [
                             "contracts"
                           ]
+                        },
+                        {
+                          "required": [
+                            "consumer_operations"
+                          ]
                         }
                       ]
                     }
@@ -9919,6 +10114,11 @@
                         {
                           "required": [
                             "contracts"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "consumer_operations"
                           ]
                         }
                       ]
@@ -9969,7 +10169,13 @@
                 ]
               },
               "example": {
-                "url": "https://example.com/openapi.json"
+                "contracts": {
+                  "before": "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"Inventory\",\"version\":\"1\"},\"paths\":{\"/items\":{\"get\":{\"responses\":{\"200\":{\"description\":\"OK\"}}}}}}",
+                  "after": "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"Inventory\",\"version\":\"1\"},\"paths\":{}}"
+                },
+                "consumer_operations": [
+                  "GET /items"
+                ]
               }
             }
           }
@@ -10297,6 +10503,18 @@
                     ],
                     "additionalProperties": false,
                     "description": "Explicit CI comparison, exclusive with a stored source/watch. Combined contract text <=2,400,000 UTF-8 bytes; only these two supplied-OpenAPI products allow a complete HTTP/MCP envelope <=3,600,000 bytes, including JSON escaping and payment metadata. All parser, reference, work and output budgets still apply. No source fetches or saved observation; the original authorized operation remains durably recoverable."
+                  },
+                  "consumer_operations": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 140,
+                      "pattern": "^(?:GET|PUT|POST|DELETE|OPTIONS|HEAD|PATCH|TRACE) \\/[^?#\\s]{0,127}$"
+                    },
+                    "uniqueItems": true,
+                    "description": "Optional for supplied contracts only. List 1–8 exact uppercase method plus space plus declared path identities, such as GET /items/{id}. The scoped assessment leaves the global verdict and CI exit code intact."
                   }
                 },
                 "additionalProperties": false,
@@ -10325,6 +10543,11 @@
                         {
                           "required": [
                             "contracts"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "consumer_operations"
                           ]
                         }
                       ]
@@ -10360,6 +10583,11 @@
                           "required": [
                             "contracts"
                           ]
+                        },
+                        {
+                          "required": [
+                            "consumer_operations"
+                          ]
                         }
                       ]
                     }
@@ -10394,6 +10622,11 @@
                           "required": [
                             "contracts"
                           ]
+                        },
+                        {
+                          "required": [
+                            "consumer_operations"
+                          ]
                         }
                       ]
                     }
@@ -10427,6 +10660,11 @@
                         {
                           "required": [
                             "contracts"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "consumer_operations"
                           ]
                         }
                       ]
@@ -10477,7 +10715,13 @@
                 ]
               },
               "example": {
-                "url": "https://example.com/openapi.json"
+                "contracts": {
+                  "before": "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"Inventory\",\"version\":\"1\"},\"paths\":{\"/items\":{\"get\":{\"responses\":{\"200\":{\"description\":\"OK\"}}}}}}",
+                  "after": "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"Inventory\",\"version\":\"1\"},\"paths\":{}}"
+                },
+                "consumer_operations": [
+                  "GET /items"
+                ]
               }
             }
           }
@@ -10838,7 +11082,7 @@
     "/v4/workflows/onchain-evidence-brief": {
       "post": {
         "operationId": "fresh402_onchain_evidence_brief",
-        "summary": "Combine selected code/proxy observations, contract-reported token facts and one wallet's ETH/Transfer evidence at one provider-finalized Base block. State and logs are selected by block hash, with evidence pointers and a canonical header recheck. At most 18 reads. Wallet history and contract safety are outside the evidence scope. One fixed workflow charge; internal steps never create separate customer charges. Each call selects one finalized Base block. Reuse its contract_snapshot_id only as previous_contract_snapshot for compatible contract comparison; this workflow accepts no observation_id. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.025 USDC or 10 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
+        "summary": "Combine selected code/proxy observations, contract-reported token facts and one wallet's ETH/Transfer evidence at one provider-finalized Base block. State and logs are selected by block hash, with evidence pointers and a canonical header recheck. At most 18 reads. Wallet history and contract safety are outside the evidence scope. Optional conditions return evidence-linked pass/fail/unknown for exact scalar assertions. Missing or unsupported evidence yields unknown. Reuse an owned contract_snapshot_id only as previous_contract_snapshot in the same scope. This tool accepts no observation_id. One fixed workflow charge of 0.025 USDC via enabled x402 v2 or MPP, or 10 eligible credits using tariff 5 and max_credits. An unpaid call quotes only. Choose inputs before authorization. Save the exact input, proof and recovery token privately. Exact replay returns the retained result with no fresh work or extra charge. No free trial or automatic paid fallback.",
         "description": "Combine selected code/proxy observations, contract-reported token facts and one wallet's ETH/Transfer evidence at one provider-finalized Base block. State and logs are selected by block hash, with evidence pointers and a canonical header recheck. At most 18 reads. Wallet history and contract safety are outside the evidence scope. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "onchain_evidence_brief"
@@ -11014,6 +11258,74 @@
                       "compact",
                       "expanded"
                     ]
+                  },
+                  "conditions": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                          "description": "Unique label within this request, beginning with a letter and at most 32 ASCII characters."
+                        },
+                        "fact": {
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160,
+                          "description": "Exact observation field. Website uses website: followed by an RFC 6901 JSON Pointer. Base uses a named base: fact. Cross-domain may also select api:version or api: followed by an uppercase method, a space and the declared path."
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "decimal",
+                            "boolean"
+                          ],
+                          "description": "Exact scalar type. Decimal expected values are quoted fixed-point strings, with at most 78 integer and 18 fraction digits."
+                        },
+                        "operator": {
+                          "type": "string",
+                          "enum": [
+                            "equals",
+                            "not_equals",
+                            "greater_than",
+                            "less_than",
+                            "changed",
+                            "unchanged"
+                          ],
+                          "description": "Greater/less require decimal. Changed/unchanged require a website field and a compatible prior JSON observation, and take no comparison operand."
+                        },
+                        "expected": {
+                          "description": "Required for a literal comparison. Text and decimal use strings, boolean uses true or false. Omit for changed/unchanged or when using with_fact.",
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "with_fact": {
+                          "description": "Cross-domain only. Compare with this second field of the same type instead of a literal.",
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fact",
+                        "type",
+                        "operator"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "description": "Optional 1–8 required checks over evidence already collected. Missing or unsupported facts produce unknown. Outcomes concern only the declared conditions. Omit to preserve the ordinary result."
                   }
                 },
                 "required": [
@@ -11026,7 +11338,16 @@
               "example": {
                 "chain_id": 8453,
                 "contract_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                "wallet_address": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"
+                "wallet_address": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+                "conditions": [
+                  {
+                    "id": "code_present",
+                    "fact": "base:code_present",
+                    "type": "boolean",
+                    "operator": "equals",
+                    "expected": true
+                  }
+                ]
               }
             }
           }
@@ -11318,6 +11639,74 @@
                       "compact",
                       "expanded"
                     ]
+                  },
+                  "conditions": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                          "description": "Unique label within this request, beginning with a letter and at most 32 ASCII characters."
+                        },
+                        "fact": {
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160,
+                          "description": "Exact observation field. Website uses website: followed by an RFC 6901 JSON Pointer. Base uses a named base: fact. Cross-domain may also select api:version or api: followed by an uppercase method, a space and the declared path."
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "decimal",
+                            "boolean"
+                          ],
+                          "description": "Exact scalar type. Decimal expected values are quoted fixed-point strings, with at most 78 integer and 18 fraction digits."
+                        },
+                        "operator": {
+                          "type": "string",
+                          "enum": [
+                            "equals",
+                            "not_equals",
+                            "greater_than",
+                            "less_than",
+                            "changed",
+                            "unchanged"
+                          ],
+                          "description": "Greater/less require decimal. Changed/unchanged require a website field and a compatible prior JSON observation, and take no comparison operand."
+                        },
+                        "expected": {
+                          "description": "Required for a literal comparison. Text and decimal use strings, boolean uses true or false. Omit for changed/unchanged or when using with_fact.",
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "with_fact": {
+                          "description": "Cross-domain only. Compare with this second field of the same type instead of a literal.",
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fact",
+                        "type",
+                        "operator"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "description": "Optional 1–8 required checks over evidence already collected. Missing or unsupported facts produce unknown. Outcomes concern only the declared conditions. Omit to preserve the ordinary result."
                   }
                 },
                 "required": [
@@ -11330,7 +11719,16 @@
               "example": {
                 "chain_id": 8453,
                 "contract_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                "wallet_address": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"
+                "wallet_address": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3",
+                "conditions": [
+                  {
+                    "id": "code_present",
+                    "fact": "base:code_present",
+                    "type": "boolean",
+                    "operator": "equals",
+                    "expected": true
+                  }
+                ]
               }
             }
           }
@@ -11691,8 +12089,8 @@
     "/v4/workflows/cross-domain-release-evidence": {
       "post": {
         "operationId": "fresh402_cross_domain_release_evidence",
-        "summary": "Combine one scoped website, an optional JSON OpenAPI comparison and selected provider-finalized Base evidence. Compare sources with separate timestamps and evidence pointers. The caller label and literal source mention are recorded with an unverified release relationship. One fixed workflow charge; internal steps never create separate customer charges. First URL source use seeds state in this same operation; compatible source_watch_id adopts retained public Register evidence for a genuine first comparison with original scope/time, not ownership. For continuation, later observations use returned owned observation_id. State expires seven days after creation; reads/writes never extend it. Auth: authorized native-USDC x402 v2 on Base, enabled MPP, or an eligible prepaid key plus exact tariff 5 and max_credits. Ordinary unpaid calls return a challenge, not execution. Persist original input, proof and recovery token before submission; exact replay returns retained results without fresh work or another charge. Choose evidence detail before authorization. No free-trial or automatic paid fallback. 0.040 USDC or 16 credits. Limits and scope are authoritative, not a complete audit or compatibility guarantee.",
-        "description": "Combine one scoped website, an optional JSON OpenAPI comparison and selected provider-finalized Base evidence. Compare sources with separate timestamps and evidence pointers. The caller label and literal source mention are recorded with an unverified release relationship. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
+        "summary": "Combine static website, optional JSON OpenAPI and finalized Base evidence. Compare selected scalar facts and requirements for a scoped pass/fail/unknown assessment with distinct source pointers and timestamps. Equality or contradiction does not establish a deployment, authenticity or causation. Optional conditions return evidence-linked pass/fail/unknown for exact scalar assertions. Missing or unsupported evidence yields unknown. A first URL use seeds state. Compatible source_watch_id instead adopts retained public Register evidence for a real comparison. For continuation, later observations use returned owned observation_id. State expires seven days from creation. One fixed workflow charge of 0.040 USDC via enabled x402 v2 or MPP, or 16 eligible credits using tariff 5 and max_credits. An unpaid call quotes only. Choose inputs before authorization. Save the exact input, proof and recovery token privately. Exact replay returns the retained result with no fresh work or extra charge. No free trial or automatic paid fallback.",
+        "description": "Combine static website, optional JSON OpenAPI and finalized Base evidence. Compare selected scalar facts and requirements for a scoped pass/fail/unknown assessment with distinct source pointers and timestamps. Equality or contradiction does not establish a deployment, authenticity or causation. The same fixed x402 service price may also be paid in native Circle USDC on Solana Mainnet (solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp), when advertised by the unpaid challenge. Explicitly select one accepted network and pin its mint, merchant, amount and sponsored fee payer before signing. Solana payers need no Base wallet; Standalone native Solana MPP solana/charge is also advertised; its client pays a separately authorized SOL network fee, with no server fee sponsorship. Prepaid MPP funding remains Base-only. Payment network does not change the observed chain: blockchain products still inspect finalized Base. Solana delivery requires finalized matching USDC evidence. Persist the original network, resource, input, proof and private recovery capability; never switch networks or authorize a replacement after uncertainty.",
         "tags": [
           "cross_domain_release_evidence"
         ],
@@ -11731,7 +12129,7 @@
             {
               "amount": "40000",
               "currency": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-              "description": "Combine one scoped website, an optional JSON OpenAPI comparison and selected provider-finalized Base evidence. Compare sources with separate timestamps and evidence pointers. The caller label and literal source mention are recorded with an unverified release relationship.",
+              "description": "Combine static website, optional JSON OpenAPI and finalized Base evidence. Compare selected scalar facts and requirements for a scoped pass/fail/unknown assessment with distinct source pointers and timestamps. Equality or contradiction does not establish a deployment, authenticity or causation.",
               "intent": "charge",
               "method": "evm"
             },
@@ -11951,6 +12349,74 @@
                     "additionalProperties": false,
                     "description": "Immutable supported normalization rules. Selected attributes participate in change detection; ignored fields are outside the reported scope. No browser execution or linked-page crawling."
                   },
+                  "conditions": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                          "description": "Unique label within this request, beginning with a letter and at most 32 ASCII characters."
+                        },
+                        "fact": {
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160,
+                          "description": "Exact observation field. Website uses website: followed by an RFC 6901 JSON Pointer. Base uses a named base: fact. Cross-domain may also select api:version or api: followed by an uppercase method, a space and the declared path."
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "decimal",
+                            "boolean"
+                          ],
+                          "description": "Exact scalar type. Decimal expected values are quoted fixed-point strings, with at most 78 integer and 18 fraction digits."
+                        },
+                        "operator": {
+                          "type": "string",
+                          "enum": [
+                            "equals",
+                            "not_equals",
+                            "greater_than",
+                            "less_than",
+                            "changed",
+                            "unchanged"
+                          ],
+                          "description": "Greater/less require decimal. Changed/unchanged require a website field and a compatible prior JSON observation, and take no comparison operand."
+                        },
+                        "expected": {
+                          "description": "Required for a literal comparison. Text and decimal use strings, boolean uses true or false. Omit for changed/unchanged or when using with_fact.",
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "with_fact": {
+                          "description": "Cross-domain only. Compare with this second field of the same type instead of a literal.",
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fact",
+                        "type",
+                        "operator"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "description": "Optional 1–8 required checks over evidence already collected. Missing or unsupported facts produce unknown. Outcomes concern only the declared conditions. Omit to preserve the ordinary result."
+                  },
                   "api_url": {
                     "description": "Optional explicit JSON OpenAPI source for a new cross-domain identity; no link discovery. Saved observation_id freezes this URL too. source_watch_id adopts only the website; this API source seeds separately.",
                     "type": "string",
@@ -12083,13 +12549,23 @@
                 ]
               },
               "example": {
-                "url": "https://example.com/release",
+                "url": "https://example.com/release.json",
+                "api_url": "https://example.com/openapi.json",
                 "onchain": {
                   "chain_id": 8453,
                   "contract_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
                   "wallet_address": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"
                 },
-                "release_label": "v1"
+                "release_label": "2",
+                "conditions": [
+                  {
+                    "id": "release_version",
+                    "fact": "website:/release",
+                    "type": "text",
+                    "operator": "equals",
+                    "with_fact": "api:version"
+                  }
+                ]
               }
             }
           }
@@ -12465,6 +12941,74 @@
                     "additionalProperties": false,
                     "description": "Immutable supported normalization rules. Selected attributes participate in change detection; ignored fields are outside the reported scope. No browser execution or linked-page crawling."
                   },
+                  "conditions": {
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                          "description": "Unique label within this request, beginning with a letter and at most 32 ASCII characters."
+                        },
+                        "fact": {
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160,
+                          "description": "Exact observation field. Website uses website: followed by an RFC 6901 JSON Pointer. Base uses a named base: fact. Cross-domain may also select api:version or api: followed by an uppercase method, a space and the declared path."
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "decimal",
+                            "boolean"
+                          ],
+                          "description": "Exact scalar type. Decimal expected values are quoted fixed-point strings, with at most 78 integer and 18 fraction digits."
+                        },
+                        "operator": {
+                          "type": "string",
+                          "enum": [
+                            "equals",
+                            "not_equals",
+                            "greater_than",
+                            "less_than",
+                            "changed",
+                            "unchanged"
+                          ],
+                          "description": "Greater/less require decimal. Changed/unchanged require a website field and a compatible prior JSON observation, and take no comparison operand."
+                        },
+                        "expected": {
+                          "description": "Required for a literal comparison. Text and decimal use strings, boolean uses true or false. Omit for changed/unchanged or when using with_fact.",
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "with_fact": {
+                          "description": "Cross-domain only. Compare with this second field of the same type instead of a literal.",
+                          "type": "string",
+                          "minLength": 4,
+                          "maxLength": 160
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fact",
+                        "type",
+                        "operator"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "description": "Optional 1–8 required checks over evidence already collected. Missing or unsupported facts produce unknown. Outcomes concern only the declared conditions. Omit to preserve the ordinary result."
+                  },
                   "api_url": {
                     "description": "Optional explicit JSON OpenAPI source for a new cross-domain identity; no link discovery. Saved observation_id freezes this URL too. source_watch_id adopts only the website; this API source seeds separately.",
                     "type": "string",
@@ -12597,13 +13141,23 @@
                 ]
               },
               "example": {
-                "url": "https://example.com/release",
+                "url": "https://example.com/release.json",
+                "api_url": "https://example.com/openapi.json",
                 "onchain": {
                   "chain_id": 8453,
                   "contract_address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
                   "wallet_address": "0xFAC492A8D7843C9aFCCa6A1691BCCB5425ab14F3"
                 },
-                "release_label": "v1"
+                "release_label": "2",
+                "conditions": [
+                  {
+                    "id": "release_version",
+                    "fact": "website:/release",
+                    "type": "text",
+                    "operator": "equals",
+                    "with_fact": "api:version"
+                  }
+                ]
               }
             }
           }
@@ -20577,6 +21131,203 @@
           },
           "persistence_error": {
             "type": "string"
+          },
+          "assessment": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "fail",
+                  "unknown"
+                ]
+              },
+              "conditions": {
+                "minItems": 1,
+                "maxItems": 8,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                      "description": "Unique label within this request, beginning with a letter and at most 32 ASCII characters."
+                    },
+                    "fact": {
+                      "type": "string",
+                      "minLength": 4,
+                      "maxLength": 160,
+                      "description": "Exact observation field. Website uses website: followed by an RFC 6901 JSON Pointer. Base uses a named base: fact. Cross-domain may also select api:version or api: followed by an uppercase method, a space and the declared path."
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "decimal",
+                        "boolean"
+                      ],
+                      "description": "Exact scalar type. Decimal expected values are quoted fixed-point strings, with at most 78 integer and 18 fraction digits."
+                    },
+                    "operator": {
+                      "type": "string",
+                      "enum": [
+                        "equals",
+                        "not_equals",
+                        "greater_than",
+                        "less_than",
+                        "changed",
+                        "unchanged"
+                      ],
+                      "description": "Greater/less require decimal. Changed/unchanged require a website field and a compatible prior JSON observation, and take no comparison operand."
+                    },
+                    "expected": {
+                      "description": "Required for a literal comparison. Text and decimal use strings, boolean uses true or false. Omit for changed/unchanged or when using with_fact.",
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 128
+                        },
+                        {
+                          "type": "boolean"
+                        }
+                      ]
+                    },
+                    "with_fact": {
+                      "description": "Cross-domain only. Compare with this second field of the same type instead of a literal.",
+                      "type": "string",
+                      "minLength": 4,
+                      "maxLength": 160
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pass",
+                        "fail",
+                        "unknown"
+                      ]
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "condition_satisfied",
+                        "condition_false",
+                        "fact_unavailable",
+                        "comparison_unavailable"
+                      ]
+                    },
+                    "observed": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "source": {
+                          "type": "object",
+                          "properties": {
+                            "provenance_pointer": {
+                              "type": "string"
+                            },
+                            "observed_at": {
+                              "type": "string"
+                            },
+                            "source_pointer": {
+                              "type": "string"
+                            },
+                            "evidence_pointer": {
+                              "type": "string"
+                            },
+                            "sha256": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "provenance_pointer",
+                            "observed_at"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "source"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "compared": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "source": {
+                          "type": "object",
+                          "properties": {
+                            "provenance_pointer": {
+                              "type": "string"
+                            },
+                            "observed_at": {
+                              "type": "string"
+                            },
+                            "source_pointer": {
+                              "type": "string"
+                            },
+                            "evidence_pointer": {
+                              "type": "string"
+                            },
+                            "sha256": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "provenance_pointer",
+                            "observed_at"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "source"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "fact",
+                    "type",
+                    "operator",
+                    "status",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "status",
+              "conditions"
+            ],
+            "additionalProperties": false,
+            "description": "All checks are required. Any false condition yields fail. Otherwise missing evidence yields unknown. Pass means all stated checks were satisfied within the observed scope."
           }
         },
         "required": [
@@ -21288,6 +22039,107 @@
           },
           "persistence_error": {
             "type": "string"
+          },
+          "consumer_review": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "fail",
+                  "unknown"
+                ]
+              },
+              "operations": {
+                "minItems": 1,
+                "maxItems": 8,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "operation": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pass",
+                        "fail",
+                        "unknown"
+                      ]
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "operation_removed",
+                        "scoped_breaking_change",
+                        "analysis_incomplete",
+                        "operation_unverified",
+                        "no_scoped_break_observed"
+                      ]
+                    },
+                    "witness": {
+                      "type": "object",
+                      "properties": {
+                        "rule": {
+                          "type": "string"
+                        },
+                        "before_pointer": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "after_pointer": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "rule",
+                        "before_pointer",
+                        "after_pointer"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "next_action": {
+                      "type": "string",
+                      "enum": [
+                        "review_migration",
+                        "review_contracts",
+                        "check_again_on_contract_change"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "operation",
+                    "status",
+                    "reason",
+                    "next_action"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "outside_scope_breaking_findings": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "incomplete_scope_mapping": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "status",
+              "operations",
+              "outside_scope_breaking_findings",
+              "incomplete_scope_mapping"
+            ],
+            "additionalProperties": false,
+            "description": "Assessment of the explicit method/path scope in the supplied contracts. A pass means no relevant issue was observed by the supported rules. It conveys no live API or global compatibility claim."
           }
         },
         "required": [
@@ -21589,6 +22441,203 @@
           },
           "persistence_error": {
             "type": "string"
+          },
+          "assessment": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "fail",
+                  "unknown"
+                ]
+              },
+              "conditions": {
+                "minItems": 1,
+                "maxItems": 8,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                      "description": "Unique label within this request, beginning with a letter and at most 32 ASCII characters."
+                    },
+                    "fact": {
+                      "type": "string",
+                      "minLength": 4,
+                      "maxLength": 160,
+                      "description": "Exact observation field. Website uses website: followed by an RFC 6901 JSON Pointer. Base uses a named base: fact. Cross-domain may also select api:version or api: followed by an uppercase method, a space and the declared path."
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "decimal",
+                        "boolean"
+                      ],
+                      "description": "Exact scalar type. Decimal expected values are quoted fixed-point strings, with at most 78 integer and 18 fraction digits."
+                    },
+                    "operator": {
+                      "type": "string",
+                      "enum": [
+                        "equals",
+                        "not_equals",
+                        "greater_than",
+                        "less_than",
+                        "changed",
+                        "unchanged"
+                      ],
+                      "description": "Greater/less require decimal. Changed/unchanged require a website field and a compatible prior JSON observation, and take no comparison operand."
+                    },
+                    "expected": {
+                      "description": "Required for a literal comparison. Text and decimal use strings, boolean uses true or false. Omit for changed/unchanged or when using with_fact.",
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 128
+                        },
+                        {
+                          "type": "boolean"
+                        }
+                      ]
+                    },
+                    "with_fact": {
+                      "description": "Cross-domain only. Compare with this second field of the same type instead of a literal.",
+                      "type": "string",
+                      "minLength": 4,
+                      "maxLength": 160
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pass",
+                        "fail",
+                        "unknown"
+                      ]
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "condition_satisfied",
+                        "condition_false",
+                        "fact_unavailable",
+                        "comparison_unavailable"
+                      ]
+                    },
+                    "observed": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "source": {
+                          "type": "object",
+                          "properties": {
+                            "provenance_pointer": {
+                              "type": "string"
+                            },
+                            "observed_at": {
+                              "type": "string"
+                            },
+                            "source_pointer": {
+                              "type": "string"
+                            },
+                            "evidence_pointer": {
+                              "type": "string"
+                            },
+                            "sha256": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "provenance_pointer",
+                            "observed_at"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "source"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "compared": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "source": {
+                          "type": "object",
+                          "properties": {
+                            "provenance_pointer": {
+                              "type": "string"
+                            },
+                            "observed_at": {
+                              "type": "string"
+                            },
+                            "source_pointer": {
+                              "type": "string"
+                            },
+                            "evidence_pointer": {
+                              "type": "string"
+                            },
+                            "sha256": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "provenance_pointer",
+                            "observed_at"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "source"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "fact",
+                    "type",
+                    "operator",
+                    "status",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "status",
+              "conditions"
+            ],
+            "additionalProperties": false,
+            "description": "All checks are required. Any false condition yields fail. Otherwise missing evidence yields unknown. Pass means all stated checks were satisfied within the observed scope."
           }
         },
         "required": [
@@ -22566,6 +23615,37 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "previous_website_observation": {
+                "type": "object",
+                "properties": {
+                  "requested_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "final_url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "raw_source_hash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "observed_at": {
+                    "type": "string"
+                  },
+                  "content_type": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "requested_url",
+                  "final_url",
+                  "raw_source_hash",
+                  "observed_at",
+                  "content_type"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
@@ -22732,6 +23812,203 @@
           },
           "persistence_error": {
             "type": "string"
+          },
+          "assessment": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "fail",
+                  "unknown"
+                ]
+              },
+              "conditions": {
+                "minItems": 1,
+                "maxItems": 8,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+                      "description": "Unique label within this request, beginning with a letter and at most 32 ASCII characters."
+                    },
+                    "fact": {
+                      "type": "string",
+                      "minLength": 4,
+                      "maxLength": 160,
+                      "description": "Exact observation field. Website uses website: followed by an RFC 6901 JSON Pointer. Base uses a named base: fact. Cross-domain may also select api:version or api: followed by an uppercase method, a space and the declared path."
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "decimal",
+                        "boolean"
+                      ],
+                      "description": "Exact scalar type. Decimal expected values are quoted fixed-point strings, with at most 78 integer and 18 fraction digits."
+                    },
+                    "operator": {
+                      "type": "string",
+                      "enum": [
+                        "equals",
+                        "not_equals",
+                        "greater_than",
+                        "less_than",
+                        "changed",
+                        "unchanged"
+                      ],
+                      "description": "Greater/less require decimal. Changed/unchanged require a website field and a compatible prior JSON observation, and take no comparison operand."
+                    },
+                    "expected": {
+                      "description": "Required for a literal comparison. Text and decimal use strings, boolean uses true or false. Omit for changed/unchanged or when using with_fact.",
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 128
+                        },
+                        {
+                          "type": "boolean"
+                        }
+                      ]
+                    },
+                    "with_fact": {
+                      "description": "Cross-domain only. Compare with this second field of the same type instead of a literal.",
+                      "type": "string",
+                      "minLength": 4,
+                      "maxLength": 160
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "pass",
+                        "fail",
+                        "unknown"
+                      ]
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": [
+                        "condition_satisfied",
+                        "condition_false",
+                        "fact_unavailable",
+                        "comparison_unavailable"
+                      ]
+                    },
+                    "observed": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "source": {
+                          "type": "object",
+                          "properties": {
+                            "provenance_pointer": {
+                              "type": "string"
+                            },
+                            "observed_at": {
+                              "type": "string"
+                            },
+                            "source_pointer": {
+                              "type": "string"
+                            },
+                            "evidence_pointer": {
+                              "type": "string"
+                            },
+                            "sha256": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "provenance_pointer",
+                            "observed_at"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "source"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "compared": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 128
+                            },
+                            {
+                              "type": "boolean"
+                            }
+                          ]
+                        },
+                        "source": {
+                          "type": "object",
+                          "properties": {
+                            "provenance_pointer": {
+                              "type": "string"
+                            },
+                            "observed_at": {
+                              "type": "string"
+                            },
+                            "source_pointer": {
+                              "type": "string"
+                            },
+                            "evidence_pointer": {
+                              "type": "string"
+                            },
+                            "sha256": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "provenance_pointer",
+                            "observed_at"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "source"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "fact",
+                    "type",
+                    "operator",
+                    "status",
+                    "reason"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "status",
+              "conditions"
+            ],
+            "additionalProperties": false,
+            "description": "All checks are required. Any false condition yields fail. Otherwise missing evidence yields unknown. Pass means all stated checks were satisfied within the observed scope."
           }
         },
         "required": [

@@ -25,3 +25,4 @@ export {prepareMachineTrialChallenge,claimMachineTrialKey} from '../knowledge-ba
 
 export {SERVER_WORKFLOWS,isServerWorkflow,serverWorkflowPath,serverWorkflowPrepaidPath} from '../knowledge-base/workflow-products.ts';
 export type {ServerWorkflow,ServerWorkflowInputs,ServerWorkflowResult,WorkflowScope,WorkflowChainSelection} from '../knowledge-base/workflow-products.ts';
+export type {WebsiteCondition,BaseCondition,CrossCondition,ConsumerOperation,WorkflowAssessment,ConsumerReview,DecisionStatus} from '../knowledge-base/workflow-products.ts';

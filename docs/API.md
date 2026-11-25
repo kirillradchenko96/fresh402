@@ -230,3 +230,5 @@ POST `/v1/agent-feedback` accepts voluntary enums: task website_change/api_upgra
 ## Bounded structured evidence update
 
 See [structured records, Release Guardian, record identity and portable observation context](DEEP_CAPABILITIES.md) for exact optional inputs, limits, CI semantics and original recovery boundaries. The existing tool identities and tariffs are unchanged.
+
+Website Change, On-chain Brief and Cross-domain Evidence accept optional typed `conditions`. API Review accepts `consumer_operations` with supplied contract pairs. See [input, evidence pointers and outcomes](SERVER_WORKFLOWS.md#evidence-linked-decisions).

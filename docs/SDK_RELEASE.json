@@ -1,11 +1,11 @@
 {
   "name": "fresh402-sdk",
-  "version": "0.6.1-rc.1",
+  "version": "0.7.0",
   "source_sdk_version": "0.3.6",
-  "source_client_base_commit": "7f9756a79dd93be171f935b0cddabe33ae142e51",
   "license": "MIT",
-  "scope": "Compiled public client files and accompanying package documentation only; private backend and unrelated repository contents excluded",
-  "integrity": "sha512-o7EWu06FlyMrwZRHGTYjtjbIlhoCzu2WVXqbHvxwJaXejsJTDBioqvpCup8EkGxEPsnpKJDYWQLN+4wcKNhDCw==",
+  "scope": "MIT public client files and accompanying package documentation only",
+  "integrity": "sha512-sELD9iv1HjYKsHLxkWy1l82TKo3KvRP9K2lYRotVHdt1w81vyg09/VsOqfKMYH1vWmPi1XWywE/9rdVGbI0y8w==",
+  "tarball_sha256": "cbecdbd0c0c5e7a585c4ab0de80df0ff248034e912ad52fea6c45bbe12c4b5ef",
   "registry": "https://registry.npmjs.org/",
   "node": ">=24",
   "format": "ESM",
@@ -15,91 +15,34 @@
   ],
   "runtime_dependencies": 0,
   "clean_public_registry_install": true,
-  "actual_framework_acceptance": "Clean public-registry installation verified 31 root exports, root/workflows modules, twelve-tool discovery, all eleven unsigned x402 quotes and zero-budget refusal. Both advertised network requirements were independently checked against exact native USDC and existing merchants. No payment or signature.",
-  "tarball_sha256": "159e41f092c6c42594a24f12eecccc10a4da957462287e84364ce45534317e2c",
   "dist_tag": "next",
   "dist_tags_at_verification": {
     "latest": "0.4.0-rc.1",
-    "next": "0.6.1-rc.1"
+    "next": "0.7.0"
   },
-  "verified_at": "2026-11-16T22:13:18.380Z",
+  "verified_at": "2026-11-25T21:42:34.205Z",
   "public_registry_acceptance": {
     "clean_install": true,
-    "exports": [
-      ".",
-      "./workflows"
-    ],
     "discovery_tools": 12,
-    "unsigned_payment_quotes": [
+    "workflow_quotes": [
       {
-        "product": "check",
-        "amount": "5000",
-        "base": true,
-        "solana": true
+        "id": "website-change-intelligence",
+        "atomic_usdc": "5000"
       },
       {
-        "product": "extract",
-        "amount": "10000",
-        "base": true,
-        "solana": true
+        "id": "api-compatibility-review",
+        "atomic_usdc": "10000"
       },
       {
-        "product": "smart_diff",
-        "amount": "15000",
-        "base": true,
-        "solana": true
+        "id": "onchain-evidence-brief",
+        "atomic_usdc": "25000"
       },
       {
-        "product": "openapi_diff",
-        "amount": "20000",
-        "base": true,
-        "solana": true
-      },
-      {
-        "product": "contract_watch",
-        "amount": "10000",
-        "base": true,
-        "solana": true
-      },
-      {
-        "product": "wallet_watch",
-        "amount": "20000",
-        "base": true,
-        "solana": true
-      },
-      {
-        "product": "token_facts",
-        "amount": "10000",
-        "base": true,
-        "solana": true
-      },
-      {
-        "product": "website_change_intelligence",
-        "amount": "5000",
-        "base": true,
-        "solana": true
-      },
-      {
-        "product": "api_compatibility_review",
-        "amount": "10000",
-        "base": true,
-        "solana": true
-      },
-      {
-        "product": "onchain_evidence_brief",
-        "amount": "25000",
-        "base": true,
-        "solana": true
-      },
-      {
-        "product": "cross_domain_release_evidence",
-        "amount": "40000",
-        "base": true,
-        "solana": true
+        "id": "cross-domain-release-evidence",
+        "atomic_usdc": "40000"
       }
     ],
-    "credit_debits": 0,
-    "payments": 0
-  },
-  "source_build_commit": "55c2563eb30c2d065e754a9f81578928b523882f"
+    "signatures": 0,
+    "paid_operations": 0
+  }
 }

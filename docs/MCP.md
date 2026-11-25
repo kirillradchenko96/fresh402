@@ -124,3 +124,5 @@ For prepaid, first read `/v4/prepaid/workflows/quote/{underscored_workflow_id}` 
 ## Native USDC on Solana
 
 The existing paid resources also support explicitly selected native Circle USDC on Solana Mainnet where the live unpaid challenge advertises it. Base stays first, all current service prices/credit costs stay the same, and MPP remains Base-only. Payment network does not change the chain observed by the product. Solana package funding requires matching Solana wallet ownership, network-specific terms and finalized native-USDC evidence, with no provisional credits. Distinct chain wallets are not automatically linked. Existing credentials retain their accepted rights. [Network selection, compatible client requirements and original recovery](SOLANA_USDC.md).
+
+The workflow names and prices are unchanged. The input schemas expose conditions for Website, On-chain and Cross-domain or the exact method/path scope for supplied API Review pairs. Inspect `structuredContent.assessment` or `structuredContent.consumer_review` for a delivered result. See [workflow contracts](SERVER_WORKFLOWS.md#evidence-linked-decisions).

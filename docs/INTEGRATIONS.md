@@ -39,3 +39,5 @@ Sources: [LangChain MCP](https://docs.langchain.com/oss/python/langchain/mcp), [
 ## Bounded structured evidence update
 
 See [structured records, Release Guardian, record identity and portable observation context](DEEP_CAPABILITIES.md) for exact optional inputs, limits, CI semantics and original recovery boundaries. The existing tool identities and tariffs are unchanged.
+
+Framework and standard MCP integrations can inspect the live tool schema and submit workflow decisions through ordinary JSON. Preserve the exact original tool arguments privately. See [supported selectors and examples](SERVER_WORKFLOWS.md#evidence-linked-decisions).

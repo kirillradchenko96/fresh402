@@ -9,7 +9,7 @@ Verified November 24, 2026 UTC; versions describe different components and need 
 | Efficiency source SDK | 0.3.6; examples/efficiency/package.json and efficiency-sdk-v0.3.6 | Node>=24 source distribution; existing immutable tag preserved |
 | Compiled npm SDK | fresh402-sdk@0.6.1-rc.1 (`next`); 0.4.0-rc.1 remains `latest` | MIT public client package, Node>=24 ESM/declarations, root/workflows exports; compatible with current API. See [verified package](SDK_RELEASE.json) |
 | Framework adapters | 0.1.0; each adapter manifest | Optional source integrations with separately pinned dependencies |
-| MCP Registry manifest | [Live existing server identity](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.kirillradchenko96%2Ffresh402/versions/latest); server.json | Manifest describing API 3.1.0; official publication/propagation is checked separately, same Registry identity |
+| MCP Registry manifest | 3.1.3 catalog revision; server.json. [Live existing server identity](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.kirillradchenko96%2Ffresh402/versions/latest) | Manifest describing API 3.1.0; official publication/propagation is checked separately, same Registry identity |
 | Website | No independent product SemVer | Presents current hosted API and source-client versions; deployment IDs are infrastructure identities |
 | Public repository | Documentation/client Git commits | No fabricated backend release archive; no GitHub Releases currently published |
 | Historical application | v1.1.0/v1.1.1 tags | Historical public source only, not a supported production deployment |
